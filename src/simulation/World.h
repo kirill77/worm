@@ -9,5 +9,6 @@ class World
 
 public:
     World();
+    void simulateStep(double dt);
 };
 

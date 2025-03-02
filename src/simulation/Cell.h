@@ -6,7 +6,7 @@
 class Cell
 {
 private:
-    std::vector<std::unique_ptr<class Organelle>> m_pOrganelles;
+    std::vector<std::shared_ptr<class Organelle>> m_pOrganelles;
 
 public:
     Cell();

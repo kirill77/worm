@@ -4,5 +4,7 @@
 
 class Worm : public Organism
 {
+public:
+    Worm();
 };
 

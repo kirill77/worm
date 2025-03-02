@@ -5,9 +5,10 @@
 
 class Organism
 {
+protected:
     std::vector<std::shared_ptr<class Cell>> m_pCells;
 
 public:
-    virtual void update(double dt) = 0;  // dt: time step
+    virtual void simulateStep(double dt);
 };
 
