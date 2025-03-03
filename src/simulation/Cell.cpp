@@ -3,8 +3,10 @@
 #include "Nucleus.h"
 #include "Mitochondrion.h"
 
-Cell::Cell()
+Cell::Cell(std::shared_ptr<Medium> pMedium)
 {
+    m_pMedium = pMedium;
+
     m_pOrganelles.emplace_back(new Nucleus());
     m_pOrganelles.emplace_back(new Mitochondrion());
     // add other organelles as needed
