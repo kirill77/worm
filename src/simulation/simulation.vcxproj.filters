@@ -57,6 +57,12 @@
     <ClInclude Include="DNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MRNA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TRNA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -87,6 +93,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DNA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MRNA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TRNA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

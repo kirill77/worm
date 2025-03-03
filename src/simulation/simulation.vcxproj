@@ -150,11 +150,13 @@
     <ClInclude Include="Medium.h" />
     <ClInclude Include="Metabolite.h" />
     <ClInclude Include="Mitochondrion.h" />
+    <ClInclude Include="MRNA.h" />
     <ClInclude Include="Nucleus.h" />
     <ClInclude Include="Organelle.h" />
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Protein.h" />
+    <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="Worm.h" />
   </ItemGroup>
@@ -163,6 +165,7 @@
     <ClCompile Include="DNA.cpp" />
     <ClCompile Include="Medium.cpp" />
     <ClCompile Include="Mitochondrion.cpp" />
+    <ClCompile Include="MRNA.cpp" />
     <ClCompile Include="Nucleus.cpp" />
     <ClCompile Include="Organelle.cpp" />
     <ClCompile Include="Organism.cpp" />
@@ -172,6 +175,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="Worm.cpp" />
   </ItemGroup>
