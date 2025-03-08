@@ -18,6 +18,18 @@ public:
         : m_fNumber(INITIAL_MITOCHONDRIA)
         , m_fAtp(MAX_ATP / 2) {}
 
-    void update(double dt, CellCycleState cellState, Medium& medium) override;
+    void update(double dt, Cell& cell, Medium& medium) override;
+
+    // ATP management functions
+    double getAvailableATP() const { return m_fAtp; }
+    
+    // Returns true if ATP was successfully consumed, false if not enough ATP
+    bool consumeATP(double amount) {
+        if (m_fAtp >= amount) {
+            m_fAtp -= amount;
+            return true;
+        }
+        return false;
+    }
 };
 

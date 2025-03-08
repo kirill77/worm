@@ -20,8 +20,7 @@ public:
     Nucleus(std::shared_ptr<DNA> pDNA)
         : m_pDNA(pDNA), m_envelopeIntegrity(1.0) {}
 
-    // Update function now takes medium directly
-    void update(double dt, CellCycleState cellState, Medium& exteMedium) override;
+    void update(double dt, Cell& cell, Medium& medium) override;
 
     double getEnvelopeIntegrity() const { return m_envelopeIntegrity; }
 };

@@ -8,8 +8,10 @@ static constexpr double MAX_ATP = 100.0;
 static constexpr double ATP_PRODUCTION_RATE = 1.0;
 static constexpr double ATP_CONSUMPTION_RATE = 0.2;
 
-void Mitochondrion::update(double dt, CellCycleState cellState, Medium& medium)
+void Mitochondrion::update(double dt, Cell& cell, Medium& medium)
 {
+    auto cellState = cell.getCellCycleState();
+
     // 1. ATP Production (proportional to number of mitochondria)
     double productionRate = ATP_PRODUCTION_RATE * (m_fNumber / INITIAL_MITOCHONDRIA);
     m_fAtp = std::min(MAX_ATP, m_fAtp + dt * productionRate);

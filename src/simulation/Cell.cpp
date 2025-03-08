@@ -22,7 +22,7 @@ void Cell::update(double dt)
     // Update all organelles
     for (auto& pOrg : m_pOrganelles)
     {
-        pOrg->update(dt, m_cellCycleState, *m_pMedium);
+        pOrg->update(dt, *this, *m_pMedium);
     }
     
     // Check for cell cycle transitions based on conditions
@@ -30,6 +30,36 @@ void Cell::update(double dt)
     
     // Update medium
     m_pMedium->update(dt);
+}
+
+std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
+{
+    for (const auto& pOrg : m_pOrganelles)
+    {
+        if (auto pMito = std::dynamic_pointer_cast<Mitochondrion>(pOrg))
+        {
+            return pMito;
+        }
+    }
+    return nullptr;
+}
+
+double Cell::getAvailableATP() const
+{
+    if (auto pMito = getMitochondrion())
+    {
+        return pMito->getAvailableATP();
+    }
+    return 0.0;
+}
+
+bool Cell::consumeATP(double amount)
+{
+    if (auto pMito = getMitochondrion())
+    {
+        return pMito->consumeATP(amount);
+    }
+    return false;
 }
 
 void Cell::checkCellCycleTransitions()
@@ -44,36 +74,56 @@ void Cell::checkCellCycleTransitions()
     switch (m_cellCycleState)
     {
         case CellCycleState::INTERPHASE:
-            // Transition to prophase when CDK1-CyclinB complex reaches threshold
-            if (cdk1 > 1000 && cyclinB > 1000)
+            // Check both ATP and protein levels for transition
+            if (cdk1 > 1000 && cyclinB > 1000 && consumeATP(ATPCosts::CHROMOSOME_CONDENSATION))
             {
                 m_cellCycleState = CellCycleState::PROPHASE;
             }
             break;
 
         case CellCycleState::PROPHASE:
-            // Transition to metaphase when chromosomes are condensed and aligned
-            // TODO: Add chromosome state monitoring
+            // Transition to metaphase requires energy for spindle formation
+            if (consumeATP(ATPCosts::SPINDLE_FORMATION))
+            {
+                // TODO: Add chromosome state monitoring
+                // m_cellCycleState = CellCycleState::METAPHASE;
+            }
             break;
 
         case CellCycleState::METAPHASE:
-            // Transition to anaphase when spindle checkpoint is satisfied
-            // TODO: Add spindle checkpoint monitoring
+            // Transition to anaphase requires initial energy for chromosome movement
+            if (consumeATP(ATPCosts::CHROMOSOME_MOVEMENT))
+            {
+                // TODO: Add spindle checkpoint monitoring
+                // m_cellCycleState = CellCycleState::ANAPHASE;
+            }
             break;
 
         case CellCycleState::ANAPHASE:
-            // Transition to telophase when chromosomes reach poles
-            // TODO: Add chromosome position monitoring
+            // Continuous ATP consumption for chromosome movement
+            if (consumeATP(ATPCosts::CHROMOSOME_MOVEMENT))
+            {
+                // TODO: Add chromosome position monitoring
+                // m_cellCycleState = CellCycleState::TELOPHASE;
+            }
             break;
 
         case CellCycleState::TELOPHASE:
-            // Transition to cytokinesis when nuclear envelopes reform
-            // TODO: Add nuclear envelope monitoring
+            // Nuclear envelope reformation requires membrane fusion energy
+            if (consumeATP(ATPCosts::MEMBRANE_FUSION))
+            {
+                // TODO: Add nuclear envelope monitoring
+                // m_cellCycleState = CellCycleState::CYTOKINESIS;
+            }
             break;
 
         case CellCycleState::CYTOKINESIS:
-            // Transition back to interphase when cell division completes
-            // TODO: Add cytokinesis completion monitoring
+            // Cell membrane division requires fusion energy
+            if (consumeATP(ATPCosts::MEMBRANE_FUSION))
+            {
+                // TODO: Add cytokinesis completion monitoring
+                // m_cellCycleState = CellCycleState::INTERPHASE;
+            }
             break;
     }
 }
