@@ -18,8 +18,7 @@ public:
     Mitochondrion(const float3& initialPos)
         : m_fAtp(MAX_ATP / 2), m_position(initialPos) {}
 
-    void update(double dt, CellCycleState cellState,
-        std::function<void(std::shared_ptr<MRNA>)> addMRNA) override;
+    void update(double dt, CellCycleState cellState, Medium& extMedium) override;
 
 private:
     void updatePosition(double dt, CellCycleState state)

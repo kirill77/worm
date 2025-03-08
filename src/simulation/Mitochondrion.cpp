@@ -7,8 +7,7 @@ static constexpr double MAX_ATP = 100.0;
 static constexpr double ATP_PRODUCTION_RATE = 1.0;
 static constexpr double ATP_CONSUMPTION_RATE = 0.2;
 
-void Mitochondrion::update(double dt, CellCycleState cellState,
-                          std::function<void(std::shared_ptr<MRNA>)> addMRNA)
+void Mitochondrion::update(double dt, CellCycleState cellState, Medium& extMedium)
 {
     // 1. ATP Production
     m_fAtp = std::min(MAX_ATP, m_fAtp + dt * ATP_PRODUCTION_RATE);

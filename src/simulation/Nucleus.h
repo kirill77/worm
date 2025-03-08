@@ -4,7 +4,6 @@
 #include "DNA.h"
 #include <memory>
 #include <vector>
-#include <functional>
 
 // Forward declarations
 class MRNA;
@@ -21,9 +20,8 @@ public:
     Nucleus(std::shared_ptr<DNA> pDNA)
         : m_pDNA(pDNA), m_envelopeIntegrity(1.0) {}
 
-    // Update function now takes cell cycle state and a callback for adding mRNAs
-    void update(double dt, CellCycleState cellState, 
-                std::function<void(std::shared_ptr<MRNA>)> addMRNA) override;
+    // Update function now takes medium directly
+    void update(double dt, CellCycleState cellState, Medium& exteMedium) override;
 
     double getEnvelopeIntegrity() const { return m_envelopeIntegrity; }
 };

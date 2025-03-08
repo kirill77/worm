@@ -1,12 +1,11 @@
 #include "pch.h"
 #include "Nucleus.h"
-#include "Cell.h"
-#include "Medium.h"
 #include "MRNA.h"
+#include "Medium.h"
+#include "Cell.h"
 #include <algorithm>
 
-void Nucleus::update(double dt, CellCycleState cellState, 
-                    std::function<void(std::shared_ptr<MRNA>)> addMRNA)
+void Nucleus::update(double dt, CellCycleState cellState, Medium& extMedium)
 {
     // 1. Nuclear envelope dynamics
     switch (cellState)
@@ -28,10 +27,18 @@ void Nucleus::update(double dt, CellCycleState cellState,
         // Transcribe genes
         auto mRNAs = m_pDNA->transcribeAll(dt);
         
-        // Add mRNAs using the callback
+        // Add mRNAs to medium near nucleus
         for (const auto& mRNA : mRNAs)
         {
-            addMRNA(mRNA);
+            // Add mRNAs slightly offset from center to simulate nuclear pores
+            float angle = static_cast<float>(rand()) / RAND_MAX * 6.28318f;  // Random angle
+            float radius = 0.2f;  // Distance from center
+            float3 position(
+                radius * cos(angle),
+                radius * sin(angle),
+                0.0f
+            );
+            extMedium.addMRNA(mRNA, position);
         }
     }
 }

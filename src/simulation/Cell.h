@@ -21,6 +21,9 @@ private:
     std::shared_ptr<Medium> m_pMedium;
     CellCycleState m_cellCycleState;
 
+    // Helper function to check conditions for cell cycle transitions
+    void checkCellCycleTransitions();
+
 public:
     Cell(std::shared_ptr<Medium> pMedium);
     void update(double dt);
