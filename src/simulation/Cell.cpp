@@ -13,7 +13,7 @@ Cell::Cell(std::shared_ptr<Medium> pMedium)
     
     // Create organelles
     m_pOrganelles.push_back(std::make_shared<Nucleus>(pDNA));
-    m_pOrganelles.push_back(std::make_shared<Mitochondrion>(float3(0, 0, 0)));
+    m_pOrganelles.push_back(std::make_shared<Mitochondrion>());
     // add other organelles as needed
 }
 
