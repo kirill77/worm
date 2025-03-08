@@ -4,12 +4,14 @@
 #include <array>
 #include <vector>
 #include "math/vector.h"
+#include "TRNA.h"
 
 struct Protein;
 
 struct SubMedium
 {
     std::vector<std::shared_ptr<Protein>> m_pProteins;
+    std::vector<TRNA> m_tRNA; // Stores available tRNAs
 };
 
 // describes the medium where everything is going on

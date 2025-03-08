@@ -63,6 +63,9 @@
     <ClInclude Include="TRNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeneWiki.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -99,6 +102,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TRNA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneWiki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
