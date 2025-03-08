@@ -6,6 +6,6 @@ void Organism::simulateStep(double dt)
 {
     for (uint32_t u = 0; u < m_pCells.size(); ++u)
     {
-        m_pCells[u]->simulateStep(dt);
+        m_pCells[u]->update(dt);
     }
 }

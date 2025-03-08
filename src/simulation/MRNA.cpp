@@ -5,7 +5,7 @@
 #include "GeneWiki.h"
 #include <algorithm>
 
-std::shared_ptr<Protein> MRNA::translate(double dt, const std::vector<std::shared_ptr<TRNA>>& availableTRNAs) const
+std::shared_ptr<ProteinPopulation> MRNA::translate(double dt, const std::vector<std::shared_ptr<TRNA>>& availableTRNAs) const
 {
     // Check if we have enough mRNA to produce protein
     if (m_fNumber < 0.1) return nullptr;  // Threshold for translation
@@ -47,7 +47,7 @@ std::shared_ptr<Protein> MRNA::translate(double dt, const std::vector<std::share
     }
 
     // Create new protein
-    auto protein = std::make_shared<Protein>();
+    auto protein = std::make_shared<ProteinPopulation>();
     protein->m_sName = m_sProteinName;
     protein->m_fNumber = proteinAmount;
 

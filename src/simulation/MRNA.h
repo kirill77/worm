@@ -37,7 +37,7 @@ public:
     }
 
     // Translation
-    std::shared_ptr<Protein> translate(double dt, const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
+    std::shared_ptr<ProteinPopulation> translate(double dt, const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
 
     // RNA processing
     void splice();  // For future implementation of RNA processing
