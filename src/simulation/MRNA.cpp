@@ -11,7 +11,7 @@ std::shared_ptr<ProteinPopulation> MRNA::translate(double dt, const std::vector<
     if (m_fNumber < 0.1) return nullptr;  // Threshold for translation
 
     // Calculate protein production based on translation rate and available mRNA
-    double proteinAmount = m_fTranslationRate * dt * m_fNumber;
+    double fProteinAmount = m_fTranslationRate * dt * m_fNumber;
 
     // Get sequence from GeneWiki
     const std::string& sequence = GeneWiki::getInstance().getSequence(m_sGeneName);
@@ -47,9 +47,7 @@ std::shared_ptr<ProteinPopulation> MRNA::translate(double dt, const std::vector<
     }
 
     // Create new protein
-    auto protein = std::make_shared<ProteinPopulation>();
-    protein->m_sName = m_sProteinName;
-    protein->m_fNumber = proteinAmount;
+    auto pProtein = std::make_shared<ProteinPopulation>(m_sProteinName, fProteinAmount);
 
     // Discharge used tRNAs (simplified)
     for (const auto& tRNA : availableTRNAs)
@@ -60,7 +58,7 @@ std::shared_ptr<ProteinPopulation> MRNA::translate(double dt, const std::vector<
         }
     }
 
-    return protein;
+    return pProtein;
 }
 
 void MRNA::splice()

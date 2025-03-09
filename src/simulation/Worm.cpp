@@ -25,32 +25,31 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
 {
     std::shared_ptr<Medium> pMedium = std::make_shared<Medium>();
 
-    // Create and add anterior proteins
-    ProteinPopulation par3;
-    par3.m_sName = "PAR-3";
-    par3.m_fNumber = 3.9e5;
+    // Create and add anterior proteins at the anterior cortex
+    ProteinPopulation par3("PAR-3", 3.9e5);
     pMedium->addProtein(par3, float3(0, 0.95f, 0));
 
-    ProteinPopulation par6;
-    par6.m_sName = "PAR-6";
-    par6.m_fNumber = 3.9e5;
+    ProteinPopulation par6("PAR-6", 3.9e5);
     pMedium->addProtein(par6, float3(0, 0.95f, 0));
 
-    ProteinPopulation pkc3;
-    pkc3.m_sName = "PKC-3";
-    pkc3.m_fNumber = 3.9e5;
+    ProteinPopulation pkc3("PKC-3", 3.9e5);
     pMedium->addProtein(pkc3, float3(0, 0.95f, 0));
 
-    // Create and add posterior proteins
-    ProteinPopulation par1;
-    par1.m_sName = "PAR-1";
-    par1.m_fNumber = 3.9e5;
+    // Create and add posterior proteins at the posterior cortex
+    ProteinPopulation par1("PAR-1", 3.9e5);
     pMedium->addProtein(par1, float3(0, -0.95f, 0));
 
-    ProteinPopulation par2;
-    par2.m_sName = "PAR-2";
-    par2.m_fNumber = 3.9e5;
+    ProteinPopulation par2("PAR-2", 3.9e5);
     pMedium->addProtein(par2, float3(0, -0.95f, 0));
+
+    // Initialize maternal proteins at cell center
+    float3 center(0.0f, 0.0f, 0.0f);
+
+    // Add maternal CDK-1 and CYB-1 (Cyclin B)
+    ProteinPopulation cdk1("CDK-1", 1500.0);  // Initial amount above threshold (1000)
+    ProteinPopulation cyb1("CYB-1", 1500.0);  // Initial amount above threshold (1000)
+    pMedium->addProtein(cdk1, center);
+    pMedium->addProtein(cyb1, center);
 
     return pMedium;
 }
