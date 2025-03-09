@@ -240,8 +240,14 @@ bool Medium::isPARProtein(const Protein& protein) const
 
 void Medium::update(double dt)
 {
+    // Update diffusion of proteins and ATP
     updateProteinDiffusion(dt);
+    updateATPDiffusion(dt);
+    
+    // Update PAR protein dynamics
     updatePARDynamics(dt);
+    
+    // Update mRNA positions
     translateMRNAs(dt);
 }
 
@@ -252,4 +258,59 @@ void Medium::translateMRNAs(double dt)
     // 1. Check for available tRNAs
     // 2. Create new proteins
     // 3. Add proteins to appropriate cytoplasmic regions
+}
+
+void Medium::addATP(double amount, const float3& position)
+{
+    auto& cell = findCell(position);
+    cell.m_fAtp = std::min(cell.m_fAtp + amount, MAX_ATP_PER_CELL);
+}
+
+bool Medium::consumeATP(double amount, const float3& position)
+{
+    auto& cell = findCell(position);
+    if (cell.m_fAtp >= amount)
+    {
+        cell.m_fAtp -= amount;
+        return true;
+    }
+    return false;
+}
+
+double Medium::getAvailableATP(const float3& position) const
+{
+    const auto& cell = findCell(position);
+    return cell.m_fAtp;
+}
+
+void Medium::updateATPDiffusion(double dt)
+{
+    // Create a temporary copy of ATP levels
+    std::vector<double> newATPLevels(m_grid.size());
+    
+    // Calculate diffusion for each cell
+    for (size_t i = 0; i < m_grid.size(); ++i)
+    {
+        double currentATP = m_grid[i].m_fAtp;
+        auto neighbors = getNeighborIndices(i);
+        
+        // Calculate net ATP change due to diffusion
+        double atpChange = 0.0;
+        for (size_t neighborIdx : neighbors)
+        {
+            double neighborATP = m_grid[neighborIdx].m_fAtp;
+            double diffusion = (neighborATP - currentATP) * ATP_DIFFUSION_RATE * dt;
+            atpChange += diffusion;
+        }
+        
+        // Store new ATP level
+        newATPLevels[i] = std::min(MAX_ATP_PER_CELL, 
+                                  std::max(0.0, currentATP + atpChange));
+    }
+    
+    // Update ATP levels
+    for (size_t i = 0; i < m_grid.size(); ++i)
+    {
+        m_grid[i].m_fAtp = newATPLevels[i];
+    }
 }

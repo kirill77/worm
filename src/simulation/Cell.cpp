@@ -44,22 +44,11 @@ std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
     return nullptr;
 }
 
-double Cell::getAvailableATP() const
-{
-    if (auto pMito = getMitochondrion())
-    {
-        return pMito->getAvailableATP();
-    }
-    return 0.0;
-}
-
 bool Cell::consumeATP(double amount)
 {
-    if (auto pMito = getMitochondrion())
-    {
-        return pMito->consumeATP(amount);
-    }
-    return false;
+    // Consume ATP from medium at cell's position (center)
+    float3 position(0.0f, 0.0f, 0.0f);
+    return m_pMedium->consumeATP(amount, position);
 }
 
 void Cell::checkCellCycleTransitions()

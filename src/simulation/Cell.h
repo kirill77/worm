@@ -43,7 +43,6 @@ public:
     std::shared_ptr<Medium> getMedium() const { return m_pMedium; }
 
     // ATP-related functions
-    double getAvailableATP() const;
-    bool consumeATP(double amount);  // Returns false if not enough ATP
+    bool consumeATP(double amount);
 };
 
