@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "World.h"
-#include "Worm.h"
+#include "Organism.h"
 
-World::World()
+World::World(std::shared_ptr<Organism> pOrganism)
 {
-    m_pOrganism = std::make_shared<Worm>();
+    m_pOrganism = pOrganism;
 }
 void World::simulateStep(double dt)
 {

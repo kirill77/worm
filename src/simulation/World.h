@@ -8,7 +8,7 @@ class World
     std::shared_ptr<class Organism> m_pOrganism;
 
 public:
-    World();
+    World(std::shared_ptr<Organism> pOrganism);
     void simulateStep(double dt);
 };
 
