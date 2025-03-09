@@ -6,15 +6,16 @@
 #include "MRNA.h"
 #include "log/ILog.h"
 
-Cell::Cell(std::shared_ptr<Medium> pMedium)
+Cell::Cell(std::shared_ptr<Medium> pMedium, CellType type, size_t numChromosomes)
     : m_pMedium(pMedium)
     , m_cellCycleState(CellCycleState::INTERPHASE)
+    , m_type(type)
 {
     // Create DNA for the nucleus
     auto pDNA = std::make_shared<DNA>();
     
     // Create organelles
-    m_pOrganelles.push_back(std::make_shared<Nucleus>(pDNA));
+    m_pOrganelles.push_back(std::make_shared<Nucleus>(pDNA, numChromosomes));
     m_pOrganelles.push_back(std::make_shared<Mitochondrion>());
     // add other organelles as needed
 }

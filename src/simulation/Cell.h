@@ -37,15 +37,15 @@ private:
     // Helper functions
     void checkCellCycleTransitions();
     std::shared_ptr<class Mitochondrion> getMitochondrion() const;
-    std::shared_ptr<class Spindle> getSpindle() const;
     void createSpindle();
     void destroySpindle();
 
 public:
-    Cell(std::shared_ptr<Medium> pMedium);
+    Cell(std::shared_ptr<Medium> pMedium, CellType type = CellType::Zygote, size_t numChromosomes = 6);
     void update(double dt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
     std::shared_ptr<Medium> getMedium() const { return m_pMedium; }
+    std::shared_ptr<class Spindle> getSpindle() const;  // Made public for Chromosome access
 
     // ATP-related functions
     bool consumeATP(double amount);
