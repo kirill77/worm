@@ -155,58 +155,131 @@ void Medium::updatePARDynamics(double dt)
     // Create temporary grid for updated numbers
     auto newGrid = m_grid;
     
+    static constexpr double PHOSPHORYLATION_RATE = 0.3;    // Rate at which PAR proteins phosphorylate their targets
+    static constexpr double DEPHOSPHORYLATION_RATE = 0.1;  // Rate at which phosphorylated PARs recover
+    static constexpr double CORTEX_DISTANCE = 0.8f;        // Distance from center considered as cortex
+    
     // Update each cell
     for (size_t i = 0; i < m_grid.size(); ++i)
     {
         bool isCortex = isCortexCell(i);
+        float3 pos = indexToPosition(i);
         
+        // Skip non-cortical cells for cortex-bound proteins
+        if (!isCortex) continue;
+
+        // Get protein populations
+        double anteriorPARs = 0.0;  // PAR-3/6/PKC-3 complex
+        double posteriorPARs = 0.0; // PAR-1/2
+        
+        for (const auto& pop : m_grid[i].m_proteins)
+        {
+            // Sum up anterior PARs
+            if (pop.m_sName == "PAR-3" || pop.m_sName == "PAR-6" || pop.m_sName == "PKC-3")
+            {
+                anteriorPARs += pop.m_fNumber;
+            }
+            // Sum up posterior PARs
+            else if (pop.m_sName == "PAR-1" || pop.m_sName == "PAR-2")
+            {
+                posteriorPARs += pop.m_fNumber;
+            }
+        }
+
+        // Calculate antagonistic effects
+        double anteriorStrength = anteriorPARs / (anteriorPARs + 1000.0);  // Saturable effect
+        double posteriorStrength = posteriorPARs / (posteriorPARs + 1000.0);
+
+        // Update each protein population
         for (auto& pop : m_grid[i].m_proteins)
         {
-            if (!isPARProtein(pop)) continue;
+            // Find corresponding population in new grid
+            auto& newPop = newGrid[i].findOrCreatePopulation(pop);
             
+            // Handle cortex binding/unbinding
             if (isCortex)
             {
-                // Handle unbinding from cortex
-                double unbindingAmount = pop.m_fNumber * CORTEX_UNBINDING_RATE * dt;
-                auto& newPop = newGrid[i].findOrCreatePopulation(pop);
-                newPop.m_fNumber -= unbindingAmount;
-                
-                // Move to neighboring internal cell
-                auto neighbors = getNeighborIndices(i);
-                for (size_t neighborIdx : neighbors)
+                // Anterior PARs
+                if (pop.m_sName == "PAR-3" || pop.m_sName == "PAR-6" || pop.m_sName == "PKC-3")
                 {
-                    if (!isCortexCell(neighborIdx))
+                    // Removed by posterior PARs
+                    double removed = pop.m_fNumber * posteriorStrength * PHOSPHORYLATION_RATE * dt;
+                    newPop.m_fNumber = std::max(0.0, newPop.m_fNumber - removed);
+                    
+                    // Recovery
+                    double recovered = removed * DEPHOSPHORYLATION_RATE * dt;
+                    
+                    // Add recovered proteins to nearby non-cortical cells
+                    auto neighbors = getNeighborIndices(i);
+                    for (size_t neighborIdx : neighbors)
                     {
-                        auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
-                        neighborPop.m_fNumber += unbindingAmount / neighbors.size();
+                        if (!isCortexCell(neighborIdx))
+                        {
+                            auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
+                            neighborPop.m_fNumber += recovered / neighbors.size();
+                        }
+                    }
+                }
+                // Posterior PARs
+                else if (pop.m_sName == "PAR-1" || pop.m_sName == "PAR-2")
+                {
+                    // Removed by anterior PARs
+                    double removed = pop.m_fNumber * anteriorStrength * PHOSPHORYLATION_RATE * dt;
+                    newPop.m_fNumber = std::max(0.0, newPop.m_fNumber - removed);
+                    
+                    // Recovery
+                    double recovered = removed * DEPHOSPHORYLATION_RATE * dt;
+                    
+                    // Add recovered proteins to nearby non-cortical cells
+                    auto neighbors = getNeighborIndices(i);
+                    for (size_t neighborIdx : neighbors)
+                    {
+                        if (!isCortexCell(neighborIdx))
+                        {
+                            auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
+                            neighborPop.m_fNumber += recovered / neighbors.size();
+                        }
                     }
                 }
             }
+            // Non-cortical cells: proteins can rebind to cortex
             else
             {
-                // Handle binding to cortex
-                double bindingAmount = pop.m_fNumber * CORTEX_BINDING_RATE * dt;
-                auto& newPop = newGrid[i].findOrCreatePopulation(pop);
-                newPop.m_fNumber -= bindingAmount;
-                
-                // Move to neighboring cortex cells
                 auto neighbors = getNeighborIndices(i);
                 std::vector<size_t> cortexNeighbors;
+                
+                // Find available cortex binding sites
                 for (size_t neighborIdx : neighbors)
                 {
                     if (isCortexCell(neighborIdx))
                     {
-                        cortexNeighbors.push_back(neighborIdx);
+                        // For anterior PARs, prefer anterior cortex
+                        if ((pop.m_sName == "PAR-3" || pop.m_sName == "PAR-6" || pop.m_sName == "PKC-3") &&
+                            indexToPosition(neighborIdx).y > 0)
+                        {
+                            cortexNeighbors.push_back(neighborIdx);
+                        }
+                        // For posterior PARs, prefer posterior cortex
+                        else if ((pop.m_sName == "PAR-1" || pop.m_sName == "PAR-2") &&
+                                indexToPosition(neighborIdx).y < 0)
+                        {
+                            cortexNeighbors.push_back(neighborIdx);
+                        }
                     }
                 }
                 
                 if (!cortexNeighbors.empty())
                 {
-                    double amountPerNeighbor = bindingAmount / cortexNeighbors.size();
+                    // Calculate binding amount based on local concentration
+                    double bindingAmount = pop.m_fNumber * CORTEX_BINDING_RATE * dt;
+                    newPop.m_fNumber -= bindingAmount;
+                    
+                    // Distribute to available cortex sites
+                    double amountPerSite = bindingAmount / cortexNeighbors.size();
                     for (size_t neighborIdx : cortexNeighbors)
                     {
                         auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
-                        neighborPop.m_fNumber += amountPerNeighbor;
+                        neighborPop.m_fNumber += amountPerSite;
                     }
                 }
             }
