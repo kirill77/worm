@@ -14,20 +14,20 @@ void Nucleus::update(double dt, Cell& cell, Medium& medium)
     {
         case CellCycleState::PROPHASE:
             // Nuclear envelope breaks down
-            m_envelopeIntegrity = std::max(0.0, m_envelopeIntegrity - dt * ENVELOPE_BREAKDOWN_RATE);
+            m_fEnvelopeIntegrity = std::max(0.0, m_fEnvelopeIntegrity - dt * fENVELOPE_BREAKDOWN_RATE);
             break;
 
         case CellCycleState::TELOPHASE:
             // Nuclear envelope reforms (requires ATP)
-            if (cell.consumeATP(ATPCosts::MEMBRANE_FUSION * dt))
+            if (cell.consumeATP(ATPCosts::fMEMBRANE_FUSION * dt))
             {
-                m_envelopeIntegrity = std::min(1.0, m_envelopeIntegrity + dt * ENVELOPE_REFORM_RATE);
+                m_fEnvelopeIntegrity = std::min(1.0, m_fEnvelopeIntegrity + dt * fENVELOPE_REFORM_RATE);
             }
             break;
     }
 
     // 2. Transcription (only during interphase when envelope is mostly intact)
-    if (cellState == CellCycleState::INTERPHASE && m_envelopeIntegrity > 0.8)
+    if (cellState == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
     {
         // Transcribe genes
         auto mRNAs = m_pDNA->transcribeAll(dt);
@@ -35,7 +35,7 @@ void Nucleus::update(double dt, Cell& cell, Medium& medium)
         // Add mRNAs to medium near nucleus (if we have ATP for synthesis)
         for (const auto& mRNA : mRNAs)
         {
-            if (cell.consumeATP(ATPCosts::MRNA_SYNTHESIS))
+            if (cell.consumeATP(ATPCosts::fMRNA_SYNTHESIS))
             {
                 // Add mRNAs slightly offset from center to simulate nuclear pores
                 float angle = static_cast<float>(rand()) / RAND_MAX * 6.28318f;  // Random angle
