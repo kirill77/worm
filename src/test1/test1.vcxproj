@@ -140,6 +140,9 @@
     <ProjectReference Include="..\simulation\simulation.vcxproj">
       <Project>{627b77b9-319e-4bbd-b6a4-12c710d64840}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\timeUtils\timeUtils.vcxproj">
+      <Project>{524acd5b-2a15-4b58-a2c7-621bb546865f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,7 @@
 #include "Mitochondrion.h"
 #include "Spindle.h"
 #include "MRNA.h"
+#include "log/ILog.h"
 
 Cell::Cell(std::shared_ptr<Medium> pMedium)
     : m_pMedium(pMedium)
@@ -67,6 +68,7 @@ void Cell::checkCellCycleTransitions()
             // Check both ATP and protein levels for transition
             if (cdk1 > 1000 && cyclinB > 1000 && consumeATP(ATPCosts::CHROMOSOME_CONDENSATION))
             {
+                LOG_INFO("Cell switches from INTERPHASE to PROPHASE");
                 m_cellCycleState = CellCycleState::PROPHASE;
                 createSpindle();  // Create spindle as we enter prophase
             }
@@ -80,6 +82,7 @@ void Cell::checkCellCycleTransitions()
                 {
                     if (pSpindle->isAssembled())
                     {
+                        LOG_INFO("Cell switches from PROPHASE to METAPHASE");
                         m_cellCycleState = CellCycleState::METAPHASE;
                     }
                 }
@@ -91,6 +94,7 @@ void Cell::checkCellCycleTransitions()
             if (consumeATP(ATPCosts::CHROMOSOME_MOVEMENT))
             {
                 // TODO: Add spindle checkpoint monitoring
+                LOG_INFO("Cell switches from METAPHASE to ANAPHASE");
                 m_cellCycleState = CellCycleState::ANAPHASE;
             }
             break;
@@ -100,6 +104,7 @@ void Cell::checkCellCycleTransitions()
             if (consumeATP(ATPCosts::CHROMOSOME_MOVEMENT))
             {
                 // TODO: Add chromosome position monitoring
+                LOG_INFO("Cell switches from ANAPHASE to TELOPHASE");
                 m_cellCycleState = CellCycleState::TELOPHASE;
             }
             break;
@@ -108,6 +113,7 @@ void Cell::checkCellCycleTransitions()
             // Nuclear envelope reformation requires membrane fusion energy
             if (consumeATP(ATPCosts::MEMBRANE_FUSION))
             {
+                LOG_INFO("Cell switches from TELOPHASE to CYTOKINESIS");
                 m_cellCycleState = CellCycleState::CYTOKINESIS;
             }
             break;
@@ -117,6 +123,7 @@ void Cell::checkCellCycleTransitions()
             if (consumeATP(ATPCosts::MEMBRANE_FUSION))
             {
                 destroySpindle();  // Destroy spindle as we complete division
+                LOG_INFO("Cell switches from CYTOKINESIS to INTERPHASE");
                 m_cellCycleState = CellCycleState::INTERPHASE;
             }
             break;
