@@ -5,20 +5,45 @@
 #include "Medium.h"
 #include "DNA.h"
 
-void Worm::initializeGenes()
+std::vector<Chromosome> Worm::initializeGenes()
 {
-    m_pDNA = std::make_shared<DNA>();
+    // Create chromosomes (C. elegans has 6 chromosomes)
+    std::vector<Chromosome> chromosomes;
+    chromosomes.reserve(6);
 
-    // Cell fate specification genes
-    m_pDNA->addGene("pie-1", 0.8, 0.1);  // Germline specification
-    m_pDNA->addGene("pal-1", 0.8, 0.1);  // Posterior fate
-    m_pDNA->addGene("skn-1", 0.8, 0.1);  // Endoderm specification
-    m_pDNA->addGene("mex-3", 0.8, 0.1);  // Anterior fate
-    
-    // Cell division and timing genes
-    m_pDNA->addGene("cdk-1", 1.2, 0.2);  // Cell cycle control
-    m_pDNA->addGene("cyb-1", 1.2, 0.2);  // Cyclin B
-    m_pDNA->addGene("plk-1", 1.2, 0.2);  // Polo-like kinase
+    // Create DNA for each chromosome
+    auto pDNA1 = std::make_shared<DNA>();  // Chromosome I
+    auto pDNA2 = std::make_shared<DNA>();  // Chromosome II
+    auto pDNA3 = std::make_shared<DNA>();  // Chromosome III
+    auto pDNA4 = std::make_shared<DNA>();  // Chromosome IV
+    auto pDNA5 = std::make_shared<DNA>();  // Chromosome V
+    auto pDNA6 = std::make_shared<DNA>();  // Chromosome X
+
+    // Distribute genes across chromosomes (based on C. elegans genome)
+    // Chromosome I
+    pDNA1->addGene("mex-3", 0.8, 0.1);  // Anterior fate
+    pDNA1->addGene("plk-1", 1.2, 0.2);  // Polo-like kinase
+
+    // Chromosome II
+    pDNA2->addGene("skn-1", 0.8, 0.1);  // Endoderm specification
+    pDNA2->addGene("cyb-1", 1.2, 0.2);  // Cyclin B
+
+    // Chromosome III
+    pDNA3->addGene("pal-1", 0.8, 0.1);  // Posterior fate
+    pDNA3->addGene("cdk-1", 1.2, 0.2);  // Cell cycle control
+
+    // Chromosome IV
+    pDNA4->addGene("pie-1", 0.8, 0.1);  // Germline specification
+
+    // Create chromosomes with their respective DNA
+    chromosomes.emplace_back(pDNA1);
+    chromosomes.emplace_back(pDNA2);
+    chromosomes.emplace_back(pDNA3);
+    chromosomes.emplace_back(pDNA4);
+    chromosomes.emplace_back(pDNA5);  // Empty for now
+    chromosomes.emplace_back(pDNA6);  // Empty for now
+
+    return chromosomes;
 }
 
 std::shared_ptr<Medium> Worm::createZygoteMedium()
@@ -56,8 +81,8 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
 
 Worm::Worm()
 {
-    initializeGenes();
+    auto chromosomes = initializeGenes();
     std::shared_ptr<Medium> pMedium = createZygoteMedium();
-    auto pCell = std::make_shared<Cell>(pMedium);
+    auto pCell = std::make_shared<Cell>(pMedium, chromosomes);
     m_pCells.push_back(pCell);
 }

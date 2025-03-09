@@ -4,6 +4,7 @@
 #include <memory>
 #include "Medium.h"
 #include "CellTypes.h"
+#include "Chromosome.h"
 
 enum class CellCycleState
 {
@@ -41,7 +42,9 @@ private:
     void destroySpindle();
 
 public:
-    Cell(std::shared_ptr<Medium> pMedium, CellType type = CellType::Zygote, size_t numChromosomes = 6);
+    // Constructor that takes a vector of chromosomes
+    Cell(std::shared_ptr<Medium> pMedium, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
+    
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
     std::shared_ptr<Medium> getMedium() const { return m_pMedium; }

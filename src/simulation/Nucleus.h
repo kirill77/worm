@@ -19,18 +19,11 @@ private:
     static constexpr double fENVELOPE_REFORM_RATE = 0.5f;    // Rate of nuclear envelope reformation
 
 public:
-    Nucleus(std::shared_ptr<DNA> pDNA, size_t numChromosomes = 6)  // Default to C. elegans (6 chromosomes)
-        : m_fEnvelopeIntegrity(1.0f)
-    {
-        // Initialize chromosomes, distributing DNA among them
-        m_chromosomes.reserve(numChromosomes);
-        for (size_t i = 0; i < numChromosomes; ++i)
-        {
-            // For now, each chromosome gets a copy of the full DNA
-            // In a more sophisticated simulation, we would partition the DNA
-            m_chromosomes.emplace_back(pDNA);
-        }
-    }
+    // Constructor that takes a vector of chromosomes
+    Nucleus(const std::vector<Chromosome>& chromosomes)
+        : m_chromosomes(chromosomes)
+        , m_fEnvelopeIntegrity(1.0f)
+    {}
 
     void update(double fDt, Cell& cell, Medium& medium) override;
 
