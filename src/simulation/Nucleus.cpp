@@ -5,32 +5,33 @@
 #include "Cell.h"
 #include <algorithm>
 
-void Nucleus::update(double dt, Cell& cell, Medium& medium)
+void Nucleus::update(double fDt, Cell& cell, Medium& medium)
 {
-    auto cellState = cell.getCellCycleState();
+    // Update all chromosomes
+    for (auto& chromosome : m_chromosomes)
+    {
+        chromosome.update(fDt, cell, medium);
+    }
 
-    // 1. Nuclear envelope dynamics
-    switch (cellState)
+    // Update nuclear envelope based on cell cycle state
+    switch (cell.getCellCycleState())
     {
         case CellCycleState::PROPHASE:
-            // Nuclear envelope breaks down
-            m_fEnvelopeIntegrity = std::max(0.0, m_fEnvelopeIntegrity - dt * fENVELOPE_BREAKDOWN_RATE);
+            // Nuclear envelope breaks down during prophase
+            m_fEnvelopeIntegrity = std::max(0.0, m_fEnvelopeIntegrity - fENVELOPE_BREAKDOWN_RATE * fDt);
             break;
 
         case CellCycleState::TELOPHASE:
-            // Nuclear envelope reforms (requires ATP)
-            if (cell.consumeATP(ATPCosts::fMEMBRANE_FUSION * dt))
-            {
-                m_fEnvelopeIntegrity = std::min(1.0, m_fEnvelopeIntegrity + dt * fENVELOPE_REFORM_RATE);
-            }
+            // Nuclear envelope reforms during telophase
+            m_fEnvelopeIntegrity = std::min(1.0, m_fEnvelopeIntegrity + fENVELOPE_REFORM_RATE * fDt);
             break;
     }
 
     // 2. Transcription (only during interphase when envelope is mostly intact)
-    if (cellState == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
+    if (cell.getCellCycleState() == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
     {
         // Transcribe genes
-        auto mRNAs = m_pDNA->transcribeAll(dt);
+        auto mRNAs = transcribeAll(fDt);
         
         // Add mRNAs to medium near nucleus (if we have ATP for synthesis)
         for (const auto& mRNA : mRNAs)
@@ -49,4 +50,70 @@ void Nucleus::update(double dt, Cell& cell, Medium& medium)
             }
         }
     }
+}
+
+bool Nucleus::areChromosomesCondensed() const
+{
+    for (const auto& chromosome : m_chromosomes)
+    {
+        if (!chromosome.isFullyCondensed())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Nucleus::areChromosomesAttached() const
+{
+    for (const auto& chromosome : m_chromosomes)
+    {
+        if (!chromosome.isAttached())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Nucleus::areChromosomesSeparated() const
+{
+    for (const auto& chromosome : m_chromosomes)
+    {
+        if (!chromosome.isSeparated())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Nucleus::areChromosomesDecondensed() const
+{
+    for (const auto& chromosome : m_chromosomes)
+    {
+        if (!chromosome.isFullyDecondensed())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::vector<std::shared_ptr<MRNA>> Nucleus::transcribeAll(double fDt) const
+{
+    std::vector<std::shared_ptr<MRNA>> allTranscripts;
+    
+    // Only transcribe if nuclear envelope is mostly intact
+    if (m_fEnvelopeIntegrity > 0.8)
+    {
+        // Collect transcripts from all chromosomes
+        for (const auto& chromosome : m_chromosomes)
+        {
+            auto transcripts = chromosome.transcribe(fDt);
+            allTranscripts.insert(allTranscripts.end(), transcripts.begin(), transcripts.end());
+        }
+    }
+    
+    return allTranscripts;
 }

@@ -12,7 +12,6 @@ class MRNA;
 class Nucleus : public Organelle
 {
 private:
-    std::shared_ptr<DNA> m_pDNA;
     std::vector<Chromosome> m_chromosomes;
     double m_fEnvelopeIntegrity;  // 1.0 = intact, 0.0 = broken down
     
@@ -21,11 +20,16 @@ private:
 
 public:
     Nucleus(std::shared_ptr<DNA> pDNA, size_t numChromosomes = 6)  // Default to C. elegans (6 chromosomes)
-        : m_pDNA(pDNA)
-        , m_fEnvelopeIntegrity(1.0f)
+        : m_fEnvelopeIntegrity(1.0f)
     {
-        // Initialize chromosomes
-        m_chromosomes.resize(numChromosomes);
+        // Initialize chromosomes, distributing DNA among them
+        m_chromosomes.reserve(numChromosomes);
+        for (size_t i = 0; i < numChromosomes; ++i)
+        {
+            // For now, each chromosome gets a copy of the full DNA
+            // In a more sophisticated simulation, we would partition the DNA
+            m_chromosomes.emplace_back(pDNA);
+        }
     }
 
     void update(double fDt, Cell& cell, Medium& medium) override;
@@ -35,9 +39,11 @@ public:
     bool areChromosomesAttached() const;
     bool areChromosomesSeparated() const;
     bool areChromosomesDecondensed() const;
+    std::vector<std::shared_ptr<MRNA>> transcribeAll(double fDt) const;
 
     // Getters
     double getEnvelopeIntegrity() const { return m_fEnvelopeIntegrity; }
     size_t getChromosomeCount() const { return m_chromosomes.size(); }
+    const std::vector<Chromosome>& getChromosomes() const { return m_chromosomes; }
 };
 
