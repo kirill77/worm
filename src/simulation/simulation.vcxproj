@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Cell.h" />
+    <ClInclude Include="CellTypes.h" />
     <ClInclude Include="DNA.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Gene.h" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Protein.h" />
+    <ClInclude Include="Spindle.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="Worm.h" />
@@ -178,6 +180,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Spindle.cpp" />
     <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="Worm.cpp" />

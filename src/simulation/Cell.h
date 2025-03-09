@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "Medium.h"
+#include "CellTypes.h"
 
 enum class CellCycleState
 {
@@ -31,10 +32,14 @@ private:
     std::vector<std::shared_ptr<class Organelle>> m_pOrganelles;
     std::shared_ptr<Medium> m_pMedium;
     CellCycleState m_cellCycleState;
+    CellType m_type;  // Store type just for spindle creation
 
-    // Helper function to check conditions for cell cycle transitions
+    // Helper functions
     void checkCellCycleTransitions();
     std::shared_ptr<class Mitochondrion> getMitochondrion() const;
+    std::shared_ptr<class Spindle> getSpindle() const;
+    void createSpindle();
+    void destroySpindle();
 
 public:
     Cell(std::shared_ptr<Medium> pMedium);

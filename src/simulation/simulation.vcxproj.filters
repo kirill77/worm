@@ -66,6 +66,12 @@
     <ClInclude Include="GeneWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Spindle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CellTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -108,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneWiki.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Spindle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

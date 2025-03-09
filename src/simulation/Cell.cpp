@@ -2,6 +2,7 @@
 #include "Cell.h"
 #include "Nucleus.h"
 #include "Mitochondrion.h"
+#include "Spindle.h"
 #include "MRNA.h"
 
 Cell::Cell(std::shared_ptr<Medium> pMedium)
@@ -67,6 +68,7 @@ void Cell::checkCellCycleTransitions()
             if (cdk1 > 1000 && cyclinB > 1000 && consumeATP(ATPCosts::CHROMOSOME_CONDENSATION))
             {
                 m_cellCycleState = CellCycleState::PROPHASE;
+                createSpindle();  // Create spindle as we enter prophase
             }
             break;
 
@@ -74,8 +76,13 @@ void Cell::checkCellCycleTransitions()
             // Transition to metaphase requires energy for spindle formation
             if (consumeATP(ATPCosts::SPINDLE_FORMATION))
             {
-                // TODO: Add chromosome state monitoring
-                // m_cellCycleState = CellCycleState::METAPHASE;
+                if (auto pSpindle = getSpindle())
+                {
+                    if (pSpindle->isAssembled())
+                    {
+                        m_cellCycleState = CellCycleState::METAPHASE;
+                    }
+                }
             }
             break;
 
@@ -84,7 +91,7 @@ void Cell::checkCellCycleTransitions()
             if (consumeATP(ATPCosts::CHROMOSOME_MOVEMENT))
             {
                 // TODO: Add spindle checkpoint monitoring
-                // m_cellCycleState = CellCycleState::ANAPHASE;
+                m_cellCycleState = CellCycleState::ANAPHASE;
             }
             break;
 
@@ -93,7 +100,7 @@ void Cell::checkCellCycleTransitions()
             if (consumeATP(ATPCosts::CHROMOSOME_MOVEMENT))
             {
                 // TODO: Add chromosome position monitoring
-                // m_cellCycleState = CellCycleState::TELOPHASE;
+                m_cellCycleState = CellCycleState::TELOPHASE;
             }
             break;
 
@@ -101,8 +108,7 @@ void Cell::checkCellCycleTransitions()
             // Nuclear envelope reformation requires membrane fusion energy
             if (consumeATP(ATPCosts::MEMBRANE_FUSION))
             {
-                // TODO: Add nuclear envelope monitoring
-                // m_cellCycleState = CellCycleState::CYTOKINESIS;
+                m_cellCycleState = CellCycleState::CYTOKINESIS;
             }
             break;
 
@@ -110,9 +116,40 @@ void Cell::checkCellCycleTransitions()
             // Cell membrane division requires fusion energy
             if (consumeATP(ATPCosts::MEMBRANE_FUSION))
             {
-                // TODO: Add cytokinesis completion monitoring
-                // m_cellCycleState = CellCycleState::INTERPHASE;
+                destroySpindle();  // Destroy spindle as we complete division
+                m_cellCycleState = CellCycleState::INTERPHASE;
             }
             break;
     }
+}
+
+void Cell::createSpindle()
+{
+    // Only create if we don't already have one
+    if (!getSpindle())
+    {
+        m_pOrganelles.push_back(std::make_shared<Spindle>(m_type));
+    }
+}
+
+void Cell::destroySpindle()
+{
+    m_pOrganelles.erase(
+        std::remove_if(m_pOrganelles.begin(), m_pOrganelles.end(),
+            [](const std::shared_ptr<Organelle>& pOrg) {
+                return std::dynamic_pointer_cast<Spindle>(pOrg) != nullptr;
+            }),
+        m_pOrganelles.end());
+}
+
+std::shared_ptr<Spindle> Cell::getSpindle() const
+{
+    for (const auto& pOrg : m_pOrganelles)
+    {
+        if (auto pSpindle = std::dynamic_pointer_cast<Spindle>(pOrg))
+        {
+            return pSpindle;
+        }
+    }
+    return nullptr;
 }
