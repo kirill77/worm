@@ -88,34 +88,39 @@ Worm::Worm()
     m_pCells.push_back(pCell);
 }
 
-bool Worm::validatePARPolarization(uint32_t timestep) const
+// Validation thresholds based on experimental data
+static constexpr double ANTERIOR_POSTERIOR_RATIO_THRESHOLD = 3.0;
+static constexpr double NUCLEAR_SIZE_THRESHOLD = 0.8;
+static constexpr double ASYMMETRIC_DIVISION_RATIO = 0.6;
+
+// Timing constants (in simulation steps, where each step is 0.1 seconds)
+static constexpr uint32_t POLARITY_ESTABLISHMENT_END = 3600;    // 6 minutes
+static constexpr uint32_t POLARITY_MAINTENANCE_END = 6000;      // 10 minutes
+static constexpr uint32_t NUCLEAR_ENVELOPE_BREAKDOWN = 7500;    // 12.5 minutes
+static constexpr uint32_t SPINDLE_ASSEMBLY_START = 9000;        // 15 minutes
+static constexpr uint32_t DIVISION_START = 11000;               // 18.3 minutes
+
+bool Worm::validatePARPolarization(float fTimeSec) const
 {
     auto medium = m_pCells[0]->getMedium();
     
-    // Check anterior PAR concentration
-    float3 anteriorPos(0.0f, 0.8f, 0.0f);  // Near anterior cortex
-    float3 posteriorPos(0.0f, -0.8f, 0.0f); // Near posterior cortex
+    float3 anteriorPos(0.0f, 0.8f, 0.0f);
+    float3 posteriorPos(0.0f, -0.8f, 0.0f);
     
     double anteriorPAR3 = medium->getProteinNumber("PAR-3", anteriorPos);
     double posteriorPAR3 = medium->getProteinNumber("PAR-3", posteriorPos);
     double anteriorPAR2 = medium->getProteinNumber("PAR-2", anteriorPos);
     double posteriorPAR2 = medium->getProteinNumber("PAR-2", posteriorPos);
     
-    // Early polarization (0-200 timesteps)
-    if (timestep < 200) {
-        LOG_INFO("Timestep {} - PAR Polarization Check:", timestep);
-        LOG_INFO("Anterior PAR-3: {}, Posterior PAR-3: {}", anteriorPAR3, posteriorPAR3);
-        LOG_INFO("Anterior PAR-2: {}, Posterior PAR-2: {}", anteriorPAR2, posteriorPAR2);
-        
-        // PAR-3 should be higher in anterior
+    // Check during polarity establishment (0-6 minutes)
+    if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
         if (anteriorPAR3 / (posteriorPAR3 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
-            LOG_INFO("Warning: Insufficient anterior PAR-3 polarization");
+            LOG_INFO("Warning: Insufficient anterior PAR-3 polarization at %.2lf sec", fTimeSec);
             return false;
         }
         
-        // PAR-2 should be higher in posterior
         if (posteriorPAR2 / (anteriorPAR2 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
-            LOG_INFO("Warning: Insufficient posterior PAR-2 polarization");
+            LOG_INFO("Warning: Insufficient posterior PAR-2 polarization at %.2lf sec", fTimeSec);
             return false;
         }
     }
@@ -123,43 +128,37 @@ bool Worm::validatePARPolarization(uint32_t timestep) const
     return true;
 }
 
-bool Worm::validateCellCycle(uint32_t timestep) const
+bool Worm::validateCellCycle(float fTimeSec) const
 {
     auto medium = m_pCells[0]->getMedium();
-    
-    // Check CDK-1 levels
-    float3 nuclearPos(0.0f, 0.0f, 0.0f);  // Assuming nucleus is roughly centered
+    float3 nuclearPos(0.0f, 0.0f, 0.0f);
     double cdk1Level = medium->getProteinNumber("CDK-1", nuclearPos);
-    
-    LOG_INFO("Timestep {} - Cell Cycle Check:", timestep);
-    LOG_INFO("CDK-1 level: {}", cdk1Level);
-    
-    // Early interphase (0-300 timesteps): CDK-1 should be relatively low
-    if (timestep < 300 && cdk1Level > 1000) {
-        LOG_INFO("Warning: CDK-1 levels too high for early interphase");
+
+    // Before nuclear envelope breakdown (0-12.5 minutes): CDK-1 should be relatively low
+    if (fTimeSec < NUCLEAR_ENVELOPE_BREAKDOWN_SEC && cdk1Level > 1000) {
+        LOG_INFO("Warning: CDK-1 levels too high before NEBD at %.2lf sec", fTimeSec);
         return false;
     }
     
-    // M-phase entry (300-600 timesteps): CDK-1 should increase
-    if (timestep >= 300 && timestep < 600 && cdk1Level < 1500) {
-        LOG_INFO("Warning: CDK-1 levels too low for M-phase entry");
+    // During mitotic entry (12.5-15 minutes): CDK-1 should increase
+    if (fTimeSec >= NUCLEAR_ENVELOPE_BREAKDOWN_SEC && fTimeSec < SPINDLE_ASSEMBLY_START_SEC && cdk1Level < 1500) {
+        LOG_INFO("Warning: CDK-1 levels too low during mitotic entry at %.2lf sec", fTimeSec);
         return false;
     }
     
     return true;
 }
 
-bool Worm::validateAsymmetricDivision(uint32_t timestep) const
+bool Worm::validateAsymmetricDivision(float fTimeSec) const
 {
-    // Only check during late stages
-    if (timestep < 800) return true;
+    // Only check during late stages (after 15 minutes)
+    if (fTimeSec < SPINDLE_ASSEMBLY_START_SEC) return true;
     
     auto pSpindle = m_pCells[0]->getSpindle();
-    
-    // Check spindle position (should be posterior-shifted)
     float3 spindlePos = pSpindle->getPosition();
-    if (spindlePos.y > -0.1f) {  // Spindle should be posterior-shifted
-        LOG_INFO("Warning: Spindle not properly positioned toward posterior");
+    
+    if (spindlePos.y > -0.1f) {
+        LOG_INFO("Warning: Spindle not properly positioned toward posterior at %.2lf sec", fTimeSec);
         return false;
     }
     

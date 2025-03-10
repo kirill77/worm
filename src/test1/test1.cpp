@@ -8,20 +8,23 @@ int main()
     World world(pWorm);
     
     bool allTestsPassed = true;
+    constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
+    float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
     
-    for (uint32_t u = 0; u < 1000; ++u)
+    for (uint32_t u = 0; u < 12000; ++u)  // 12000 steps = 20 minutes
     {
-        world.simulateStep(0.1);
-        
-        // Run validation checks every 50 timesteps
-        if (u % 50 == 0) {
-            bool parValid = pWorm->validatePARPolarization(u);
-            bool cycleValid = pWorm->validateCellCycle(u);
-            bool divisionValid = pWorm->validateAsymmetricDivision(u);
+        world.simulateStep(fDtSec);
+        fCurrentTimeSec += fDtSec;
+
+        // Run validation checks every 10 seconds
+        if ((u + 1) % 100 == 0) {
+            bool parValid = pWorm->validatePARPolarization(fCurrentTimeSec);
+            bool cycleValid = pWorm->validateCellCycle(fCurrentTimeSec);
+            bool divisionValid = pWorm->validateAsymmetricDivision(fCurrentTimeSec);
             
             if (!(parValid && cycleValid && divisionValid)) {
                 allTestsPassed = false;
-                LOG_ERROR("Validation failed at timestep");
+                LOG_ERROR("Validation failed at %.2lf sec", fCurrentTimeSec);
                 break;
             }
         }
@@ -30,6 +33,6 @@ int main()
     if (allTestsPassed) {
         LOG_INFO("All development validation checks passed!");
     }
-        
+    
     return allTestsPassed ? 0 : 1;
 }
