@@ -1,5 +1,5 @@
 #include "simulation/World.h"
-#include "simulation/Worm.h"
+#include "worm/Worm.h"
 
 int main()
 {

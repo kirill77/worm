@@ -1,9 +1,8 @@
 #include "pch.h"
 #include "Worm.h"
-#include "Cell.h"
-#include "Protein.h"
-#include "Medium.h"
-#include "DNA.h"
+#include "simulation/Cell.h"
+#include "simulation/Protein.h"
+#include "simulation/Medium.h"
 
 std::vector<Chromosome> Worm::initializeGenes()
 {

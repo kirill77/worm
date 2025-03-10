@@ -42,9 +42,6 @@
     <ClInclude Include="Medium.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Worm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Gene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -99,9 +96,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Medium.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Worm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DNA.cpp">

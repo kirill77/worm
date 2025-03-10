@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Organism.h"
-#include "DNA.h"
-#include "Chromosome.h"
+#include "simulation/Organism.h"
+#include "simulation/DNA.h"
+#include "simulation/Chromosome.h"
 
 class Worm : public Organism
 {
