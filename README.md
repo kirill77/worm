@@ -1,4 +1,3 @@
-```markdown
 # C. elegans Life Cycle Simulation
 
 A comprehensive computational model simulating the complete life cycle of C. elegans, from zygote formation to natural death. This ambitious project aims to create a detailed molecular and cellular simulation of all developmental stages and aging processes in C. elegans.
@@ -158,4 +157,3 @@ The simulation includes automatic validation of key developmental events:
 
 ## References
 The simulation parameters and validation thresholds are based on experimental observations from C. elegans research literature. The project integrates data from embryogenesis through aging studies to create a comprehensive life cycle model.
-```
