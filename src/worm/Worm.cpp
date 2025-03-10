@@ -3,6 +3,8 @@
 #include "simulation/Cell.h"
 #include "simulation/Protein.h"
 #include "simulation/Medium.h"
+#include "simulation/Spindle.h"
+#include "log/ILog.h"
 
 std::vector<Chromosome> Worm::initializeGenes()
 {
@@ -84,4 +86,82 @@ Worm::Worm()
     std::shared_ptr<Medium> pMedium = createZygoteMedium();
     auto pCell = std::make_shared<Cell>(pMedium, chromosomes);
     m_pCells.push_back(pCell);
+}
+
+bool Worm::validatePARPolarization(uint32_t timestep) const
+{
+    auto medium = m_pCells[0]->getMedium();
+    
+    // Check anterior PAR concentration
+    float3 anteriorPos(0.0f, 0.8f, 0.0f);  // Near anterior cortex
+    float3 posteriorPos(0.0f, -0.8f, 0.0f); // Near posterior cortex
+    
+    double anteriorPAR3 = medium->getProteinNumber("PAR-3", anteriorPos);
+    double posteriorPAR3 = medium->getProteinNumber("PAR-3", posteriorPos);
+    double anteriorPAR2 = medium->getProteinNumber("PAR-2", anteriorPos);
+    double posteriorPAR2 = medium->getProteinNumber("PAR-2", posteriorPos);
+    
+    // Early polarization (0-200 timesteps)
+    if (timestep < 200) {
+        LOG_INFO("Timestep {} - PAR Polarization Check:", timestep);
+        LOG_INFO("Anterior PAR-3: {}, Posterior PAR-3: {}", anteriorPAR3, posteriorPAR3);
+        LOG_INFO("Anterior PAR-2: {}, Posterior PAR-2: {}", anteriorPAR2, posteriorPAR2);
+        
+        // PAR-3 should be higher in anterior
+        if (anteriorPAR3 / (posteriorPAR3 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
+            LOG_INFO("Warning: Insufficient anterior PAR-3 polarization");
+            return false;
+        }
+        
+        // PAR-2 should be higher in posterior
+        if (posteriorPAR2 / (anteriorPAR2 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
+            LOG_INFO("Warning: Insufficient posterior PAR-2 polarization");
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Worm::validateCellCycle(uint32_t timestep) const
+{
+    auto medium = m_pCells[0]->getMedium();
+    
+    // Check CDK-1 levels
+    float3 nuclearPos(0.0f, 0.0f, 0.0f);  // Assuming nucleus is roughly centered
+    double cdk1Level = medium->getProteinNumber("CDK-1", nuclearPos);
+    
+    LOG_INFO("Timestep {} - Cell Cycle Check:", timestep);
+    LOG_INFO("CDK-1 level: {}", cdk1Level);
+    
+    // Early interphase (0-300 timesteps): CDK-1 should be relatively low
+    if (timestep < 300 && cdk1Level > 1000) {
+        LOG_INFO("Warning: CDK-1 levels too high for early interphase");
+        return false;
+    }
+    
+    // M-phase entry (300-600 timesteps): CDK-1 should increase
+    if (timestep >= 300 && timestep < 600 && cdk1Level < 1500) {
+        LOG_INFO("Warning: CDK-1 levels too low for M-phase entry");
+        return false;
+    }
+    
+    return true;
+}
+
+bool Worm::validateAsymmetricDivision(uint32_t timestep) const
+{
+    // Only check during late stages
+    if (timestep < 800) return true;
+    
+    auto pSpindle = m_pCells[0]->getSpindle();
+    
+    // Check spindle position (should be posterior-shifted)
+    float3 spindlePos = pSpindle->getPosition();
+    if (spindlePos.y > -0.1f) {  // Spindle should be posterior-shifted
+        LOG_INFO("Warning: Spindle not properly positioned toward posterior");
+        return false;
+    }
+    
+    return true;
 }
