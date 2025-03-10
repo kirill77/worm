@@ -4,19 +4,19 @@
 #include <algorithm>
 #include <cassert>
 
-ProteinPopulation& Medium::GridCell::findOrCreatePopulation(const ProteinPopulation& protein)
+ProteinPopulation& Medium::GridCell::findOrCreateProtein(const std::string& sProteinName)
 {
     auto it = std::find_if(m_proteins.begin(), m_proteins.end(),
         [&](const ProteinPopulation& pop) {
-            return pop.m_sName == protein.m_sName;
+            return pop.m_sName == sProteinName;
         });
     
     if (it != m_proteins.end()) {
-        it->m_fNumber += protein.m_fNumber;  // Add to existing population
         return *it;
     }
     
-    m_proteins.push_back(protein);  // Create new population
+    // Create new population with zero initial amount
+    m_proteins.emplace_back(sProteinName, 0.0);
     return m_proteins.back();
 }
 
@@ -103,7 +103,8 @@ std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
 void Medium::addProtein(const ProteinPopulation& protein, const float3& position)
 {
     auto& cell = findCell(position);
-    cell.findOrCreatePopulation(protein);
+    auto& pop = cell.findOrCreateProtein(protein.m_sName);
+    pop.m_fNumber += protein.m_fNumber;
 }
 
 void Medium::addMRNA(std::shared_ptr<MRNA> mRNA, const float3& position)
@@ -135,14 +136,18 @@ void Medium::updateProteinDiffusion(double dt)
         // For each protein population in the cell
         for (auto& pop : m_grid[i].m_proteins)
         {
+            // Calculate amount to diffuse
             double diffusionAmount = pop.m_fNumber * DIFFUSION_RATE * dt / neighbors.size();
+            
+            // Get reference to population in new grid for this cell
+            auto& sourcePop = newGrid[i].findOrCreateProtein(pop.m_sName);
             
             // Distribute to neighbors
             for (size_t neighborIdx : neighbors)
             {
-                auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
+                auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
                 neighborPop.m_fNumber += diffusionAmount;
-                newGrid[i].findOrCreatePopulation(pop).m_fNumber -= diffusionAmount;
+                sourcePop.m_fNumber -= diffusionAmount;
             }
         }
     }
@@ -194,7 +199,7 @@ void Medium::updatePARDynamics(double dt)
         for (auto& pop : m_grid[i].m_proteins)
         {
             // Find corresponding population in new grid
-            auto& newPop = newGrid[i].findOrCreatePopulation(pop);
+            auto& newPop = newGrid[i].findOrCreateProtein(pop.m_sName);
             
             // Handle cortex binding/unbinding
             if (isCortex)
@@ -215,7 +220,7 @@ void Medium::updatePARDynamics(double dt)
                     {
                         if (!isCortexCell(neighborIdx))
                         {
-                            auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
+                            auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
                             neighborPop.m_fNumber += recovered / neighbors.size();
                         }
                     }
@@ -236,7 +241,7 @@ void Medium::updatePARDynamics(double dt)
                     {
                         if (!isCortexCell(neighborIdx))
                         {
-                            auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
+                            auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
                             neighborPop.m_fNumber += recovered / neighbors.size();
                         }
                     }
@@ -278,7 +283,7 @@ void Medium::updatePARDynamics(double dt)
                     double amountPerSite = bindingAmount / cortexNeighbors.size();
                     for (size_t neighborIdx : cortexNeighbors)
                     {
-                        auto& neighborPop = newGrid[neighborIdx].findOrCreatePopulation(pop);
+                        auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
                         neighborPop.m_fNumber += amountPerSite;
                     }
                 }

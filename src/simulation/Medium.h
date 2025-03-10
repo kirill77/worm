@@ -18,7 +18,7 @@ private:
         double m_fAtp;  // ATP level in this grid cell
         
         // Helper to find or create protein population
-        ProteinPopulation& findOrCreatePopulation(const ProteinPopulation& protein);
+        ProteinPopulation& findOrCreateProtein(const std::string& sProteinName);
         
         GridCell() : m_fAtp(0.0) {}
     };
