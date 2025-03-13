@@ -4,17 +4,7 @@
 #include <algorithm>
 #include <cassert>
 #include "ProteinAntagonism.h"
-
-ProteinPopulation& Medium::GridCell::getOrCreateProtein(const std::string& sProteinName)
-{
-    auto it = m_proteins.find(sProteinName);
-    if (it != m_proteins.end()) {
-        return it->second;
-    }
-    
-    // Create new population with zero initial amount
-    return m_proteins.emplace(sProteinName, ProteinPopulation(sProteinName, 0.0)).first->second;
-}
+#include "GridCell.h"
 
 uint32_t Medium::positionToIndex(const float3& position) const
 {
@@ -41,12 +31,12 @@ float3 Medium::indexToPosition(size_t index) const
     return pos;
 }
 
-Medium::GridCell& Medium::findCell(const float3& position)
+GridCell& Medium::findCell(const float3& position)
 {
     return m_grid[positionToIndex(position)];
 }
 
-const Medium::GridCell& Medium::findCell(const float3& position) const
+const GridCell& Medium::findCell(const float3& position) const
 {
     return m_grid[positionToIndex(position)];
 }

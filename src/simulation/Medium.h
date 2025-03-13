@@ -9,22 +9,11 @@
 #include "MRNA.h"
 #include "math/vector.h"
 #include "ProteinAntagonism.h"
+#include "GridCell.h"
 
 class Medium
 {
 private:
-    // Represents contents of one grid cell
-    struct GridCell {
-        std::unordered_map<std::string, ProteinPopulation> m_proteins;
-        std::vector<std::shared_ptr<MRNA>> m_pMRNAs;
-        double m_fAtp;  // ATP level in this grid cell
-        
-        // Helper to get or create protein population
-        ProteinPopulation& getOrCreateProtein(const std::string& sProteinName);
-        
-        GridCell() : m_fAtp(0.0) {}
-    };
-
     static constexpr uint32_t GRID_RES = 3;  // 3x3x3 grid
     std::array<GridCell, GRID_RES * GRID_RES * GRID_RES> m_grid;
     

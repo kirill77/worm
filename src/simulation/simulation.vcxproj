@@ -162,6 +162,7 @@
     <ClInclude Include="Spindle.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="GridCell.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cell.cpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="Spindle.cpp" />
     <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="GridCell.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
