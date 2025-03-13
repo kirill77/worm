@@ -4,20 +4,15 @@
 #include <algorithm>
 #include <cassert>
 
-ProteinPopulation& Medium::GridCell::findOrCreateProtein(const std::string& sProteinName)
+ProteinPopulation& Medium::GridCell::getOrCreateProtein(const std::string& sProteinName)
 {
-    auto it = std::find_if(m_proteins.begin(), m_proteins.end(),
-        [&](const ProteinPopulation& pop) {
-            return pop.m_sName == sProteinName;
-        });
-    
+    auto it = m_proteins.find(sProteinName);
     if (it != m_proteins.end()) {
-        return *it;
+        return it->second;
     }
     
     // Create new population with zero initial amount
-    m_proteins.emplace_back(sProteinName, 0.0);
-    return m_proteins.back();
+    return m_proteins.emplace(sProteinName, ProteinPopulation(sProteinName, 0.0)).first->second;
 }
 
 uint32_t Medium::positionToIndex(const float3& position) const
@@ -103,7 +98,7 @@ std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
 void Medium::addProtein(const ProteinPopulation& protein, const float3& position)
 {
     auto& cell = findCell(position);
-    auto& pop = cell.findOrCreateProtein(protein.m_sName);
+    auto& pop = cell.getOrCreateProtein(protein.m_sName);
     pop.m_fNumber += protein.m_fNumber;
 }
 
@@ -115,12 +110,8 @@ void Medium::addMRNA(std::shared_ptr<MRNA> mRNA, const float3& position)
 double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
 {
     const auto& cell = findCell(position);
-    auto it = std::find_if(cell.m_proteins.begin(), cell.m_proteins.end(),
-        [&](const ProteinPopulation& pop) {
-            return pop.m_sName == proteinName;
-        });
-    
-    return (it != cell.m_proteins.end()) ? it->m_fNumber : 0.0;
+    auto it = cell.m_proteins.find(proteinName);
+    return (it != cell.m_proteins.end()) ? it->second.m_fNumber : 0.0;
 }
 
 void Medium::updateProteinDiffusion(double dt)
@@ -134,18 +125,18 @@ void Medium::updateProteinDiffusion(double dt)
         auto neighbors = getNeighborIndices(i);
         
         // For each protein population in the cell
-        for (auto& pop : m_grid[i].m_proteins)
+        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
         {
             // Calculate amount to diffuse
             double diffusionAmount = pop.m_fNumber * DIFFUSION_RATE * dt / neighbors.size();
             
             // Get reference to population in new grid for this cell
-            auto& sourcePop = newGrid[i].findOrCreateProtein(pop.m_sName);
+            auto& sourcePop = newGrid[i].getOrCreateProtein(proteinName);
             
             // Distribute to neighbors
             for (size_t neighborIdx : neighbors)
             {
-                auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
+                auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
                 neighborPop.m_fNumber += diffusionAmount;
                 sourcePop.m_fNumber -= diffusionAmount;
             }
@@ -177,15 +168,15 @@ void Medium::updatePARDynamics(double dt)
         double anteriorPARs = 0.0;  // PAR-3/6/PKC-3 complex
         double posteriorPARs = 0.0; // PAR-1/2
         
-        for (const auto& pop : m_grid[i].m_proteins)
+        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
         {
             // Sum up anterior PARs
-            if (pop.m_sName == "PAR-3" || pop.m_sName == "PAR-6" || pop.m_sName == "PKC-3")
+            if (proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3")
             {
                 anteriorPARs += pop.m_fNumber;
             }
             // Sum up posterior PARs
-            else if (pop.m_sName == "PAR-1" || pop.m_sName == "PAR-2")
+            else if (proteinName == "PAR-1" || proteinName == "PAR-2")
             {
                 posteriorPARs += pop.m_fNumber;
             }
@@ -196,16 +187,16 @@ void Medium::updatePARDynamics(double dt)
         double posteriorStrength = posteriorPARs / (posteriorPARs + 1000.0);
 
         // Update each protein population
-        for (auto& pop : m_grid[i].m_proteins)
+        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
         {
             // Find corresponding population in new grid
-            auto& newPop = newGrid[i].findOrCreateProtein(pop.m_sName);
+            auto& newPop = newGrid[i].getOrCreateProtein(proteinName);
             
             // Handle cortex binding/unbinding
             if (isCortex)
             {
                 // Anterior PARs
-                if (pop.m_sName == "PAR-3" || pop.m_sName == "PAR-6" || pop.m_sName == "PKC-3")
+                if (proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3")
                 {
                     // Removed by posterior PARs
                     double removed = pop.m_fNumber * posteriorStrength * PHOSPHORYLATION_RATE * dt;
@@ -220,13 +211,13 @@ void Medium::updatePARDynamics(double dt)
                     {
                         if (!isCortexCell(neighborIdx))
                         {
-                            auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
+                            auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
                             neighborPop.m_fNumber += recovered / neighbors.size();
                         }
                     }
                 }
                 // Posterior PARs
-                else if (pop.m_sName == "PAR-1" || pop.m_sName == "PAR-2")
+                else if (proteinName == "PAR-1" || proteinName == "PAR-2")
                 {
                     // Removed by anterior PARs
                     double removed = pop.m_fNumber * anteriorStrength * PHOSPHORYLATION_RATE * dt;
@@ -241,7 +232,7 @@ void Medium::updatePARDynamics(double dt)
                     {
                         if (!isCortexCell(neighborIdx))
                         {
-                            auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
+                            auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
                             neighborPop.m_fNumber += recovered / neighbors.size();
                         }
                     }
@@ -259,13 +250,13 @@ void Medium::updatePARDynamics(double dt)
                     if (isCortexCell(neighborIdx))
                     {
                         // For anterior PARs, prefer anterior cortex
-                        if ((pop.m_sName == "PAR-3" || pop.m_sName == "PAR-6" || pop.m_sName == "PKC-3") &&
+                        if ((proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3") &&
                             indexToPosition(neighborIdx).y > 0)
                         {
                             cortexNeighbors.push_back(neighborIdx);
                         }
                         // For posterior PARs, prefer posterior cortex
-                        else if ((pop.m_sName == "PAR-1" || pop.m_sName == "PAR-2") &&
+                        else if ((proteinName == "PAR-1" || proteinName == "PAR-2") &&
                                 indexToPosition(neighborIdx).y < 0)
                         {
                             cortexNeighbors.push_back(neighborIdx);
@@ -283,7 +274,7 @@ void Medium::updatePARDynamics(double dt)
                     double amountPerSite = bindingAmount / cortexNeighbors.size();
                     for (size_t neighborIdx : cortexNeighbors)
                     {
-                        auto& neighborPop = newGrid[neighborIdx].findOrCreateProtein(pop.m_sName);
+                        auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
                         neighborPop.m_fNumber += amountPerSite;
                     }
                 }
@@ -299,21 +290,17 @@ double Medium::getTotalProteinNumber(const std::string& proteinName) const
     double total = 0.0;
     for (const auto& cell : m_grid)
     {
-        for (const auto& pop : cell.m_proteins)
-        {
-            if (pop.m_sName == proteinName)
-            {
-                total += pop.m_fNumber;
-            }
+        auto it = cell.m_proteins.find(proteinName);
+        if (it != cell.m_proteins.end()) {
+            total += it->second.m_fNumber;
         }
     }
     return total;
 }
 
-bool Medium::isPARProtein(const Protein& protein) const
+bool Medium::isPARProtein(const std::string& proteinName) const
 {
-    const std::string& name = protein.m_sName;
-    return name.substr(0, 4) == "PAR-" || name == "PKC-3";
+    return proteinName.substr(0, 4) == "PAR-" || proteinName == "PKC-3";
 }
 
 void Medium::update(double dt)

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <unordered_map>
 #include "Protein.h"
 #include "MRNA.h"
 #include "math/vector.h"
@@ -13,12 +14,12 @@ class Medium
 private:
     // Represents contents of one grid cell
     struct GridCell {
-        std::vector<ProteinPopulation> m_proteins;
+        std::unordered_map<std::string, ProteinPopulation> m_proteins;
         std::vector<std::shared_ptr<MRNA>> m_pMRNAs;
         double m_fAtp;  // ATP level in this grid cell
         
-        // Helper to find or create protein population
-        ProteinPopulation& findOrCreateProtein(const std::string& sProteinName);
+        // Helper to get or create protein population
+        ProteinPopulation& getOrCreateProtein(const std::string& sProteinName);
         
         GridCell() : m_fAtp(0.0) {}
     };
@@ -72,6 +73,6 @@ private:
     float3 indexToPosition(size_t index) const;
     
     // Helper function to check protein type
-    bool isPARProtein(const Protein& protein) const;
+    bool isPARProtein(const std::string& proteinName) const;
 };
 
