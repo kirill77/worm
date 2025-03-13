@@ -71,8 +71,5 @@ private:
     // Convert between grid indices and 3D coordinates
     uint32_t positionToIndex(const float3& position) const;
     float3 indexToPosition(size_t index) const;
-    
-    // Helper function to check protein type
-    bool isPARProtein(const std::string& proteinName) const;
 };
 

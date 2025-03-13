@@ -298,11 +298,6 @@ double Medium::getTotalProteinNumber(const std::string& proteinName) const
     return total;
 }
 
-bool Medium::isPARProtein(const std::string& proteinName) const
-{
-    return proteinName.substr(0, 4) == "PAR-" || proteinName == "PKC-3";
-}
-
 void Medium::update(double dt)
 {
     // Update diffusion of proteins and ATP
