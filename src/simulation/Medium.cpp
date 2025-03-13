@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 #include <cassert>
+#include "ProteinAntagonism.h"
 
 ProteinPopulation& Medium::GridCell::getOrCreateProtein(const std::string& sProteinName)
 {
@@ -151,132 +152,182 @@ void Medium::updatePARDynamics(double dt)
     // Create temporary grid for updated numbers
     auto newGrid = m_grid;
     
-    static constexpr double PHOSPHORYLATION_RATE = 0.3;    // Rate at which PAR proteins phosphorylate their targets
-    static constexpr double DEPHOSPHORYLATION_RATE = 0.1;  // Rate at which phosphorylated PARs recover
-    static constexpr double CORTEX_DISTANCE = 0.8f;        // Distance from center considered as cortex
+    // Constants for protein dynamics
+    static constexpr double CORTEX_BINDING_RATE = 0.15;    // Rate at which proteins bind to cortex from cytoplasm
+    static constexpr double CORTEX_UNBINDING_RATE = 0.12;  // Rate at which proteins unbind from cortex
     
     // Update each cell
     for (size_t i = 0; i < m_grid.size(); ++i)
     {
         bool isCortex = isCortexCell(i);
-        float3 pos = indexToPosition(i);
-        
-        // Skip non-cortical cells for cortex-bound proteins
-        if (!isCortex) continue;
+        if (!isCortex) continue;  // Skip non-cortical cells
 
-        // Get protein populations
-        double anteriorPARs = 0.0;  // PAR-3/6/PKC-3 complex
-        double posteriorPARs = 0.0; // PAR-1/2
-        
-        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
+        // Process each protein antagonism
+        for (const auto& antagonism : m_proteinAntagonisms)
         {
-            // Sum up anterior PARs
-            if (proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3")
-            {
-                anteriorPARs += pop.m_fNumber;
-            }
-            // Sum up posterior PARs
-            else if (proteinName == "PAR-1" || proteinName == "PAR-2")
-            {
-                posteriorPARs += pop.m_fNumber;
-            }
-        }
-
-        // Calculate antagonistic effects
-        double anteriorStrength = anteriorPARs / (anteriorPARs + 1000.0);  // Saturable effect
-        double posteriorStrength = posteriorPARs / (posteriorPARs + 1000.0);
-
-        // Update each protein population
-        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
-        {
-            // Find corresponding population in new grid
-            auto& newPop = newGrid[i].getOrCreateProtein(proteinName);
+            // Get protein amounts
+            const auto& antagonist = antagonism.getAntagonist();
+            const auto& target = antagonism.getTarget();
             
-            // Handle cortex binding/unbinding
-            if (isCortex)
-            {
-                // Anterior PARs
-                if (proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3")
-                {
-                    // Removed by posterior PARs
-                    double removed = pop.m_fNumber * posteriorStrength * PHOSPHORYLATION_RATE * dt;
-                    newPop.m_fNumber = std::max(0.0, newPop.m_fNumber - removed);
-                    
-                    // Recovery
-                    double recovered = removed * DEPHOSPHORYLATION_RATE * dt;
-                    
-                    // Add recovered proteins to nearby non-cortical cells
-                    auto neighbors = getNeighborIndices(i);
-                    for (size_t neighborIdx : neighbors)
-                    {
-                        if (!isCortexCell(neighborIdx))
-                        {
-                            auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
-                            neighborPop.m_fNumber += recovered / neighbors.size();
-                        }
-                    }
-                }
-                // Posterior PARs
-                else if (proteinName == "PAR-1" || proteinName == "PAR-2")
-                {
-                    // Removed by anterior PARs
-                    double removed = pop.m_fNumber * anteriorStrength * PHOSPHORYLATION_RATE * dt;
-                    newPop.m_fNumber = std::max(0.0, newPop.m_fNumber - removed);
-                    
-                    // Recovery
-                    double recovered = removed * DEPHOSPHORYLATION_RATE * dt;
-                    
-                    // Add recovered proteins to nearby non-cortical cells
-                    auto neighbors = getNeighborIndices(i);
-                    for (size_t neighborIdx : neighbors)
-                    {
-                        if (!isCortexCell(neighborIdx))
-                        {
-                            auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
-                            neighborPop.m_fNumber += recovered / neighbors.size();
-                        }
-                    }
-                }
+            double antagonistAmount = 0.0;
+            double targetAmount = 0.0;
+            
+            // Get antagonist amount
+            auto antagonistIt = m_grid[i].m_proteins.find(antagonist);
+            if (antagonistIt != m_grid[i].m_proteins.end()) {
+                antagonistAmount = antagonistIt->second.m_fNumber;
             }
-            // Non-cortical cells: proteins can rebind to cortex
-            else
+            
+            // Get target amount
+            auto targetIt = m_grid[i].m_proteins.find(target);
+            if (targetIt != m_grid[i].m_proteins.end()) {
+                targetAmount = targetIt->second.m_fNumber;
+            }
+            
+            // Calculate and apply antagonistic effects
+            if (antagonistAmount > 0 && targetAmount > 0)
             {
-                auto neighbors = getNeighborIndices(i);
-                std::vector<size_t> cortexNeighbors;
+                // Get available ATP if needed for phosphorylation
+                double availableATP = 0.0;
+                if (antagonism.getMechanism() == ProteinAntagonism::Mechanism::PHOSPHORYLATION) {
+                    availableATP = m_grid[i].m_fAtp;
+                }
                 
-                // Find available cortex binding sites
+                auto& targetPop = newGrid[i].getOrCreateProtein(target);
+                
+                // Calculate removal based on mechanism and parameters
+                double removedAmount = antagonism.calculateRemoval(targetAmount, antagonistAmount, dt, availableATP);
+                
+                // Consume ATP if using phosphorylation
+                if (antagonism.getMechanism() == ProteinAntagonism::Mechanism::PHOSPHORYLATION && removedAmount > 0) {
+                    double atpUsed = removedAmount * antagonism.getATPCost();
+                    newGrid[i].m_fAtp = std::max(0.0, newGrid[i].m_fAtp - atpUsed);
+                }
+                
+                // Apply removal
+                targetPop.m_fNumber = std::max(0.0, targetPop.m_fNumber - removedAmount);
+                
+                // Recovery of target
+                double recoveredAmount = antagonism.calculateRecovery(removedAmount, dt);
+                
+                // Add recovered proteins to nearby non-cortical cells
+                auto neighbors = getNeighborIndices(i);
                 for (size_t neighborIdx : neighbors)
                 {
-                    if (isCortexCell(neighborIdx))
+                    if (!isCortexCell(neighborIdx))
                     {
-                        // For anterior PARs, prefer anterior cortex
-                        if ((proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3") &&
-                            indexToPosition(neighborIdx).y > 0)
-                        {
-                            cortexNeighbors.push_back(neighborIdx);
-                        }
-                        // For posterior PARs, prefer posterior cortex
-                        else if ((proteinName == "PAR-1" || proteinName == "PAR-2") &&
-                                indexToPosition(neighborIdx).y < 0)
-                        {
-                            cortexNeighbors.push_back(neighborIdx);
-                        }
+                        auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(target);
+                        neighborPop.m_fNumber += recoveredAmount / neighbors.size();
+                    }
+                }
+            }
+        }
+        
+        // Handle cortical binding/unbinding - this part remains similar to the original
+        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
+        {
+            if (!isCortex) // For non-cortical cells, this should not execute due to the skip above
+            {
+                // Skip, already filtered out
+            }
+            else // For cortical cells, handle proteins that can unbind
+            {
+                // Proteins can unbind from cortex to cytoplasm
+                auto neighbors = getNeighborIndices(i);
+                std::vector<size_t> nonCortexNeighbors;
+                
+                // Find non-cortical neighbors
+                for (size_t neighborIdx : neighbors)
+                {
+                    if (!isCortexCell(neighborIdx))
+                    {
+                        nonCortexNeighbors.push_back(neighborIdx);
                     }
                 }
                 
-                if (!cortexNeighbors.empty())
+                if (!nonCortexNeighbors.empty())
                 {
-                    // Calculate binding amount based on local concentration
-                    double bindingAmount = pop.m_fNumber * CORTEX_BINDING_RATE * dt;
-                    newPop.m_fNumber -= bindingAmount;
+                    // Calculate unbinding based on protein type
+                    double unbindingRate = CORTEX_UNBINDING_RATE;
                     
-                    // Distribute to available cortex sites
-                    double amountPerSite = bindingAmount / cortexNeighbors.size();
-                    for (size_t neighborIdx : cortexNeighbors)
+                    // PAR-2 has more stability at the cortex
+                    if (proteinName == "PAR-2") {
+                        unbindingRate *= 0.8; // 20% lower unbinding
+                    }
+                    
+                    // Anterior complex proteins have slight stability
+                    if (proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3") {
+                        unbindingRate *= 0.9; // 10% lower unbinding
+                    }
+                    
+                    double unbindingAmount = pop.m_fNumber * unbindingRate * dt;
+                    auto& newPop = newGrid[i].getOrCreateProtein(proteinName);
+                    newPop.m_fNumber -= unbindingAmount;
+                    
+                    // Distribute unbound proteins to non-cortical neighbors
+                    double amountPerSite = unbindingAmount / nonCortexNeighbors.size();
+                    for (size_t neighborIdx : nonCortexNeighbors)
                     {
                         auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
                         neighborPop.m_fNumber += amountPerSite;
                     }
+                }
+            }
+        }
+    }
+    
+    // Handle proteins in non-cortical cells that can bind to cortex
+    for (size_t i = 0; i < m_grid.size(); ++i)
+    {
+        bool isCortex = isCortexCell(i);
+        if (isCortex) continue; // Skip cortical cells, already processed
+        
+        auto neighbors = getNeighborIndices(i);
+        
+        // For each protein population in the cell
+        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
+        {
+            std::vector<size_t> cortexNeighbors;
+            
+            // Find available cortex binding sites with protein-specific preferences
+            for (size_t neighborIdx : neighbors)
+            {
+                if (isCortexCell(neighborIdx))
+                {
+                    float3 pos = indexToPosition(neighborIdx);
+                    
+                    // For anterior PARs, prefer anterior cortex
+                    if ((proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3") &&
+                        pos.y > 0)
+                    {
+                        cortexNeighbors.push_back(neighborIdx);
+                    }
+                    // For posterior PARs, prefer posterior cortex
+                    else if ((proteinName == "PAR-1" || proteinName == "PAR-2") &&
+                            pos.y < 0)
+                    {
+                        cortexNeighbors.push_back(neighborIdx);
+                    }
+                }
+            }
+            
+            if (!cortexNeighbors.empty())
+            {
+                // Calculate binding amount with protein-specific rates
+                double bindingRate = CORTEX_BINDING_RATE;
+                if (proteinName == "PAR-2") bindingRate *= 1.2; // 20% higher for PAR-2
+                if (proteinName == "PAR-1") bindingRate *= 1.1; // 10% higher for PAR-1
+                
+                double bindingAmount = pop.m_fNumber * bindingRate * dt;
+                auto& newPop = newGrid[i].getOrCreateProtein(proteinName);
+                newPop.m_fNumber -= bindingAmount;
+                
+                // Distribute to available cortex sites
+                double amountPerSite = bindingAmount / cortexNeighbors.size();
+                for (size_t neighborIdx : cortexNeighbors)
+                {
+                    auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
+                    neighborPop.m_fNumber += amountPerSite;
                 }
             }
         }
@@ -373,4 +424,72 @@ void Medium::updateATPDiffusion(double dt)
     {
         m_grid[i].m_fAtp = newATPLevels[i];
     }
+}
+
+Medium::Medium()
+{
+    // Initialize protein antagonisms
+    
+    // PKC-3 (kinase) phosphorylates posterior PARs
+    ProteinAntagonism::Parameters pkc3ToParParams{
+        0.9,                                          // High removal rate (strong kinase)
+        0.07,                                         // Recovery rate
+        550.0,                                        // Low saturation for stronger effect
+        ProteinAntagonism::Mechanism::PHOSPHORYLATION, // Phosphorylation mechanism
+        0.5                                           // ATP cost
+    };
+    
+    // PAR-1 (kinase) phosphorylates PAR-3
+    ProteinAntagonism::Parameters par1ToPar3Params{
+        0.7,                                          // Medium-high removal rate
+        0.06,                                         // Lower recovery rate
+        650.0,                                        // Medium saturation constant
+        ProteinAntagonism::Mechanism::PHOSPHORYLATION, // Phosphorylation mechanism
+        0.4                                           // ATP cost
+    };
+    
+    // PAR-1 weakly affects PAR-6 (indirect)
+    ProteinAntagonism::Parameters par1ToPar6Params{
+        0.3,                                          // Lower removal rate
+        0.1,                                          // Higher recovery rate
+        900.0,                                        // High saturation constant
+        ProteinAntagonism::Mechanism::RECRUITMENT,     // Indirect mechanism
+        0.0                                           // No ATP cost
+    };
+    
+    // PAR-2 affects anterior proteins through cortical exclusion
+    ProteinAntagonism::Parameters par2ToPar3Params{
+        0.5,                                          // Medium removal rate 
+        0.09,                                         // Medium recovery rate
+        750.0,                                        // Medium saturation constant
+        ProteinAntagonism::Mechanism::CORTICAL_EXCLUSION, // Cortical competition
+        0.0                                           // No ATP cost
+    };
+    
+    ProteinAntagonism::Parameters par2ToPar6Params{
+        0.35,                                         // Medium-low removal rate
+        0.09,                                         // Recovery rate
+        800.0,                                        // Medium-high saturation constant
+        ProteinAntagonism::Mechanism::CORTICAL_EXCLUSION, // Cortical competition
+        0.0                                           // No ATP cost
+    };
+    
+    ProteinAntagonism::Parameters par2ToPkc3Params{
+        0.3,                                          // Lower removal rate
+        0.1,                                          // Higher recovery rate
+        850.0,                                        // Higher saturation constant
+        ProteinAntagonism::Mechanism::CORTICAL_EXCLUSION, // Cortical competition
+        0.0                                           // No ATP cost
+    };
+    
+    // Add antagonistic relationships
+    m_proteinAntagonisms.emplace_back("PKC-3", "PAR-2", pkc3ToParParams);
+    m_proteinAntagonisms.emplace_back("PKC-3", "PAR-1", pkc3ToParParams);
+    
+    m_proteinAntagonisms.emplace_back("PAR-1", "PAR-3", par1ToPar3Params);
+    m_proteinAntagonisms.emplace_back("PAR-1", "PAR-6", par1ToPar6Params);
+    
+    m_proteinAntagonisms.emplace_back("PAR-2", "PAR-3", par2ToPar3Params);
+    m_proteinAntagonisms.emplace_back("PAR-2", "PAR-6", par2ToPar6Params);
+    m_proteinAntagonisms.emplace_back("PAR-2", "PKC-3", par2ToPkc3Params);
 }

@@ -8,6 +8,7 @@
 #include "Protein.h"
 #include "MRNA.h"
 #include "math/vector.h"
+#include "ProteinAntagonism.h"
 
 class Medium
 {
@@ -32,8 +33,13 @@ private:
     static constexpr double CORTEX_UNBINDING_RATE = 0.1;   // Rate of unbinding from cortex
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
 
+    // List of protein antagonistic relationships
+    std::vector<ProteinAntagonism> m_proteinAntagonisms;
+
 public:
     static constexpr double MAX_ATP_PER_CELL = 100.0;      // Maximum ATP per grid cell
+
+    Medium();  // Constructor will set up protein antagonisms
 
     // Add protein population to specific location
     void addProtein(const ProteinPopulation& protein, const float3& position);
