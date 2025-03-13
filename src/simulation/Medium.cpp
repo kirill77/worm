@@ -3,7 +3,6 @@
 #include <random>
 #include <algorithm>
 #include <cassert>
-#include "ProteinAntagonism.h"
 #include "GridCell.h"
 
 uint32_t Medium::positionToIndex(const float3& position) const
@@ -152,8 +151,11 @@ void Medium::updatePARDynamics(double dt)
         bool isCortex = isCortexCell(i);
         if (!isCortex) continue;  // Skip non-cortical cells
 
+        // Get all protein antagonisms from ProteinWiki
+        const auto& antagonisms = ProteinWiki::GetProteinAntagonisms();
+        
         // Process each protein antagonism
-        for (const auto& antagonism : m_proteinAntagonisms)
+        for (const auto& antagonism : antagonisms)
         {
             // Get protein amounts
             const auto& antagonist = antagonism.getAntagonist();
@@ -418,68 +420,6 @@ void Medium::updateATPDiffusion(double dt)
 
 Medium::Medium()
 {
-    // Initialize protein antagonisms
-    
-    // PKC-3 (kinase) phosphorylates posterior PARs
-    ProteinAntagonism::Parameters pkc3ToParParams{
-        0.9,                                          // High removal rate (strong kinase)
-        0.07,                                         // Recovery rate
-        550.0,                                        // Low saturation for stronger effect
-        ProteinAntagonism::Mechanism::PHOSPHORYLATION, // Phosphorylation mechanism
-        0.5                                           // ATP cost
-    };
-    
-    // PAR-1 (kinase) phosphorylates PAR-3
-    ProteinAntagonism::Parameters par1ToPar3Params{
-        0.7,                                          // Medium-high removal rate
-        0.06,                                         // Lower recovery rate
-        650.0,                                        // Medium saturation constant
-        ProteinAntagonism::Mechanism::PHOSPHORYLATION, // Phosphorylation mechanism
-        0.4                                           // ATP cost
-    };
-    
-    // PAR-1 weakly affects PAR-6 (indirect)
-    ProteinAntagonism::Parameters par1ToPar6Params{
-        0.3,                                          // Lower removal rate
-        0.1,                                          // Higher recovery rate
-        900.0,                                        // High saturation constant
-        ProteinAntagonism::Mechanism::RECRUITMENT,     // Indirect mechanism
-        0.0                                           // No ATP cost
-    };
-    
-    // PAR-2 affects anterior proteins through cortical exclusion
-    ProteinAntagonism::Parameters par2ToPar3Params{
-        0.5,                                          // Medium removal rate 
-        0.09,                                         // Medium recovery rate
-        750.0,                                        // Medium saturation constant
-        ProteinAntagonism::Mechanism::CORTICAL_EXCLUSION, // Cortical competition
-        0.0                                           // No ATP cost
-    };
-    
-    ProteinAntagonism::Parameters par2ToPar6Params{
-        0.35,                                         // Medium-low removal rate
-        0.09,                                         // Recovery rate
-        800.0,                                        // Medium-high saturation constant
-        ProteinAntagonism::Mechanism::CORTICAL_EXCLUSION, // Cortical competition
-        0.0                                           // No ATP cost
-    };
-    
-    ProteinAntagonism::Parameters par2ToPkc3Params{
-        0.3,                                          // Lower removal rate
-        0.1,                                          // Higher recovery rate
-        850.0,                                        // Higher saturation constant
-        ProteinAntagonism::Mechanism::CORTICAL_EXCLUSION, // Cortical competition
-        0.0                                           // No ATP cost
-    };
-    
-    // Add antagonistic relationships
-    m_proteinAntagonisms.emplace_back("PKC-3", "PAR-2", pkc3ToParParams);
-    m_proteinAntagonisms.emplace_back("PKC-3", "PAR-1", pkc3ToParParams);
-    
-    m_proteinAntagonisms.emplace_back("PAR-1", "PAR-3", par1ToPar3Params);
-    m_proteinAntagonisms.emplace_back("PAR-1", "PAR-6", par1ToPar6Params);
-    
-    m_proteinAntagonisms.emplace_back("PAR-2", "PAR-3", par2ToPar3Params);
-    m_proteinAntagonisms.emplace_back("PAR-2", "PAR-6", par2ToPar6Params);
-    m_proteinAntagonisms.emplace_back("PAR-2", "PKC-3", par2ToPkc3Params);
+    // No need to initialize protein antagonisms here anymore
+    // They are now managed by ProteinWiki
 }

@@ -1,9 +1,13 @@
 #include "simulation/World.h"
 #include "worm/Worm.h"
 #include "log/ILog.h"
+#include "simulation/ProteinWiki.h"
 
 int main()
 {
+    // Initialize protein interaction data
+    ProteinWiki::Initialize();
+    
     std::shared_ptr<Worm> pWorm = std::make_shared<Worm>();
     World world(pWorm);
     
