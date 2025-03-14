@@ -159,7 +159,9 @@
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Protein.h" />
-    <ClInclude Include="ProteinAntagonism.h" />
+    <ClInclude Include="ProteinInteraction.h" />
+    <ClInclude Include="PhosphorylationInteraction.h" />
+    <ClInclude Include="ComplexFormationInteraction.h" />
     <ClInclude Include="ProteinWiki.h" />
     <ClInclude Include="Spindle.h" />
     <ClInclude Include="TRNA.h" />
@@ -189,6 +191,8 @@
     <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="GridCell.cpp" />
+    <ClCompile Include="PhosphorylationInteraction.cpp" />
+    <ClCompile Include="ComplexFormationInteraction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

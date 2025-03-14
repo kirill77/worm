@@ -3,28 +3,28 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "ProteinAntagonism.h"
+#include "ProteinInteraction.h"
 
 // A static repository of protein interaction data
 class ProteinWiki
 {
 private:
-    // List of known protein antagonistic relationships
-    static std::vector<ProteinAntagonism> s_proteinAntagonisms;
+    // List of known protein interactions
+    static std::vector<std::shared_ptr<ProteinInteraction>> s_proteinInteractions;
 
     // Private constructor to prevent instantiation
     ProteinWiki() = default;
 
 public:
-    // Initialize all known protein antagonisms
+    // Initialize all known protein interactions
     static void Initialize();
 
-    // Get all known protein antagonisms
-    static const std::vector<ProteinAntagonism>& GetProteinAntagonisms();
+    // Get all known protein interactions
+    static const std::vector<std::shared_ptr<ProteinInteraction>>& GetProteinInteractions();
 
-    // Get protein antagonisms where the specified protein is the antagonist
-    static std::vector<ProteinAntagonism> GetAntagonismsFromProtein(const std::string& antagonistName);
+    // Get protein interactions involving a specific protein
+    static std::vector<std::shared_ptr<ProteinInteraction>> GetInteractionsInvolvingProtein(const std::string& proteinName);
     
-    // Get protein antagonisms where the specified protein is the target
-    static std::vector<ProteinAntagonism> GetAntagonismsToProtein(const std::string& targetName);
+    // Get interactions by mechanism
+    static std::vector<std::shared_ptr<ProteinInteraction>> GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism);
 }; 

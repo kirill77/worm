@@ -145,84 +145,59 @@ void Medium::updatePARDynamics(double dt)
     static constexpr double CORTEX_BINDING_RATE = 0.15;    // Rate at which proteins bind to cortex from cytoplasm
     static constexpr double CORTEX_UNBINDING_RATE = 0.12;  // Rate at which proteins unbind from cortex
     
-    // Update each cell
+    // Get all protein interactions 
+    const auto& interactions = ProteinWiki::GetProteinInteractions();
+    
+    // First, apply direct protein interactions
     for (size_t i = 0; i < m_grid.size(); ++i)
     {
         bool isCortex = isCortexCell(i);
-        if (!isCortex) continue;  // Skip non-cortical cells
-
-        // Get all protein antagonisms from ProteinWiki
-        const auto& antagonisms = ProteinWiki::GetProteinAntagonisms();
         
-        // Process each protein antagonism
-        for (const auto& antagonism : antagonisms)
+        // Skip non-cortical cells for certain interactions
+        if (!isCortex) continue;
+        
+        // Track ATP consumption
+        double atpConsumed = 0.0;
+        
+        // Apply each interaction to the cell
+        for (const auto& interaction : interactions)
         {
-            // Get protein amounts
-            const auto& antagonist = antagonism.getAntagonist();
-            const auto& target = antagonism.getTarget();
-            
-            double antagonistAmount = 0.0;
-            double targetAmount = 0.0;
-            
-            // Get antagonist amount
-            auto antagonistIt = m_grid[i].m_proteins.find(antagonist);
-            if (antagonistIt != m_grid[i].m_proteins.end()) {
-                antagonistAmount = antagonistIt->second.m_fNumber;
-            }
-            
-            // Get target amount
-            auto targetIt = m_grid[i].m_proteins.find(target);
-            if (targetIt != m_grid[i].m_proteins.end()) {
-                targetAmount = targetIt->second.m_fNumber;
-            }
-            
-            // Calculate and apply antagonistic effects
-            if (antagonistAmount > 0 && targetAmount > 0)
-            {
-                // Get available ATP if needed for phosphorylation
-                double availableATP = 0.0;
-                if (antagonism.getMechanism() == ProteinAntagonism::Mechanism::PHOSPHORYLATION) {
-                    availableATP = m_grid[i].m_fAtp;
-                }
-                
-                auto& targetPop = newGrid[i].getOrCreateProtein(target);
-                
-                // Calculate removal based on mechanism and parameters
-                double removedAmount = antagonism.calculateRemoval(targetAmount, antagonistAmount, dt, availableATP);
-                
-                // Consume ATP if using phosphorylation
-                if (antagonism.getMechanism() == ProteinAntagonism::Mechanism::PHOSPHORYLATION && removedAmount > 0) {
-                    double atpUsed = removedAmount * antagonism.getATPCost();
-                    newGrid[i].m_fAtp = std::max(0.0, newGrid[i].m_fAtp - atpUsed);
-                }
-                
-                // Apply removal
-                targetPop.m_fNumber = std::max(0.0, targetPop.m_fNumber - removedAmount);
-                
-                // Recovery of target
-                double recoveredAmount = antagonism.calculateRecovery(removedAmount, dt);
-                
-                // Add recovered proteins to nearby non-cortical cells
-                auto neighbors = getNeighborIndices(i);
-                for (size_t neighborIdx : neighbors)
-                {
-                    if (!isCortexCell(neighborIdx))
-                    {
-                        auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(target);
-                        neighborPop.m_fNumber += recoveredAmount / neighbors.size();
-                    }
-                }
-            }
+            // Apply the interaction and track ATP consumption
+            interaction->apply(newGrid[i], dt, atpConsumed);
         }
         
-        // Handle cortical binding/unbinding - this part remains similar to the original
-        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
+        // Update ATP (already done inside apply() method, this is just for clarity)
+        newGrid[i].m_fAtp = std::max(0.0, newGrid[i].m_fAtp);
+    }
+    
+    // Then, handle neighbor effects for each cell
+    for (size_t i = 0; i < m_grid.size(); ++i)
+    {
+        // Get references to neighbor cells
+        auto neighborIndices = getNeighborIndices(i);
+        std::vector<std::reference_wrapper<GridCell>> neighborCells;
+        
+        for (size_t neighborIdx : neighborIndices)
         {
-            if (!isCortex) // For non-cortical cells, this should not execute due to the skip above
-            {
-                // Skip, already filtered out
-            }
-            else // For cortical cells, handle proteins that can unbind
+            neighborCells.push_back(std::ref(newGrid[neighborIdx]));
+        }
+        
+        // Apply neighbor effects for each interaction
+        for (const auto& interaction : interactions)
+        {
+            interaction->applyNeighborEffects(newGrid[i], neighborCells, dt);
+        }
+    }
+    
+    // Handle cortical binding/unbinding - this part remains similar to the original
+    for (size_t i = 0; i < m_grid.size(); ++i)
+    {
+        bool isCortex = isCortexCell(i);
+        
+        if (isCortex)
+        {
+            // For cortical cells, handle proteins that can unbind
+            for (auto& [proteinName, pop] : m_grid[i].m_proteins)
             {
                 // Proteins can unbind from cortex to cytoplasm
                 auto neighbors = getNeighborIndices(i);
@@ -266,60 +241,56 @@ void Medium::updatePARDynamics(double dt)
                 }
             }
         }
-    }
-    
-    // Handle proteins in non-cortical cells that can bind to cortex
-    for (size_t i = 0; i < m_grid.size(); ++i)
-    {
-        bool isCortex = isCortexCell(i);
-        if (isCortex) continue; // Skip cortical cells, already processed
-        
-        auto neighbors = getNeighborIndices(i);
-        
-        // For each protein population in the cell
-        for (auto& [proteinName, pop] : m_grid[i].m_proteins)
+        else
         {
-            std::vector<size_t> cortexNeighbors;
+            // For non-cortical cells, handle proteins that can bind to cortex
+            auto neighbors = getNeighborIndices(i);
             
-            // Find available cortex binding sites with protein-specific preferences
-            for (size_t neighborIdx : neighbors)
+            // For each protein population in the cell
+            for (auto& [proteinName, pop] : m_grid[i].m_proteins)
             {
-                if (isCortexCell(neighborIdx))
+                std::vector<size_t> cortexNeighbors;
+                
+                // Find available cortex binding sites with protein-specific preferences
+                for (size_t neighborIdx : neighbors)
                 {
-                    float3 pos = indexToPosition(neighborIdx);
-                    
-                    // For anterior PARs, prefer anterior cortex
-                    if ((proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3") &&
-                        pos.y > 0)
+                    if (isCortexCell(neighborIdx))
                     {
-                        cortexNeighbors.push_back(neighborIdx);
-                    }
-                    // For posterior PARs, prefer posterior cortex
-                    else if ((proteinName == "PAR-1" || proteinName == "PAR-2") &&
-                            pos.y < 0)
-                    {
-                        cortexNeighbors.push_back(neighborIdx);
+                        float3 pos = indexToPosition(neighborIdx);
+                        
+                        // For anterior PARs, prefer anterior cortex
+                        if ((proteinName == "PAR-3" || proteinName == "PAR-6" || proteinName == "PKC-3") &&
+                            pos.y > 0)
+                        {
+                            cortexNeighbors.push_back(neighborIdx);
+                        }
+                        // For posterior PARs, prefer posterior cortex
+                        else if ((proteinName == "PAR-1" || proteinName == "PAR-2") &&
+                                pos.y < 0)
+                        {
+                            cortexNeighbors.push_back(neighborIdx);
+                        }
                     }
                 }
-            }
-            
-            if (!cortexNeighbors.empty())
-            {
-                // Calculate binding amount with protein-specific rates
-                double bindingRate = CORTEX_BINDING_RATE;
-                if (proteinName == "PAR-2") bindingRate *= 1.2; // 20% higher for PAR-2
-                if (proteinName == "PAR-1") bindingRate *= 1.1; // 10% higher for PAR-1
                 
-                double bindingAmount = pop.m_fNumber * bindingRate * dt;
-                auto& newPop = newGrid[i].getOrCreateProtein(proteinName);
-                newPop.m_fNumber -= bindingAmount;
-                
-                // Distribute to available cortex sites
-                double amountPerSite = bindingAmount / cortexNeighbors.size();
-                for (size_t neighborIdx : cortexNeighbors)
+                if (!cortexNeighbors.empty())
                 {
-                    auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
-                    neighborPop.m_fNumber += amountPerSite;
+                    // Calculate binding amount with protein-specific rates
+                    double bindingRate = CORTEX_BINDING_RATE;
+                    if (proteinName == "PAR-2") bindingRate *= 1.2; // 20% higher for PAR-2
+                    if (proteinName == "PAR-1") bindingRate *= 1.1; // 10% higher for PAR-1
+                    
+                    double bindingAmount = pop.m_fNumber * bindingRate * dt;
+                    auto& newPop = newGrid[i].getOrCreateProtein(proteinName);
+                    newPop.m_fNumber -= bindingAmount;
+                    
+                    // Distribute to available cortex sites
+                    double amountPerSite = bindingAmount / cortexNeighbors.size();
+                    for (size_t neighborIdx : cortexNeighbors)
+                    {
+                        auto& neighborPop = newGrid[neighborIdx].getOrCreateProtein(proteinName);
+                        neighborPop.m_fNumber += amountPerSite;
+                    }
                 }
             }
         }
