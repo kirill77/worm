@@ -15,7 +15,6 @@ class Membrane : public ProteinBindingSurface
 private:
     std::shared_ptr<Medium> m_pInternalMedium;  // Internal cellular environment
     double m_fThickness;                        // Membrane thickness in micrometers
-    double m_fSurfaceArea;                      // Surface area in square micrometers
 
 public:
     /**
@@ -97,7 +96,4 @@ public:
     
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
-    
-    double getSurfaceArea() const { return m_fSurfaceArea; }
-    void setSurfaceArea(double fSurfaceArea) { m_fSurfaceArea = fSurfaceArea; }
 }; 
