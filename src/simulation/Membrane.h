@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "Medium.h"
+#include "ProteinBindingSurface.h"
 #include "math/vector.h"
 
 /**
@@ -9,7 +10,7 @@
  * the internal cellular environment from the external environment.
  * It mediates interactions between internal and external media.
  */
-class Membrane
+class Membrane : public ProteinBindingSurface
 {
 private:
     std::shared_ptr<Medium> m_pInternalMedium;  // Internal cellular environment

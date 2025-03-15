@@ -160,6 +160,7 @@
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Protein.h" />
+    <ClInclude Include="ProteinBindingSurface.h" />
     <ClInclude Include="ProteinInteraction.h" />
     <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />
@@ -188,6 +189,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ProteinBindingSurface.cpp" />
     <ClCompile Include="ProteinWiki.cpp" />
     <ClCompile Include="Spindle.cpp" />
     <ClCompile Include="TRNA.cpp" />

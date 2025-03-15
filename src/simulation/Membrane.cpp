@@ -6,9 +6,9 @@
 #include <cmath>
 
 Membrane::Membrane(std::shared_ptr<Medium> pInternalMedium, double fThickness, double fSurfaceArea)
-    : m_pInternalMedium(pInternalMedium)
+    : ProteinBindingSurface(fSurfaceArea)  // Call base class constructor with surface area and binding capacity
+    , m_pInternalMedium(pInternalMedium)
     , m_fThickness(fThickness)
-    , m_fSurfaceArea(fSurfaceArea)
 {
     // Ensure the internal medium is valid
     if (!m_pInternalMedium) {
