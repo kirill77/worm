@@ -6,8 +6,8 @@
 #include "MRNA.h"
 #include "log/ILog.h"
 
-Cell::Cell(std::shared_ptr<Medium> pMedium, const std::vector<Chromosome>& chromosomes, CellType type)
-    : m_pMedium(pMedium)
+Cell::Cell(std::shared_ptr<Membrane> pMembrane, const std::vector<Chromosome>& chromosomes, CellType type)
+    : m_pMembrane(pMembrane)
     , m_cellCycleState(CellCycleState::INTERPHASE)
     , m_type(type)
 {
@@ -19,17 +19,18 @@ Cell::Cell(std::shared_ptr<Medium> pMedium, const std::vector<Chromosome>& chrom
 
 void Cell::update(double fDt)
 {
-    // Update all organelles
+    // Update all organelles - pass the internal medium to organelles
+    Medium& internalMedium = m_pMembrane->getInternalMedium();
     for (auto& pOrg : m_pOrganelles)
     {
-        pOrg->update(fDt, *this, *m_pMedium);
+        pOrg->update(fDt, *this, internalMedium);
     }
     
     // Check for cell cycle transitions based on conditions
     checkCellCycleTransitions();
     
-    // Update medium
-    m_pMedium->update(fDt);
+    // Update the membrane which in turn will update the internal medium
+    m_pMembrane->update(fDt);
 }
 
 std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
@@ -46,18 +47,19 @@ std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
 
 bool Cell::consumeATP(double fAmount)
 {
-    // Consume ATP from medium at cell's position (center)
+    // Consume ATP from internal medium at cell's position (center)
     float3 position(0.0f, 0.0f, 0.0f);
-    return m_pMedium->consumeATP(fAmount, position);
+    return m_pMembrane->getInternalMedium().consumeATP(fAmount, position);
 }
 
 void Cell::checkCellCycleTransitions()
 {
-    // Get key protein concentrations
+    // Get key protein concentrations from internal medium
     float3 center(0, 0, 0);
-    double fCdk1 = m_pMedium->getProteinNumber("CDK-1", center);
-    double fCyclinB = m_pMedium->getProteinNumber("CYB-1", center);
-    double fPlk1 = m_pMedium->getProteinNumber("PLK-1", center);
+    Medium& internalMedium = m_pMembrane->getInternalMedium();
+    double fCdk1 = internalMedium.getProteinNumber("CDK-1", center);
+    double fCyclinB = internalMedium.getProteinNumber("CYB-1", center);
+    double fPlk1 = internalMedium.getProteinNumber("PLK-1", center);
     
     // Check conditions for each transition
     switch (m_cellCycleState)
@@ -71,7 +73,7 @@ void Cell::checkCellCycleTransitions()
                 createSpindle();  // Create spindle as we enter prophase
             }
             break;
-
+            
         case CellCycleState::PROPHASE:
             // Transition to metaphase requires energy for spindle formation
             if (consumeATP(ATPCosts::fSPINDLE_FORMATION))
@@ -86,7 +88,7 @@ void Cell::checkCellCycleTransitions()
                 }
             }
             break;
-
+                    
         case CellCycleState::METAPHASE:
             // Transition to anaphase requires initial energy for chromosome movement
             if (consumeATP(ATPCosts::fCHROMOSOME_MOVEMENT))
@@ -96,7 +98,7 @@ void Cell::checkCellCycleTransitions()
                 m_cellCycleState = CellCycleState::ANAPHASE;
             }
             break;
-
+        
         case CellCycleState::ANAPHASE:
             // Continuous ATP consumption for chromosome movement
             if (consumeATP(ATPCosts::fCHROMOSOME_MOVEMENT))
@@ -106,7 +108,7 @@ void Cell::checkCellCycleTransitions()
                 m_cellCycleState = CellCycleState::TELOPHASE;
             }
             break;
-
+            
         case CellCycleState::TELOPHASE:
             // Nuclear envelope reformation requires membrane fusion energy
             if (consumeATP(ATPCosts::fMEMBRANE_FUSION))
@@ -115,7 +117,7 @@ void Cell::checkCellCycleTransitions()
                 m_cellCycleState = CellCycleState::CYTOKINESIS;
             }
             break;
-
+            
         case CellCycleState::CYTOKINESIS:
             // Cell membrane division requires fusion energy
             if (consumeATP(ATPCosts::fMEMBRANE_FUSION))

@@ -7,7 +7,7 @@
 class Worm : public Organism
 {
 private:
-    std::shared_ptr<class Medium> createZygoteMedium();
+    std::shared_ptr<class Membrane> createZygoteMembrane();
     std::vector<Chromosome> initializeGenes();
 
     // Validation thresholds based on experimental data

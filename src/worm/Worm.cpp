@@ -3,6 +3,7 @@
 #include "simulation/Cell.h"
 #include "simulation/Protein.h"
 #include "simulation/Medium.h"
+#include "simulation/Membrane.h"
 #include "simulation/Spindle.h"
 #include "log/ILog.h"
 
@@ -47,26 +48,27 @@ std::vector<Chromosome> Worm::initializeGenes()
     return chromosomes;
 }
 
-std::shared_ptr<Medium> Worm::createZygoteMedium()
+std::shared_ptr<Membrane> Worm::createZygoteMembrane()
 {
-    std::shared_ptr<Medium> pMedium = std::make_shared<Medium>();
+    // Create the internal medium
+    std::shared_ptr<Medium> pInternalMedium = std::make_shared<Medium>();
 
     // Create and add anterior proteins at the anterior cortex
     ProteinPopulation par3("PAR-3", 3.9e5);
-    pMedium->addProtein(par3, float3(0, 0.95f, 0));
+    pInternalMedium->addProtein(par3, float3(0, 0.95f, 0));
 
     ProteinPopulation par6("PAR-6", 3.9e5);
-    pMedium->addProtein(par6, float3(0, 0.95f, 0));
+    pInternalMedium->addProtein(par6, float3(0, 0.95f, 0));
 
     ProteinPopulation pkc3("PKC-3", 3.9e5);
-    pMedium->addProtein(pkc3, float3(0, 0.95f, 0));
+    pInternalMedium->addProtein(pkc3, float3(0, 0.95f, 0));
 
     // Create and add posterior proteins at the posterior cortex
     ProteinPopulation par1("PAR-1", 3.9e5);
-    pMedium->addProtein(par1, float3(0, -0.95f, 0));
+    pInternalMedium->addProtein(par1, float3(0, -0.95f, 0));
 
     ProteinPopulation par2("PAR-2", 3.9e5);
-    pMedium->addProtein(par2, float3(0, -0.95f, 0));
+    pInternalMedium->addProtein(par2, float3(0, -0.95f, 0));
 
     // Initialize maternal proteins at cell center
     float3 center(0.0f, 0.0f, 0.0f);
@@ -74,17 +76,18 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
     // Add maternal CDK-1 and CYB-1 (Cyclin B)
     ProteinPopulation cdk1("CDK-1", 1500.0);  // Initial amount above threshold (1000)
     ProteinPopulation cyb1("CYB-1", 1500.0);  // Initial amount above threshold (1000)
-    pMedium->addProtein(cdk1, center);
-    pMedium->addProtein(cyb1, center);
+    pInternalMedium->addProtein(cdk1, center);
+    pInternalMedium->addProtein(cyb1, center);
 
-    return pMedium;
+    // Create a membrane with the internal medium
+    return std::make_shared<Membrane>(pInternalMedium);
 }
 
 Worm::Worm()
 {
     auto chromosomes = initializeGenes();
-    std::shared_ptr<Medium> pMedium = createZygoteMedium();
-    auto pCell = std::make_shared<Cell>(pMedium, chromosomes);
+    std::shared_ptr<Membrane> pMembrane = createZygoteMembrane();
+    auto pCell = std::make_shared<Cell>(pMembrane, chromosomes);
     m_pCells.push_back(pCell);
 }
 
@@ -102,15 +105,15 @@ static constexpr uint32_t DIVISION_START = 11000;               // 18.3 minutes
 
 bool Worm::validatePARPolarization(float fTimeSec) const
 {
-    auto medium = m_pCells[0]->getMedium();
+    auto& internalMedium = m_pCells[0]->getInternalMedium();
     
     float3 anteriorPos(0.0f, 0.8f, 0.0f);
     float3 posteriorPos(0.0f, -0.8f, 0.0f);
     
-    double anteriorPAR3 = medium->getProteinNumber("PAR-3", anteriorPos);
-    double posteriorPAR3 = medium->getProteinNumber("PAR-3", posteriorPos);
-    double anteriorPAR2 = medium->getProteinNumber("PAR-2", anteriorPos);
-    double posteriorPAR2 = medium->getProteinNumber("PAR-2", posteriorPos);
+    double anteriorPAR3 = internalMedium.getProteinNumber("PAR-3", anteriorPos);
+    double posteriorPAR3 = internalMedium.getProteinNumber("PAR-3", posteriorPos);
+    double anteriorPAR2 = internalMedium.getProteinNumber("PAR-2", anteriorPos);
+    double posteriorPAR2 = internalMedium.getProteinNumber("PAR-2", posteriorPos);
     
     // Check during polarity establishment (0-6 minutes)
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
@@ -130,9 +133,9 @@ bool Worm::validatePARPolarization(float fTimeSec) const
 
 bool Worm::validateCellCycle(float fTimeSec) const
 {
-    auto medium = m_pCells[0]->getMedium();
+    auto& internalMedium = m_pCells[0]->getInternalMedium();
     float3 nuclearPos(0.0f, 0.0f, 0.0f);
-    double cdk1Level = medium->getProteinNumber("CDK-1", nuclearPos);
+    double cdk1Level = internalMedium.getProteinNumber("CDK-1", nuclearPos);
 
     // Before nuclear envelope breakdown (0-12.5 minutes): CDK-1 should be relatively low
     if (fTimeSec < NUCLEAR_ENVELOPE_BREAKDOWN_SEC && cdk1Level > 1000) {
