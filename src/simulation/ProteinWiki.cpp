@@ -92,3 +92,8 @@ std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsByM
                  
     return result;
 }
+
+std::string ProteinWiki::GetPhosphorylatedName(const std::string& proteinName)
+{
+    return proteinName + "-P";
+}

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PhosphorylationInteraction.h"
+#include "ProteinWiki.h"
 #include <algorithm>
 #include <cmath>
 
@@ -58,7 +59,7 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpCon
         targetIt->second.m_fNumber -= phosphorylatedAmount;
         
         // Add to phosphorylated population
-        std::string phosphorylatedName = m_targetName + "-P";  // e.g., "PAR-2" becomes "PAR-2-P"
+        std::string phosphorylatedName = ProteinWiki::GetPhosphorylatedName(m_targetName);
         auto& phosphorylatedPop = cell.getOrCreateProtein(phosphorylatedName);
         phosphorylatedPop.m_fNumber += phosphorylatedAmount;
         

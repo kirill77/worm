@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DephosphorylationInteraction.h"
+#include "ProteinWiki.h"
 #include <algorithm>
 
 DephosphorylationInteraction::DephosphorylationInteraction(
@@ -14,7 +15,7 @@ DephosphorylationInteraction::DephosphorylationInteraction(
 bool DephosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
 {
     // Get phosphorylated protein population (e.g. "PAR-2-P")
-    std::string phosphorylatedName = m_targetName + "-P";
+    std::string phosphorylatedName = ProteinWiki::GetPhosphorylatedName(m_targetName);
     auto phosphorylatedIt = cell.m_proteins.find(phosphorylatedName);
     
     if (phosphorylatedIt == cell.m_proteins.end() || 
