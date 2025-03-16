@@ -80,20 +80,6 @@ const std::vector<std::shared_ptr<ProteinInteraction>>& ProteinWiki::GetProteinI
     return s_proteinInteractions;
 }
 
-std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsInvolvingProtein(const std::string& proteinName)
-{
-    std::vector<std::shared_ptr<ProteinInteraction>> result;
-    
-    std::copy_if(s_proteinInteractions.begin(), s_proteinInteractions.end(), 
-                 std::back_inserter(result),
-                 [&proteinName](const auto& interaction) {
-                     return interaction->getProteinA() == proteinName || 
-                            interaction->getProteinB() == proteinName;
-                 });
-                 
-    return result;
-}
-
 std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism)
 {
     std::vector<std::shared_ptr<ProteinInteraction>> result;
@@ -105,4 +91,4 @@ std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsByM
                  });
                  
     return result;
-} 
+}

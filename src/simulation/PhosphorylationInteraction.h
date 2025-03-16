@@ -16,14 +16,16 @@ public:
     };
     
     // Constructor
-    PhosphorylationInteraction(const std::string& kinase, 
-                              const std::string& target, 
+    PhosphorylationInteraction(const std::string& kinaseName, 
+                              const std::string& targetName,
                               const Parameters& params);
     
     // Apply phosphorylation to proteins in the cell
     bool apply(GridCell& cell, double dt, double& atpConsumed) const override;
     
 private:
+    std::string m_kinaseName;    // Name of the kinase protein
+    std::string m_targetName;    // Name of the target protein
     double m_removalRate;
     double m_saturationConstant;
 }; 

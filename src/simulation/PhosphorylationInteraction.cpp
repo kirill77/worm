@@ -7,9 +7,9 @@ PhosphorylationInteraction::PhosphorylationInteraction(
     const std::string& kinase, 
     const std::string& target, 
     const Parameters& params)
-    : ProteinInteraction(kinase, target, 
-                       Mechanism::PHOSPHORYLATION, 
-                       0.5)  // Standard ATP cost for phosphorylation
+    : ProteinInteraction(Mechanism::PHOSPHORYLATION, 0.5)  // Standard ATP cost for phosphorylation
+    , m_kinaseName(kinase)
+    , m_targetName(target)
     , m_removalRate(params.removalRate)
     , m_saturationConstant(params.saturationConstant)
 {
@@ -18,13 +18,13 @@ PhosphorylationInteraction::PhosphorylationInteraction(
 bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
 {
     // Get kinase amount
-    auto kinaseIt = cell.m_proteins.find(m_proteinA);
+    auto kinaseIt = cell.m_proteins.find(m_kinaseName);
     if (kinaseIt == cell.m_proteins.end() || kinaseIt->second.m_fNumber <= 0) {
         return false; // No kinase present
     }
     
     // Get target amount
-    auto targetIt = cell.m_proteins.find(m_proteinB);
+    auto targetIt = cell.m_proteins.find(m_targetName);
     if (targetIt == cell.m_proteins.end() || targetIt->second.m_fNumber <= 0) {
         return false; // No target present
     }
@@ -58,7 +58,7 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpCon
         targetIt->second.m_fNumber -= phosphorylatedAmount;
         
         // Add to phosphorylated population
-        std::string phosphorylatedName = m_proteinB + "-P";  // e.g., "PAR-2" becomes "PAR-2-P"
+        std::string phosphorylatedName = m_targetName + "-P";  // e.g., "PAR-2" becomes "PAR-2-P"
         auto& phosphorylatedPop = cell.getOrCreateProtein(phosphorylatedName);
         phosphorylatedPop.m_fNumber += phosphorylatedAmount;
         

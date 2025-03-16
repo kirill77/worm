@@ -29,22 +29,13 @@ public:
     };
     
     // Basic constructor
-    ProteinInteraction(const std::string& proteinA, 
-                     const std::string& proteinB,
-                     Mechanism mechanism,
-                     double atpCost) 
-        : m_proteinA(proteinA)
-        , m_proteinB(proteinB)
-        , m_mechanism(mechanism)
+    ProteinInteraction(Mechanism mechanism, double atpCost) 
+        : m_mechanism(mechanism)
         , m_atpCost(atpCost)
     {}
     
     // Virtual destructor for proper cleanup
     virtual ~ProteinInteraction() = default;
-    
-    // Get proteins involved in this interaction
-    const std::string& getProteinA() const { return m_proteinA; }
-    const std::string& getProteinB() const { return m_proteinB; }
     
     // Get mechanism (informational only)
     Mechanism getMechanism() const { return m_mechanism; }
@@ -63,8 +54,6 @@ public:
     virtual bool apply(GridCell& cell, double dt, double& atpConsumed) const = 0;
     
 protected:
-    std::string m_proteinA;
-    std::string m_proteinB;
     Mechanism m_mechanism;
     double m_atpCost;
 }; 

@@ -4,12 +4,12 @@
 #include <cmath>
 
 ComplexFormationInteraction::ComplexFormationInteraction(
-    const std::string& proteinA, 
-    const std::string& proteinB, 
+    const std::string& firstProtein, 
+    const std::string& secondProtein, 
     const Parameters& params)
-    : ProteinInteraction(proteinA, proteinB, 
-                       Mechanism::BINDING, 
-                       0.2)  // Lower ATP cost for binding
+    : ProteinInteraction(Mechanism::BINDING, 0.2)  // Lower ATP cost for binding
+    , m_firstProteinName(firstProtein)
+    , m_secondProteinName(secondProtein)
     , m_bindingRate(params.bindingRate)
     , m_dissociationRate(params.dissociationRate)
     , m_saturationConstant(params.saturationConstant)
@@ -20,23 +20,23 @@ ComplexFormationInteraction::ComplexFormationInteraction(
 bool ComplexFormationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
 {
     // Check for both proteins
-    auto proteinAIt = cell.m_proteins.find(m_proteinA);
-    auto proteinBIt = cell.m_proteins.find(m_proteinB);
+    auto firstProteinIt = cell.m_proteins.find(m_firstProteinName);
+    auto secondProteinIt = cell.m_proteins.find(m_secondProteinName);
     
-    if (proteinAIt == cell.m_proteins.end() || proteinAIt->second.m_fNumber <= 0 ||
-        proteinBIt == cell.m_proteins.end() || proteinBIt->second.m_fNumber <= 0) {
+    if (firstProteinIt == cell.m_proteins.end() || firstProteinIt->second.m_fNumber <= 0 ||
+        secondProteinIt == cell.m_proteins.end() || secondProteinIt->second.m_fNumber <= 0) {
         return false; // One or both proteins missing
     }
     
-    double proteinAAmount = proteinAIt->second.m_fNumber;
-    double proteinBAmount = proteinBIt->second.m_fNumber;
+    double firstProteinAmount = firstProteinIt->second.m_fNumber;
+    double secondProteinAmount = secondProteinIt->second.m_fNumber;
     
     // Calculate binding using mass action kinetics
-    double bindingPotential = m_bindingRate * proteinAAmount * proteinBAmount / 
-                             (m_saturationConstant + proteinAAmount + proteinBAmount);
+    double bindingPotential = m_bindingRate * firstProteinAmount * secondProteinAmount / 
+                             (m_saturationConstant + firstProteinAmount + secondProteinAmount);
     
     // The amount that can actually bind is limited by the lesser of the two proteins
-    double boundAmount = std::min(bindingPotential * dt, std::min(proteinAAmount, proteinBAmount));
+    double boundAmount = std::min(bindingPotential * dt, std::min(firstProteinAmount, secondProteinAmount));
     
     // Binding requires ATP
     double requiredATP = boundAmount * m_atpCost;
@@ -62,8 +62,8 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, double& atpCo
         cell.m_fAtp -= requiredATP;
         
         // Remove proteins from free populations
-        proteinAIt->second.m_fNumber -= boundAmount;
-        proteinBIt->second.m_fNumber -= boundAmount;
+        firstProteinIt->second.m_fNumber -= boundAmount;
+        secondProteinIt->second.m_fNumber -= boundAmount;
         
         // Add to complex population
         auto& complexPop = cell.getOrCreateProtein(m_complexName);
@@ -76,8 +76,8 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, double& atpCo
         complexIt->second.m_fNumber -= dissociatedAmount;
         
         // Return to free protein populations
-        proteinAIt->second.m_fNumber += dissociatedAmount;
-        proteinBIt->second.m_fNumber += dissociatedAmount;
+        firstProteinIt->second.m_fNumber += dissociatedAmount;
+        secondProteinIt->second.m_fNumber += dissociatedAmount;
     }
     
     return (boundAmount > 0 || dissociatedAmount > 0);

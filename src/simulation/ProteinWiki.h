@@ -22,9 +22,6 @@ public:
     // Get all known protein interactions
     static const std::vector<std::shared_ptr<ProteinInteraction>>& GetProteinInteractions();
 
-    // Get protein interactions involving a specific protein
-    static std::vector<std::shared_ptr<ProteinInteraction>> GetInteractionsInvolvingProtein(const std::string& proteinName);
-    
     // Get interactions by mechanism
     static std::vector<std::shared_ptr<ProteinInteraction>> GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism);
 }; 

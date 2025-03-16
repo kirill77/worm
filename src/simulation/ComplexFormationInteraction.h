@@ -18,14 +18,16 @@ public:
     };
     
     // Constructor
-    ComplexFormationInteraction(const std::string& proteinA, 
-                              const std::string& proteinB, 
+    ComplexFormationInteraction(const std::string& firstProtein, 
+                              const std::string& secondProtein, 
                               const Parameters& params);
     
     // Apply complex formation to proteins in the cell
     bool apply(GridCell& cell, double dt, double& atpConsumed) const override;
-
+    
 private:
+    std::string m_firstProteinName;     // Name of first protein in complex
+    std::string m_secondProteinName;    // Name of second protein in complex
     double m_bindingRate;
     double m_dissociationRate;
     double m_saturationConstant;

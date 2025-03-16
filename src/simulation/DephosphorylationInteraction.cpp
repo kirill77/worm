@@ -5,9 +5,8 @@
 DephosphorylationInteraction::DephosphorylationInteraction(
     const std::string& target,
     const Parameters& params)
-    : ProteinInteraction("", target,  // No kinase needed for dephosphorylation
-                        Mechanism::DEPHOSPHORYLATION,
-                        0.1)  // Lower ATP cost for dephosphorylation
+    : ProteinInteraction(Mechanism::DEPHOSPHORYLATION, 0.1)  // Lower ATP cost for dephosphorylation
+    , m_targetName(target)
     , m_recoveryRate(params.recoveryRate)
 {
 }
@@ -15,7 +14,7 @@ DephosphorylationInteraction::DephosphorylationInteraction(
 bool DephosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
 {
     // Get phosphorylated protein population (e.g. "PAR-2-P")
-    std::string phosphorylatedName = m_proteinB + "-P";
+    std::string phosphorylatedName = m_targetName + "-P";
     auto phosphorylatedIt = cell.m_proteins.find(phosphorylatedName);
     
     if (phosphorylatedIt == cell.m_proteins.end() || 
@@ -45,7 +44,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, double& atpC
     phosphorylatedIt->second.m_fNumber -= recoveredAmount;
     
     // Add back to original unphosphorylated population
-    auto& unphosphorylatedPop = cell.getOrCreateProtein(m_proteinB);
+    auto& unphosphorylatedPop = cell.getOrCreateProtein(m_targetName);
     unphosphorylatedPop.m_fNumber += recoveredAmount;
     
     // Update ATP consumption
