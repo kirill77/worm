@@ -19,13 +19,13 @@ void ProteinWiki::Initialize()
     // PKC-3 (kinase) phosphorylates posterior PARs
     PhosphorylationInteraction::Parameters pkc3ToParParams{
         0.9,    // High removal rate (strong kinase)
-        0.07,   // Recovery rate
+        0.07,   // Saturation constant for Hill-type kinetics
     };
     
     // PAR-1 (kinase) phosphorylates PAR-3
     PhosphorylationInteraction::Parameters par1ToPar3Params{
         0.7,    // Medium-high removal rate
-        0.06,   // Lower recovery rate
+        0.06,   // Saturation constant for Hill-type kinetics
     };
     
     // Add phosphorylation interactions
