@@ -2,6 +2,7 @@
 #include "ProteinWiki.h"
 #include "PhosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
+#include "DephosphorylationInteraction.h"
 #include <algorithm>
 #include <iterator>
 
@@ -19,14 +20,12 @@ void ProteinWiki::Initialize()
     PhosphorylationInteraction::Parameters pkc3ToParParams{
         0.9,    // High removal rate (strong kinase)
         0.07,   // Recovery rate
-        550.0,  // Low saturation for stronger effect
     };
     
     // PAR-1 (kinase) phosphorylates PAR-3
     PhosphorylationInteraction::Parameters par1ToPar3Params{
         0.7,    // Medium-high removal rate
         0.06,   // Lower recovery rate
-        650.0,  // Medium saturation constant
     };
     
     // Add phosphorylation interactions
@@ -36,6 +35,20 @@ void ProteinWiki::Initialize()
         "PKC-3", "PAR-1", pkc3ToParParams));
     s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
         "PAR-1", "PAR-3", par1ToPar3Params));
+    
+    // === DEPHOSPHORYLATION INTERACTIONS ===
+    
+    // Add dephosphorylation interactions for each protein
+    DephosphorylationInteraction::Parameters dephosphoParams{
+        0.07,    // Recovery rate
+    };
+    
+    s_proteinInteractions.push_back(std::make_shared<DephosphorylationInteraction>(
+        "PAR-2", dephosphoParams));
+    s_proteinInteractions.push_back(std::make_shared<DephosphorylationInteraction>(
+        "PAR-1", dephosphoParams));
+    s_proteinInteractions.push_back(std::make_shared<DephosphorylationInteraction>(
+        "PAR-3", dephosphoParams));
     
     // === COMPLEX FORMATION INTERACTIONS ===
     

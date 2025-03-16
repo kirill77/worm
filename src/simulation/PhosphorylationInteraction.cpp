@@ -11,7 +11,6 @@ PhosphorylationInteraction::PhosphorylationInteraction(
                        Mechanism::PHOSPHORYLATION, 
                        0.5)  // Standard ATP cost for phosphorylation
     , m_removalRate(params.removalRate)
-    , m_recoveryRate(params.recoveryRate)
     , m_saturationConstant(params.saturationConstant)
 {
 }
@@ -68,42 +67,3 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpCon
     
     return false;
 }
-
-bool PhosphorylationInteraction::applyNeighborEffects(
-    GridCell& cell, 
-    std::vector<std::reference_wrapper<GridCell>>& neighborCells, 
-    double dt) const
-{
-    // Get phosphorylated protein population
-    std::string phosphorylatedName = m_proteinB + "-P";
-    auto phosphorylatedIt = cell.m_proteins.find(phosphorylatedName);
-    
-    if (phosphorylatedIt == cell.m_proteins.end() || 
-        phosphorylatedIt->second.m_fNumber <= 0 || 
-        neighborCells.empty()) {
-        return false;
-    }
-    
-    // Calculate recovery
-    double phosphorylatedAmount = phosphorylatedIt->second.m_fNumber;
-    double recoveredAmount = phosphorylatedAmount * m_recoveryRate * dt;
-    
-    if (recoveredAmount <= 0) {
-        return false;
-    }
-    
-    // Remove from phosphorylated population
-    phosphorylatedIt->second.m_fNumber -= recoveredAmount;
-    
-    // Distribute recovered (unphosphorylated) proteins to neighbors
-    double amountPerNeighbor = recoveredAmount / neighborCells.size();
-    
-    for (auto& neighborRef : neighborCells) {
-        GridCell& neighbor = neighborRef.get();
-        // Add back to original unphosphorylated protein population
-        auto& neighborPop = neighbor.getOrCreateProtein(m_proteinB);
-        neighborPop.m_fNumber += amountPerNeighbor;
-    }
-    
-    return true;
-} 

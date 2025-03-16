@@ -62,19 +62,6 @@ public:
      */
     virtual bool apply(GridCell& cell, double dt, double& atpConsumed) const = 0;
     
-    /**
-     * Handle any effects that should occur outside the cell 
-     * (e.g., proteins entering/exiting cell, recovery effects, etc.)
-     *
-     * @param cell The source cell where the interaction occurred
-     * @param neighborCells Vector of neighboring cells that might be affected
-     * @param dt Time step in seconds
-     * @return true if any changes were made, false otherwise
-     */
-    virtual bool applyNeighborEffects(GridCell& cell, 
-                                    std::vector<std::reference_wrapper<GridCell>>& neighborCells, 
-                                    double dt) const = 0;
-    
 protected:
     std::string m_proteinA;
     std::string m_proteinB;

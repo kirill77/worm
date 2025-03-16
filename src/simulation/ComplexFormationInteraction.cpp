@@ -82,13 +82,3 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, double& atpCo
     
     return (boundAmount > 0 || dissociatedAmount > 0);
 }
-
-bool ComplexFormationInteraction::applyNeighborEffects(
-    GridCell& cell, 
-    std::vector<std::reference_wrapper<GridCell>>& neighborCells, 
-    double dt) const
-{
-    // Complex formation typically doesn't have neighbor effects
-    // This could be extended for more complex scenarios
-    return false;
-} 

@@ -24,12 +24,7 @@ public:
     
     // Apply complex formation to proteins in the cell
     bool apply(GridCell& cell, double dt, double& atpConsumed) const override;
-    
-    // Handle complex dissociation effects
-    bool applyNeighborEffects(GridCell& cell, 
-                            std::vector<std::reference_wrapper<GridCell>>& neighborCells, 
-                            double dt) const override;
-    
+
 private:
     double m_bindingRate;
     double m_dissociationRate;

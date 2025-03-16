@@ -146,6 +146,7 @@
     <ClInclude Include="Cell.h" />
     <ClInclude Include="CellTypes.h" />
     <ClInclude Include="Chromosome.h" />
+    <ClInclude Include="DephosphorylationInteraction.h" />
     <ClInclude Include="DNA.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Gene.h" />
@@ -173,6 +174,7 @@
   <ItemGroup>
     <ClCompile Include="Cell.cpp" />
     <ClCompile Include="Chromosome.cpp" />
+    <ClCompile Include="DephosphorylationInteraction.cpp" />
     <ClCompile Include="DNA.cpp" />
     <ClCompile Include="Gene.cpp" />
     <ClCompile Include="GeneWiki.cpp" />

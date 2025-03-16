@@ -176,12 +176,6 @@ void Medium::updatePARDynamics(double fDt)
         {
             vecNeighborCells.push_back(std::ref(gridNew[uNeighborIdx]));
         }
-        
-        // Apply neighbor effects for each interaction
-        for (const auto& pInteraction : vecInteractions)
-        {
-            pInteraction->applyNeighborEffects(gridNew[i], vecNeighborCells, fDt);
-        }
     }
     
     // Handle cortical binding/unbinding - this part remains similar to the original
