@@ -13,15 +13,11 @@ PhosphorylationInteraction::PhosphorylationInteraction(
     , m_removalRate(params.removalRate)
     , m_recoveryRate(params.recoveryRate)
     , m_saturationConstant(params.saturationConstant)
-    , m_lastPhosphorylatedAmount(0.0)
 {
 }
 
 bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
 {
-    // Reset tracking variable
-    m_lastPhosphorylatedAmount = 0.0;
-    
     // Get kinase amount
     auto kinaseIt = cell.m_proteins.find(m_proteinA);
     if (kinaseIt == cell.m_proteins.end() || kinaseIt->second.m_fNumber <= 0) {
@@ -59,11 +55,13 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpCon
         atpConsumed += requiredATP;
         cell.m_fAtp -= requiredATP;
         
-        // Remove phosphorylated proteins from active population
+        // Remove proteins from unphosphorylated population
         targetIt->second.m_fNumber -= phosphorylatedAmount;
         
-        // Track how much was phosphorylated for recovery effects
-        m_lastPhosphorylatedAmount = phosphorylatedAmount;
+        // Add to phosphorylated population
+        std::string phosphorylatedName = m_proteinB + "-P";  // e.g., "PAR-2" becomes "PAR-2-P"
+        auto& phosphorylatedPop = cell.getOrCreateProtein(phosphorylatedName);
+        phosphorylatedPop.m_fNumber += phosphorylatedAmount;
         
         return true;
     }
@@ -76,37 +74,33 @@ bool PhosphorylationInteraction::applyNeighborEffects(
     std::vector<std::reference_wrapper<GridCell>>& neighborCells, 
     double dt) const
 {
-    // If no phosphorylation occurred, no recovery needed
-    if (m_lastPhosphorylatedAmount <= 0 || neighborCells.empty()) {
+    // Get phosphorylated protein population
+    std::string phosphorylatedName = m_proteinB + "-P";
+    auto phosphorylatedIt = cell.m_proteins.find(phosphorylatedName);
+    
+    if (phosphorylatedIt == cell.m_proteins.end() || 
+        phosphorylatedIt->second.m_fNumber <= 0 || 
+        neighborCells.empty()) {
         return false;
     }
     
     // Calculate recovery
-    double recoveredAmount = m_lastPhosphorylatedAmount * m_recoveryRate * dt;
+    double phosphorylatedAmount = phosphorylatedIt->second.m_fNumber;
+    double recoveredAmount = phosphorylatedAmount * m_recoveryRate * dt;
     
     if (recoveredAmount <= 0) {
         return false;
     }
     
-    // Count non-cortical neighbors (assuming we have a function to check this)
-    int nonCorticalCount = 0;
-    for (auto& neighborRef : neighborCells) {
-        // For this example, let's assume we're distributing to all neighbors
-        // In your real implementation, you can filter based on cortical status
-        nonCorticalCount++;
-    }
+    // Remove from phosphorylated population
+    phosphorylatedIt->second.m_fNumber -= recoveredAmount;
     
-    if (nonCorticalCount == 0) {
-        return false;
-    }
-    
-    // Distribute recovery to neighbors
-    double amountPerNeighbor = recoveredAmount / nonCorticalCount;
+    // Distribute recovered (unphosphorylated) proteins to neighbors
+    double amountPerNeighbor = recoveredAmount / neighborCells.size();
     
     for (auto& neighborRef : neighborCells) {
         GridCell& neighbor = neighborRef.get();
-        
-        // Add recovered proteins to neighbor
+        // Add back to original unphosphorylated protein population
         auto& neighborPop = neighbor.getOrCreateProtein(m_proteinB);
         neighborPop.m_fNumber += amountPerNeighbor;
     }

@@ -34,7 +34,4 @@ private:
     double m_removalRate;
     double m_recoveryRate;
     double m_saturationConstant;
-    
-    // Track phosphorylated amounts for recovery
-    mutable double m_lastPhosphorylatedAmount;
 }; 
