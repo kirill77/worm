@@ -11,6 +11,7 @@ PhosphorylationInteraction::PhosphorylationInteraction(
     : ProteinInteraction(Mechanism::PHOSPHORYLATION, 0.5)  // Standard ATP cost for phosphorylation
     , m_kinaseName(kinase)
     , m_targetName(target)
+    , m_phosphorylatedName(ProteinWiki::GetPhosphorylatedName(target))
     , m_removalRate(params.removalRate)
     , m_saturationConstant(params.saturationConstant)
 {
@@ -59,8 +60,7 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpCon
         targetIt->second.m_fNumber -= phosphorylatedAmount;
         
         // Add to phosphorylated population
-        std::string phosphorylatedName = ProteinWiki::GetPhosphorylatedName(m_targetName);
-        auto& phosphorylatedPop = cell.getOrCreateProtein(phosphorylatedName);
+        auto& phosphorylatedPop = cell.getOrCreateProtein(m_phosphorylatedName);
         phosphorylatedPop.m_fNumber += phosphorylatedAmount;
         
         return true;

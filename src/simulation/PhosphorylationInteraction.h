@@ -26,6 +26,7 @@ public:
 private:
     std::string m_kinaseName;    // Name of the kinase protein
     std::string m_targetName;    // Name of the target protein
+    std::string m_phosphorylatedName; // Cached name of phosphorylated protein
     double m_removalRate;
     double m_saturationConstant;
 }; 

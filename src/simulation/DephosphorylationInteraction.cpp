@@ -8,15 +8,15 @@ DephosphorylationInteraction::DephosphorylationInteraction(
     const Parameters& params)
     : ProteinInteraction(Mechanism::DEPHOSPHORYLATION, 0.1)  // Lower ATP cost for dephosphorylation
     , m_targetName(target)
+    , m_phosphorylatedName(ProteinWiki::GetPhosphorylatedName(target))
     , m_recoveryRate(params.recoveryRate)
 {
 }
 
 bool DephosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
 {
-    // Get phosphorylated protein population (e.g. "PAR-2-P")
-    std::string phosphorylatedName = ProteinWiki::GetPhosphorylatedName(m_targetName);
-    auto phosphorylatedIt = cell.m_proteins.find(phosphorylatedName);
+    // Get phosphorylated protein population
+    auto phosphorylatedIt = cell.m_proteins.find(m_phosphorylatedName);
     
     if (phosphorylatedIt == cell.m_proteins.end() || 
         phosphorylatedIt->second.m_fNumber <= 0) {
