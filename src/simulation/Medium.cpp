@@ -151,11 +151,6 @@ void Medium::updatePARDynamics(double fDt)
     // First, apply direct protein interactions
     for (size_t i = 0; i < m_grid.size(); ++i)
     {
-        bool bIsCortex = isCortexCell(i);
-        
-        // Skip non-cortical cells for certain interactions
-        if (!bIsCortex) continue;
-        
         // Track ATP consumption
         double fAtpConsumed = 0.0;
         
