@@ -18,8 +18,8 @@ public:
      * 
      * @param fSurfaceArea Surface area in square micrometers
      */
-    Organelle(double fSurfaceArea = 1.0)
-        : ProteinBindingSurface(fSurfaceArea)  // Default binding capacity of 1e6 proteins per square micrometer
+    Organelle()
+        : ProteinBindingSurface()
     {}
     
     /**

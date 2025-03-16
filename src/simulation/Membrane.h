@@ -25,9 +25,8 @@ public:
      * @param fThickness Membrane thickness in micrometers
      * @param fSurfaceArea Surface area in square micrometers
      */
-    Membrane(std::shared_ptr<Medium> pInternalMedium, 
-             double fThickness = 0.01,          // Default 10nm thickness
-             double fSurfaceArea = 78.5);       // Default ~5 micrometers diameter sphere
+    Membrane(std::shared_ptr<Medium> pInternalMedium,
+        double fThickness = 0.01); // Default 10nm thickness
 
     /**
      * Update the membrane state.

@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <cmath>
 
-Membrane::Membrane(std::shared_ptr<Medium> pInternalMedium, double fThickness, double fSurfaceArea)
-    : ProteinBindingSurface(fSurfaceArea)  // Call base class constructor with surface area and binding capacity
+Membrane::Membrane(std::shared_ptr<Medium> pInternalMedium, double fThickness)
+    : ProteinBindingSurface()  // Call base class constructor with surface area and binding capacity
     , m_pInternalMedium(pInternalMedium)
     , m_fThickness(fThickness)
 {
