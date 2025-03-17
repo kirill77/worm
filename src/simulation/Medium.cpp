@@ -164,20 +164,7 @@ void Medium::updatePARDynamics(double fDt)
         // Update ATP (already done inside apply() method, this is just for clarity)
         gridNew[i].m_fAtp = std::max(0.0, gridNew[i].m_fAtp);
     }
-    
-    // Then, handle neighbor effects for each cell
-    for (size_t i = 0; i < m_grid.size(); ++i)
-    {
-        // Get references to neighbor cells
-        auto vecNeighborIndices = getNeighborIndices(i);
-        std::vector<std::reference_wrapper<GridCell>> vecNeighborCells;
-        
-        for (size_t uNeighborIdx : vecNeighborIndices)
-        {
-            vecNeighborCells.push_back(std::ref(gridNew[uNeighborIdx]));
-        }
-    }
-    
+
     // Handle cortical binding/unbinding - this part remains similar to the original
     for (size_t i = 0; i < m_grid.size(); ++i)
     {
