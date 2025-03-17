@@ -6,7 +6,7 @@
 #include <cmath>
 
 Membrane::Membrane(std::shared_ptr<Medium> pInternalMedium, double fThickness)
-    : ProteinBindingSurface()  // Call base class constructor with surface area and binding capacity
+    : ProteinBindingSurface(ProteinWiki::BindingSurface::MEMBRANE) // Initialize binding surface with enum
     , m_pInternalMedium(pInternalMedium)
     , m_fThickness(fThickness)
 {
@@ -119,6 +119,44 @@ bool Membrane::transportATPOutward(Medium& externalMedium,
     
     // Add ATP to external medium
     externalMedium.addATP(amount, position);
+    
+    return true;
+}
+
+bool Membrane::initializeBindingSites(double totalAmount)
+{
+    // Make sure we have an internal medium
+    if (!m_pInternalMedium) {
+        LOG_ERROR("Cannot initialize binding sites: internal medium is null");
+        return false;
+    }
+    
+    // Number of sample points to use (adjust for desired density)
+    const int sampleCount = 20; 
+    
+    // Calculate total number of positions
+    int totalPositions = sampleCount * sampleCount * sampleCount;
+    
+    // Calculate amount per position to distribute totalAmount evenly
+    double amountPerPosition = totalAmount / totalPositions;
+    
+    // Add binding sites at each position in the grid
+    for (int x = -sampleCount/2; x < sampleCount/2; x++) {
+        for (int y = -sampleCount/2; y < sampleCount/2; y++) {
+            for (int z = -sampleCount/2; z < sampleCount/2; z++) {
+                // Create a normalized position between -1 and 1
+                float3 normalizedPos(
+                    (float)x / (sampleCount/2),
+                    (float)y / (sampleCount/2),
+                    (float)z / (sampleCount/2)
+                );
+                
+                // Create binding site protein and add to the medium
+                ProteinPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::MEMBRANE), amountPerPosition);
+                m_pInternalMedium->addProtein(bindingSites, normalizedPos);
+            }
+        }
+    }
     
     return true;
 } 

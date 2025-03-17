@@ -3,10 +3,12 @@
 #include "PhosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
 #include "DephosphorylationInteraction.h"
+#include "SurfaceBindingInteraction.h"
+#include "ProteinBindingSurface.h"
 #include <algorithm>
 #include <iterator>
 
-// Initialize static member
+// Initialize static members
 std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::s_proteinInteractions;
 
 void ProteinWiki::Initialize()
@@ -73,6 +75,38 @@ void ProteinWiki::Initialize()
         "PAR-3", "PAR-6", par3Par6ComplexParams));
     s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
         "PAR-6", "PKC-3", par6Pkc3ComplexParams));
+        
+    // === SURFACE BINDING INTERACTIONS ===
+    
+    // Define binding site and bound protein names for membrane
+    std::string bindingSiteName = GetBindingSiteName(BindingSurface::MEMBRANE);
+    
+    // Parameters for PAR protein binding to membrane
+    SurfaceBindingInteraction::Parameters par1MembraneParams{
+        0.6,    // High binding rate for posterior proteins
+        0.04,   // Moderate dissociation rate
+        800.0   // Saturation constant
+    };
+    
+    SurfaceBindingInteraction::Parameters par2MembraneParams{
+        0.5,    // Medium binding rate
+        0.03,   // Low dissociation rate
+        900.0   // Saturation constant
+    };
+    
+    SurfaceBindingInteraction::Parameters par3MembraneParams{
+        0.4,    // Lower binding rate for anterior proteins
+        0.1,    // Higher dissociation rate
+        1000.0  // Saturation constant
+    };
+    
+    // Add membrane binding interactions
+    s_proteinInteractions.push_back(std::make_shared<SurfaceBindingInteraction>(
+        "PAR-1", bindingSiteName, GetBoundProteinName("PAR-1", BindingSurface::MEMBRANE), par1MembraneParams));
+    s_proteinInteractions.push_back(std::make_shared<SurfaceBindingInteraction>(
+        "PAR-2", bindingSiteName, GetBoundProteinName("PAR-2", BindingSurface::MEMBRANE), par2MembraneParams));
+    s_proteinInteractions.push_back(std::make_shared<SurfaceBindingInteraction>(
+        "PAR-3", bindingSiteName, GetBoundProteinName("PAR-3", BindingSurface::MEMBRANE), par3MembraneParams));
 }
 
 const std::vector<std::shared_ptr<ProteinInteraction>>& ProteinWiki::GetProteinInteractions()
@@ -96,4 +130,29 @@ std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsByM
 std::string ProteinWiki::GetPhosphorylatedName(const std::string& proteinName)
 {
     return proteinName + "-P";
+}
+
+std::string ProteinWiki::BindingSurfaceToString(BindingSurface surface)
+{
+    switch (surface)
+    {
+        case BindingSurface::MEMBRANE:
+            return "MEMBRANE";
+        case BindingSurface::CORTEX:
+            return "CORTEX";
+        case BindingSurface::CENTROSOME:
+            return "CENTROSOME";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+std::string ProteinWiki::GetBindingSiteName(BindingSurface surface)
+{
+    return "BINDING-SITE-" + BindingSurfaceToString(surface);
+}
+
+std::string ProteinWiki::GetBoundProteinName(const std::string& proteinName, BindingSurface surface)
+{
+    return proteinName + "-" + BindingSurfaceToString(surface);
 }

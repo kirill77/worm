@@ -15,6 +15,14 @@ Cell::Cell(std::shared_ptr<Membrane> pMembrane, const std::vector<Chromosome>& c
     m_pOrganelles.push_back(std::make_shared<Nucleus>(chromosomes));
     m_pOrganelles.push_back(std::make_shared<Mitochondrion>());
     // add other organelles as needed
+    
+    // Initialize binding sites in the cell's membrane
+    if (m_pMembrane)
+    {
+        // Add binding sites throughout the medium
+        // The coordinates are normalized between -1 and 1
+        m_pMembrane->initializeBindingSites(1000.0);
+    }
 }
 
 void Cell::update(double fDt)

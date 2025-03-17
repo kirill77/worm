@@ -167,6 +167,7 @@
     <ClInclude Include="ComplexFormationInteraction.h" />
     <ClInclude Include="ProteinWiki.h" />
     <ClInclude Include="Spindle.h" />
+    <ClInclude Include="SurfaceBindingInteraction.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="GridCell.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="ProteinBindingSurface.cpp" />
     <ClCompile Include="ProteinWiki.cpp" />
     <ClCompile Include="Spindle.cpp" />
+    <ClCompile Include="SurfaceBindingInteraction.cpp" />
     <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="GridCell.cpp" />

@@ -96,6 +96,9 @@
     <ClInclude Include="DephosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SurfaceBindingInteraction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -162,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DephosphorylationInteraction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SurfaceBindingInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

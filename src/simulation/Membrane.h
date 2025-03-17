@@ -36,6 +36,16 @@ public:
      * @param dt Time step in seconds
      */
     void update(double dt);
+    
+    /**
+     * Initialize binding sites in the internal medium.
+     * This creates binding sites throughout the medium
+     * that allow proteins to bind to the cell membrane surface.
+     * 
+     * @param totalAmount Total amount of binding sites to distribute
+     * @return True if binding sites were successfully added
+     */
+    bool initializeBindingSites(double totalAmount = 1000.0);
 
     /**
      * Transport proteins from external to internal medium.

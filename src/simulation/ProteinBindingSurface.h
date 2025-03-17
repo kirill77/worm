@@ -5,6 +5,7 @@
 #include <string>
 #include "Protein.h"
 #include "math/vector.h"
+#include "ProteinWiki.h"
 
 /**
  * Abstract base class representing any cellular structure that can bind proteins.
@@ -13,15 +14,17 @@
 class ProteinBindingSurface : public std::enable_shared_from_this<ProteinBindingSurface>
 {
 protected:
-    // Map of bound proteins and their quantities
-    std::unordered_map<std::string, std::shared_ptr<ProteinPopulation>> m_boundProteins;
+    // Binding surface type
+    ProteinWiki::BindingSurface m_surfaceType;
 
 public:
     /**
      * Constructor that initializes the binding surface
      * 
-     * @param fSurfaceArea Surface area in square micrometers
-     * @param fBindingCapacity Maximum protein binding capacity per square micrometer
+     * @param surfaceType Type of binding surface
+     * @param bindingSiteDensity Amount of binding sites per surface unit (default: 1000)
      */
-    ProteinBindingSurface() {}
+    ProteinBindingSurface(ProteinWiki::BindingSurface surfaceType = ProteinWiki::BindingSurface::eUNKNOWN)
+        : m_surfaceType(surfaceType)
+    {}
 }; 

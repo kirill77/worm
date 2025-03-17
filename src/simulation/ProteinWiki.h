@@ -8,6 +8,15 @@
 // A static repository of protein interaction data
 class ProteinWiki
 {
+public:
+    // Enum for binding surfaces
+    enum class BindingSurface {
+        eUNKNOWN,
+        MEMBRANE,
+        CORTEX,
+        CENTROSOME
+    };
+    
 private:
     // List of known protein interactions
     static std::vector<std::shared_ptr<ProteinInteraction>> s_proteinInteractions;
@@ -27,4 +36,13 @@ public:
     
     // Utility function to get the name of a phosphorylated protein
     static std::string GetPhosphorylatedName(const std::string& proteinName);
+    
+    // Get the binding site name for a specific surface
+    static std::string GetBindingSiteName(BindingSurface surface);
+    
+    // Get the bound protein name for a protein on a specific surface
+    static std::string GetBoundProteinName(const std::string& proteinName, BindingSurface surface);
+    
+    // Convert binding surface enum to string
+    static std::string BindingSurfaceToString(BindingSurface surface);
 }; 
