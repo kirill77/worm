@@ -70,6 +70,8 @@ bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, double& atpCons
         
         // Add to bound complex population
         auto& boundPop = cell.getOrCreateProtein(m_boundComplexName);
+        // bind this protein to the surface containing the binding site
+        boundPop.bindTo(bindingSiteIt->second.getBindingSurface());
         boundPop.m_fNumber += newBoundAmount;
         
         changesApplied = true;

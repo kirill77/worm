@@ -153,6 +153,7 @@ bool Membrane::initializeBindingSites(double totalAmount)
                 
                 // Create binding site protein and add to the medium
                 ProteinPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::MEMBRANE), amountPerPosition);
+                bindingSites.bindTo(shared_from_this());
                 m_pInternalMedium->addProtein(bindingSites, normalizedPos);
             }
         }

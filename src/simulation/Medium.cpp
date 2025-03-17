@@ -87,9 +87,11 @@ std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
 
 void Medium::addProtein(const ProteinPopulation& protein, const float3& position)
 {
-    auto& gridCell = findCell(position);
-    auto& proteinPop = gridCell.getOrCreateProtein(protein.m_sName);
-    proteinPop.m_fNumber += protein.m_fNumber;
+    GridCell& gridCell = findCell(position);
+    ProteinPopulation& cellProtein = gridCell.getOrCreateProtein(protein.m_sName);
+
+    cellProtein.bindTo(protein.getBindingSurface());
+    cellProtein.m_fNumber += protein.m_fNumber;
 }
 
 void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
@@ -117,6 +119,10 @@ void Medium::updateProteinDiffusion(double dt)
         // For each protein population in the cell
         for (auto& [sProteinName, proteinPop] : m_grid[i].m_proteins)
         {
+            // proteins attached to surfaces don't participate in diffusion
+            if (proteinPop.isBound())
+                continue;
+
             // Calculate amount to diffuse
             double fDiffusionAmount = proteinPop.m_fNumber * DIFFUSION_RATE * dt / vecNeighbors.size();
             
