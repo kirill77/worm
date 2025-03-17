@@ -40,19 +40,6 @@ const GridCell& Medium::findCell(const float3& position) const
     return m_grid[positionToIndex(position)];
 }
 
-bool Medium::isCortexCell(size_t index) const
-{
-    // Convert to 3D coordinates
-    size_t uZ = index % GRID_RES;
-    size_t uY = (index / GRID_RES) % GRID_RES;
-    size_t uX = index / (GRID_RES * GRID_RES);
-    
-    // Check if any coordinate is on the boundary
-    return uX == 0 || uX == GRID_RES - 1 ||
-           uY == 0 || uY == GRID_RES - 1 ||
-           uZ == 0 || uZ == GRID_RES - 1;
-}
-
 std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
 {
     std::vector<size_t> vecNeighbors;
@@ -142,14 +129,10 @@ void Medium::updateProteinDiffusion(double dt)
     m_grid = std::move(gridNew);
 }
 
-void Medium::updatePARDynamics(double fDt)
+void Medium::updateProteinInteraction(double fDt)
 {
     // Create temporary grid for updated numbers
     auto gridNew = m_grid;
-    
-    // Constants for protein dynamics
-    static constexpr double CORTEX_BINDING_RATE = 0.15;    // Rate at which proteins bind to cortex from cytoplasm
-    static constexpr double CORTEX_UNBINDING_RATE = 0.12;  // Rate at which proteins unbind from cortex
     
     // Get all protein interactions 
     const auto& vecInteractions = ProteinWiki::GetProteinInteractions();
@@ -193,8 +176,8 @@ void Medium::update(double fDt)
     updateProteinDiffusion(fDt);
     updateATPDiffusion(fDt);
     
-    // Update PAR protein dynamics
-    updatePARDynamics(fDt);
+    // Interaction of proteins between each other
+    updateProteinInteraction(fDt);
     
     // Update mRNA positions
     translateMRNAs(fDt);

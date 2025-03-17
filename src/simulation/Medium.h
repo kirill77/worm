@@ -18,8 +18,6 @@ private:
     std::array<GridCell, GRID_RES * GRID_RES * GRID_RES> m_grid;
     
     static constexpr double DIFFUSION_RATE = 0.1;          // Rate of movement between cells
-    static constexpr double CORTEX_BINDING_RATE = 0.3;     // Rate of binding to cortex
-    static constexpr double CORTEX_UNBINDING_RATE = 0.1;   // Rate of unbinding from cortex
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
 
 public:
@@ -51,12 +49,11 @@ private:
     // Helper functions
     GridCell& findCell(const float3& position);
     const GridCell& findCell(const float3& position) const;
-    bool isCortexCell(size_t index) const;  // Determines if a cell is on the boundary
     std::vector<size_t> getNeighborIndices(size_t cellIndex) const;
     
     // Update functions
     void updateProteinDiffusion(double dt);
-    void updatePARDynamics(double dt);
+    void updateProteinInteraction(double dt);
     void translateMRNAs(double dt);
     void updateATPDiffusion(double dt);
     
