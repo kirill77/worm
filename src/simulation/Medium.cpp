@@ -153,125 +153,18 @@ void Medium::updatePARDynamics(double fDt)
     {
         // Track ATP consumption
         double fAtpConsumed = 0.0;
-        
+
         // Apply each interaction to the cell
         for (const auto& pInteraction : vecInteractions)
         {
             // Apply the interaction and track ATP consumption
             pInteraction->apply(gridNew[i], fDt, fAtpConsumed);
         }
-        
+
         // Update ATP (already done inside apply() method, this is just for clarity)
         gridNew[i].m_fAtp = std::max(0.0, gridNew[i].m_fAtp);
     }
 
-    // Handle cortical binding/unbinding - this part remains similar to the original
-    for (size_t i = 0; i < m_grid.size(); ++i)
-    {
-        bool bIsCortex = isCortexCell(i);
-        
-        if (bIsCortex)
-        {
-            // For cortical cells, handle proteins that can unbind
-            for (auto& [sProteinName, proteinPop] : m_grid[i].m_proteins)
-            {
-                // Proteins can unbind from cortex to cytoplasm
-                auto vecNeighbors = getNeighborIndices(i);
-                std::vector<size_t> vecNonCortexNeighbors;
-                
-                // Find non-cortical neighbors
-                for (size_t uNeighborIdx : vecNeighbors)
-                {
-                    if (!isCortexCell(uNeighborIdx))
-                    {
-                        vecNonCortexNeighbors.push_back(uNeighborIdx);
-                    }
-                }
-                
-                if (!vecNonCortexNeighbors.empty())
-                {
-                    // Calculate unbinding based on protein type
-                    double fUnbindingRate = CORTEX_UNBINDING_RATE;
-                    
-                    // PAR-2 has more stability at the cortex
-                    if (sProteinName == "PAR-2") {
-                        fUnbindingRate *= 0.8; // 20% lower unbinding
-                    }
-                    
-                    // Anterior complex proteins have slight stability
-                    if (sProteinName == "PAR-3" || sProteinName == "PAR-6" || sProteinName == "PKC-3") {
-                        fUnbindingRate *= 0.9; // 10% lower unbinding
-                    }
-                    
-                    double fUnbindingAmount = proteinPop.m_fNumber * fUnbindingRate * fDt;
-                    auto& proteinPopNew = gridNew[i].getOrCreateProtein(sProteinName);
-                    proteinPopNew.m_fNumber -= fUnbindingAmount;
-                    
-                    // Distribute unbound proteins to non-cortical neighbors
-                    double fAmountPerSite = fUnbindingAmount / vecNonCortexNeighbors.size();
-                    for (size_t uNeighborIdx : vecNonCortexNeighbors)
-                    {
-                        auto& proteinPopNeighbor = gridNew[uNeighborIdx].getOrCreateProtein(sProteinName);
-                        proteinPopNeighbor.m_fNumber += fAmountPerSite;
-                    }
-                }
-            }
-        }
-        else
-        {
-            // For non-cortical cells, handle proteins that can bind to cortex
-            auto vecNeighbors = getNeighborIndices(i);
-            
-            // For each protein population in the cell
-            for (auto& [sProteinName, proteinPop] : m_grid[i].m_proteins)
-            {
-                std::vector<size_t> vecCortexNeighbors;
-                
-                // Find available cortex binding sites with protein-specific preferences
-                for (size_t uNeighborIdx : vecNeighbors)
-                {
-                    if (isCortexCell(uNeighborIdx))
-                    {
-                        float3 vecPos = indexToPosition(uNeighborIdx);
-                        
-                        // For anterior PARs, prefer anterior cortex
-                        if ((sProteinName == "PAR-3" || sProteinName == "PAR-6" || sProteinName == "PKC-3") &&
-                            vecPos.y > 0)
-                        {
-                            vecCortexNeighbors.push_back(uNeighborIdx);
-                        }
-                        // For posterior PARs, prefer posterior cortex
-                        else if ((sProteinName == "PAR-1" || sProteinName == "PAR-2") &&
-                                vecPos.y < 0)
-                        {
-                            vecCortexNeighbors.push_back(uNeighborIdx);
-                        }
-                    }
-                }
-                
-                if (!vecCortexNeighbors.empty())
-                {
-                    // Calculate binding amount with protein-specific rates
-                    double fBindingRate = CORTEX_BINDING_RATE;
-                    if (sProteinName == "PAR-2") fBindingRate *= 1.2; // 20% higher for PAR-2
-                    if (sProteinName == "PAR-1") fBindingRate *= 1.1; // 10% higher for PAR-1
-                    
-                    double fBindingAmount = proteinPop.m_fNumber * fBindingRate * fDt;
-                    auto& proteinPopNew = gridNew[i].getOrCreateProtein(sProteinName);
-                    proteinPopNew.m_fNumber -= fBindingAmount;
-                    
-                    // Distribute to available cortex sites
-                    double fAmountPerSite = fBindingAmount / vecCortexNeighbors.size();
-                    for (size_t uNeighborIdx : vecCortexNeighbors)
-                    {
-                        auto& proteinPopNeighbor = gridNew[uNeighborIdx].getOrCreateProtein(sProteinName);
-                        proteinPopNeighbor.m_fNumber += fAmountPerSite;
-                    }
-                }
-            }
-        }
-    }
-    
     m_grid = std::move(gridNew);
 }
 
