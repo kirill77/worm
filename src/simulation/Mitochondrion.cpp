@@ -3,11 +3,6 @@
 #include "Cell.h"
 #include <algorithm>
 
-// Constants for ATP metabolism
-static constexpr double MAX_ATP = 100.0;
-static constexpr double ATP_PRODUCTION_RATE = 1.0;
-static constexpr double ATP_CONSUMPTION_RATE = 0.2;
-
 void Mitochondrion::update(double dt, Cell& cell, Medium& medium)
 {
     auto cellState = cell.getCellCycleState();
