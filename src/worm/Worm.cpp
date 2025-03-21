@@ -5,6 +5,7 @@
 #include "simulation/Medium.h"
 #include "simulation/Membrane.h"
 #include "simulation/Spindle.h"
+#include "simulation/ProteinWiki.h"
 #include "log/ILog.h"
 
 std::vector<Chromosome> Worm::initializeGenes()
@@ -107,23 +108,28 @@ bool Worm::validatePARPolarization(float fTimeSec) const
 {
     auto& internalMedium = m_pCells[0]->getInternalMedium();
     
-    float3 anteriorPos(0.0f, 0.8f, 0.0f);
-    float3 posteriorPos(0.0f, -0.8f, 0.0f);
+    float3 anteriorPos(0.0f, 1.f, 0.0f);
+    float3 posteriorPos(0.0f, -1.f, 0.0f);
     
-    double anteriorPAR3 = internalMedium.getProteinNumber("PAR-3", anteriorPos);
-    double posteriorPAR3 = internalMedium.getProteinNumber("PAR-3", posteriorPos);
-    double anteriorPAR2 = internalMedium.getProteinNumber("PAR-2", anteriorPos);
-    double posteriorPAR2 = internalMedium.getProteinNumber("PAR-2", posteriorPos);
+    // Get membrane-bound protein names using the utility function
+    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::MEMBRANE);
+    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::MEMBRANE);
+    
+    // Check membrane-bound proteins
+    double anteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, anteriorPos);
+    double posteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, posteriorPos);
+    double anteriorPAR2 = internalMedium.getProteinNumber(par2Membrane, anteriorPos);
+    double posteriorPAR2 = internalMedium.getProteinNumber(par2Membrane, posteriorPos);
     
     // Check during polarity establishment (0-6 minutes)
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
         if (anteriorPAR3 / (posteriorPAR3 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
-            LOG_INFO("Warning: Insufficient anterior PAR-3 polarization at %.2lf sec", fTimeSec);
+            LOG_INFO("Warning: Insufficient anterior %s polarization at %.2lf sec", par3Membrane.c_str(), fTimeSec);
             return false;
         }
         
         if (posteriorPAR2 / (anteriorPAR2 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
-            LOG_INFO("Warning: Insufficient posterior PAR-2 polarization at %.2lf sec", fTimeSec);
+            LOG_INFO("Warning: Insufficient posterior %s polarization at %.2lf sec", par2Membrane.c_str(), fTimeSec);
             return false;
         }
     }
