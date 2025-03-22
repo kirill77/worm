@@ -21,7 +21,7 @@ private:
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
 
 public:
-    static constexpr double MAX_ATP_PER_CELL = 100.0;      // Maximum ATP per grid cell
+    static constexpr double MAX_ATP_PER_CELL = 1e10;      // Maximum ATP per grid cell
 
     Medium();
 
