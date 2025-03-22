@@ -4,6 +4,14 @@
 #include <algorithm>
 #include <random>
 
+Mitochondrion::Mitochondrion()
+    : m_fNumber(N_INITIAL_MITOCHONDRIA) 
+{
+    // Initialize random number generator with a seed
+    std::random_device rd;
+    m_rng.seed(rd());
+}
+
 void Mitochondrion::update(double dt, Cell& cell, Medium& medium)
 {
     auto cellState = cell.getCellCycleState();

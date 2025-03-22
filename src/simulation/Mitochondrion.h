@@ -22,13 +22,7 @@ private:
     float3 generateRandomPosition();
 
 public:
-    Mitochondrion()
-        : m_fNumber(N_INITIAL_MITOCHONDRIA) 
-    {
-        // Initialize random number generator with a seed
-        std::random_device rd;
-        m_rng.seed(rd());
-    }
+    Mitochondrion();
 
     void update(double dt, Cell& cell, Medium& medium) override;
 };
