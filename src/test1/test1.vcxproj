@@ -137,6 +137,9 @@
     <ProjectReference Include="..\CSVFile\CSVFile.vcxproj">
       <Project>{bb747f64-d1ff-4023-a588-c03a903af0ff}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\DataCollector\DataCollector.vcxproj">
+      <Project>{05a61ec7-4c44-4895-a25d-ff9c949dac28}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\log\Log.vcxproj">
       <Project>{e08b404e-79fe-4f0b-a796-a961900cd558}</Project>
     </ProjectReference>

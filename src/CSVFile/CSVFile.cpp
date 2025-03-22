@@ -5,7 +5,8 @@
 #include <iomanip>
 
 CSVFile::CSVFile(const std::string& filename, const std::vector<std::string>& headers)
-    : m_headers(headers)
+    : m_filename(filename)
+    , m_headers(headers)
 {
     // Open the file for writing
     m_file.open(filename, std::ios::out | std::ios::trunc);

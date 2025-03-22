@@ -73,8 +73,15 @@ public:
      * @param precision The number of decimal places to show
      */
     void setPrecision(int precision);
+    
+    /**
+     * @brief Get the filename of this CSV file
+     * @return The path to the CSV file
+     */
+    const std::string& getFilename() const { return m_filename; }
 
 private:
+    std::string m_filename;                ///< Path to the CSV file
     std::ofstream m_file;                  ///< File stream for writing
     std::vector<std::string> m_headers;    ///< Column headers
     char m_delimiter = ',';                ///< Delimiter character
