@@ -166,6 +166,7 @@
     <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />
     <ClInclude Include="ProteinWiki.h" />
+    <ClInclude Include="ResourceAllocation.h" />
     <ClInclude Include="Spindle.h" />
     <ClInclude Include="SurfaceBindingInteraction.h" />
     <ClInclude Include="TRNA.h" />
@@ -194,6 +195,7 @@
     </ClCompile>
     <ClCompile Include="ProteinBindingSurface.cpp" />
     <ClCompile Include="ProteinWiki.cpp" />
+    <ClCompile Include="ResourceAllocation.cpp" />
     <ClCompile Include="Spindle.cpp" />
     <ClCompile Include="SurfaceBindingInteraction.cpp" />
     <ClCompile Include="TRNA.cpp" />
