@@ -18,8 +18,8 @@ void ProteinWiki::Initialize()
     
     // === PHOSPHORYLATION INTERACTIONS ===
     
-    // PKC-3 (kinase) phosphorylates posterior PARs
-    PhosphorylationInteraction::Parameters pkc3ToParParams{
+    // PKC-3 (kinase) phosphorylates posterior PARs, but only when in complex with PAR-6
+    PhosphorylationInteraction::Parameters pkc3ComplexToParParams{
         0.9,    // High removal rate (strong kinase)
         0.07,   // Saturation constant for Hill-type kinetics
     };
@@ -30,11 +30,11 @@ void ProteinWiki::Initialize()
         0.06,   // Saturation constant for Hill-type kinetics
     };
     
-    // Add phosphorylation interactions
+    // Add phosphorylation interactions - using the PAR-6-PKC-3 complex as the active kinase
     s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
-        "PKC-3", "PAR-2", pkc3ToParParams));
+        "PAR-6-PKC-3", "PAR-2", pkc3ComplexToParParams));
     s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
-        "PKC-3", "PAR-1", pkc3ToParParams));
+        "PAR-6-PKC-3", "PAR-1", pkc3ComplexToParParams));
     s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
         "PAR-1", "PAR-3", par1ToPar3Params));
     
