@@ -90,6 +90,62 @@ Worm::Worm()
     std::shared_ptr<Membrane> pMembrane = createZygoteMembrane();
     auto pCell = std::make_shared<Cell>(pMembrane, chromosomes);
     m_pCells.push_back(pCell);
+    
+    // Set up the data collector
+    setupDataCollector();
+}
+
+void Worm::setupDataCollector()
+{
+    // Get access to the cell's internal medium
+    if (m_pCells.empty()) {
+        LOG_ERROR("Cannot set up data collector: no cells available");
+        return;
+    }
+    
+    auto& internalMedium = m_pCells[0]->getInternalMedium();
+    
+    // Initialize the DataCollector with the cell's internal medium
+    m_pDataCollector = std::make_unique<DataCollector>(
+        internalMedium, 
+        "worm_simulation_data.csv",
+        0.1f  // Collect data every 0.1 seconds
+    );
+    
+    // Add collection points for anterior and posterior positions
+    float3 anteriorPos(0.0f, 1.f, 0.0f);  // Anterior position
+    float3 posteriorPos(0.0f, -1.f, 0.0f); // Posterior position
+    
+    // Get membrane-bound protein names using the utility function
+    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::MEMBRANE);
+    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::MEMBRANE);
+    
+    // Add collection points with specific proteins to track
+    m_pDataCollector->addCollectionPoint(
+        anteriorPos, 
+        "Anterior", 
+        {par2Membrane, par3Membrane, "PAR-2", "PAR-3", "PKC-3"}
+    );
+    
+    m_pDataCollector->addCollectionPoint(
+        posteriorPos, 
+        "Posterior", 
+        {par2Membrane, par3Membrane, "PAR-1", "PAR-2"}
+    );
+}
+
+void Worm::simulateStep(double dt)
+{
+    // Call the base class simulateStep to handle standard simulation
+    Organism::simulateStep(dt);
+    
+    // Update total simulation time
+    m_fTotalTime += static_cast<float>(dt);
+    
+    // Force data collection at the current time (regardless of interval)
+    if (m_pDataCollector) {
+        m_pDataCollector->forceCollection(m_fTotalTime);
+    }
 }
 
 // Validation thresholds based on experimental data

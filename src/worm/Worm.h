@@ -3,12 +3,18 @@
 #include "simulation/Organism.h"
 #include "simulation/DNA.h"
 #include "simulation/Chromosome.h"
+#include "DataCollector/DataCollector.h"
+#include <memory>
 
 class Worm : public Organism
 {
 private:
     std::shared_ptr<class Membrane> createZygoteMembrane();
     std::vector<Chromosome> initializeGenes();
+
+    void setupDataCollector();  // Method to set up the data collector
+    std::unique_ptr<DataCollector> m_pDataCollector;  // Data collector for simulation data
+    float m_fTotalTime = 0.0f;  // Total simulation time in seconds
 
     // Validation thresholds based on experimental data
     static constexpr double ANTERIOR_POSTERIOR_RATIO_THRESHOLD = 3.0;  // Minimum ratio for proper PAR polarization
@@ -24,6 +30,9 @@ private:
 
 public:
     Worm();
+
+    // Override the simulateStep method from the base class
+    void simulateStep(double dt) override;
 
     // Validation functions (time in seconds)
     bool validatePARPolarization(float fTimeSec) const;
