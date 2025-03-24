@@ -78,6 +78,13 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         // Add to complex population
         auto& complexPop = cell.getOrCreateProtein(m_complexName);
         complexPop.m_fNumber += boundAmount;
+
+        // update binding surface
+        assert(!firstProteinIt->second.isBound());
+        if (secondProteinIt->second.isBound())
+        {
+            complexPop.bindTo(secondProteinIt->second.getBindingSurface());
+        }
     }
     
     // Apply dissociation if any occurs

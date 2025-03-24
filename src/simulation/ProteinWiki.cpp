@@ -75,38 +75,39 @@ void ProteinWiki::Initialize()
         "PAR-3", "PAR-6", par3Par6ComplexParams));
     s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
         "PAR-6", "PKC-3", par6Pkc3ComplexParams));
-        
-    // === SURFACE BINDING INTERACTIONS ===
-    
-    // Define binding site and bound protein names for membrane
+          
+    // Define binding site name for membrane
     std::string bindingSiteName = GetBindingSiteName(BindingSurface::MEMBRANE);
     
-    // Parameters for PAR protein binding to membrane
-    SurfaceBindingInteraction::Parameters par1MembraneParams{
+    // Parameters for PAR protein binding to membrane (converted to ComplexFormationInteraction parameters)
+    ComplexFormationInteraction::Parameters par1MembraneParams{
         0.6,    // High binding rate for posterior proteins
         0.04,   // Moderate dissociation rate
-        800.0   // Saturation constant
+        800.0,  // Saturation constant
+        GetBoundProteinName("PAR-1", BindingSurface::MEMBRANE)  // Complex name
     };
     
-    SurfaceBindingInteraction::Parameters par2MembraneParams{
+    ComplexFormationInteraction::Parameters par2MembraneParams{
         0.5,    // Medium binding rate
         0.03,   // Low dissociation rate
-        900.0   // Saturation constant
+        900.0,  // Saturation constant
+        GetBoundProteinName("PAR-2", BindingSurface::MEMBRANE)  // Complex name
     };
     
-    SurfaceBindingInteraction::Parameters par3MembraneParams{
+    ComplexFormationInteraction::Parameters par3MembraneParams{
         0.4,    // Lower binding rate for anterior proteins
         0.1,    // Higher dissociation rate
-        1000.0  // Saturation constant
+        1000.0, // Saturation constant
+        GetBoundProteinName("PAR-3", BindingSurface::MEMBRANE)  // Complex name
     };
     
-    // Add membrane binding interactions
-    s_proteinInteractions.push_back(std::make_shared<SurfaceBindingInteraction>(
-        "PAR-1", bindingSiteName, GetBoundProteinName("PAR-1", BindingSurface::MEMBRANE), par1MembraneParams));
-    s_proteinInteractions.push_back(std::make_shared<SurfaceBindingInteraction>(
-        "PAR-2", bindingSiteName, GetBoundProteinName("PAR-2", BindingSurface::MEMBRANE), par2MembraneParams));
-    s_proteinInteractions.push_back(std::make_shared<SurfaceBindingInteraction>(
-        "PAR-3", bindingSiteName, GetBoundProteinName("PAR-3", BindingSurface::MEMBRANE), par3MembraneParams));
+    // Add membrane binding interactions (now using ComplexFormationInteraction)
+    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
+        "PAR-1", bindingSiteName, par1MembraneParams));
+    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
+        "PAR-2", bindingSiteName, par2MembraneParams));
+    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
+        "PAR-3", bindingSiteName, par3MembraneParams));
 }
 
 const std::vector<std::shared_ptr<ProteinInteraction>>& ProteinWiki::GetProteinInteractions()
