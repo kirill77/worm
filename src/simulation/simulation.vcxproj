@@ -168,7 +168,6 @@
     <ClInclude Include="ProteinWiki.h" />
     <ClInclude Include="ResourceDistributor.h" />
     <ClInclude Include="Spindle.h" />
-    <ClInclude Include="SurfaceBindingInteraction.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="GridCell.h" />
@@ -197,7 +196,6 @@
     <ClCompile Include="ProteinWiki.cpp" />
     <ClCompile Include="ResourceDistributor.cpp" />
     <ClCompile Include="Spindle.cpp" />
-    <ClCompile Include="SurfaceBindingInteraction.cpp" />
     <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="GridCell.cpp" />
