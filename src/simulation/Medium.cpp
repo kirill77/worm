@@ -133,9 +133,6 @@ void Medium::updateProteinDiffusion(double dt)
 
 void Medium::updateProteinInteraction(double fDt)
 {
-    // Create temporary grid for updated numbers
-    auto gridNew = m_grid;
-    
     // Get all protein interactions 
     const auto& vecInteractions = ProteinWiki::GetProteinInteractions();
     
@@ -147,7 +144,7 @@ void Medium::updateProteinInteraction(double fDt)
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
             m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
-            vecInteractions[i]->apply(gridNew[uCell], fDt, m_resDistributor);
+            vecInteractions[i]->apply(m_grid[uCell], fDt, m_resDistributor);
         }
 
         // now do the real run to distribute the resources
@@ -155,14 +152,12 @@ void Medium::updateProteinInteraction(double fDt)
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
             m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
-            vecInteractions[i]->apply(gridNew[uCell], fDt, m_resDistributor);
+            vecInteractions[i]->apply(m_grid[uCell], fDt, m_resDistributor);
         }
 
         // Ensure ATP doesn't go below zero
-        gridNew[uCell].m_fAtp = std::max(0.0, gridNew[uCell].m_fAtp);
+        m_grid[uCell].m_fAtp = std::max(0.0, m_grid[uCell].m_fAtp);
     }
-
-    m_grid = std::move(gridNew);
 }
 
 double Medium::getTotalProteinNumber(const std::string& proteinName) const
