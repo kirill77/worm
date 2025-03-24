@@ -42,19 +42,32 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceAlloc
     // Binding requires ATP
     double requiredATP = boundAmount * m_atpCost;
     
-    // Check ATP availability
-    if (cell.m_fAtp < requiredATP) {
-        // Scale down binding based on available ATP
-        boundAmount = boundAmount * (cell.m_fAtp / requiredATP);
-        requiredATP = cell.m_fAtp;
-    }
-    
     // Also check for dissociation of existing complexes
     auto complexIt = cell.m_proteins.find(m_complexName);
     double complexAmount = (complexIt != cell.m_proteins.end()) ? complexIt->second.m_fNumber : 0.0;
     
     // Calculate dissociation (simpler first-order kinetics)
     double dissociatedAmount = complexAmount * m_dissociationRate * dt;
+    
+    // If we're in a dry run, just report resource requirements and return
+    if (resDistributor.isDryRun()) {
+        if (boundAmount > 0) {
+            // Register our requirements with the resource distributor
+            resDistributor.notifyResourceConsumed("ATP", requiredATP);
+            resDistributor.notifyResourceConsumed(m_firstProteinName, boundAmount);
+            resDistributor.notifyResourceConsumed(m_secondProteinName, boundAmount);
+            return true; // We're reporting resource needs
+        }
+        // Dissociation doesn't consume resources, but still return true if it occurs
+        return dissociatedAmount > 0;
+    }
+    
+    // This is the real run, get the scaling factor for this interaction
+    double scalingFactor = resDistributor.notifyNewInteractionStarting(*this);
+    
+    // Scale our binding resource usage by the scaling factor
+    boundAmount *= scalingFactor;
+    requiredATP *= scalingFactor;
     
     // Apply binding if any occurs
     if (boundAmount > 0) {

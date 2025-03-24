@@ -151,6 +151,10 @@ void Medium::updateProteinInteraction(double fDt)
 
         // now do the real run to distribute the resources
         m_resDistributor.notifyNewRealRun();
+        for (int i = 0; i < vecInteractions.size(); ++i)
+        {
+            vecInteractions[i]->apply(gridNew[i], fDt, m_resDistributor);
+        }
 
         // Ensure ATP doesn't go below zero
         gridNew[i].m_fAtp = std::max(0.0, gridNew[i].m_fAtp);

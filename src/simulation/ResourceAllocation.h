@@ -27,6 +27,8 @@ public:
 
     void notifyNewRealRun();
 
+    bool isDryRun() const { return m_curDryRunId > m_curRealRunId; }
+
 private:
     void updateAvailableResources(const GridCell& cell);
 

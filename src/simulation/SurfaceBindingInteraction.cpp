@@ -50,12 +50,25 @@ bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceAllocat
     // Binding requires ATP
     double requiredATP = newBoundAmount * m_atpCost;
     
-    // Check ATP availability
-    if (cell.m_fAtp < requiredATP) {
-        // Scale down binding based on available ATP
-        newBoundAmount = newBoundAmount * (cell.m_fAtp / requiredATP);
-        requiredATP = cell.m_fAtp;
+    // If we're in a dry run, just report resource requirements and return
+    if (resDistributor.isDryRun()) {
+        if (newBoundAmount > 0) {
+            // Register our requirements with the resource distributor
+            resDistributor.notifyResourceConsumed("ATP", requiredATP);
+            resDistributor.notifyResourceConsumed(m_proteinName, newBoundAmount);
+            resDistributor.notifyResourceConsumed(m_bindingSiteName, newBoundAmount);
+            return true; // We're reporting resource needs
+        }
+        // Dissociation doesn't consume resources, but still return true if it occurs
+        return dissociatedAmount > 0;
     }
+    
+    // This is the real run, get the scaling factor for this interaction
+    double scalingFactor = resDistributor.notifyNewInteractionStarting(*this);
+    
+    // Scale our binding resource usage by the scaling factor
+    newBoundAmount *= scalingFactor;
+    requiredATP *= scalingFactor;
     
     bool changesApplied = false;
     

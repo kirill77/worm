@@ -44,12 +44,23 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceAlloca
     // Phosphorylation requires ATP
     double requiredATP = phosphorylatedAmount * m_atpCost;
     
-    // Check ATP availability
-    if (cell.m_fAtp < requiredATP) {
-        // Scale down phosphorylation based on available ATP
-        phosphorylatedAmount = phosphorylatedAmount * (cell.m_fAtp / requiredATP);
-        requiredATP = cell.m_fAtp;
+    // If we're in a dry run, just report resource requirements and return
+    if (resDistributor.isDryRun()) {
+        if (phosphorylatedAmount > 0) {
+            // Register our requirements with the resource distributor
+            resDistributor.notifyResourceConsumed("ATP", requiredATP);
+            resDistributor.notifyResourceConsumed(m_targetName, phosphorylatedAmount);
+            return true; // We're reporting resource needs
+        }
+        return false;
     }
+    
+    // This is the real run, get the scaling factor for this interaction
+    double scalingFactor = resDistributor.notifyNewInteractionStarting(*this);
+    
+    // Scale our resource usage by the scaling factor
+    phosphorylatedAmount *= scalingFactor;
+    requiredATP *= scalingFactor;
     
     // Apply the effect if any phosphorylation occurs
     if (phosphorylatedAmount > 0) {
