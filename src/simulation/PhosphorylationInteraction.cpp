@@ -59,6 +59,7 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     if (phosphorylatedAmount > 0) {
         // Update ATP consumption
         cell.m_fAtp -= requiredATP;
+        assert(cell.m_fAtp >= GridCell::MIN_ATP_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from unphosphorylated population
         targetIt->second.m_fNumber -= phosphorylatedAmount;

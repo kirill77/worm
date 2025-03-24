@@ -151,7 +151,8 @@ void Medium::updateProteinInteraction(double fDt)
         m_resDistributor.notifyNewRealRun();
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
-            m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
+            if (!m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]))
+                continue;
             vecInteractions[i]->apply(m_grid[uCell], fDt, m_resDistributor);
         }
 

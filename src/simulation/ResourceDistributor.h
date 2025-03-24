@@ -19,7 +19,8 @@ public:
 
     void notifyNewDryRun(const class GridCell& cell);
 
-    void notifyNewInteractionStarting(const class ProteinInteraction &interaction);
+    // if this returns false - you can skip this interaction
+    bool notifyNewInteractionStarting(const class ProteinInteraction &interaction);
 
     double getAvailableResource(const std::string& resourceName);
 
@@ -48,9 +49,9 @@ private:
 
     struct InteractionData
     {
-        uint64_t m_dryRunId = 0;
+        uint64_t m_lastValidDryRunId = 0;
         double m_fScalingFactor = 1.0;
-        std::vector<std::string> m_consumedResourceNames;
+        std::vector<std::string> m_requestedResourceNames;
     };
     std::unordered_map<const ProteinInteraction*, InteractionData> m_interactions;
 

@@ -52,6 +52,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     
     // Update ATP consumption
     cell.m_fAtp -= requiredATP;
+    assert(cell.m_fAtp >= GridCell::MIN_ATP_LEVEL); // Assert ATP doesn't go below minimum
     
     return true;
 } 

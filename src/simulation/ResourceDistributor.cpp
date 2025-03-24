@@ -23,11 +23,34 @@ void ResourceDistributor::notifyNewDryRun(const class GridCell& cell)
     updateAvailableResources(cell);
 }
 
-void ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction& interaction)
+bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction& interaction)
 {
     // Look up or create an entry for this interaction
     auto& interactionData = m_interactions[&interaction];
     m_pCurInteraction = &interactionData;
+    if (isDryRun())
+    {
+        m_pCurInteraction->m_fScalingFactor = 1;
+        return true;
+    }
+    // previously we had real run - it had to have scaling factor of 1
+    assert(m_pCurInteraction->m_fScalingFactor == 1);
+    if (m_pCurInteraction->m_lastValidDryRunId != m_curDryRunId)
+    {
+        // the interaction didn't request any resources - we can skip it
+        return false;
+    }
+    // update the scaling factor
+    for (const auto &resourceName : m_pCurInteraction->m_requestedResourceNames)
+    {
+        auto it = m_resources.find(resourceName);
+        assert(it != m_resources.end() && it->second.m_dryRunId == m_curDryRunId);
+        double fResourceScalingFactor = it->second.computeScalingFactor();
+        // the interaction is constrained by the most scarce resource
+        m_pCurInteraction->m_fScalingFactor = std::min(m_pCurInteraction->m_fScalingFactor,
+            fResourceScalingFactor);
+    }
+    return true;
 }
 
 double ResourceDistributor::getAvailableResource(const std::string& resourceName)
@@ -53,7 +76,8 @@ void ResourceDistributor::notifyResourceWanted(const std::string& resourceName, 
     }
 
     it->second.m_fRequested += amount;
-    m_pCurInteraction->m_consumedResourceNames.push_back(resourceName);
+    m_pCurInteraction->m_requestedResourceNames.push_back(resourceName);
+    m_pCurInteraction->m_lastValidDryRunId = m_curDryRunId;
 }
 
 void ResourceDistributor::notifyNewRealRun()
