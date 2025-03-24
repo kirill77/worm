@@ -32,7 +32,10 @@ void ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
 
 double ResourceDistributor::getAvailableResource(const std::string& resourceName)
 {
-    return 0;
+    auto it = m_resources.find(resourceName);
+    if (it == m_resources.end())
+        return 0;
+    return it->second.m_fAvailable;
 }
 
 void ResourceDistributor::notifyResourceWanted(const std::string& resourceName, double amount)
