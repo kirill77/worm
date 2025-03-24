@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SurfaceBindingInteraction.h"
+#include "ResourceAllocation.h"
 #include <algorithm>
 #include <cmath>
 
@@ -18,7 +19,7 @@ SurfaceBindingInteraction::SurfaceBindingInteraction(
 {
 }
 
-bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
+bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
 {
     // Check for protein and binding sites
     auto proteinIt = cell.m_proteins.find(m_proteinName);
@@ -61,7 +62,6 @@ bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, double& atpCons
     // Apply binding if any occurs
     if (newBoundAmount > 0) {
         // Update ATP consumption
-        atpConsumed += requiredATP;
         cell.m_fAtp -= requiredATP;
         
         // Remove proteins from free populations

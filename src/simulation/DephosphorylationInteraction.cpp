@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DephosphorylationInteraction.h"
 #include "ProteinWiki.h"
+#include "ResourceAllocation.h"
 #include <algorithm>
 
 DephosphorylationInteraction::DephosphorylationInteraction(
@@ -13,7 +14,7 @@ DephosphorylationInteraction::DephosphorylationInteraction(
 {
 }
 
-bool DephosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
+bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
 {
     // Get phosphorylated protein population
     auto phosphorylatedIt = cell.m_proteins.find(m_phosphorylatedName);
@@ -49,7 +50,6 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, double& atpC
     unphosphorylatedPop.m_fNumber += recoveredAmount;
     
     // Update ATP consumption
-    atpConsumed += requiredATP;
     cell.m_fAtp -= requiredATP;
     
     return true;

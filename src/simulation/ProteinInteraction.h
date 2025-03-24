@@ -5,8 +5,9 @@
 #include <unordered_map>
 #include "Protein.h"
 
-// Forward declaration
+// Forward declarations
 class GridCell;
+class ResourceAllocation;
 
 /**
  * Base class for protein interactions.
@@ -48,10 +49,10 @@ public:
      * 
      * @param cell The grid cell containing proteins to act on
      * @param dt Time step in seconds
-     * @param atpConsumed Reference to track ATP consumed by this interaction
+     * @param resDistributor Object to handle resource distribution
      * @return true if any changes were made, false otherwise
      */
-    virtual bool apply(GridCell& cell, double dt, double& atpConsumed) const = 0;
+    virtual bool apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const = 0;
     
 protected:
     Mechanism m_mechanism;

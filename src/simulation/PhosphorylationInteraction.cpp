@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "PhosphorylationInteraction.h"
 #include "ProteinWiki.h"
+#include "ResourceAllocation.h"
 #include <algorithm>
 #include <cmath>
 
@@ -17,7 +18,7 @@ PhosphorylationInteraction::PhosphorylationInteraction(
 {
 }
 
-bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
+bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
 {
     // Get kinase amount
     auto kinaseIt = cell.m_proteins.find(m_kinaseName);
@@ -53,7 +54,6 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, double& atpCon
     // Apply the effect if any phosphorylation occurs
     if (phosphorylatedAmount > 0) {
         // Update ATP consumption
-        atpConsumed += requiredATP;
         cell.m_fAtp -= requiredATP;
         
         // Remove proteins from unphosphorylated population

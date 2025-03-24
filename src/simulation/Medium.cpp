@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Medium.h"
+#include "ProteinWiki.h"
+#include "ResourceAllocation.h"
 #include <random>
 #include <algorithm>
 #include <cassert>
@@ -140,17 +142,17 @@ void Medium::updateProteinInteraction(double fDt)
     // First, apply direct protein interactions
     for (size_t i = 0; i < m_grid.size(); ++i)
     {
-        // Track ATP consumption
-        double fAtpConsumed = 0.0;
-
-        // Apply each interaction to the cell
-        for (const auto& pInteraction : vecInteractions)
+        // at first make a dry run to figure out who needs which resources
+        m_resDistributor.notifyNewDryRun(m_grid[i]);
+        for (int i = 0; i < vecInteractions.size(); ++i)
         {
-            // Apply the interaction and track ATP consumption
-            pInteraction->apply(gridNew[i], fDt, fAtpConsumed);
+            vecInteractions[i]->apply(gridNew[i], fDt, m_resDistributor);
         }
 
-        // Update ATP (already done inside apply() method, this is just for clarity)
+        // now do the real run to distribute the resources
+        m_resDistributor.notifyNewRealRun();
+
+        // Ensure ATP doesn't go below zero
         gridNew[i].m_fAtp = std::max(0.0, gridNew[i].m_fAtp);
     }
 

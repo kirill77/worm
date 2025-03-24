@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ComplexFormationInteraction.h"
+#include "ResourceAllocation.h"
 #include <algorithm>
 #include <cmath>
 
@@ -17,7 +18,7 @@ ComplexFormationInteraction::ComplexFormationInteraction(
 {
 }
 
-bool ComplexFormationInteraction::apply(GridCell& cell, double dt, double& atpConsumed) const
+bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
 {
     // Check for both proteins
     auto firstProteinIt = cell.m_proteins.find(m_firstProteinName);
@@ -58,7 +59,6 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, double& atpCo
     // Apply binding if any occurs
     if (boundAmount > 0) {
         // Update ATP consumption
-        atpConsumed += requiredATP;
         cell.m_fAtp -= requiredATP;
         
         // Remove proteins from free populations
