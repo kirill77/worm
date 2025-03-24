@@ -19,7 +19,7 @@ public:
                                 const Parameters& params);
     
     // Apply dephosphorylation to proteins in the cell
-    bool apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const override;
+    bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const override;
     
 private:
     std::string m_targetName;    // Name of the target protein

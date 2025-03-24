@@ -23,7 +23,7 @@ public:
                               const Parameters& params);
     
     // Apply complex formation to proteins in the cell
-    bool apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const override;
+    bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const override;
     
 private:
     std::string m_firstProteinName;     // Name of first protein in complex

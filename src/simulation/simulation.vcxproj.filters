@@ -99,7 +99,7 @@
     <ClInclude Include="SurfaceBindingInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceAllocation.h">
+    <ClInclude Include="ResourceDistributor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -173,7 +173,7 @@
     <ClCompile Include="SurfaceBindingInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ResourceAllocation.cpp">
+    <ClCompile Include="ResourceDistributor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

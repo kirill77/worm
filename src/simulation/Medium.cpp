@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Medium.h"
 #include "ProteinWiki.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 #include <random>
 #include <algorithm>
 #include <cassert>

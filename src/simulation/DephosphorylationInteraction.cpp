@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "DephosphorylationInteraction.h"
 #include "ProteinWiki.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 #include <algorithm>
 
 DephosphorylationInteraction::DephosphorylationInteraction(
@@ -14,7 +14,7 @@ DephosphorylationInteraction::DephosphorylationInteraction(
 {
 }
 
-bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
+bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
     // Get phosphorylated protein population
     auto phosphorylatedIt = cell.m_proteins.find(m_phosphorylatedName);

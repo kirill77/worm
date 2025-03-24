@@ -10,7 +10,7 @@
 #include "math/vector.h"
 #include "ProteinWiki.h"
 #include "GridCell.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 
 class Medium
 {
@@ -47,7 +47,7 @@ public:
     void update(double dt);
 
 private:
-    ResourceAllocation m_resDistributor;
+    ResourceDistributor m_resDistributor;
 
     // Helper functions
     GridCell& findCell(const float3& position);

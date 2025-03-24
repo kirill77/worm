@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ComplexFormationInteraction.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 #include <algorithm>
 #include <cmath>
 
@@ -18,7 +18,7 @@ ComplexFormationInteraction::ComplexFormationInteraction(
 {
 }
 
-bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
+bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
     // Check for both proteins
     auto firstProteinIt = cell.m_proteins.find(m_firstProteinName);

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "PhosphorylationInteraction.h"
 #include "ProteinWiki.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 #include <algorithm>
 #include <cmath>
 
@@ -18,7 +18,7 @@ PhosphorylationInteraction::PhosphorylationInteraction(
 {
 }
 
-bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
+bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
     // Get kinase amount
     auto kinaseIt = cell.m_proteins.find(m_kinaseName);

@@ -1,21 +1,21 @@
 #include "pch.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 #include "GridCell.h"
 #include "ProteinInteraction.h"
 #include <cassert>
 #include <algorithm>
 
-ResourceAllocation::ResourceAllocation()
+ResourceDistributor::ResourceDistributor()
 {
     // Initialize with default values
 }
 
-ResourceAllocation::~ResourceAllocation()
+ResourceDistributor::~ResourceDistributor()
 {
     // Cleanup if needed
 }
 
-void ResourceAllocation::notifyNewDryRun(const class GridCell& cell)
+void ResourceDistributor::notifyNewDryRun(const class GridCell& cell)
 {
     // Start a new dry run - increment the ID to mark a new set of computations
     ++m_curDryRunId;
@@ -23,7 +23,7 @@ void ResourceAllocation::notifyNewDryRun(const class GridCell& cell)
     updateAvailableResources(cell);
 }
 
-double ResourceAllocation::notifyNewInteractionStarting(const ProteinInteraction& interaction)
+double ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction& interaction)
 {
     // Look up or create an entry for this interaction
     auto& interactionData = m_interactions[&interaction];
@@ -57,7 +57,7 @@ double ResourceAllocation::notifyNewInteractionStarting(const ProteinInteraction
     return interactionData.m_fScalingFactor;
 }
 
-void ResourceAllocation::notifyResourceConsumed(const std::string& resourceName, double amount)
+void ResourceDistributor::notifyResourceConsumed(const std::string& resourceName, double amount)
 {
     // Don't record zero or negative consumption
     if (amount <= 0.0)
@@ -93,13 +93,13 @@ void ResourceAllocation::notifyResourceConsumed(const std::string& resourceName,
     }
 }
 
-void ResourceAllocation::notifyNewRealRun()
+void ResourceDistributor::notifyNewRealRun()
 {
     assert(m_curRealRunId < m_curDryRunId);
     m_curRealRunId = m_curDryRunId;
 }
 
-void ResourceAllocation::updateAvailableResources(const GridCell &cell)
+void ResourceDistributor::updateAvailableResources(const GridCell &cell)
 {
     // Special case for ATP - it's stored directly in GridCell
     auto& atpResource = m_resources["ATP"];

@@ -7,7 +7,7 @@
 
 // Forward declarations
 class GridCell;
-class ResourceAllocation;
+class ResourceDistributor;
 
 /**
  * Base class for protein interactions.
@@ -52,7 +52,7 @@ public:
      * @param resDistributor Object to handle resource distribution
      * @return true if any changes were made, false otherwise
      */
-    virtual bool apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const = 0;
+    virtual bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const = 0;
     
 protected:
     Mechanism m_mechanism;

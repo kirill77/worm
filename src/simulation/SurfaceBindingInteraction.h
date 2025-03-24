@@ -25,7 +25,7 @@ public:
         const Parameters& params);
     
     // Apply binding to proteins in the cell
-    bool apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const override;
+    bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const override;
     
 private:
     std::string m_proteinName;            // Name of the protein to bind

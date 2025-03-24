@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SurfaceBindingInteraction.h"
-#include "ResourceAllocation.h"
+#include "ResourceDistributor.h"
 #include <algorithm>
 #include <cmath>
 
@@ -19,7 +19,7 @@ SurfaceBindingInteraction::SurfaceBindingInteraction(
 {
 }
 
-bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceAllocation& resDistributor) const
+bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
     // Check for protein and binding sites
     auto proteinIt = cell.m_proteins.find(m_proteinName);

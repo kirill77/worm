@@ -11,11 +11,11 @@
 // to fix that. It assumes the interactions will be applied in two passes. First pass (dry run)
 // gathers the information about used resources, and second pass distributes the resources
 // fairly between all interactions
-class ResourceAllocation
+class ResourceDistributor
 {
 public:
-    ResourceAllocation();
-    ~ResourceAllocation();
+    ResourceDistributor();
+    ~ResourceDistributor();
 
     void notifyNewDryRun(const class GridCell& cell);
 
