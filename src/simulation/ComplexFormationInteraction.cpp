@@ -66,11 +66,14 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     if (boundAmount > 0) {
         // Update ATP consumption
         cell.m_fAtp -= requiredATP;
-        assert(cell.m_fAtp >= GridCell::MIN_ATP_LEVEL); // Assert ATP doesn't go below minimum
+        assert(cell.m_fAtp >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from free populations
         firstProteinIt->second.m_fNumber -= boundAmount;
+        assert(firstProteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
+        
         secondProteinIt->second.m_fNumber -= boundAmount;
+        assert(secondProteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to complex population
         auto& complexPop = cell.getOrCreateProtein(m_complexName);
@@ -81,6 +84,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     if (dissociatedAmount > 0 && complexIt != cell.m_proteins.end()) {
         // Remove from complex population
         complexIt->second.m_fNumber -= dissociatedAmount;
+        assert(complexIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Return to free protein populations
         firstProteinIt->second.m_fNumber += dissociatedAmount;

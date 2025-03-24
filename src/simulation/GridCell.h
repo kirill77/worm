@@ -11,8 +11,8 @@
 class GridCell 
 {
 public:
-    // Minimum possible ATP level (to check with assertions)
-    static constexpr double MIN_ATP_LEVEL = 0.0;
+    // Minimum possible resource level (to check with assertions)
+    static constexpr double MIN_RESOURCE_LEVEL = 0.0;
 
     std::unordered_map<std::string, ProteinPopulation> m_proteins;
     std::vector<std::shared_ptr<MRNA>> m_pMRNAs;

@@ -69,11 +69,14 @@ bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceDistrib
     if (newBoundAmount > 0) {
         // Update ATP consumption
         cell.m_fAtp -= requiredATP;
-        assert(cell.m_fAtp >= GridCell::MIN_ATP_LEVEL); // Assert ATP doesn't go below minimum
+        assert(cell.m_fAtp >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from free populations
         proteinIt->second.m_fNumber -= newBoundAmount;
+        assert(proteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
+        
         bindingSiteIt->second.m_fNumber -= newBoundAmount;  // Occupy binding sites
+        assert(bindingSiteIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert binding site level doesn't go below minimum
         
         // Add to bound complex population
         auto& boundPop = cell.getOrCreateProtein(m_boundComplexName);
@@ -88,6 +91,7 @@ bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceDistrib
     if (dissociatedAmount > 0 && boundIt != cell.m_proteins.end()) {
         // Remove from bound complex population
         boundIt->second.m_fNumber -= dissociatedAmount;
+        assert(boundIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert complex level doesn't go below minimum
         
         // Return to free populations
         proteinIt->second.m_fNumber += dissociatedAmount;

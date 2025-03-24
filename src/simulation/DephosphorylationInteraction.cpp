@@ -45,6 +45,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
 
     // Remove from phosphorylated population
     phosphorylatedIt->second.m_fNumber -= recoveredAmount;
+    assert(phosphorylatedIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
     
     // Add back to original unphosphorylated population
     auto& unphosphorylatedPop = cell.getOrCreateProtein(m_targetName);
@@ -52,7 +53,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     
     // Update ATP consumption
     cell.m_fAtp -= requiredATP;
-    assert(cell.m_fAtp >= GridCell::MIN_ATP_LEVEL); // Assert ATP doesn't go below minimum
+    assert(cell.m_fAtp >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
     
     return true;
 } 
