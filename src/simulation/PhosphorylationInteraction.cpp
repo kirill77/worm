@@ -32,8 +32,8 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
         return false; // No target present
     }
     
-    double kinaseAmount = kinaseIt->second.m_fNumber;
-    double targetAmount = targetIt->second.m_fNumber;
+    double kinaseAmount = resDistributor.getAvailableResource(m_kinaseName);
+    double targetAmount = resDistributor.getAvailableResource(m_targetName);
     
     // Calculate phosphorylation using Hill-like kinetics
     double removalRate = m_removalRate * kinaseAmount / (m_saturationConstant + kinaseAmount);

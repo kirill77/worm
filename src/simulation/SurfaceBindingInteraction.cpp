@@ -30,8 +30,8 @@ bool SurfaceBindingInteraction::apply(GridCell& cell, double dt, ResourceDistrib
         return false; // Missing protein or binding sites
     }
     
-    double proteinAmount = proteinIt->second.m_fNumber;
-    double bindingSiteAmount = bindingSiteIt->second.m_fNumber;
+    double proteinAmount = resDistributor.getAvailableResource(m_proteinName);
+    double bindingSiteAmount = resDistributor.getAvailableResource(m_bindingSiteName);
     
     // Get current amount of bound complex, if any
     auto boundIt = cell.m_proteins.find(m_boundComplexName);

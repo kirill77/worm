@@ -25,7 +25,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     }
     
     // Calculate recovery
-    double phosphorylatedAmount = phosphorylatedIt->second.m_fNumber;
+    double phosphorylatedAmount = resDistributor.getAvailableResource(m_phosphorylatedName);
     double recoveredAmount = phosphorylatedAmount * m_recoveryRate * dt;
     
     if (recoveredAmount <= 0) {

@@ -29,8 +29,8 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         return false; // One or both proteins missing
     }
     
-    double firstProteinAmount = firstProteinIt->second.m_fNumber;
-    double secondProteinAmount = secondProteinIt->second.m_fNumber;
+    double firstProteinAmount = resDistributor.getAvailableResource(m_firstProteinName);
+    double secondProteinAmount = resDistributor.getAvailableResource(m_secondProteinName);
     
     // Calculate binding using mass action kinetics
     double bindingPotential = m_bindingRate * firstProteinAmount * secondProteinAmount / 
