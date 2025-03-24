@@ -33,7 +33,8 @@ void ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
 double ResourceDistributor::getAvailableResource(const std::string& resourceName)
 {
     auto it = m_resources.find(resourceName);
-    if (it == m_resources.end())
+    // if we don't have such resource, or the data is stale
+    if (it == m_resources.end() || it->second.m_dryRunId != m_curDryRunId)
         return 0;
     return it->second.m_fAvailable * m_pCurInteraction->m_fScalingFactor;
 }

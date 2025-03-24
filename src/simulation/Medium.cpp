@@ -140,14 +140,14 @@ void Medium::updateProteinInteraction(double fDt)
     const auto& vecInteractions = ProteinWiki::GetProteinInteractions();
     
     // First, apply direct protein interactions
-    for (size_t i = 0; i < m_grid.size(); ++i)
+    for (size_t uCell = 0; uCell < m_grid.size(); ++uCell)
     {
         // at first make a dry run to figure out who needs which resources
-        m_resDistributor.notifyNewDryRun(m_grid[i]);
+        m_resDistributor.notifyNewDryRun(m_grid[uCell]);
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
             m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
-            vecInteractions[i]->apply(gridNew[i], fDt, m_resDistributor);
+            vecInteractions[i]->apply(gridNew[uCell], fDt, m_resDistributor);
         }
 
         // now do the real run to distribute the resources
@@ -155,11 +155,11 @@ void Medium::updateProteinInteraction(double fDt)
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
             m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
-            vecInteractions[i]->apply(gridNew[i], fDt, m_resDistributor);
+            vecInteractions[i]->apply(gridNew[uCell], fDt, m_resDistributor);
         }
 
         // Ensure ATP doesn't go below zero
-        gridNew[i].m_fAtp = std::max(0.0, gridNew[i].m_fAtp);
+        gridNew[uCell].m_fAtp = std::max(0.0, gridNew[uCell].m_fAtp);
     }
 
     m_grid = std::move(gridNew);
