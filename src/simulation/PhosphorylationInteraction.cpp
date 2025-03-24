@@ -48,20 +48,13 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     if (resDistributor.isDryRun()) {
         if (phosphorylatedAmount > 0) {
             // Register our requirements with the resource distributor
-            resDistributor.notifyResourceConsumed("ATP", requiredATP);
-            resDistributor.notifyResourceConsumed(m_targetName, phosphorylatedAmount);
+            resDistributor.notifyResourceWanted("ATP", requiredATP);
+            resDistributor.notifyResourceWanted(m_targetName, phosphorylatedAmount);
             return true; // We're reporting resource needs
         }
         return false;
     }
-    
-    // This is the real run, get the scaling factor for this interaction
-    double scalingFactor = resDistributor.notifyNewInteractionStarting(*this);
-    
-    // Scale our resource usage by the scaling factor
-    phosphorylatedAmount *= scalingFactor;
-    requiredATP *= scalingFactor;
-    
+
     // Apply the effect if any phosphorylation occurs
     if (phosphorylatedAmount > 0) {
         // Update ATP consumption

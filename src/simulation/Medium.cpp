@@ -146,6 +146,7 @@ void Medium::updateProteinInteraction(double fDt)
         m_resDistributor.notifyNewDryRun(m_grid[i]);
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
+            m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
             vecInteractions[i]->apply(gridNew[i], fDt, m_resDistributor);
         }
 
@@ -153,6 +154,7 @@ void Medium::updateProteinInteraction(double fDt)
         m_resDistributor.notifyNewRealRun();
         for (int i = 0; i < vecInteractions.size(); ++i)
         {
+            m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
             vecInteractions[i]->apply(gridNew[i], fDt, m_resDistributor);
         }
 

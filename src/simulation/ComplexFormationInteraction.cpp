@@ -53,22 +53,15 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     if (resDistributor.isDryRun()) {
         if (boundAmount > 0) {
             // Register our requirements with the resource distributor
-            resDistributor.notifyResourceConsumed("ATP", requiredATP);
-            resDistributor.notifyResourceConsumed(m_firstProteinName, boundAmount);
-            resDistributor.notifyResourceConsumed(m_secondProteinName, boundAmount);
+            resDistributor.notifyResourceWanted("ATP", requiredATP);
+            resDistributor.notifyResourceWanted(m_firstProteinName, boundAmount);
+            resDistributor.notifyResourceWanted(m_secondProteinName, boundAmount);
             return true; // We're reporting resource needs
         }
         // Dissociation doesn't consume resources, but still return true if it occurs
         return dissociatedAmount > 0;
     }
-    
-    // This is the real run, get the scaling factor for this interaction
-    double scalingFactor = resDistributor.notifyNewInteractionStarting(*this);
-    
-    // Scale our binding resource usage by the scaling factor
-    boundAmount *= scalingFactor;
-    requiredATP *= scalingFactor;
-    
+
     // Apply binding if any occurs
     if (boundAmount > 0) {
         // Update ATP consumption

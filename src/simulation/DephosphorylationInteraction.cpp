@@ -38,18 +38,11 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     // If we're in a dry run, just report resource requirements and return
     if (resDistributor.isDryRun()) {
         // Register our requirements with the resource distributor
-        resDistributor.notifyResourceConsumed("ATP", requiredATP);
-        resDistributor.notifyResourceConsumed(m_phosphorylatedName, recoveredAmount);
+        resDistributor.notifyResourceWanted("ATP", requiredATP);
+        resDistributor.notifyResourceWanted(m_phosphorylatedName, recoveredAmount);
         return true; // We're reporting resource needs
     }
-    
-    // This is the real run, get the scaling factor for this interaction
-    double scalingFactor = resDistributor.notifyNewInteractionStarting(*this);
-    
-    // Scale our resource usage by the scaling factor
-    recoveredAmount *= scalingFactor;
-    requiredATP *= scalingFactor;
-    
+
     // Remove from phosphorylated population
     phosphorylatedIt->second.m_fNumber -= recoveredAmount;
     

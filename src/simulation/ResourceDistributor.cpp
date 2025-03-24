@@ -23,74 +23,33 @@ void ResourceDistributor::notifyNewDryRun(const class GridCell& cell)
     updateAvailableResources(cell);
 }
 
-double ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction& interaction)
+void ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction& interaction)
 {
     // Look up or create an entry for this interaction
     auto& interactionData = m_interactions[&interaction];
-
-    // Check if this interaction has already been processed in the current dry run
-    if (interactionData.m_dryRunId != m_curDryRunId)
-    {
-        // This is a new interaction for this dry run
-        interactionData.m_dryRunId = m_curDryRunId;
-        interactionData.m_consumedResourceNames.clear();
-        interactionData.m_fScalingFactor = 1.0;
-    }
-    else
-    {
-        // For the real run, compute the scaling factor based on resources consumed during the dry run
-
-        // Look through all resources this interaction consumed and find the most constraining one
-        for (const auto& resourceName : interactionData.m_consumedResourceNames)
-        {
-            auto resourceIt = m_resources.find(resourceName);
-            if (resourceIt != m_resources.end())
-            {
-                double resourceScaling = resourceIt->second.computeScalingFactor();
-
-                // Take the smallest scaling factor (most constraining resource)
-                interactionData.m_fScalingFactor = std::min(interactionData.m_fScalingFactor, resourceScaling);
-            }
-        }
-    }
-    
-    return interactionData.m_fScalingFactor;
+    m_pCurInteraction = &interactionData;
 }
 
-void ResourceDistributor::notifyResourceConsumed(const std::string& resourceName, double amount)
+double ResourceDistributor::getAvailableResource(const std::string& resourceName)
 {
-    // Don't record zero or negative consumption
-    if (amount <= 0.0)
+    return 0;
+}
+
+void ResourceDistributor::notifyResourceWanted(const std::string& resourceName, double amount)
+{
+    assert(amount > 0); // seems sub-optimal - this interaction must have bailed out earlier
+
+    auto it = m_resources.find(resourceName);
+    
+    // if we don't have such resource - can't distribute it
+    if (it == m_resources.end())
     {
+        assert(false); // seems sub-optimal - this interaction must have bailed out earlier
         return;
     }
-    
-    // Create or get the resource record
-    auto& resource = m_resources[resourceName];
-    
-    // If this is a dry run
-    if (m_curRealRunId == 0)
-    {
-        // Track consumption during dry run
-        resource.m_fConsumed += amount;
-        
-        // Add this resource to the current interaction's list of consumed resources
-        auto currentInteractionIt = m_interactions.begin();
-        while (currentInteractionIt != m_interactions.end() && currentInteractionIt->second.m_dryRunId != m_curDryRunId)
-        {
-            ++currentInteractionIt;
-        }
-        
-        if (currentInteractionIt != m_interactions.end())
-        {
-            // Add to consumed resources if not already there
-            auto& consumedResources = currentInteractionIt->second.m_consumedResourceNames;
-            if (std::find(consumedResources.begin(), consumedResources.end(), resourceName) == consumedResources.end())
-            {
-                consumedResources.push_back(resourceName);
-            }
-        }
-    }
+
+    it->second.m_fRequested += amount;
+    m_pCurInteraction->m_consumedResourceNames.push_back(resourceName);
 }
 
 void ResourceDistributor::notifyNewRealRun()

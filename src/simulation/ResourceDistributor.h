@@ -19,11 +19,11 @@ public:
 
     void notifyNewDryRun(const class GridCell& cell);
 
-    // returns coefficient for this new interaction
-    double notifyNewInteractionStarting(const class ProteinInteraction &interaction);
+    void notifyNewInteractionStarting(const class ProteinInteraction &interaction);
 
-    // interaction tells us about the resource it has consumed
-    void notifyResourceConsumed(const std::string& resourceName, double m_fNumber);
+    double getAvailableResource(const std::string& resourceName);
+
+    void notifyResourceWanted(const std::string& resourceName, double m_fNumber);
 
     void notifyNewRealRun();
 
@@ -37,11 +37,11 @@ private:
     struct ResourceData
     {
         uint64_t m_dryRunId = 0;
-        double m_fConsumed = 0, m_fAvailable = 0;
+        double m_fRequested = 0, m_fAvailable = 0;
         double computeScalingFactor()
         {
-            assert(m_fConsumed >= 0 && m_fAvailable >= 0);
-            return m_fAvailable >= m_fConsumed ? 1 : m_fAvailable / m_fConsumed;
+            assert(m_fRequested >= 0 && m_fAvailable >= 0);
+            return m_fAvailable >= m_fRequested ? 1 : m_fAvailable / m_fRequested;
         }
     };
     std::unordered_map<std::string, ResourceData> m_resources;
@@ -53,4 +53,6 @@ private:
         std::vector<std::string> m_consumedResourceNames;
     };
     std::unordered_map<const ProteinInteraction*, InteractionData> m_interactions;
+
+    InteractionData* m_pCurInteraction = nullptr;
 }; 
