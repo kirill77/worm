@@ -56,20 +56,20 @@ std::shared_ptr<Membrane> Worm::createZygoteMembrane()
 
     // Create and add anterior proteins at the anterior cortex
     ProteinPopulation par3("PAR-3", 3.9e5);
-    pInternalMedium->addProtein(par3, float3(0, 0.95f, 0));
+    pInternalMedium->addProtein(par3, float3(0, 1.f, 0));
 
     ProteinPopulation par6("PAR-6", 3.9e5);
-    pInternalMedium->addProtein(par6, float3(0, 0.95f, 0));
+    pInternalMedium->addProtein(par6, float3(0, 1.f, 0));
 
     ProteinPopulation pkc3("PKC-3", 3.9e5);
-    pInternalMedium->addProtein(pkc3, float3(0, 0.95f, 0));
+    pInternalMedium->addProtein(pkc3, float3(0, 1.f, 0));
 
     // Create and add posterior proteins at the posterior cortex
     ProteinPopulation par1("PAR-1", 3.9e5);
-    pInternalMedium->addProtein(par1, float3(0, -0.95f, 0));
+    pInternalMedium->addProtein(par1, float3(0, -1.f, 0));
 
     ProteinPopulation par2("PAR-2", 3.9e5);
-    pInternalMedium->addProtein(par2, float3(0, -0.95f, 0));
+    pInternalMedium->addProtein(par2, float3(0, -1.f, 0));
 
     // Initialize maternal proteins at cell center
     float3 center(0.0f, 0.0f, 0.0f);

@@ -10,8 +10,8 @@ class Mitochondrion : public Organelle
 private:
     double m_fNumber;  // Number of mitochondria in the population
     
-    static constexpr double ATP_PRODUCTION_RATE = 1.5;
-    static constexpr double N_INITIAL_MITOCHONDRIA = 1e5;
+    static constexpr double ATP_PRODUCTION_RATE = 1000;
+    static constexpr double N_INITIAL_MITOCHONDRIA = 200;
     
     // Random number generator for ATP distribution
     std::mt19937 m_rng;
