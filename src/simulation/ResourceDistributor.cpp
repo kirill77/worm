@@ -31,6 +31,7 @@ bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
     if (isDryRun())
     {
         m_pCurInteraction->m_fScalingFactor = 1;
+        m_pCurInteraction->m_requestedResourceNames.resize(0);
         return true;
     }
     // previously we had real run - it had to have scaling factor of 1
