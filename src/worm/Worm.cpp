@@ -125,13 +125,13 @@ void Worm::setupDataCollector()
     m_pDataCollector->addCollectionPoint(
         anteriorPos, 
         "Anterior", 
-        {par2Membrane, par3Membrane, "PAR-2", "PAR-3", "PKC-3"}
+        {par2Membrane, par3Membrane, "PAR-2", "PAR-3", "PKC-3", "BINDING-SITE-MEMBRANE"}
     );
     
     m_pDataCollector->addCollectionPoint(
         posteriorPos, 
         "Posterior", 
-        {par2Membrane, par3Membrane, "PAR-1", "PAR-2"}
+        {par2Membrane, par3Membrane, "PAR-1", "PAR-2", "BINDING-SITE-MEMBRANE"}
     );
 }
 

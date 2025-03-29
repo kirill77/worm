@@ -19,9 +19,7 @@ Cell::Cell(std::shared_ptr<Membrane> pMembrane, const std::vector<Chromosome>& c
     // Initialize binding sites in the cell's membrane
     if (m_pMembrane)
     {
-        // Add binding sites throughout the medium
-        // The coordinates are normalized between -1 and 1
-        m_pMembrane->initializeBindingSites(1000.0);
+        m_pMembrane->initializeBindingSites(4000000.0);
     }
 }
 
