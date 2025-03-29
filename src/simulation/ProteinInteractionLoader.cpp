@@ -4,11 +4,25 @@
 #include "fileUtils/fileUtils.h"
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 // Define the expected CSV file names
 static const std::string PHOSPHORYLATION_FILE = "phosphorylation.csv";
 static const std::string DEPHOSPHORYLATION_FILE = "dephosphorylation.csv";
 static const std::string COMPLEX_FORMATION_FILE = "complex_formation.csv";
+
+// Helper function to trim whitespace from a string
+static std::string TrimWhitespace(const std::string& str) {
+    auto start = std::find_if_not(str.begin(), str.end(), [](unsigned char c) {
+        return std::isspace(c);
+    });
+    
+    auto end = std::find_if_not(str.rbegin(), str.rend(), [](unsigned char c) {
+        return std::isspace(c);
+    }).base();
+    
+    return (start < end) ? std::string(start, end) : std::string();
+}
 
 std::vector<std::shared_ptr<ProteinInteraction>> ProteinInteractionLoader::LoadAllInteractions(const std::string& basePath)
 {
@@ -94,7 +108,7 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
         
         // Parse CSV row
         while (std::getline(ss, cell, ',')) {
-            values.push_back(cell);
+            values.push_back(TrimWhitespace(cell));
         }
         
         // Ensure we have enough values
@@ -105,8 +119,8 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
         
         try {
             // Extract values
-            std::string kinaseName = values[0];
-            std::string targetName = values[1];
+            std::string kinaseName = values[0]; // Already trimmed
+            std::string targetName = values[1]; // Already trimmed
             double removalRate = std::stod(values[2]);
             double saturationConstant = std::stod(values[3]);
             
@@ -156,7 +170,7 @@ std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoa
         
         // Parse CSV row
         while (std::getline(ss, cell, ',')) {
-            values.push_back(cell);
+            values.push_back(TrimWhitespace(cell));
         }
         
         // Ensure we have enough values
@@ -167,7 +181,7 @@ std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoa
         
         try {
             // Extract values
-            std::string targetName = values[0];
+            std::string targetName = values[0]; // Already trimmed
             double recoveryRate = std::stod(values[1]);
             
             // Create interaction parameters
@@ -215,7 +229,7 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> ProteinInteractionLoad
         
         // Parse CSV row
         while (std::getline(ss, cell, ',')) {
-            values.push_back(cell);
+            values.push_back(TrimWhitespace(cell));
         }
         
         // Ensure we have enough values
@@ -226,8 +240,8 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> ProteinInteractionLoad
         
         try {
             // Extract values
-            std::string firstProtein = values[0];
-            std::string secondProtein = values[1];
+            std::string firstProtein = values[0]; // Already trimmed
+            std::string secondProtein = values[1]; // Already trimmed
             double bindingRate = std::stod(values[2]);
             double dissociationRate = std::stod(values[3]);
             double saturationConstant = std::stod(values[4]);
