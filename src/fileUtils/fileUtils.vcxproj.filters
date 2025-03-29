@@ -21,9 +21,6 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MyTime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="fileUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -23,6 +23,9 @@ private:
 
     // Private constructor to prevent instantiation
     ProteinWiki() = default;
+    
+    // Helper method to load default hardcoded interactions
+    static void LoadDefaultInteractions();
 
 public:
     // Initialize all known protein interactions

@@ -4,8 +4,12 @@
 #include "ComplexFormationInteraction.h"
 #include "DephosphorylationInteraction.h"
 #include "ProteinBindingSurface.h"
+#include "ProteinInteractionLoader.h"
+#include "log/ILog.h"
+#include "fileUtils/fileUtils.h"
 #include <algorithm>
 #include <iterator>
+#include <filesystem>
 
 // Initialize static members
 std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::s_proteinInteractions;
@@ -15,98 +19,49 @@ void ProteinWiki::Initialize()
     // Clear any existing interactions
     s_proteinInteractions.clear();
     
-    // === PHOSPHORYLATION INTERACTIONS ===
+    // Try to find the data directory
+    std::filesystem::path dataPath;
+    bool dataFolderFound = false;
     
-    // PKC-3 (kinase) phosphorylates posterior PARs, but only when in complex with PAR-6
-    PhosphorylationInteraction::Parameters pkc3ComplexToParParams{
-        0.9,    // High removal rate (strong kinase)
-        0.07,   // Saturation constant for Hill-type kinetics
-    };
+    // First try to find a "data" folder relative to the current directory
+    if (std::filesystem::exists("data/proteinRules")) {
+        dataPath = "data/proteinRules";
+        dataFolderFound = true;
+    } 
+    // Then try to use the fileUtils helper
+    else if (FileUtils::findTheFolder("data", dataPath)) {
+        dataPath /= "proteinRules";
+        if (std::filesystem::exists(dataPath)) {
+            dataFolderFound = true;
+        }
+    }
     
-    // PAR-1 (kinase) phosphorylates PAR-3
-    PhosphorylationInteraction::Parameters par1ToPar3Params{
-        0.7,    // Medium-high removal rate
-        0.06,   // Saturation constant for Hill-type kinetics
-    };
+    // Try a few common paths relative to executable
+    if (!dataFolderFound) {
+        std::vector<std::string> commonPaths = {
+            "../data/proteinRules",
+            "../../data/proteinRules",
+            "../../../data/proteinRules"
+        };
+        
+        for (const auto& path : commonPaths) {
+            if (std::filesystem::exists(path)) {
+                dataPath = path;
+                dataFolderFound = true;
+                break;
+            }
+        }
+    }
     
-    // Add phosphorylation interactions - using the PAR-6-PKC-3 complex as the active kinase
-    s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
-        "PAR-6-PKC-3", "PAR-2", pkc3ComplexToParParams));
-    s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
-        "PAR-6-PKC-3", "PAR-1", pkc3ComplexToParParams));
-    s_proteinInteractions.push_back(std::make_shared<PhosphorylationInteraction>(
-        "PAR-1", "PAR-3", par1ToPar3Params));
-    
-    // === DEPHOSPHORYLATION INTERACTIONS ===
-    
-    // Add dephosphorylation interactions for each protein
-    DephosphorylationInteraction::Parameters dephosphoParams{
-        0.07,    // Recovery rate
-    };
-    
-    s_proteinInteractions.push_back(std::make_shared<DephosphorylationInteraction>(
-        "PAR-2", dephosphoParams));
-    s_proteinInteractions.push_back(std::make_shared<DephosphorylationInteraction>(
-        "PAR-1", dephosphoParams));
-    s_proteinInteractions.push_back(std::make_shared<DephosphorylationInteraction>(
-        "PAR-3", dephosphoParams));
-    
-    // === COMPLEX FORMATION INTERACTIONS ===
-    
-    // PAR-3 and PAR-6 form a complex
-    ComplexFormationInteraction::Parameters par3Par6ComplexParams{
-        0.5,             // Binding rate
-        0.05,            // Dissociation rate 
-        600.0,           // Saturation constant
-        "PAR-3-PAR-6"    // Complex name
-    };
-    
-    // PAR-6 and PKC-3 form a complex
-    ComplexFormationInteraction::Parameters par6Pkc3ComplexParams{
-        0.4,             // Binding rate
-        0.04,            // Dissociation rate
-        700.0,           // Saturation constant
-        "PAR-6-PKC-3"    // Complex name
-    };
-    
-    // Add complex formation interactions
-    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
-        "PAR-3", "PAR-6", par3Par6ComplexParams));
-    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
-        "PAR-6", "PKC-3", par6Pkc3ComplexParams));
-          
-    // Define binding site name for membrane
-    std::string bindingSiteName = GetBindingSiteName(BindingSurface::MEMBRANE);
-    
-    // Parameters for PAR protein binding to membrane (converted to ComplexFormationInteraction parameters)
-    ComplexFormationInteraction::Parameters par1MembraneParams{
-        0.6,    // High binding rate for posterior proteins
-        0.04,   // Moderate dissociation rate
-        800.0,  // Saturation constant
-        GetBoundProteinName("PAR-1", BindingSurface::MEMBRANE)  // Complex name
-    };
-    
-    ComplexFormationInteraction::Parameters par2MembraneParams{
-        0.5,    // Medium binding rate
-        0.03,   // Low dissociation rate
-        900.0,  // Saturation constant
-        GetBoundProteinName("PAR-2", BindingSurface::MEMBRANE)  // Complex name
-    };
-    
-    ComplexFormationInteraction::Parameters par3MembraneParams{
-        0.4,    // Lower binding rate for anterior proteins
-        0.1,    // Higher dissociation rate
-        1000.0, // Saturation constant
-        GetBoundProteinName("PAR-3", BindingSurface::MEMBRANE)  // Complex name
-    };
-    
-    // Add membrane binding interactions (now using ComplexFormationInteraction)
-    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
-        "PAR-1", bindingSiteName, par1MembraneParams));
-    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
-        "PAR-2", bindingSiteName, par2MembraneParams));
-    s_proteinInteractions.push_back(std::make_shared<ComplexFormationInteraction>(
-        "PAR-3", bindingSiteName, par3MembraneParams));
+    if (dataFolderFound) {
+        LOG_INFO("Loading protein interactions from %s", dataPath.string().c_str());
+        s_proteinInteractions = ProteinInteractionLoader::LoadAllInteractions(dataPath.string());
+        if (s_proteinInteractions.empty()) {
+            LOG_ERROR("No protein interactions were loaded from CSV files.");
+        }
+    } else {
+        LOG_ERROR("Interaction data directory not found. Using default hardcoded interactions.");
+    }
 }
 
 const std::vector<std::shared_ptr<ProteinInteraction>>& ProteinWiki::GetProteinInteractions()

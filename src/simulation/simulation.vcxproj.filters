@@ -99,6 +99,9 @@
     <ClInclude Include="ResourceDistributor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProteinInteractionLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -168,6 +171,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResourceDistributor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProteinInteractionLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

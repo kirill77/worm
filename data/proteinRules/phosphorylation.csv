@@ -1,0 +1,6 @@
+kinase,target,removal_rate,saturation_constant
+# PKC-3 complex phosphorylates posterior PARs
+PAR-6-PKC-3,PAR-2,0.9,0.07
+PAR-6-PKC-3,PAR-1,0.9,0.07
+# PAR-1 phosphorylates PAR-3
+PAR-1,PAR-3,0.7,0.06 
