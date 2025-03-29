@@ -56,8 +56,9 @@ public:
     /**
      * @brief Force data collection at current time
      * @param currentTime Current simulation time
+     * @param stepTimeMs Time taken for the current simulation step in milliseconds
      */
-    void forceCollection(double currentTime);
+    void forceCollection(double currentTime, double stepTimeMs = 0.0);
     
     /**
      * @brief Set collection interval
@@ -73,15 +74,17 @@ private:
     double m_lastCollectionTime = 0.0;          // Last time data was collected
     double m_collectionInterval;                // How often to collect data
     size_t m_dataPointCount = 0;                // Total data points collected
+    std::unordered_map<std::string, double> m_performanceMetrics; // Performance metrics like step time
     
     /**
      * @brief Collect all data at current time
      * @param currentTime Current simulation time
+     * @param stepTimeMs Time taken for the current simulation step in milliseconds
      */
-    void collectData(double currentTime);
+    void collectData(double currentTime, double stepTimeMs);
     
     /**
-     * @brief Generate headers for CSV file based on collection points
+     * @brief Generate headers for CSV file based on collection points and performance metrics
      */
     std::vector<std::string> generateHeaders() const;
 }; 

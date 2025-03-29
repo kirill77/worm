@@ -7,6 +7,7 @@
 #include "simulation/Spindle.h"
 #include "simulation/ProteinWiki.h"
 #include "log/ILog.h"
+#include <chrono> // For high_resolution_clock
 
 std::vector<Chromosome> Worm::initializeGenes()
 {
@@ -136,15 +137,23 @@ void Worm::setupDataCollector()
 
 void Worm::simulateStep(double dt)
 {
+    // Use local variables for timing
+    auto stepStartTime = std::chrono::high_resolution_clock::now();
+    
     // Call the base class simulateStep to handle standard simulation
     Organism::simulateStep(dt);
+    
+    // Calculate time taken for this step using local variables
+    auto stepEndTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stepEndTime - stepStartTime);
+    double stepTimeMsec = duration.count() / 1000.0; // Convert to milliseconds
     
     // Update total simulation time
     m_fTotalTime += static_cast<float>(dt);
     
     // Force data collection at the current time (regardless of interval)
     if (m_pDataCollector) {
-        m_pDataCollector->forceCollection(m_fTotalTime);
+        m_pDataCollector->forceCollection(m_fTotalTime, stepTimeMsec);
     }
 }
 

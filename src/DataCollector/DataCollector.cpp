@@ -6,6 +6,9 @@ DataCollector::DataCollector(Medium& medium, const std::string& outputFile, doub
     , m_outputFile(outputFile)
     , m_collectionInterval(collectionInterval)
 {
+    // Initialize performance metrics
+    m_performanceMetrics["StepTime"] = 0.0;
+    
     // Defer CSV file creation until we have collection points and know the headers
 }
 
@@ -38,23 +41,26 @@ bool DataCollector::update(double currentTime)
 {
     // Check if it's time to collect data
     if (currentTime >= m_lastCollectionTime + m_collectionInterval) {
-        collectData(currentTime);
+        collectData(currentTime, 0.0); // No step time info for regular updates
         return true;
     }
     return false;
 }
 
-void DataCollector::forceCollection(double currentTime)
+void DataCollector::forceCollection(double currentTime, double stepTimeMs)
 {
-    collectData(currentTime);
+    collectData(currentTime, stepTimeMs);
 }
 
-void DataCollector::collectData(double currentTime)
+void DataCollector::collectData(double currentTime, double stepTimeMs)
 {
     // Make sure we have a CSV file and collection points
     if (!m_csvFile || m_collectionPoints.empty()) {
         return;
     }
+    
+    // Store the step time
+    m_performanceMetrics["StepTime"] = stepTimeMs;
     
     // Prepare row of data
     std::vector<double> dataRow;
@@ -73,6 +79,11 @@ void DataCollector::collectData(double currentTime)
     for (const auto& point : m_collectionPoints) {
         double atp = m_medium.getAvailableATP(point.position);
         dataRow.push_back(atp);
+    }
+    
+    // Add performance metrics
+    for (const auto& metric : m_performanceMetrics) {
+        dataRow.push_back(metric.second);
     }
     
     // Add the row to the CSV file
@@ -105,6 +116,11 @@ std::vector<std::string> DataCollector::generateHeaders() const
     // Add ATP headers for each point
     for (const auto& point : m_collectionPoints) {
         headers.push_back("ATP_" + point.name);
+    }
+    
+    // Add performance metric headers
+    for (const auto& metric : m_performanceMetrics) {
+        headers.push_back(metric.first + "(ms)");
     }
     
     return headers;
