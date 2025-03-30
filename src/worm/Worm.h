@@ -9,7 +9,7 @@
 class Worm : public Organism
 {
 private:
-    std::shared_ptr<class Membrane> createZygoteMembrane();
+    std::shared_ptr<class Cortex> createZygoteCortex();
     std::vector<Chromosome> initializeGenes();
 
     void setupDataCollector();  // Method to set up the data collector

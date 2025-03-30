@@ -152,7 +152,7 @@
     <ClInclude Include="Gene.h" />
     <ClInclude Include="GeneWiki.h" />
     <ClInclude Include="Medium.h" />
-    <ClInclude Include="Membrane.h" />
+    <ClInclude Include="Cortex.h" />
     <ClInclude Include="Metabolite.h" />
     <ClInclude Include="Mitochondrion.h" />
     <ClInclude Include="MRNA.h" />
@@ -181,7 +181,7 @@
     <ClCompile Include="Gene.cpp" />
     <ClCompile Include="GeneWiki.cpp" />
     <ClCompile Include="Medium.cpp" />
-    <ClCompile Include="Membrane.cpp" />
+    <ClCompile Include="Cortex.cpp" />
     <ClCompile Include="Mitochondrion.cpp" />
     <ClCompile Include="MRNA.cpp" />
     <ClCompile Include="Nucleus.cpp" />

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include "Membrane.h"
+#include "Cortex.h"
 #include "CellTypes.h"
 #include "Chromosome.h"
 
@@ -31,7 +31,7 @@ class Cell
 {
 private:
     std::vector<std::shared_ptr<class Organelle>> m_pOrganelles;
-    std::shared_ptr<Membrane> m_pMembrane;
+    std::shared_ptr<Cortex> m_pCortex;
     CellCycleState m_cellCycleState;
     CellType m_type;  // Store type just for spindle creation
 
@@ -43,14 +43,13 @@ private:
 
 public:
     // Constructor that takes a membrane instead of a medium
-    Cell(std::shared_ptr<Membrane> pMembrane, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
+    Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
     
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
     
-    // Access to internal medium through the membrane
-    std::shared_ptr<Membrane> getMembrane() const { return m_pMembrane; }
-    Medium& getInternalMedium() const { return m_pMembrane->getInternalMedium(); }
+    // Access to internal medium
+    Medium& getInternalMedium() const { return m_pCortex->getInternalMedium(); }
     
     std::shared_ptr<class Spindle> getSpindle() const;  // Made public for Chromosome access
 

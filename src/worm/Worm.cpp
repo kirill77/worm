@@ -3,7 +3,7 @@
 #include "simulation/Cell.h"
 #include "simulation/Protein.h"
 #include "simulation/Medium.h"
-#include "simulation/Membrane.h"
+#include "simulation/Cortex.h"
 #include "simulation/Spindle.h"
 #include "simulation/ProteinWiki.h"
 #include "log/ILog.h"
@@ -50,7 +50,7 @@ std::vector<Chromosome> Worm::initializeGenes()
     return chromosomes;
 }
 
-std::shared_ptr<Membrane> Worm::createZygoteMembrane()
+std::shared_ptr<Cortex> Worm::createZygoteCortex()
 {
     // Create the internal medium
     std::shared_ptr<Medium> pInternalMedium = std::make_shared<Medium>();
@@ -82,14 +82,14 @@ std::shared_ptr<Membrane> Worm::createZygoteMembrane()
     pInternalMedium->addProtein(cyb1, center);
 
     // Create a membrane with the internal medium
-    return std::make_shared<Membrane>(pInternalMedium);
+    return std::make_shared<Cortex>(pInternalMedium);
 }
 
 Worm::Worm()
 {
     auto chromosomes = initializeGenes();
-    std::shared_ptr<Membrane> pMembrane = createZygoteMembrane();
-    auto pCell = std::make_shared<Cell>(pMembrane, chromosomes);
+    std::shared_ptr<Cortex> pCortex = createZygoteCortex();
+    auto pCell = std::make_shared<Cell>(pCortex, chromosomes);
     m_pCells.push_back(pCell);
     
     // Set up the data collector
@@ -118,20 +118,20 @@ void Worm::setupDataCollector()
     float3 posteriorPos(0.0f, -1.f, 0.0f); // Posterior position
     
     // Get membrane-bound protein names using the utility function
-    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::MEMBRANE);
-    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::MEMBRANE);
+    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::CORTEX);
+    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::CORTEX);
     
     // Add collection points with specific proteins to track
     m_pDataCollector->addCollectionPoint(
         anteriorPos, 
         "Anterior", 
-        {par2Membrane, par3Membrane, "PAR-2", "PAR-3", "PKC-3", "BINDING-SITE-MEMBRANE"}
+        {par2Membrane, par3Membrane, "PAR-2", "PAR-3", "PKC-3", "BINDING-SITE-CORTEX"}
     );
     
     m_pDataCollector->addCollectionPoint(
         posteriorPos, 
         "Posterior", 
-        {par2Membrane, par3Membrane, "PAR-1", "PAR-2", "BINDING-SITE-MEMBRANE"}
+        {par2Membrane, par3Membrane, "PAR-1", "PAR-2", "BINDING-SITE-CORTEX"}
     );
 }
 
@@ -177,8 +177,8 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     float3 posteriorPos(0.0f, -1.f, 0.0f);
     
     // Get membrane-bound protein names using the utility function
-    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::MEMBRANE);
-    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::MEMBRANE);
+    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::CORTEX);
+    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::CORTEX);
     
     // Check membrane-bound proteins
     double anteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, anteriorPos);

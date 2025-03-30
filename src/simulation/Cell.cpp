@@ -6,8 +6,8 @@
 #include "MRNA.h"
 #include "log/ILog.h"
 
-Cell::Cell(std::shared_ptr<Membrane> pMembrane, const std::vector<Chromosome>& chromosomes, CellType type)
-    : m_pMembrane(pMembrane)
+Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type)
+    : m_pCortex(pCortex)
     , m_cellCycleState(CellCycleState::INTERPHASE)
     , m_type(type)
 {
@@ -17,16 +17,16 @@ Cell::Cell(std::shared_ptr<Membrane> pMembrane, const std::vector<Chromosome>& c
     // add other organelles as needed
     
     // Initialize binding sites in the cell's membrane
-    if (m_pMembrane)
+    if (m_pCortex)
     {
-        m_pMembrane->initializeBindingSites(4000000.0);
+        m_pCortex->initializeBindingSites(4000000.0);
     }
 }
 
 void Cell::update(double fDt)
 {
     // Update all organelles - pass the internal medium to organelles
-    Medium& internalMedium = m_pMembrane->getInternalMedium();
+    Medium& internalMedium = m_pCortex->getInternalMedium();
     for (auto& pOrg : m_pOrganelles)
     {
         pOrg->update(fDt, *this, internalMedium);
@@ -36,7 +36,7 @@ void Cell::update(double fDt)
     checkCellCycleTransitions();
     
     // Update the membrane which in turn will update the internal medium
-    m_pMembrane->update(fDt);
+    m_pCortex->update(fDt);
 }
 
 std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
@@ -55,14 +55,14 @@ bool Cell::consumeATP(double fAmount)
 {
     // Consume ATP from internal medium at cell's position (center)
     float3 position(0.0f, 0.0f, 0.0f);
-    return m_pMembrane->getInternalMedium().consumeATP(fAmount, position);
+    return m_pCortex->getInternalMedium().consumeATP(fAmount, position);
 }
 
 void Cell::checkCellCycleTransitions()
 {
     // Get key protein concentrations from internal medium
     float3 center(0, 0, 0);
-    Medium& internalMedium = m_pMembrane->getInternalMedium();
+    Medium& internalMedium = m_pCortex->getInternalMedium();
     double fCdk1 = internalMedium.getProteinNumber("CDK-1", center);
     double fCyclinB = internalMedium.getProteinNumber("CYB-1", center);
     double fPlk1 = internalMedium.getProteinNumber("PLK-1", center);

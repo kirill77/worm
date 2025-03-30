@@ -10,7 +10,7 @@
  * the internal cellular environment from the external environment.
  * It mediates interactions between internal and external media.
  */
-class Membrane : public ProteinBindingSurface
+class Cortex : public ProteinBindingSurface
 {
 private:
     std::shared_ptr<Medium> m_pInternalMedium;  // Internal cellular environment
@@ -25,7 +25,7 @@ public:
      * @param fThickness Membrane thickness in micrometers
      * @param fSurfaceArea Surface area in square micrometers
      */
-    Membrane(std::shared_ptr<Medium> pInternalMedium,
+    Cortex(std::shared_ptr<Medium> pInternalMedium,
         double fThickness = 0.01); // Default 10nm thickness
 
     /**

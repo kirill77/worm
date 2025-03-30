@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "Membrane.h"
+#include "Cortex.h"
 #include "Medium.h"
 #include "log/ILog.h"
 #include <algorithm>
 #include <cmath>
 
-Membrane::Membrane(std::shared_ptr<Medium> pInternalMedium, double fThickness)
-    : ProteinBindingSurface(ProteinWiki::BindingSurface::MEMBRANE) // Initialize binding surface with enum
+Cortex::Cortex(std::shared_ptr<Medium> pInternalMedium, double fThickness)
+    : ProteinBindingSurface(ProteinWiki::BindingSurface::CORTEX) // Initialize binding surface with enum
     , m_pInternalMedium(pInternalMedium)
     , m_fThickness(fThickness)
 {
@@ -18,7 +18,7 @@ Membrane::Membrane(std::shared_ptr<Medium> pInternalMedium, double fThickness)
     }
 }
 
-void Membrane::update(double dt)
+void Cortex::update(double dt)
 {
     // Update internal medium - its dynamics are independent of external medium
     m_pInternalMedium->update(dt);
@@ -31,7 +31,7 @@ void Membrane::update(double dt)
     // - Signal transduction
 }
 
-bool Membrane::transportProteinInward(Medium& externalMedium, 
+bool Cortex::transportProteinInward(Medium& externalMedium, 
                                      const std::string& proteinName, 
                                      double amount, 
                                      const float3& position)
@@ -58,7 +58,7 @@ bool Membrane::transportProteinInward(Medium& externalMedium,
     return true;
 }
 
-bool Membrane::transportProteinOutward(Medium& externalMedium,
+bool Cortex::transportProteinOutward(Medium& externalMedium,
                                       const std::string& proteinName,
                                       double amount,
                                       const float3& position)
@@ -83,7 +83,7 @@ bool Membrane::transportProteinOutward(Medium& externalMedium,
     return true;
 }
 
-bool Membrane::transportATPInward(Medium& externalMedium,
+bool Cortex::transportATPInward(Medium& externalMedium,
                                  double amount,
                                  const float3& position)
 {
@@ -103,7 +103,7 @@ bool Membrane::transportATPInward(Medium& externalMedium,
     return true;
 }
 
-bool Membrane::transportATPOutward(Medium& externalMedium,
+bool Cortex::transportATPOutward(Medium& externalMedium,
                                   double amount,
                                   const float3& position)
 {
@@ -123,7 +123,7 @@ bool Membrane::transportATPOutward(Medium& externalMedium,
     return true;
 }
 
-bool Membrane::initializeBindingSites(double totalAmount)
+bool Cortex::initializeBindingSites(double totalAmount)
 {
     // Make sure we have an internal medium
     if (!m_pInternalMedium) {
@@ -152,7 +152,7 @@ bool Membrane::initializeBindingSites(double totalAmount)
                 );
                 
                 // Create binding site protein and add to the medium
-                ProteinPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::MEMBRANE), amountPerPosition);
+                ProteinPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 m_pInternalMedium->addProtein(bindingSites, normalizedPos);
             }

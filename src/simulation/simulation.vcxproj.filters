@@ -87,9 +87,6 @@
     <ClInclude Include="ProteinWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Membrane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ProteinBindingSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -100,6 +97,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ProteinInteractionLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cortex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -161,9 +161,6 @@
     <ClCompile Include="ProteinWiki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Membrane.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ProteinBindingSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -174,6 +171,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProteinInteractionLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Cortex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
