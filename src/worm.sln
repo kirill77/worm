@@ -17,9 +17,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "timeUtils", "timeUtils\time
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "worm", "worm\worm.vcxproj", "{AE833F6A-DAB0-4155-9374-D5710023A461}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CSVFile", "CSVFile\CSVFile.vcxproj", "{BB747F64-D1FF-4023-A588-C03A903AF0FF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csvFile", "CSVFile\CSVFile.vcxproj", "{BB747F64-D1FF-4023-A588-C03A903AF0FF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataCollector", "DataCollector\DataCollector.vcxproj", "{05A61EC7-4C44-4895-A25D-FF9C949DAC28}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataCollector", "DataCollector\DataCollector.vcxproj", "{05A61EC7-4C44-4895-A25D-FF9C949DAC28}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TensionSphere", "TensionSphere\TensionSphere.vcxproj", "{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,14 @@ Global
 		{05A61EC7-4C44-4895-A25D-FF9C949DAC28}.Release|x64.Build.0 = Release|x64
 		{05A61EC7-4C44-4895-A25D-FF9C949DAC28}.Release|x86.ActiveCfg = Release|Win32
 		{05A61EC7-4C44-4895-A25D-FF9C949DAC28}.Release|x86.Build.0 = Release|Win32
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Debug|x64.ActiveCfg = Debug|x64
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Debug|x64.Build.0 = Debug|x64
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Debug|x86.ActiveCfg = Debug|Win32
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Debug|x86.Build.0 = Debug|Win32
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Release|x64.ActiveCfg = Release|x64
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Release|x64.Build.0 = Release|x64
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Release|x86.ActiveCfg = Release|Win32
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
