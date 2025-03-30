@@ -20,6 +20,8 @@ private:
     
     static constexpr double DIFFUSION_RATE = 0.1;          // Rate of movement between cells
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
+    static constexpr int DIFFUSION_SAMPLES = 1000;         // Number of random samples per diffusion update
+    static constexpr double DIFFUSION_SIGMA = 0.2;         // Standard deviation for diffusion distance (as fraction of medium size)
 
 public:
     static constexpr double MAX_ATP_PER_CELL = 1e10;      // Maximum ATP per grid cell
@@ -54,6 +56,10 @@ private:
     const GridCell& findCell(const float3& position) const;
     std::vector<size_t> getNeighborIndices(size_t cellIndex) const;
     
+    // Different diffusion implementations
+    void updateProteinDiffusionGrid(double dt);       // Original grid-based diffusion
+    void updateProteinDiffusionPhysical(double dt);   // New physically-based diffusion
+    
     // Update functions
     void updateProteinDiffusion(double dt);
     void updateProteinInteraction(double dt);
@@ -63,5 +69,10 @@ private:
     // Convert between grid indices and 3D coordinates
     uint32_t positionToIndex(const float3& position) const;
     float3 indexToPosition(size_t index) const;
+    
+    // Helper functions for physically-based diffusion
+    float3 generateRandomPosition() const;
+    float3 generateRandomDirection() const;
+    float generateRandomDistance(double dt) const;
 };
 

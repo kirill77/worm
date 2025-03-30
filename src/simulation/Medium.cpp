@@ -7,6 +7,9 @@
 #include <cassert>
 #include "GridCell.h"
 
+// Global random number generator for consistent randomness
+static std::mt19937 g_rng(std::random_device{}());
+
 uint32_t Medium::positionToIndex(const float3& position) const
 {
     uint32_t uIndex = 0;
@@ -95,8 +98,45 @@ double Medium::getProteinNumber(const std::string& proteinName, const float3& po
     return (itProtein != gridCell.m_proteins.end()) ? itProtein->second.m_fNumber : 0.0;
 }
 
-void Medium::updateProteinDiffusion(double dt)
+float3 Medium::generateRandomPosition() const
 {
+    // Generate random coordinates in [-1,1] range
+    std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+    return float3(dist(g_rng), dist(g_rng), dist(g_rng));
+}
+
+float3 Medium::generateRandomDirection() const
+{
+    // Generate random direction vector on unit sphere
+    std::normal_distribution<float> dist(0.0f, 1.0f);
+    float3 dir(dist(g_rng), dist(g_rng), dist(g_rng));
+    
+    // Normalize to get unit vector
+    float len = length(dir);
+    if (len > 0.001f) {
+        dir = dir * (1.0f / len);
+    } else {
+        // Fallback for unlikely case of very small vector
+        dir = float3(1.0f, 0.0f, 0.0f);
+    }
+    
+    return dir;
+}
+
+float Medium::generateRandomDistance(double dt) const
+{
+    // Use normal distribution for distance to match diffusion physics
+    // Scale by diffusion rate and time step (sqrt of dt for correct diffusion scaling)
+    float sigma = static_cast<float>(DIFFUSION_SIGMA * std::sqrt(dt * DIFFUSION_RATE));
+    std::normal_distribution<float> dist(0.0f, sigma);
+    
+    // Take absolute value to ensure positive distance
+    return std::abs(dist(g_rng));
+}
+
+void Medium::updateProteinDiffusionGrid(double dt)
+{
+    // Original grid-based diffusion implementation
     // Create temporary grid for updated numbers
     auto gridNew = m_grid;
     
@@ -129,6 +169,105 @@ void Medium::updateProteinDiffusion(double dt)
     }
     
     m_grid = std::move(gridNew);
+}
+
+void Medium::updateProteinDiffusionPhysical(double dt)
+{
+    // Create temporary grid for updated state
+    auto gridNew = m_grid;
+    
+    // Process a fixed number of random samples
+    for (int sample = 0; sample < DIFFUSION_SAMPLES; ++sample)
+    {
+        // Generate a random position in the medium
+        float3 sourcePos = generateRandomPosition();
+        
+        // Get the grid cell at this position
+        size_t sourceIndex = positionToIndex(sourcePos);
+        GridCell& sourceCell = m_grid[sourceIndex];
+        
+        // Skip if there are no proteins in this cell
+        if (sourceCell.m_proteins.empty()) {
+            continue;
+        }
+        
+        // Randomly select a protein population from this cell
+        // First, build a vector of protein names with non-zero amounts
+        std::vector<std::string> availableProteins;
+        for (const auto& [proteinName, population] : sourceCell.m_proteins) {
+            // Only include unbound proteins with positive amounts
+            if (population.m_fNumber > 0.001 && !population.isBound()) {
+                availableProteins.push_back(proteinName);
+            }
+        }
+        
+        // Skip if no eligible proteins
+        if (availableProteins.empty()) {
+            continue;
+        }
+        
+        // Select a random protein
+        std::uniform_int_distribution<size_t> proteinDist(0, availableProteins.size() - 1);
+        const std::string& selectedProtein = availableProteins[proteinDist(g_rng)];
+        
+        // Get the protein population
+        const auto& proteinPop = sourceCell.m_proteins.at(selectedProtein);
+        double proteinAmount = proteinPop.m_fNumber;
+        
+        // Generate random direction and distance
+        float3 direction = generateRandomDirection();
+        float distance = generateRandomDistance(dt);
+        
+        // Calculate the new position
+        float3 newPos = sourcePos + direction * distance;
+        
+        // Clamp to boundaries [-1, 1]
+        newPos.x = std::clamp(newPos.x, -1.0f, 1.0f);
+        newPos.y = std::clamp(newPos.y, -1.0f, 1.0f);
+        newPos.z = std::clamp(newPos.z, -1.0f, 1.0f);
+        
+        // Get the target cell index
+        size_t targetIndex = positionToIndex(newPos);
+        
+        // Skip if same cell (no movement)
+        if (targetIndex == sourceIndex) {
+            continue;
+        }
+        
+        // Determine amount to transfer
+        // Use a fraction based on distance (longer distances transfer less)
+        // This prevents too many proteins from moving too far at once
+        double maxTransferFraction = 0.05; // Max 5% per transfer
+        double transferFraction = maxTransferFraction / (1.0 + distance * 5.0);
+        double transferAmount = proteinAmount * transferFraction;
+        
+        // Apply a minimum threshold to avoid very small transfers
+        if (transferAmount < 0.001) {
+            continue;
+        }
+
+        // Update protein amounts in source and target cells
+        // Use the getOrCreateProtein method instead of direct [] access to avoid default constructor issues
+        ProteinPopulation& sourceProtein = gridNew[sourceIndex].getOrCreateProtein(selectedProtein);
+        sourceProtein.m_fNumber -= transferAmount;
+        
+        ProteinPopulation& targetProtein = gridNew[targetIndex].getOrCreateProtein(selectedProtein);
+        targetProtein.m_fNumber += transferAmount;
+    }
+    
+    m_grid = std::move(gridNew);
+}
+
+void Medium::updateProteinDiffusion(double dt)
+{
+    // Choose which diffusion method to use
+    // Uncomment the desired method:
+    
+    // Original grid-based method (only adjacent cells)
+    //updateProteinDiffusionGrid(dt);
+    
+    // New physically-based method (arbitrary distances)
+    updateProteinDiffusionPhysical(dt);
 }
 
 void Medium::updateProteinInteraction(double fDt)
