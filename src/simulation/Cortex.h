@@ -4,6 +4,7 @@
 #include "Medium.h"
 #include "ProteinBindingSurface.h"
 #include "math/vector.h"
+#include "tensionSphere/tensionSphere.h"
 
 /**
  * The Membrane class represents the cell membrane that separates
@@ -15,6 +16,7 @@ class Cortex : public ProteinBindingSurface
 private:
     std::shared_ptr<Medium> m_pInternalMedium;  // Internal cellular environment
     double m_fThickness;                        // Membrane thickness in micrometers
+    TensionSphere m_tensionSphere;
 
 public:
     /**
@@ -35,7 +37,7 @@ public:
      * 
      * @param dt Time step in seconds
      */
-    void update(double dt);
+    void update(double fDtSec);
     
     /**
      * Initialize binding sites in the internal medium.

@@ -18,10 +18,12 @@ Cortex::Cortex(std::shared_ptr<Medium> pInternalMedium, double fThickness)
     }
 }
 
-void Cortex::update(double dt)
+void Cortex::update(double fDtSec)
 {
     // Update internal medium - its dynamics are independent of external medium
-    m_pInternalMedium->update(dt);
+    m_pInternalMedium->update(fDtSec);
+
+    m_tensionSphere.makeTimeStep(fDtSec);
     
     // Note: In a more advanced implementation, this method could include:
     // - Membrane fluidity changes
