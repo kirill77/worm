@@ -68,7 +68,7 @@ public:
      * @brief Constructor
      * @param subdivisionLevel Number of times to subdivide the base icosahedron (increases detail)
      */
-    TensionSphere(uint32_t subdivisionLevel = 0);
+    TensionSphere(uint32_t subdivisionLevel = 2);
     
     /**
      * @brief Get the total number of cells in the geodesic sphere
