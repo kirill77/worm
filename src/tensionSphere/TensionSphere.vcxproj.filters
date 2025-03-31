@@ -24,7 +24,7 @@
     <ClInclude Include="tensionSphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WingedEdgeMesh.h">
+    <ClInclude Include="wingedEdgeMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClCompile Include="tensionSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WingedEdgeMesh.cpp">
+    <ClCompile Include="wingedEdgeMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
