@@ -21,9 +21,22 @@
 */
 
 #pragma once
+
+// Prevent Windows.h min/max macro conflicts
+#define NOMINMAX
+
 #include <cassert>
 #include <cmath>
 #include <numbers>
+
+// Undefine any existing min/max macros
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
 
 // Macro to define conversion and subscript operators
 #define VECTOR_MEMBERS(T, n) \
