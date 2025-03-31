@@ -571,9 +571,19 @@ void TensionSphere::createIcosahedron()
 void TensionSphere::subdivide(uint32_t level)
 {
     for (uint32_t l = 0; l < level; ++l) {
-        // Store the original faces and clear edge mapping
+        // Store the original faces and their vertex information
         std::vector<Face> originalFaces = m_faces;
         std::vector<Edge> originalEdges = m_edges;
+        
+        // Extract vertex information for each face before clearing faces
+        std::vector<std::vector<uint32_t>> faceVertices;
+        faceVertices.reserve(originalFaces.size());
+        
+        for (uint32_t faceIdx = 0; faceIdx < originalFaces.size(); ++faceIdx) {
+            faceVertices.push_back(getFaceVertices(faceIdx));
+        }
+        
+        // Now clear faces and edge mapping
         m_faces.clear();
         m_edgeMap.clear();
         
@@ -582,8 +592,7 @@ void TensionSphere::subdivide(uint32_t level)
         
         // Process each original face
         for (uint32_t faceIdx = 0; faceIdx < originalFaces.size(); ++faceIdx) {
-            // Get the three vertices of the face
-            std::vector<uint32_t> vertices = getFaceVertices(faceIdx);
+            const std::vector<uint32_t>& vertices = faceVertices[faceIdx];
             if (vertices.size() != 3) continue;
             
             uint32_t v1 = vertices[0];
