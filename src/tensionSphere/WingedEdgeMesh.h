@@ -29,6 +29,9 @@ public:
     // Subdivide the current mesh
     void subdivide(uint32_t levels);
     
+    // Validate the mesh structure and attempt to fix any inconsistencies
+    void validateMesh();
+    
     // Get the number of vertices in the mesh
     uint32_t getVertexCount() const { return static_cast<uint32_t>(m_vertices.size()); }
     
@@ -46,6 +49,9 @@ public:
     
     // Get all neighbors of a face (faces that share an edge)
     std::vector<uint32_t> getFaceNeighbors(uint32_t faceIndex) const;
+    
+    // Find all edges connected to a vertex
+    std::vector<uint32_t> findVertexEdges(uint32_t vertexIndex) const;
     
     // Calculate the area of a face
     double calculateFaceArea(uint32_t faceIndex) const;
@@ -78,11 +84,7 @@ public:
         uint32_t leftFace;    // Index of face on the left
         uint32_t rightFace;   // Index of face on the right
         
-        // Edges around vertices and faces (clockwise/counterclockwise traversal)
-        uint32_t startCW;     // Edge clockwise from this edge around start vertex
-        uint32_t startCCW;    // Edge counterclockwise from this edge around start vertex
-        uint32_t endCW;       // Edge clockwise from this edge around end vertex
-        uint32_t endCCW;      // Edge counterclockwise from this edge around end vertex
+        // Edges around faces (classic Winged-Edge structure)
         uint32_t leftCW;      // Edge clockwise from this edge around left face
         uint32_t leftCCW;     // Edge counterclockwise from this edge around left face
         uint32_t rightCW;     // Edge clockwise from this edge around right face

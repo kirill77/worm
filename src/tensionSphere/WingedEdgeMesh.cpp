@@ -12,10 +12,6 @@ WingedEdgeMesh::Edge::Edge()
     , endVertex(INVALID_INDEX)
     , leftFace(INVALID_INDEX)
     , rightFace(INVALID_INDEX)
-    , startCW(INVALID_INDEX)
-    , startCCW(INVALID_INDEX)
-    , endCW(INVALID_INDEX)
-    , endCCW(INVALID_INDEX)
     , leftCW(INVALID_INDEX)
     , leftCCW(INVALID_INDEX)
     , rightCW(INVALID_INDEX)
@@ -36,6 +32,9 @@ WingedEdgeMesh::WingedEdgeMesh(double radius, uint32_t subdivisionLevel)
     if (subdivisionLevel > 0) {
         subdivide(subdivisionLevel);
     }
+    
+    // Validate the mesh structure
+    validateMesh();
 }
 
 // Clear the mesh
@@ -143,47 +142,9 @@ uint32_t WingedEdgeMesh::findOrCreateEdge(uint32_t startVertex, uint32_t endVert
 // Link two edges around a vertex
 void WingedEdgeMesh::linkEdges(uint32_t e1, uint32_t e2, bool startToStart, bool preserveWinding)
 {
-    Edge& edge1 = m_edges[e1];
-    Edge& edge2 = m_edges[e2];
-    
-    // Determine which vertices to link
-    uint32_t v1, v2;
-    if (startToStart) {
-        v1 = edge1.startVertex;
-        v2 = edge2.startVertex;
-    } else {
-        v1 = edge1.startVertex;
-        v2 = edge2.endVertex;
-    }
-    
-    // Link edges based on winding order
-    if (preserveWinding) {
-        // Link e1 -> e2, same winding direction
-        if (v1 == edge1.startVertex) {
-            edge1.startCW = e2;
-        } else {
-            edge1.endCCW = e2;
-        }
-        
-        if (v2 == edge2.startVertex) {
-            edge2.startCCW = e1;
-        } else {
-            edge2.endCW = e1;
-        }
-    } else {
-        // Link e1 -> e2, opposite winding direction
-        if (v1 == edge1.startVertex) {
-            edge1.startCCW = e2;
-        } else {
-            edge1.endCW = e2;
-        }
-        
-        if (v2 == edge2.startVertex) {
-            edge2.startCW = e1;
-        } else {
-            edge2.endCCW = e1;
-        }
-    }
+    // This function is no longer needed in the classic Winged-Edge structure
+    // since we don't maintain the vertex-edge connectivity directly.
+    // This is a no-op to avoid breaking existing code.
 }
 
 // Attach an edge to a face
@@ -247,63 +208,88 @@ uint32_t WingedEdgeMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
     uint32_t e2 = findOrCreateEdge(v2, v3);
     uint32_t e3 = findOrCreateEdge(v3, v1);
     
-    // Attach edges to face
-    attachEdgeToFace(e1, faceIndex, true);
-    attachEdgeToFace(e2, faceIndex, true);
-    attachEdgeToFace(e3, faceIndex, true);
+    // Attach edges to face (check if already attached to another face)
+    Edge& edge1 = m_edges[e1];
+    Edge& edge2 = m_edges[e2];
+    Edge& edge3 = m_edges[e3];
+    
+    // For each edge, decide whether to use leftFace or rightFace
+    // If leftFace is already assigned, use rightFace
+    if (edge1.leftFace == INVALID_INDEX) {
+        attachEdgeToFace(e1, faceIndex, true);
+    } else {
+        attachEdgeToFace(e1, faceIndex, false);
+    }
+    
+    if (edge2.leftFace == INVALID_INDEX) {
+        attachEdgeToFace(e2, faceIndex, true);
+    } else {
+        attachEdgeToFace(e2, faceIndex, false);
+    }
+    
+    if (edge3.leftFace == INVALID_INDEX) {
+        attachEdgeToFace(e3, faceIndex, true);
+    } else {
+        attachEdgeToFace(e3, faceIndex, false);
+    }
     
     // Link edges in cyclic order around face
-    m_edges[e1].leftCCW = e2;
-    m_edges[e2].leftCW = e1;
+    // Determine if this is a leftFace or rightFace for each edge
+    bool e1IsLeft = (edge1.leftFace == faceIndex);
+    bool e2IsLeft = (edge2.leftFace == faceIndex);
+    bool e3IsLeft = (edge3.leftFace == faceIndex);
     
-    m_edges[e2].leftCCW = e3;
-    m_edges[e3].leftCW = e2;
+    // Link in proper CCW order for left faces, CW order for right faces
+    if (e1IsLeft) {
+        edge1.leftCCW = e2;
+        if (e2IsLeft) {
+            edge2.leftCW = e1;
+        } else {
+            edge2.rightCCW = e1;
+        }
+    } else {
+        edge1.rightCW = e2;
+        if (e2IsLeft) {
+            edge2.leftCCW = e1;
+        } else {
+            edge2.rightCW = e1;
+        }
+    }
     
-    m_edges[e3].leftCCW = e1;
-    m_edges[e1].leftCW = e3;
+    if (e2IsLeft) {
+        edge2.leftCCW = e3;
+        if (e3IsLeft) {
+            edge3.leftCW = e2;
+        } else {
+            edge3.rightCCW = e2;
+        }
+    } else {
+        edge2.rightCW = e3;
+        if (e3IsLeft) {
+            edge3.leftCCW = e2;
+        } else {
+            edge3.rightCW = e2;
+        }
+    }
+    
+    if (e3IsLeft) {
+        edge3.leftCCW = e1;
+        if (e1IsLeft) {
+            edge1.leftCW = e3;
+        } else {
+            edge1.rightCCW = e3;
+        }
+    } else {
+        edge3.rightCW = e1;
+        if (e1IsLeft) {
+            edge1.leftCCW = e3;
+        } else {
+            edge1.rightCW = e3;
+        }
+    }
     
     // Set face's reference edge
     m_faces[faceIndex].edgeIndex = e1;
-    
-    // Link edges around vertices
-    // For v1 (connects e3 -> e1)
-    if (m_edges[e3].endVertex == v1) {
-        m_edges[e3].endCCW = e1;
-    } else {
-        m_edges[e3].startCW = e1;
-    }
-    
-    if (m_edges[e1].startVertex == v1) {
-        m_edges[e1].startCW = e3;
-    } else {
-        m_edges[e1].endCCW = e3;
-    }
-    
-    // For v2 (connects e1 -> e2)
-    if (m_edges[e1].endVertex == v2) {
-        m_edges[e1].endCCW = e2;
-    } else {
-        m_edges[e1].startCW = e2;
-    }
-    
-    if (m_edges[e2].startVertex == v2) {
-        m_edges[e2].startCW = e1;
-    } else {
-        m_edges[e2].endCCW = e1;
-    }
-    
-    // For v3 (connects e2 -> e3)
-    if (m_edges[e2].endVertex == v3) {
-        m_edges[e2].endCCW = e3;
-    } else {
-        m_edges[e2].startCW = e3;
-    }
-    
-    if (m_edges[e3].startVertex == v3) {
-        m_edges[e3].startCW = e2;
-    } else {
-        m_edges[e3].endCCW = e2;
-    }
     
     return faceIndex;
 }
@@ -319,17 +305,60 @@ std::vector<uint32_t> WingedEdgeMesh::getFaceVertices(uint32_t faceIndex) const
     
     const Face& face = m_faces[faceIndex];
     uint32_t firstEdge = face.edgeIndex;
+    
+    // Return empty list if this face doesn't have a valid edge
+    if (firstEdge == INVALID_INDEX || firstEdge >= m_edges.size()) {
+        return vertices;
+    }
+    
+    // Track visited edges to prevent infinite loops
+    std::vector<uint32_t> visitedEdges;
     uint32_t currentEdge = firstEdge;
     
+    // Check if this face is a left or right face for this edge
+    bool isLeftFace = (m_edges[currentEdge].leftFace == faceIndex);
+    
+    // Safety counter to prevent infinite loops in case of inconsistent mesh
+    int safetyCounter = 0;
+    const int MAX_EDGES = 10; // Triangular faces have 3 edges, but be safe
+    
     do {
+        // Add current edge to visited list
+        visitedEdges.push_back(currentEdge);
+        
         const Edge& edge = m_edges[currentEdge];
-        uint32_t v1 = edge.startVertex;
         
-        vertices.push_back(v1);
+        // For a left face, we traverse CCW and add start vertex
+        // For a right face, we traverse CW and add end vertex
+        uint32_t nextEdge;
         
-        // Move to next edge around the face
-        currentEdge = edge.leftCCW;
-    } while (currentEdge != firstEdge && currentEdge != INVALID_INDEX && vertices.size() < 3);
+        if (isLeftFace) {
+            vertices.push_back(edge.startVertex);
+            nextEdge = edge.leftCCW;
+        } else {
+            vertices.push_back(edge.endVertex);
+            nextEdge = edge.rightCW;
+        }
+        
+        // Check for invalid next edge
+        if (nextEdge == INVALID_INDEX) {
+            break;
+        }
+        
+        // Check if we've already visited this edge (cycle detection)
+        if (std::find(visitedEdges.begin(), visitedEdges.end(), nextEdge) != visitedEdges.end()) {
+            break;
+        }
+        
+        currentEdge = nextEdge;
+        
+        // Safety check
+        safetyCounter++;
+        if (safetyCounter >= MAX_EDGES) {
+            break;
+        }
+        
+    } while (currentEdge != firstEdge && vertices.size() < 3);
     
     return vertices;
 }
@@ -345,12 +374,40 @@ std::vector<uint32_t> WingedEdgeMesh::getFaceNeighbors(uint32_t faceIndex) const
     
     const Face& face = m_faces[faceIndex];
     uint32_t firstEdge = face.edgeIndex;
+    
+    // Return empty list if this face doesn't have a valid edge
+    if (firstEdge == INVALID_INDEX || firstEdge >= m_edges.size()) {
+        return neighbors;
+    }
+    
+    // Track visited edges to prevent infinite loops
+    std::vector<uint32_t> visitedEdges;
     uint32_t currentEdge = firstEdge;
     
+    // Check if this face is a left or right face for this edge
+    bool isLeftFace = (m_edges[currentEdge].leftFace == faceIndex);
+    
+    // Safety counter to prevent infinite loops in case of inconsistent mesh
+    int safetyCounter = 0;
+    const int MAX_EDGES = 10; // Faces shouldn't have more than this many edges
+    
     do {
+        // Add current edge to visited list
+        visitedEdges.push_back(currentEdge);
+        
         const Edge& edge = m_edges[currentEdge];
+        
         // If this edge is shared with another face, add that face as a neighbor
-        uint32_t neighborFace = (edge.leftFace == faceIndex) ? edge.rightFace : edge.leftFace;
+        uint32_t neighborFace;
+        uint32_t nextEdge;
+        
+        if (isLeftFace) {
+            neighborFace = edge.rightFace;
+            nextEdge = edge.leftCCW;
+        } else {
+            neighborFace = edge.leftFace;
+            nextEdge = edge.rightCW;
+        }
         
         if (neighborFace != INVALID_INDEX) {
             // Check if this neighbor is already in the list
@@ -359,9 +416,25 @@ std::vector<uint32_t> WingedEdgeMesh::getFaceNeighbors(uint32_t faceIndex) const
             }
         }
         
-        // Move to next edge around the face
-        currentEdge = edge.leftCCW;
-    } while (currentEdge != firstEdge && currentEdge != INVALID_INDEX);
+        // Check for invalid next edge
+        if (nextEdge == INVALID_INDEX) {
+            break;
+        }
+        
+        // Check if we've already visited this edge (cycle detection)
+        if (std::find(visitedEdges.begin(), visitedEdges.end(), nextEdge) != visitedEdges.end()) {
+            break;
+        }
+        
+        currentEdge = nextEdge;
+        
+        // Safety check
+        safetyCounter++;
+        if (safetyCounter >= MAX_EDGES) {
+            break;
+        }
+        
+    } while (currentEdge != firstEdge);
     
     return neighbors;
 }
@@ -391,7 +464,7 @@ double WingedEdgeMesh::calculateFaceArea(uint32_t faceIndex) const
 // Calculate face normal
 double3 WingedEdgeMesh::calculateFaceNormal(uint32_t faceIndex) const
 {
-    // Get vertices of the face
+    // Get vertices of the face in correct order
     std::vector<uint32_t> vertices = getFaceVertices(faceIndex);
     if (vertices.size() != 3) return double3(0.0, 0.0, 1.0);
     
@@ -403,11 +476,18 @@ double3 WingedEdgeMesh::calculateFaceNormal(uint32_t faceIndex) const
     double3 v1 = p2 - p1;
     double3 v2 = p3 - p1;
     
-    // Cross product to get normal vector
+    // Cross product to get normal vector (order matters for orientation)
     double3 normal = cross(v1, v2);
     
     // Normalize
-    return normalize(normal);
+    double len = length(normal);
+    if (len > 1e-10) {
+        normal = normal / len;
+    } else {
+        normal = double3(0.0, 0.0, 1.0);
+    }
+    
+    return normal;
 }
 
 // Create an icosahedron (regular 20-faced polyhedron)
@@ -446,6 +526,9 @@ void WingedEdgeMesh::createIcosahedron(double radius)
     for (int i = 0; i < 20; ++i) {
         addFace(faceIndices[i][0], faceIndices[i][1], faceIndices[i][2]);
     }
+    
+    // Validate the mesh structure after creation
+    validateMesh();
 }
 
 // Subdivide the mesh for smoother surfaces
@@ -497,6 +580,9 @@ void WingedEdgeMesh::subdivide(uint32_t levels)
             addFace(v3, mid3, mid2);
             addFace(mid1, mid2, mid3);
         }
+        
+        // Validate the mesh structure after each subdivision level
+        validateMesh();
     }
 }
 
@@ -513,10 +599,18 @@ uint32_t WingedEdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
     // Create a key for the edge
     std::string key = std::to_string(v1) + ":" + std::to_string(v2);
     
-    // Check if we already have this midpoint
+    // Check if we already have this midpoint in the cache
     auto it = midpointCache.find(key);
     if (it != midpointCache.end()) {
         return it->second;
+    }
+    
+    // Check if an edge exists between these vertices
+    uint32_t edgeIndex = findEdge(v1, v2);
+    if (edgeIndex != INVALID_INDEX) {
+        // If the edge exists, we need to keep track of its old data
+        // to update it properly after the subdivision
+        // Currently, we just create a new midpoint
     }
     
     // Calculate the midpoint
@@ -531,4 +625,162 @@ uint32_t WingedEdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
     // Store in cache and return
     midpointCache[key] = newIndex;
     return newIndex;
+}
+
+// Validate mesh structure and fix inconsistencies
+void WingedEdgeMesh::validateMesh()
+{
+    // Report statistics
+    size_t vertexCount = m_vertices.size();
+    size_t edgeCount = m_edges.size();
+    size_t faceCount = m_faces.size();
+    
+    // 1. Verify each edge has both a left and right face (for a closed mesh)
+    size_t edgesWithOneFace = 0;
+    size_t edgesWithNoFace = 0;
+    
+    for (size_t i = 0; i < edgeCount; ++i) {
+        Edge& edge = m_edges[i];
+        
+        // Check that edge vertices are valid indices
+        if (edge.startVertex >= vertexCount || edge.endVertex >= vertexCount) {
+            // Edge has invalid vertex indices - critical error
+            continue;
+        }
+        
+        // Check face connectivity
+        bool hasLeftFace = (edge.leftFace != INVALID_INDEX && edge.leftFace < faceCount);
+        bool hasRightFace = (edge.rightFace != INVALID_INDEX && edge.rightFace < faceCount);
+        
+        if (!hasLeftFace && !hasRightFace) {
+            edgesWithNoFace++;
+        } else if (hasLeftFace && !hasRightFace) {
+            edgesWithOneFace++;
+            
+            // For a closed manifold mesh like an icosahedron, every edge should 
+            // have exactly two adjacent faces. If only one is present, it might 
+            // indicate an issue in face creation.
+        } else if (!hasLeftFace && hasRightFace) {
+            edgesWithOneFace++;
+            
+            // Swap left and right to ensure left is always populated
+            std::swap(edge.leftFace, edge.rightFace);
+            std::swap(edge.leftCW, edge.rightCW);
+            std::swap(edge.leftCCW, edge.rightCCW);
+        }
+    }
+    
+    // 2. Verify face loop connectivity for each face
+    for (size_t i = 0; i < faceCount; ++i) {
+        Face& face = m_faces[i];
+        
+        if (face.edgeIndex >= edgeCount || face.edgeIndex == INVALID_INDEX) {
+            // Face has an invalid edge reference
+            // Try to locate a valid edge for this face
+            for (size_t j = 0; j < edgeCount; ++j) {
+                if (m_edges[j].leftFace == i || m_edges[j].rightFace == i) {
+                    face.edgeIndex = static_cast<uint32_t>(j);
+                    break;
+                }
+            }
+            continue;  // Skip rest of checks if we couldn't find a valid edge
+        }
+        
+        // Check face loop connectivity
+        uint32_t firstEdge = face.edgeIndex;
+        uint32_t currentEdge = firstEdge;
+        bool isLeftFace = (m_edges[currentEdge].leftFace == i);
+        
+        std::vector<uint32_t> visitedEdges;
+        std::vector<uint32_t> faceEdges;
+        bool loopIsClosed = false;
+        
+        // Follow the edge loop and see if it returns to the first edge
+        int safetyCounter = 0;
+        do {
+            visitedEdges.push_back(currentEdge);
+            faceEdges.push_back(currentEdge);
+            
+            Edge& edge = m_edges[currentEdge];
+            uint32_t nextEdge;
+            
+            if (isLeftFace) {
+                nextEdge = edge.leftCCW;
+            } else {
+                nextEdge = edge.rightCW;
+            }
+            
+            // Check for end of loop
+            if (nextEdge == firstEdge) {
+                loopIsClosed = true;
+                break;
+            }
+            
+            // Check for invalid next edge
+            if (nextEdge == INVALID_INDEX || nextEdge >= edgeCount) {
+                break;
+            }
+            
+            // Check for cycle (not returning to first edge)
+            if (std::find(visitedEdges.begin(), visitedEdges.end(), nextEdge) != visitedEdges.end()) {
+                break;
+            }
+            
+            currentEdge = nextEdge;
+            safetyCounter++;
+        } while (safetyCounter < 10); // Safety limit
+        
+        // If the loop is not closed, try to fix it
+        if (!loopIsClosed && faceEdges.size() > 1) {
+            // Connect the last edge to the first edge
+            uint32_t lastEdge = faceEdges.back();
+            
+            if (isLeftFace) {
+                m_edges[lastEdge].leftCCW = firstEdge;
+                m_edges[firstEdge].leftCW = lastEdge;
+            } else {
+                m_edges[lastEdge].rightCW = firstEdge;
+                m_edges[firstEdge].rightCCW = lastEdge;
+            }
+        }
+    }
+    
+    // 3. Rebuild edge mapping (for faster edge finding)
+    m_edgeMap.clear();
+    for (size_t i = 0; i < edgeCount; ++i) {
+        const Edge& edge = m_edges[i];
+        m_edgeMap[edgeKey(edge.startVertex, edge.endVertex)] = static_cast<uint32_t>(i);
+    }
+    
+    // 4. Verify each vertex has a valid edge reference
+    for (size_t i = 0; i < vertexCount; ++i) {
+        Vertex& vertex = m_vertices[i];
+        
+        if (vertex.edgeIndex >= edgeCount || vertex.edgeIndex == INVALID_INDEX) {
+            // Vertex has an invalid edge reference
+            // Find an edge that uses this vertex
+            for (size_t j = 0; j < edgeCount; ++j) {
+                if (m_edges[j].startVertex == i || m_edges[j].endVertex == i) {
+                    vertex.edgeIndex = static_cast<uint32_t>(j);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Find edges connected to a specific vertex
+std::vector<uint32_t> WingedEdgeMesh::findVertexEdges(uint32_t vertexIndex) const
+{
+    std::vector<uint32_t> connectedEdges;
+    
+    // Search through all edges for those that include this vertex
+    for (uint32_t i = 0; i < m_edges.size(); ++i) {
+        const Edge& edge = m_edges[i];
+        if (edge.startVertex == vertexIndex || edge.endVertex == vertexIndex) {
+            connectedEdges.push_back(i);
+        }
+    }
+    
+    return connectedEdges;
 }
