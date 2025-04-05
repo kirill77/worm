@@ -161,6 +161,7 @@
     <ClCompile Include="GPUMesh.cpp" />
     <ClCompile Include="GPUQueue.cpp" />
     <ClCompile Include="GPUWorld.cpp" />
+    <ClCompile Include="ShaderHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelShader.hlsl">
