@@ -593,3 +593,28 @@ template<int n> vector<float, n> snorm8ToVector(uint32_t v); // undefined
 template<> float2 snorm8ToVector<2>(uint32_t v);
 template<> float3 snorm8ToVector<3>(uint32_t v);
 template<> float4 snorm8ToVector<4>(uint32_t v);
+
+// Add these conversion functions after the vector class definitions but before any other functions
+
+// Conversion functions for vector types
+template<typename T, typename U, int n>
+inline vector<T, n> convertVector(const vector<U, n>& v)
+{
+    return vector<T, n>(v);
+}
+
+// In-place conversion functions
+template<typename T, typename U, int n>
+inline void convertVector(vector<T, n>& dst, const vector<U, n>& src)
+{
+    dst = convertVector<T,U,n>(src);
+}
+
+// Specialized conversion functions for common types
+inline float2 toFloat2(const double2& v) { return convertVector<float, double, 2>(v); }
+inline float3 toFloat3(const double3& v) { return convertVector<float, double, 3>(v); }
+inline float4 toFloat4(const double4& v) { return convertVector<float, double, 4>(v); }
+
+inline double2 toDouble2(const float2& v) { return convertVector<double, float, 2>(v); }
+inline double3 toDouble3(const float3& v) { return convertVector<double, float, 3>(v); }
+inline double4 toDouble4(const float4& v) { return convertVector<double, float, 4>(v); }

@@ -41,7 +41,7 @@ void ConnectedMeshVis::updateGPUMesh()
     for (uint32_t i = 0; i < vertexCount; ++i)
     {
         GPUMesh::Vertex gpuVertex;
-        gpuVertex.vPos = m_pMesh->getVertexPosition(i);  // Convert from double3 to float3
+        convertVector(gpuVertex.vPos, m_pMesh->getVertexPosition(i));
         gpuVertices.push_back(gpuVertex);
     }
 
