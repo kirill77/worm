@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include "../math/vector.h"
-#include "WingedEdgeMesh.h"
+#include "connectedMesh/connectedMesh.h"
 
 /**
  * @brief Represents a single cell in the geodesic sphere
@@ -131,7 +131,7 @@ public:
 
 private:
     // The underlying mesh data structure
-    WingedEdgeMesh m_mesh;
+    ConnectedMesh m_mesh;
     
     // Physics and simulation properties
     std::vector<Vertex> m_vertexData;       // Physics data for vertices

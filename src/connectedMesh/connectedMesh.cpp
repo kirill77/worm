@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "WingedEdgeMesh.h"
+#include "connectedMesh.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -8,11 +7,11 @@
 #include <cassert>  // For assert()
 
 // Constructor
-WingedEdgeMesh::WingedEdgeMesh() {
+ConnectedMesh::ConnectedMesh() {
 }
 
 // Constructor with radius and subdivision
-WingedEdgeMesh::WingedEdgeMesh(double radius, uint32_t subdivisionLevel) {
+ConnectedMesh::ConnectedMesh(double radius, uint32_t subdivisionLevel) {
     createIcosahedron(radius);
     if (subdivisionLevel > 0) {
         subdivide(subdivisionLevel);
@@ -20,7 +19,7 @@ WingedEdgeMesh::WingedEdgeMesh(double radius, uint32_t subdivisionLevel) {
 }
 
 // Clear all mesh data
-void WingedEdgeMesh::clear() {
+void ConnectedMesh::clear() {
     vertices.clear();
     edges.clear();
     faces.clear();
@@ -28,13 +27,13 @@ void WingedEdgeMesh::clear() {
 }
 
 // Add a vertex to the mesh
-uint32_t WingedEdgeMesh::addVertex(const double3& position) {
+uint32_t ConnectedMesh::addVertex(const double3& position) {
     vertices.emplace_back(position);
     return static_cast<uint32_t>(vertices.size() - 1);
 }
 
 // Get vertex position
-double3 WingedEdgeMesh::getVertexPosition(uint32_t index) const {
+double3 ConnectedMesh::getVertexPosition(uint32_t index) const {
     if (index < vertices.size()) {
         return vertices[index].position;
     }
@@ -42,35 +41,35 @@ double3 WingedEdgeMesh::getVertexPosition(uint32_t index) const {
 }
 
 // Set vertex position
-void WingedEdgeMesh::setVertexPosition(uint32_t index, const double3& position) {
+void ConnectedMesh::setVertexPosition(uint32_t index, const double3& position) {
     if (index < vertices.size()) {
         vertices[index].position = position;
     }
 }
 
 // Get number of vertices
-uint32_t WingedEdgeMesh::getVertexCount() const {
+uint32_t ConnectedMesh::getVertexCount() const {
     return static_cast<uint32_t>(vertices.size());
 }
 
 // Get number of faces
-uint32_t WingedEdgeMesh::getFaceCount() const {
+uint32_t ConnectedMesh::getFaceCount() const {
     return static_cast<uint32_t>(faces.size());
 }
 
 // Generate a key for edge lookup
-std::string WingedEdgeMesh::edgeKey(uint32_t startVertex, uint32_t endVertex) const {
+std::string ConnectedMesh::edgeKey(uint32_t startVertex, uint32_t endVertex) const {
     return std::to_string(startVertex) + ":" + std::to_string(endVertex);
 }
 
 // Find an edge by vertices
-uint32_t WingedEdgeMesh::findEdge(uint32_t startVertex, uint32_t endVertex) const {
+uint32_t ConnectedMesh::findEdge(uint32_t startVertex, uint32_t endVertex) const {
     auto it = edgeMap.find(edgeKey(startVertex, endVertex));
     return (it != edgeMap.end()) ? it->second : INVALID_INDEX;
 }
 
 // Add an edge to the mesh
-uint32_t WingedEdgeMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
+uint32_t ConnectedMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
     std::string key = edgeKey(startVertex, endVertex);
     auto it = edgeMap.find(key);
     
@@ -89,7 +88,7 @@ uint32_t WingedEdgeMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
 }
 
 // Add a face to the mesh
-uint32_t WingedEdgeMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
+uint32_t ConnectedMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
 {
 #ifndef NDEBUG
     {
@@ -132,7 +131,7 @@ uint32_t WingedEdgeMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
 }
 
 // Get all vertices of a face
-std::vector<uint32_t> WingedEdgeMesh::getFaceVertices(uint32_t faceIndex) const {
+std::vector<uint32_t> ConnectedMesh::getFaceVertices(uint32_t faceIndex) const {
     std::vector<uint32_t> result;
     
     if (faceIndex >= faces.size()) {
@@ -159,7 +158,7 @@ std::vector<uint32_t> WingedEdgeMesh::getFaceVertices(uint32_t faceIndex) const 
 }
 
 // Get neighboring faces
-std::vector<uint32_t> WingedEdgeMesh::getFaceNeighbors(uint32_t faceIndex) const {
+std::vector<uint32_t> ConnectedMesh::getFaceNeighbors(uint32_t faceIndex) const {
     std::vector<uint32_t> neighbors;
     
     if (faceIndex >= faces.size()) {
@@ -194,7 +193,7 @@ std::vector<uint32_t> WingedEdgeMesh::getFaceNeighbors(uint32_t faceIndex) const
 }
 
 // Calculate the area of a face
-double WingedEdgeMesh::calculateFaceArea(uint32_t faceIndex) const {
+double ConnectedMesh::calculateFaceArea(uint32_t faceIndex) const {
     std::vector<uint32_t> verts = getFaceVertices(faceIndex);
     if (verts.size() < 3) {
         return 0.0;
@@ -209,7 +208,7 @@ double WingedEdgeMesh::calculateFaceArea(uint32_t faceIndex) const {
 }
 
 // Calculate face normal
-double3 WingedEdgeMesh::calculateFaceNormal(uint32_t faceIndex) const {
+double3 ConnectedMesh::calculateFaceNormal(uint32_t faceIndex) const {
     std::vector<uint32_t> verts = getFaceVertices(faceIndex);
     if (verts.size() < 3) {
         return double3(0.0, 0.0, 1.0); // Default normal if face is invalid
@@ -231,7 +230,7 @@ double3 WingedEdgeMesh::calculateFaceNormal(uint32_t faceIndex) const {
 }
 
 // Create an icosahedron with the given radius
-void WingedEdgeMesh::createIcosahedron(double radius) {
+void ConnectedMesh::createIcosahedron(double radius) {
     clear();
     
     // Golden ratio for icosahedron calculations
@@ -284,7 +283,7 @@ void WingedEdgeMesh::createIcosahedron(double radius) {
 }
 
 // Subdivide the mesh
-void WingedEdgeMesh::subdivide(uint32_t levels) {
+void ConnectedMesh::subdivide(uint32_t levels) {
     if (levels == 0) return;
     
     for (uint32_t level = 0; level < levels; ++level) {
@@ -341,7 +340,7 @@ void WingedEdgeMesh::subdivide(uint32_t levels) {
 }
 
 // Helper to get or create midpoint between two vertices
-uint32_t WingedEdgeMesh::getMidpoint(uint32_t v1, uint32_t v2, 
+uint32_t ConnectedMesh::getMidpoint(uint32_t v1, uint32_t v2, 
                                std::unordered_map<std::string, uint32_t>& midpoints,
                                double radius) {
     // Use a normalized edge key (smaller vertex index first)

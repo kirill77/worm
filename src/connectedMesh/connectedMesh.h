@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <string>
 #include <cstdint>
-#include "../math/vector.h"
+#include "math/vector.h"
 
-class WingedEdgeMesh {
+class ConnectedMesh {
 public:
     static const uint32_t INVALID_INDEX = UINT32_MAX;
     
@@ -33,8 +33,8 @@ public:
     };
 
     // Constructors and main methods
-    WingedEdgeMesh();
-    WingedEdgeMesh(double radius, uint32_t subdivisionLevel);
+    ConnectedMesh();
+    ConnectedMesh(double radius, uint32_t subdivisionLevel);
     void clear();
     uint32_t addVertex(const double3& position);
     uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);

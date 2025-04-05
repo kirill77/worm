@@ -31,7 +31,7 @@ TensionSphere::TensionSphere(uint32_t subdivisionLevel)
     , m_sphereRadius(1.0)      // Unit sphere
 {
     // Create the base mesh with icosahedron and subdivisions
-    m_mesh = WingedEdgeMesh(m_sphereRadius, subdivisionLevel);
+    m_mesh = ConnectedMesh(m_sphereRadius, subdivisionLevel);
     
     // Initialize vertex physics data
     m_vertexData.resize(m_mesh.getVertexCount());
