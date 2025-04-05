@@ -15,6 +15,7 @@ struct ID3D12PipelineState;
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 class Window;
+class GPUStats;
 
 class GPUWorld
 {
@@ -32,7 +33,7 @@ public:
     void setCamera(std::shared_ptr<GPUCamera> camera);
     
     // Rendering
-    void drawMeshesIntoWindow();
+    void drawMeshesIntoWindow(GPUStats *pStats = nullptr);
 
 private:
     void initializeRenderResources();

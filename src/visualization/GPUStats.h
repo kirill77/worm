@@ -11,22 +11,21 @@ namespace Microsoft { namespace WRL { template<typename> class ComPtr; } }
 struct ID3D12Device;
 struct ID3D12QueryHeap;
 struct ID3D12Resource;
-class GPUQueue;
 
 class GPUStats
 {
 public:
-    GPUStats(Microsoft::WRL::ComPtr<ID3D12Device> device, std::shared_ptr<GPUQueue> gpuQueue);
+    GPUStats(Microsoft::WRL::ComPtr<ID3D12Device> device);
     ~GPUStats();
 
     // Begin collecting GPU statistics
-    void begin();
+    void begin(ID3D12GraphicsCommandList& cmdList);
 
     // End collecting GPU statistics
-    void end();
+    void end(ID3D12GraphicsCommandList& cmdList);
 
     // Get the collected statistics as a string
-    std::string getStats() const;
+    std::string getStats();
 
 private:
     // Initialize query resources
@@ -36,17 +35,16 @@ private:
     void readQueryData();
 
     Microsoft::WRL::ComPtr<ID3D12Device> m_device;
-    std::shared_ptr<GPUQueue> m_gpuQueue;
-    Microsoft::WRL::ComPtr<ID3D12QueryHeap> m_queryHeap;
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_queryBuffer;
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_queryReadbackBuffer;
+     
+    // Separate query heaps for different query types
+    Microsoft::WRL::ComPtr<ID3D12QueryHeap> m_pipelineStatsQueryHeap;
+    Microsoft::WRL::ComPtr<ID3D12QueryHeap> m_timestampQueryHeap;
     
-    // Query types we're tracking
-    enum class QueryType
-    {
-        PipelineStatistics,
-        Timestamp
-    };
+    // Query buffers
+    Microsoft::WRL::ComPtr<ID3D12Resource> m_pipelineStatsBuffer;
+    Microsoft::WRL::ComPtr<ID3D12Resource> m_pipelineStatsReadbackBuffer;
+    Microsoft::WRL::ComPtr<ID3D12Resource> m_timestampBuffer;
+    Microsoft::WRL::ComPtr<ID3D12Resource> m_timestampReadbackBuffer;
     
     // Query indices
     struct QueryIndices

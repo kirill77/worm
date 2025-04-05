@@ -47,7 +47,7 @@ int main()
     constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
     float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
     
-    GPUStats gpuStats(pWindow->getDevice(), pWindow->createOrGetGPUQueue());
+    GPUStats gpuStats(pWindow->getDevice());
 
     // Main simulation loop
     while (true)
@@ -77,9 +77,7 @@ int main()
         // Render the visualization
         pCortexVis->updateGPUMesh(*pWindow->createOrGetGPUQueue());
 
-        gpuStats.begin();
-        pGPUWorld->drawMeshesIntoWindow();
-        gpuStats.end();
+        pGPUWorld->drawMeshesIntoWindow(&gpuStats);
         std::string s = gpuStats.getStats();
         s = s;
     }

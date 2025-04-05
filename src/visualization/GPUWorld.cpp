@@ -3,6 +3,7 @@
 #include "DirectXHelpers.h"
 #include "ShaderHelper.h"
 #include "GPUWorld.h"
+#include "GPUStats.h"
 
 // Constructor
 GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow)
@@ -245,7 +246,7 @@ void GPUWorld::initializeRenderResources()
 }
 
 // Draw all meshes
-void GPUWorld::drawMeshesIntoWindow()
+void GPUWorld::drawMeshesIntoWindow(GPUStats* pStats)
 {
     // Get GPU queue
     auto gpuQueue = m_pWindow->createOrGetGPUQueue();
@@ -342,6 +343,10 @@ void GPUWorld::drawMeshesIntoWindow()
     
     // Begin command list recording
     auto commandList = gpuQueue->beginRecording();
+    if (pStats)
+    {
+        pStats->begin(*commandList.Get());
+    }
     
     // Set viewport and scissor rect
     D3D12_VIEWPORT viewport = {};
@@ -433,6 +438,10 @@ void GPUWorld::drawMeshesIntoWindow()
     commandList->ResourceBarrier(1, &renderTargetBarrier);
     
     // Execute command list
+    if (pStats)
+    {
+        pStats->end(*commandList.Get());
+    }
     gpuQueue->execute(commandList);
     
     // Present the frame
