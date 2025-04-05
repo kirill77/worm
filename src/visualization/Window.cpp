@@ -180,8 +180,7 @@ bool Window::initDirectX() {
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
-    ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+    std::shared_ptr<GPUQueue> pQueue = this->createOrGetGPUQueue();
 
     // Create swap chain
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -195,7 +194,7 @@ bool Window::initDirectX() {
 
     Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
     ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(
-        commandQueue.Get(),
+        pQueue->getQueue().Get(),
         m_hwnd,
         &swapChainDesc,
         nullptr,
