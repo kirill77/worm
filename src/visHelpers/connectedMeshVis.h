@@ -1,8 +1,14 @@
 #pragma once
 
+#include <memory>
+
+class Window;
+class ConnectedMesh;
+class GPUMesh;
+
 struct ConnectedMeshVis
 {
-    ConnectedMeshVis(std::shared_ptr<ConnecteMesh> pMesh);
+    ConnectedMeshVis(std::shared_ptr<Window>, std::shared_ptr<ConnectedMesh> pMesh);
 
     std::shared_ptr<GPUMesh> getGPUMesh();
     void updateGPUMesh();
