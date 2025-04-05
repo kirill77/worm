@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "DirectXHelpers.h"
 #include "ShaderHelper.h"
+#include "GPUWorld.h"
 
 // Constructor
 GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow)

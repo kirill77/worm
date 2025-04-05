@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "DirectXHelpers.h"
+#include "GPUCamera.h"
 
 GPUCamera::GPUCamera()
 {

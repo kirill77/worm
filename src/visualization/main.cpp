@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Window.h"
+#include "GPUWorld.h"
+#include "GPUMesh.h"
 #include <iostream>
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)

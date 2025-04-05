@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "DirectXHelpers.h"
+#include "GPUQueue.h"
 
 GPUQueue::GPUQueue(Microsoft::WRL::ComPtr<ID3D12Device> device)
     : m_device(device)

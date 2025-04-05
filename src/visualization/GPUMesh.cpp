@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "DirectXHelpers.h"
+#include "GPUMesh.h"
 
 // Helper function to create a GPU buffer
 Microsoft::WRL::ComPtr<ID3D12Resource> createDefaultBuffer(

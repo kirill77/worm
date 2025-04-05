@@ -152,6 +152,9 @@
     <ProjectReference Include="..\timeUtils\timeUtils.vcxproj">
       <Project>{524acd5b-2a15-4b58-a2c7-621bb546865f}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\visualization\visualization.vcxproj">
+      <Project>{250ef3cc-b8d1-4814-8ae1-4a5ad649af73}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\worm\worm.vcxproj">
       <Project>{ae833f6a-dab0-4155-9374-d5710023a461}</Project>
     </ProjectReference>
