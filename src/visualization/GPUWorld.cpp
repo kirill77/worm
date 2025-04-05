@@ -217,7 +217,7 @@ void GPUWorld::initializeRenderResources()
     ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
     
     // Create the constant buffer for transformation matrices
-    const UINT constantBufferSize = sizeof(TransformBuffer);
+    const UINT constantBufferSize = (sizeof(TransformBuffer) + 255) & ~255;
     
     // Create the constant buffer resource
     m_transformBufferResource = CreateBuffer(
