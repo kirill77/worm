@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "DirectXHelpers.h"
 #include "GPUMesh.h"
+#include "GPUQueue.h"
 
 // Helper function to create a GPU buffer
 Microsoft::WRL::ComPtr<ID3D12Resource> createDefaultBuffer(
@@ -74,22 +75,10 @@ GPUMesh::GPUMesh(Microsoft::WRL::ComPtr<ID3D12Device> device)
 {
 }
 
-void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles)
+void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles, GPUQueue& gpuQueue)
 {
-    // Create a command queue for data transfer
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
-    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
-    
-    // Create a command allocator
-    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
-    ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
-    
-    // Create a command list
-    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
-    ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+    // Get a command list from the provided queue
+    auto commandList = gpuQueue.beginRecording();
     
     // Upload buffers
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexUploadBuffer;
@@ -134,32 +123,6 @@ void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3
     m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
     m_indexBufferView.SizeInBytes = ibSize;
     
-    // Execute command list
-    ThrowIfFailed(commandList->Close());
-    ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
-    commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-    
-    // Create fence for synchronization
-    Microsoft::WRL::ComPtr<ID3D12Fence> fence;
-    ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-    
-    // Create event handle
-    HANDLE eventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    if (eventHandle == nullptr)
-    {
-        ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-    }
-    
-    // Signal the fence
-    uint64_t fenceValue = 1;
-    ThrowIfFailed(commandQueue->Signal(fence.Get(), fenceValue));
-    
-    // Wait for the fence
-    if (fence->GetCompletedValue() < fenceValue)
-    {
-        ThrowIfFailed(fence->SetEventOnCompletion(fenceValue, eventHandle));
-        WaitForSingleObject(eventHandle, INFINITE);
-    }
-    
-    CloseHandle(eventHandle);
+    // Execute command list using the provided queue
+    gpuQueue.execute(commandList);
 } 

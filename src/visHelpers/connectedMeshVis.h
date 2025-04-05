@@ -5,6 +5,7 @@
 class Window;
 class ConnectedMesh;
 class GPUMesh;
+class GPUQueue;
 
 struct ConnectedMeshVis
 {
@@ -12,7 +13,7 @@ struct ConnectedMeshVis
 
     void setConnectedMesh(std::shared_ptr<ConnectedMesh> pMesh);
     std::shared_ptr<GPUMesh> getGPUMesh();
-    void updateGPUMesh();
+    void updateGPUMesh(GPUQueue& gpuQueue);
 
 private:
     std::shared_ptr<ConnectedMesh> m_pMesh;

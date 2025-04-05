@@ -72,7 +72,7 @@ int main()
         }
 
         // Render the visualization
-        pCortexVis->updateGPUMesh();
+        pCortexVis->updateGPUMesh(*pWindow->createOrGetGPUQueue());
         pGPUWorld->drawMeshesIntoWindow();
     }
 

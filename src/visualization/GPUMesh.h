@@ -10,6 +10,7 @@
 namespace Microsoft { namespace WRL { template<typename> class ComPtr; } }
 struct ID3D12Device;
 struct ID3D12Resource;
+class GPUQueue;
 
 class GPUMesh
 {
@@ -21,7 +22,7 @@ public:
         float3 vPos;
     };
     
-    void setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles);
+    void setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles, GPUQueue& gpuQueue);
     
     D3D12_VERTEX_BUFFER_VIEW getVertexBufferView() const { return m_vertexBufferView; }
     D3D12_INDEX_BUFFER_VIEW getIndexBufferView() const { return m_indexBufferView; }
