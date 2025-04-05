@@ -5,6 +5,7 @@
 #include "simulation/ProteinWiki.h"
 #include "visualization/Window.h"
 #include "visualization/GPUWorld.h"
+#include "visualization/GPUStats.h"
 #include "visHelpers/connectedMeshVis.h"
 #include <memory>
 
@@ -46,6 +47,8 @@ int main()
     constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
     float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
     
+    GPUStats gpuStats(pWindow->getDevice(), pWindow->createOrGetGPUQueue());
+
     // Main simulation loop
     while (true)
     {
@@ -73,7 +76,12 @@ int main()
 
         // Render the visualization
         pCortexVis->updateGPUMesh(*pWindow->createOrGetGPUQueue());
+
+        gpuStats.begin();
         pGPUWorld->drawMeshesIntoWindow();
+        gpuStats.end();
+        std::string s = gpuStats.getStats();
+        s = s;
     }
 
     if (allTestsPassed) {
