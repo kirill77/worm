@@ -2,6 +2,10 @@
 #include "Window.h"
 #include "DirectXHelpers.h"
 
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+
 // Constants for window creation
 constexpr int DEFAULT_WIDTH = 1280;
 constexpr int DEFAULT_HEIGHT = 720;

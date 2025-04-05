@@ -2,6 +2,8 @@
 
 #include <memory>
 #include "../math/vector.h"
+#include <d3d12.h>
+#include <wrl/client.h>
 
 // Forward declarations
 namespace Microsoft { namespace WRL { template<typename> class ComPtr; } }

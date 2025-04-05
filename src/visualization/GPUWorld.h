@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 #include <DirectXMath.h>
+#include <d3d12.h>
+#include <wrl/client.h>
 #include "GPUMesh.h"
 #include "GPUCamera.h"
 
