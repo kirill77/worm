@@ -24,15 +24,14 @@ public:
     // End collecting GPU statistics
     void end(ID3D12GraphicsCommandList& cmdList);
 
-    // Get the collected statistics as a string
-    std::string getStats();
+    void downloadStats();
 
 private:
+    D3D12_QUERY_DATA_PIPELINE_STATISTICS m_downloadedStats;
+    double m_fDownloadedTimeMs = 0;
+
     // Initialize query resources
     void initializeQueries();
-
-    // Read back query data
-    void readQueryData();
 
     Microsoft::WRL::ComPtr<ID3D12Device> m_device;
      
@@ -53,11 +52,8 @@ private:
         uint32_t pipelineStatsEnd;
         uint32_t timestampBegin;
         uint32_t timestampEnd;
-    } m_queryIndices;
-    
-    // Pipeline statistics data
-    D3D12_QUERY_DATA_PIPELINE_STATISTICS m_pipelineStats;
-    
+    } m_queryIndices;    
+   
     // Timestamp data
     uint64_t m_timestampBegin;
     uint64_t m_timestampEnd;

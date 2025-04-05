@@ -78,8 +78,8 @@ int main()
         pCortexVis->updateGPUMesh(*pWindow->createOrGetGPUQueue());
 
         pGPUWorld->drawMeshesIntoWindow(&gpuStats);
-        std::string s = gpuStats.getStats();
-        s = s;
+        gpuStats.downloadStats();
+        pGPUWorld = pGPUWorld;
     }
 
     if (allTestsPassed) {

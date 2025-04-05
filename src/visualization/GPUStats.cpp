@@ -187,22 +187,23 @@ void GPUStats::end(ID3D12GraphicsCommandList& cmdList)
     m_isCollecting = false;
 }
 
-void GPUStats::readQueryData()
+void GPUStats::downloadStats()
 {
     // Map the pipeline statistics readback buffer
     D3D12_QUERY_DATA_PIPELINE_STATISTICS* pPipelineStatsData = nullptr;
-    CD3DX12_RANGE readRange(0, sizeof(D3D12_QUERY_DATA_PIPELINE_STATISTICS));
-    ThrowIfFailed(m_pipelineStatsReadbackBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pPipelineStatsData)));
+    CD3DX12_RANGE pipelineStatsRange(0, sizeof(D3D12_QUERY_DATA_PIPELINE_STATISTICS));
+    ThrowIfFailed(m_pipelineStatsReadbackBuffer->Map(0, &pipelineStatsRange, reinterpret_cast<void**>(&pPipelineStatsData)));
     
     // Copy the pipeline statistics data
-    m_pipelineStats = *pPipelineStatsData;
+    m_downloadedStats = *pPipelineStatsData;
     
     // Unmap the buffer
     m_pipelineStatsReadbackBuffer->Unmap(0, nullptr);
     
     // Map the timestamp readback buffer
     uint64_t* pTimestampData = nullptr;
-    ThrowIfFailed(m_timestampReadbackBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pTimestampData)));
+    CD3DX12_RANGE timestampRange(0, sizeof(uint64_t) * 2); // Space for begin and end timestamps
+    ThrowIfFailed(m_timestampReadbackBuffer->Map(0, &timestampRange, reinterpret_cast<void**>(&pTimestampData)));
     
     // Copy the timestamp data
     m_timestampBegin = pTimestampData[0];
@@ -210,36 +211,7 @@ void GPUStats::readQueryData()
     
     // Unmap the buffer
     m_timestampReadbackBuffer->Unmap(0, nullptr);
+
+    m_fDownloadedTimeMs = static_cast<double>(m_timestampEnd - m_timestampBegin) / static_cast<double>(m_timestampFrequency) * 1000.0;
 }
-
-std::string GPUStats::getStats()
-{
-    // Read back query data
-    readQueryData();
-
-    std::stringstream ss;
-    
-    // Calculate time in milliseconds
-    double timeMs = 0.0;
-    if (m_timestampFrequency > 0)
-    {
-        timeMs = static_cast<double>(m_timestampEnd - m_timestampBegin) / static_cast<double>(m_timestampFrequency) * 1000.0;
-    }
-    
-    ss << std::fixed << std::setprecision(2);
-    ss << "GPU Statistics:\n";
-    ss << "Time: " << timeMs << " ms\n";
-    ss << "Vertex Shader Invocations: " << m_pipelineStats.IAVertices << "\n";
-    ss << "Input Assembler Primitives: " << m_pipelineStats.IAPrimitives << "\n";
-    ss << "Vertex Shader Invocations: " << m_pipelineStats.VSInvocations << "\n";
-    ss << "Geometry Shader Invocations: " << m_pipelineStats.GSInvocations << "\n";
-    ss << "Geometry Shader Primitives: " << m_pipelineStats.GSPrimitives << "\n";
-    ss << "Clipping Stage Primitives: " << m_pipelineStats.CInvocations << "\n";
-    ss << "Clipping Stage Primitives: " << m_pipelineStats.CPrimitives << "\n";
-    ss << "Pixel Shader Invocations: " << m_pipelineStats.PSInvocations << "\n";
-    ss << "Hull Shader Invocations: " << m_pipelineStats.HSInvocations << "\n";
-    ss << "Domain Shader Invocations: " << m_pipelineStats.DSInvocations << "\n";
-    ss << "Compute Shader Invocations: " << m_pipelineStats.CSInvocations << "\n";
-    
-    return ss.str();
-} 
+ 
