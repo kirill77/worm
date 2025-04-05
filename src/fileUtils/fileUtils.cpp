@@ -34,3 +34,36 @@ bool FileUtils::findTheFolder(const std::string &sName, std::filesystem::path& _
         path = tmp;
     }
 }
+
+bool FileUtils::findFile(const std::wstring &fileName, std::filesystem::path &path, const std::vector<std::wstring> &searchPaths)
+{
+    // If no search paths provided, use default paths
+    std::vector<std::wstring> paths = searchPaths;
+    if (paths.empty())
+    {
+        // Get the executable directory
+        std::wstring buffer;
+        buffer.resize(1024);
+        GetModuleFileNameW(nullptr, &buffer[0], (DWORD)buffer.size());
+        std::filesystem::path exePath = buffer;
+        exePath.remove_filename();
+        
+        // Add default search paths
+        paths.push_back(exePath.wstring());
+        paths.push_back((exePath / L"..").wstring());
+        paths.push_back((exePath.parent_path() / L"../..").wstring());
+    }
+    
+    // Search in each path
+    for (const auto &searchPath : paths)
+    {
+        std::filesystem::path fullPath = std::filesystem::path(searchPath) / fileName;
+        if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
+        {
+            path = fullPath;
+            return true;
+        }
+    }
+    
+    return false;
+}

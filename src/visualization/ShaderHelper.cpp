@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <d3dcompiler.h>
+#include "fileUtils/fileUtils.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -28,12 +29,19 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderHelper::loadShader(
         return it->second;
     }
     
+    // Find the shader file in different directories
+    std::filesystem::path foundPath;
+    if (!FileUtils::findFile(filePath, foundPath))
+    {
+        throw std::runtime_error("Failed to find shader file: " + std::string(filePath.begin(), filePath.end()));
+    }
+    
     // Compile shader
     Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
     Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
     
     HRESULT hr = D3DCompileFromFile(
-        filePath.c_str(),
+        foundPath.c_str(),
         nullptr,
         D3D_COMPILE_STANDARD_FILE_INCLUDE,
         entryPoint.c_str(),
@@ -67,9 +75,16 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderHelper::loadCompiledShader(const std::wst
         return it->second;
     }
     
+    // Find the shader file in different directories
+    std::filesystem::path foundPath;
+    if (!FileUtils::findFile(filePath, foundPath))
+    {
+        throw std::runtime_error("Failed to find compiled shader file: " + std::string(filePath.begin(), filePath.end()));
+    }
+    
     // Load the shader
     Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
-    ThrowIfFailed(D3DReadFileToBlob(filePath.c_str(), &shaderBlob));
+    ThrowIfFailed(D3DReadFileToBlob(foundPath.c_str(), &shaderBlob));
     
     // Cache the shader
     m_shaderCache[filePath] = shaderBlob;

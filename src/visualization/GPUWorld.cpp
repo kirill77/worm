@@ -119,7 +119,7 @@ void GPUWorld::initializeRenderResources()
 #endif
     
     // Use our shader helper to load/compile shaders
-    std::wstring shaderPath = L"Shaders/";
+    std::wstring shaderPath = L"visualization/Shaders/";
     ShaderHelper& shaderHelper = ShaderHelper::getInstance();
     
     try 
