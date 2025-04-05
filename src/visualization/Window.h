@@ -46,8 +46,11 @@ public:
     void processMessages();
     HWND getWindowHandle() const;
     void handleInput(UINT message, WPARAM wParam, LPARAM lParam);
+    bool shouldExit() const { return m_shouldExit; }
 
 private:
+    static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
     bool initDirectX();
     
     HWND m_hwnd;
@@ -58,4 +61,5 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Device> m_device;
     Microsoft::WRL::ComPtr<IDXGISwapChain4> m_swapChain;
     std::shared_ptr<GPUQueue> m_gpuQueue;
+    bool m_shouldExit = false;
 };

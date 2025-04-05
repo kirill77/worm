@@ -34,6 +34,8 @@ int main()
     {
         // Process window messages
         pWindow->processMessages();
+        if (pWindow->shouldExit())
+            break;
         
         // Simulate one step
         world.simulateStep(fDtSec);

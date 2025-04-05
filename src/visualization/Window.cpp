@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "DirectXHelpers.h"
+#include <stdexcept>
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -12,9 +13,6 @@ constexpr int DEFAULT_HEIGHT = 720;
 
 // Global Window class pointer for the Win32 window procedure
 Window* g_pWindow = nullptr;
-
-// Forward declarations
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // UIState implementation
 uint32_t UIState::getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const {
@@ -62,7 +60,7 @@ bool Window::createWindowDevicAndSwapChain(const std::string& sName) {
     WNDCLASSEX windowClass = {};
     windowClass.cbSize = sizeof(WNDCLASSEX);
     windowClass.style = CS_HREDRAW | CS_VREDRAW;
-    windowClass.lpfnWndProc = WindowProc;
+    windowClass.lpfnWndProc = Window::WindowProc;
     windowClass.hInstance = GetModuleHandle(NULL);
     windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     windowClass.lpszClassName = L"VisualizationWindowClass";
@@ -86,7 +84,7 @@ bool Window::createWindowDevicAndSwapChain(const std::string& sName) {
         nullptr, // No parent window
         nullptr, // No menus
         windowClass.hInstance,
-        nullptr);
+        this);
 
     if (!m_hwnd) {
         return false;
@@ -236,16 +234,40 @@ void Window::handleInput(UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 // Window procedure
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    // Handle input if the Window instance exists
-    if (g_pWindow) {
-        g_pWindow->handleInput(message, wParam, lParam);
+LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    Window* window = nullptr;
+    if (message == WM_NCCREATE)
+    {
+        CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
+        window = reinterpret_cast<Window*>(createStruct->lpCreateParams);
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+    }
+    else
+    {
+        window = reinterpret_cast<Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
     }
 
-    switch (message) {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
+    if (window)
+    {
+        switch (message)
+        {
+        case WM_DESTROY:
+            window->m_shouldExit = true;
+            return 0;
+        case WM_SIZE:
+            // Handle window resize
+            return 0;
+        case WM_KEYDOWN:
+        case WM_KEYUP:
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+        case WM_MOUSEMOVE:
+            window->handleInput(message, wParam, lParam);
+            return 0;
+        }
     }
 
     return DefWindowProc(hwnd, message, wParam, lParam);
