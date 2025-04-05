@@ -8,8 +8,9 @@ class GPUMesh;
 
 struct ConnectedMeshVis
 {
-    ConnectedMeshVis(std::shared_ptr<Window>, std::shared_ptr<ConnectedMesh> pMesh);
+    ConnectedMeshVis(std::shared_ptr<Window>);
 
+    void setConnectedMesh(std::shared_ptr<ConnectedMesh> pMesh);
     std::shared_ptr<GPUMesh> getGPUMesh();
     void updateGPUMesh();
 

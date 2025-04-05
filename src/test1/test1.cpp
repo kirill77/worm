@@ -1,10 +1,24 @@
 #include "simulation/World.h"
+#include "simulation/Cell.h"
 #include "worm/Worm.h"
 #include "log/ILog.h"
 #include "simulation/ProteinWiki.h"
 #include "visualization/Window.h"
 #include "visualization/GPUWorld.h"
+#include "visHelpers/connectedMeshVis.h"
 #include <memory>
+
+std::shared_ptr<ConnectedMeshVis> createCortexVis(std::shared_ptr<Worm> pWorm, std::shared_ptr<Window> pWindow)
+{
+    // get a connected mesh that shows how the cortex looks like
+    auto pCell = pWorm->getCells()[0];
+    auto pCortex = pCell->getCortex();
+    auto pConnectedMesh = pCortex->getTensionSphere().getConnectedMesh();
+
+    std::shared_ptr<ConnectedMeshVis> pCortexVis = std::make_shared<ConnectedMeshVis>(pWindow);
+    pCortexVis->setConnectedMesh(pConnectedMesh);
+    return pCortexVis;
+}
 
 int main()
 {
@@ -24,7 +38,10 @@ int main()
 
     // Create GPU world for visualization
     std::shared_ptr<GPUWorld> pGPUWorld = std::make_shared<GPUWorld>(pWindow);
-    
+
+    std::shared_ptr<ConnectedMeshVis> pCortexVis = createCortexVis(pWorm, pWindow);
+    pGPUWorld->addMesh(pCortexVis->getGPUMesh());
+
     bool allTestsPassed = true;
     constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
     float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
@@ -55,6 +72,7 @@ int main()
         }
 
         // Render the visualization
+        pCortexVis->updateGPUMesh();
         pGPUWorld->drawMeshesIntoWindow();
     }
 

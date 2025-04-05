@@ -4,6 +4,7 @@
 #include <array>
 #include <unordered_map>
 #include <string>
+#include <memory>
 #include "../math/vector.h"
 #include "connectedMesh/connectedMesh.h"
 
@@ -127,11 +128,17 @@ public:
     /**
      * @brief Get the vertex count
      */
-    uint32_t getVertexCount() const { return m_mesh.getVertexCount(); }
+    uint32_t getVertexCount() const { return m_pMesh->getVertexCount(); }
+    
+    /**
+     * @brief Get the underlying ConnectedMesh
+     * @return Shared pointer to the ConnectedMesh
+     */
+    std::shared_ptr<ConnectedMesh> getConnectedMesh() const { return m_pMesh; }
 
 private:
     // The underlying mesh data structure
-    ConnectedMesh m_mesh;
+    std::shared_ptr<ConnectedMesh> m_pMesh;
     
     // Physics and simulation properties
     std::vector<Vertex> m_vertexData;       // Physics data for vertices

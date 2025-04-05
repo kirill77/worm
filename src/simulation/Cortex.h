@@ -107,4 +107,9 @@ public:
     
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
+
+    const TensionSphere &getTensionSphere() const
+    {
+        return m_tensionSphere;
+    }
 }; 

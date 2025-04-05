@@ -31,19 +31,19 @@ TensionSphere::TensionSphere(uint32_t subdivisionLevel)
     , m_sphereRadius(1.0)      // Unit sphere
 {
     // Create the base mesh with icosahedron and subdivisions
-    m_mesh = ConnectedMesh(m_sphereRadius, subdivisionLevel);
+    m_pMesh = std::make_shared<ConnectedMesh>(m_sphereRadius, subdivisionLevel);
     
     // Initialize vertex physics data
-    m_vertexData.resize(m_mesh.getVertexCount());
+    m_vertexData.resize(m_pMesh->getVertexCount());
     
     // Initialize face and cell data
-    uint32_t faceCount = m_mesh.getFaceCount();
+    uint32_t faceCount = m_pMesh->getFaceCount();
     m_faceData.resize(faceCount);
     m_cells.resize(faceCount);
     
     // Calculate initial areas
     for (uint32_t i = 0; i < faceCount; ++i) {
-        m_faceData[i].area = m_mesh.calculateFaceArea(i);
+        m_faceData[i].area = m_pMesh->calculateFaceArea(i);
         m_faceData[i].restArea = m_faceData[i].area;
         m_cells[i].setArea(m_faceData[i].area);
     }
@@ -74,7 +74,7 @@ const SphereCell& TensionSphere::getCell(uint32_t index) const
 
 double3 TensionSphere::getVertexPosition(uint32_t index) const
 {
-    return m_mesh.getVertexPosition(index);
+    return m_pMesh->getVertexPosition(index);
 }
 
 void TensionSphere::makeTimeStep(double fDtSec)
@@ -167,7 +167,7 @@ void TensionSphere::calculateForces()
         double3 forceVector = normal * forceMagnitude / 3.0;  // Divide by 3 to distribute to each vertex
         
         // Get vertices for this face and apply force
-        std::vector<uint32_t> faceVertices = m_mesh.getFaceVertices(i);
+        std::vector<uint32_t> faceVertices = m_pMesh->getFaceVertices(i);
         for (uint32_t vertexIndex : faceVertices) {
             m_vertexData[vertexIndex].force += forceVector;
         }
@@ -184,8 +184,8 @@ void TensionSphere::integrateMotion(double fDtSec)
         vertex.velocity = vertex.velocity * (1.0 - m_damping) + vertex.force * fDtSec;
         
         // Update position
-        double3 newPosition = m_mesh.getVertexPosition(i) + vertex.velocity * fDtSec;
-        m_mesh.setVertexPosition(i, newPosition);
+        double3 newPosition = m_pMesh->getVertexPosition(i) + vertex.velocity * fDtSec;
+        m_pMesh->setVertexPosition(i, newPosition);
     }
 }
 
@@ -194,7 +194,7 @@ void TensionSphere::enforceSphericalConstraint()
     // Ensure all vertices stay on the sphere surface
     for (uint32_t i = 0; i < m_vertexData.size(); ++i) {
         Vertex& vertex = m_vertexData[i];
-        double3 position = m_mesh.getVertexPosition(i);
+        double3 position = m_pMesh->getVertexPosition(i);
         
         // Calculate distance from origin
         double distance = length(position);
@@ -206,7 +206,7 @@ void TensionSphere::enforceSphericalConstraint()
         if (distance > 1e-10) {
             // Normalize and scale to sphere radius
             position = normalize(position) * m_sphereRadius;
-            m_mesh.setVertexPosition(i, position);
+            m_pMesh->setVertexPosition(i, position);
             
             // Project velocity onto tangent plane
             double dotProduct = dot(vertex.velocity, position);
@@ -221,7 +221,7 @@ void TensionSphere::updateCellAreas()
 {
     // Recalculate areas for all faces after vertex movement
     for (uint32_t i = 0; i < m_faceData.size(); ++i) {
-        m_faceData[i].area = m_mesh.calculateFaceArea(i);
+        m_faceData[i].area = m_pMesh->calculateFaceArea(i);
         m_cells[i].setArea(m_faceData[i].area);
     }
 }
@@ -246,7 +246,7 @@ void TensionSphere::resetToBalancedState()
     
     // Reset all faces to their rest areas
     for (uint32_t i = 0; i < m_faceData.size(); ++i) {
-        m_faceData[i].area = m_mesh.calculateFaceArea(i);
+        m_faceData[i].area = m_pMesh->calculateFaceArea(i);
         m_faceData[i].restArea = m_faceData[i].area;
     }
     
@@ -273,7 +273,7 @@ void TensionSphere::setupCellNeighbors()
     
     // For each face, get its neighbors from the mesh
     for (uint32_t i = 0; i < m_cells.size(); ++i) {
-        std::vector<uint32_t> neighbors = m_mesh.getFaceNeighbors(i);
+        std::vector<uint32_t> neighbors = m_pMesh->getFaceNeighbors(i);
         for (uint32_t neighborIdx : neighbors) {
             m_cells[i].addNeighbor(neighborIdx);
         }
@@ -282,5 +282,5 @@ void TensionSphere::setupCellNeighbors()
 
 double3 TensionSphere::calculateFaceNormal(uint32_t faceIndex) const
 {
-    return m_mesh.calculateFaceNormal(faceIndex);
+    return m_pMesh->calculateFaceNormal(faceIndex);
 }

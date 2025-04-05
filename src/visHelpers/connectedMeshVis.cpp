@@ -4,19 +4,14 @@
 #include "connectedMesh/connectedMesh.h"
 #include <stdexcept>
 
-ConnectedMeshVis::ConnectedMeshVis(std::shared_ptr<Window> pWindow, std::shared_ptr<ConnectedMesh> pMesh)
-    : m_pMesh(pMesh)
+ConnectedMeshVis::ConnectedMeshVis(std::shared_ptr<Window> pWindow)
 {
-    if (!pMesh)
-    {
-        throw std::invalid_argument("ConnectedMeshVis: pMesh cannot be null");
-    }
-
-    // Create GPUMesh using the device from the Window singleton
     m_pGPUMesh = std::make_shared<GPUMesh>(pWindow->getDevice());
+}
 
-    // Initial update of the GPU mesh
-    updateGPUMesh();
+void ConnectedMeshVis::setConnectedMesh(std::shared_ptr<ConnectedMesh> pMesh)
+{
+    m_pMesh = pMesh;
 }
 
 std::shared_ptr<GPUMesh> ConnectedMeshVis::getGPUMesh()

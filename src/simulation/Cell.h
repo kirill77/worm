@@ -48,6 +48,10 @@ public:
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
     
+    std::shared_ptr<Cortex> getCortex() const
+    {
+        return m_pCortex;
+    }
     // Access to internal medium
     Medium& getInternalMedium() const { return m_pCortex->getInternalMedium(); }
     
