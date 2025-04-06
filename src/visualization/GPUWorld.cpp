@@ -159,7 +159,7 @@ void GPUWorld::initializeRenderResources()
     psoDesc.PS.BytecodeLength = pixelShader->GetBufferSize();
     
     // Setup rasterizer state
-    psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+    psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
     psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
     psoDesc.RasterizerState.FrontCounterClockwise = FALSE;
     psoDesc.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
