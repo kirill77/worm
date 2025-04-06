@@ -21,8 +21,8 @@ public:
     friend class Window;
     
     uint32_t getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const;
-    float2 getMousePosition();
-    float getScrollWheelState();
+    float2 getMousePosition() const;
+    float getScrollWheelState() const;
 
 private:
     std::unordered_map<uint32_t, uint32_t> m_buttonKeyPressCount;

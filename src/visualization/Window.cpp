@@ -23,11 +23,11 @@ uint32_t UIState::getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const {
     return 0;
 }
 
-float2 UIState::getMousePosition() {
+float2 UIState::getMousePosition() const {
     return m_mousePosition;
 }
 
-float UIState::getScrollWheelState() {
+float UIState::getScrollWheelState() const {
     return m_scrollWheelState;
 }
 

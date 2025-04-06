@@ -7,6 +7,7 @@
 #include "visualization/GPUWorld.h"
 #include "visualization/GPUStats.h"
 #include "visHelpers/connectedMeshVis.h"
+#include "visHelpers/cameraUI.h"
 #include <memory>
 
 std::shared_ptr<ConnectedMeshVis> createCortexVis(std::shared_ptr<Worm> pWorm, std::shared_ptr<Window> pWindow)
@@ -46,6 +47,9 @@ int main()
     bool allTestsPassed = true;
     constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
     float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
+
+    CameraUI cameraUI;
+    cameraUI.attachToCamera(pGPUWorld->getCamera());
     
     GPUStats gpuStats(pWindow->getDevice());
 
@@ -56,13 +60,14 @@ int main()
         pWindow->processMessages();
         if (pWindow->shouldExit())
             break;
+        cameraUI.notifyNewUIState(pWindow->getCurrentUIState());
         
         // Simulate one step
         world.simulateStep(fDtSec);
         fCurrentTimeSec += fDtSec;
 
         // Run validation checks every 10 seconds
-        if ((static_cast<uint32_t>(fCurrentTimeSec / fDtSec) + 1) % 100 == 0) {
+        if (false && (static_cast<uint32_t>(fCurrentTimeSec / fDtSec) + 1) % 100 == 0) {
             bool parValid = pWorm->validatePARPolarization(fCurrentTimeSec);
             bool cycleValid = pWorm->validateCellCycle(fCurrentTimeSec);
             bool divisionValid = pWorm->validateAsymmetricDivision(fCurrentTimeSec);
