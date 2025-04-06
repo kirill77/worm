@@ -165,7 +165,7 @@ void GPUWorld::initializeRenderResources()
     psoDesc.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
     psoDesc.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
     psoDesc.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-    psoDesc.RasterizerState.DepthClipEnable = TRUE;
+    psoDesc.RasterizerState.DepthClipEnable = FALSE; // TODO: figure out why I see nothing with 'TRUE' here
     psoDesc.RasterizerState.MultisampleEnable = FALSE;
     psoDesc.RasterizerState.AntialiasedLineEnable = FALSE;
     psoDesc.RasterizerState.ForcedSampleCount = 0;
@@ -209,6 +209,7 @@ void GPUWorld::initializeRenderResources()
     // Setup MSAA
     psoDesc.SampleDesc.Count = 1;
     psoDesc.SampleDesc.Quality = 0;
+    psoDesc.SampleMask = UINT_MAX;  // Enable all samples
     
     // Setup misc flags
     psoDesc.NodeMask = 0;
