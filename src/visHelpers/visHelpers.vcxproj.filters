@@ -18,9 +18,15 @@
     <ClCompile Include="connectedMeshVis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cameraUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="connectedMeshVis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cameraUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

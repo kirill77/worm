@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cameraUI.cpp" />
     <ClCompile Include="connectedMeshVis.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cameraUI.h" />
     <ClInclude Include="connectedMeshVis.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
