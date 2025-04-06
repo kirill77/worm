@@ -79,12 +79,15 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderHelper::loadCompiledShader(const std::wst
     std::filesystem::path foundPath;
     if (!FileUtils::findFile(filePath, foundPath))
     {
-        throw std::runtime_error("Failed to find compiled shader file: " + std::string(filePath.begin(), filePath.end()));
+        return nullptr;
     }
     
     // Load the shader
     Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
-    ThrowIfFailed(D3DReadFileToBlob(foundPath.c_str(), &shaderBlob));
+    if (FAILED(D3DReadFileToBlob(foundPath.c_str(), &shaderBlob)))
+    {
+        return nullptr;
+    }
     
     // Cache the shader
     m_shaderCache[filePath] = shaderBlob;

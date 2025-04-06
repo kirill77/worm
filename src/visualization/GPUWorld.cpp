@@ -120,22 +120,24 @@ void GPUWorld::initializeRenderResources()
 #endif
     
     // Use our shader helper to load/compile shaders
-    std::wstring shaderPath = L"visualization/Shaders/";
     ShaderHelper& shaderHelper = ShaderHelper::getInstance();
     
-    try 
     {
         // Try to load pre-compiled shaders
+        std::wstring shaderPath = L"Shaders/";
         vertexShader = shaderHelper.loadCompiledShader(shaderPath + L"VertexShader.cso");
         pixelShader = shaderHelper.loadCompiledShader(shaderPath + L"PixelShader.cso");
     }
-    catch (...)
+
     {
         // Fallback: Compile shaders at runtime
-        vertexShader = shaderHelper.loadShader(shaderPath + L"VertexShader.hlsl", "main", "vs_5_0", compileFlags);
-        pixelShader = shaderHelper.loadShader(shaderPath + L"PixelShader.hlsl", "main", "ps_5_0", compileFlags);
+        std::wstring shaderPath = L"visualization/Shaders/";
+        if (!vertexShader)
+            vertexShader = shaderHelper.loadShader(shaderPath + L"VertexShader.hlsl", "main", "vs_5_0", compileFlags);
+        if (!pixelShader)
+            pixelShader = shaderHelper.loadShader(shaderPath + L"PixelShader.hlsl", "main", "ps_5_0", compileFlags);
     }
-    
+
     // Define the vertex input layout
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
     {
