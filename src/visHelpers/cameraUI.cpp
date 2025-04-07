@@ -1,10 +1,12 @@
 #include "cameraUI.h"
 #include "visualization/GPUCamera.h"
-#include "../math/vector.h"
 #include <cmath>
 
 CameraUI::CameraUI()
-    : m_pCamera(nullptr)
+    : m_rotationSpeed(0.5f)
+    , m_panSpeed(0.01f)
+    , m_zoomSpeed(0.1f)
+    , m_pCamera(nullptr)
 {
 }
 
@@ -12,9 +14,9 @@ CameraUI::~CameraUI()
 {
 }
 
-void CameraUI::attachToCamera(std::shared_ptr<GPUCamera> pCamera)
+void CameraUI::attachToCamera(std::shared_ptr<GPUCamera> camera)
 {
-    m_pCamera = pCamera;
+    m_pCamera = camera;
 }
 
 void CameraUI::notifyNewUIState(const UIState& uiState)
@@ -22,105 +24,139 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     if (!m_pCamera)
         return;
 
-    // Calculate mouse movement delta
-    float2 currentMousePos = uiState.getMousePosition();
-    float2 mouseDelta = currentMousePos - m_prevUIState.getMousePosition();
-    
-    // Handle mouse buttons for camera control
-    // Left button (VK_LBUTTON = 0x01) for rotation
-    if (uiState.getButtonOrKeyPressCount(0x01) > 0)
+    // Handle Ctrl+A to fit world box in view
+    if (uiState.getButtonOrKeyPressCount(VK_CONTROL) &&
+        uiState.getButtonOrKeyPressCount('A') > m_prevUIState.getButtonOrKeyPressCount('A'))
     {
-        handleRotation(mouseDelta);
+        if (!m_worldBox.isempty())
+        {
+            // Set FOV to 30 degrees
+            m_pCamera->setFOV(30.0f);
+            
+            // Calculate the center of the world box
+            float3 boxCenter = m_worldBox.center();
+            
+            // Calculate the diagonal of the world box
+            float3 boxDiagonal = m_worldBox.diagonal();
+            
+            // Calculate the maximum dimension of the box
+            float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
+            
+            // Calculate the distance needed to fit the box in view
+            // For a 30-degree FOV, we need to be at a distance of maxDimension / (2 * tan(15 degrees))
+            float fovRadians = 30.0f * 3.14159265359f / 180.0f;
+            float distance = maxDimension / (2.0f * std::tan(fovRadians / 2.0f));
+            
+            // Add a small margin to ensure the box is fully visible
+            distance *= 1.1f;
+            
+            // Calculate the new camera position
+            // Position the camera at the center of the box, offset by the calculated distance
+            // along the negative z-axis (assuming the camera looks along the positive z-axis)
+            float3 newPosition = boxCenter;
+            newPosition.z -= distance;
+            
+            // Set the camera position and target
+            m_pCamera->setPosition(newPosition);
+            m_pCamera->setLookAt(boxCenter);
+            
+            return; // Skip other camera controls when fitting to view
+        }
+    }
+
+    // Handle rotation with right mouse button
+    if (uiState.getButtonOrKeyPressCount(VK_RBUTTON) > 0) // Right mouse button
+    {
+        // Calculate rotation based on mouse movement
+        float2 currentMousePos = uiState.getMousePosition();
+        float2 prevMousePos = m_prevUIState.getMousePosition();
+        float deltaX = currentMousePos.x - prevMousePos.x;
+        float deltaY = currentMousePos.y - prevMousePos.y;
+        
+        // Get current camera position and direction
+        float3 cameraPos = m_pCamera->getPosition();
+        float3 direction = m_pCamera->getDirection();
+        float distance = length(direction);
+        direction = normalize(direction);
+        
+        // Calculate right and up vectors
+        float3 right = normalize(cross(direction, float3(0.0f, 1.0f, 0.0f)));
+        float3 up = normalize(cross(right, direction));
+        
+        // Apply rotation around up vector (yaw)
+        float yawAngle = deltaX * m_rotationSpeed * 0.01f;
+        float cosYaw = std::cos(yawAngle);
+        float sinYaw = std::sin(yawAngle);
+        
+        float3 newRight = right * cosYaw + direction * sinYaw;
+        float3 newDirection = -right * sinYaw + direction * cosYaw;
+        
+        // Apply rotation around right vector (pitch)
+        float pitchAngle = deltaY * m_rotationSpeed * 0.01f;
+        float cosPitch = std::cos(pitchAngle);
+        float sinPitch = std::sin(pitchAngle);
+        
+        float3 finalDirection = newDirection * cosPitch - up * sinPitch;
+        
+        // Update camera target
+        float3 newTarget = cameraPos + finalDirection * distance;
+        m_pCamera->setLookAt(newTarget);
     }
     
-    // Right button (VK_RBUTTON = 0x02) for panning
-    if (uiState.getButtonOrKeyPressCount(0x02) > 0)
+    // Handle panning with middle mouse button
+    if (uiState.getButtonOrKeyPressCount(VK_MBUTTON) > 0) // Middle mouse button
     {
-        handlePanning(mouseDelta);
+        // Calculate pan offset based on mouse movement
+        float2 currentMousePos = uiState.getMousePosition();
+        float2 prevMousePos = m_prevUIState.getMousePosition();
+        float deltaX = currentMousePos.x - prevMousePos.x;
+        float deltaY = currentMousePos.y - prevMousePos.y;
+        
+        // Get current camera position and direction
+        float3 cameraPos = m_pCamera->getPosition();
+        float3 direction = m_pCamera->getDirection();
+        float distance = length(direction);
+        direction = normalize(direction);
+        
+        // Calculate right and up vectors
+        float3 right = normalize(cross(direction, float3(0.0f, 1.0f, 0.0f)));
+        float3 up = normalize(cross(right, direction));
+        
+        // Calculate the pan offset
+        float3 panOffset = -right * deltaX * m_panSpeed * distance - up * deltaY * m_panSpeed * distance;
+        
+        // Update camera position and target
+        m_pCamera->setPosition(cameraPos + panOffset);
+        float3 newTarget = cameraPos + direction * distance + panOffset;
+        m_pCamera->setLookAt(newTarget);
     }
     
-    // Middle button or scroll wheel for zooming
+    // Handle zooming with mouse wheel
     float scrollDelta = uiState.getScrollWheelState();
     if (std::abs(scrollDelta) > 0.0f)
     {
-        handleZooming(scrollDelta);
+        // Get current camera position and direction
+        float3 cameraPos = m_pCamera->getPosition();
+        float3 direction = m_pCamera->getDirection();
+        float distance = length(direction);
+        direction = normalize(direction);
+        
+        // Calculate the zoom factor
+        float zoomFactor = 1.0f + scrollDelta * m_zoomSpeed * 0.01f;
+        
+        // Calculate the new distance
+        float newDistance = distance * zoomFactor;
+        
+        // Ensure the new distance is not too small
+        newDistance = std::max(newDistance, 0.1f);
+        
+        // Calculate the new camera position
+        float3 newPosition = cameraPos + direction * (newDistance - distance);
+        
+        // Update camera position
+        m_pCamera->setPosition(newPosition);
     }
     
-    // Store current UI state for next frame
+    // Store the current UI state for the next frame
     m_prevUIState = uiState;
-}
-
-void CameraUI::handleRotation(const float2& mouseDelta)
-{
-    // Get current camera position and direction
-    float3 position = m_pCamera->getPosition();
-    float3 direction = m_pCamera->getDirection();
-    float distance = length(direction);
-    direction = normalize(direction);
-    
-    // Calculate right vector (cross product of direction and up)
-    float3 right = normalize(cross(direction, float3(0.0f, 1.0f, 0.0f)));
-    
-    // Calculate up vector (cross product of right and direction)
-    float3 up = normalize(cross(right, direction));
-    
-    // Apply rotation around up vector (yaw)
-    float yawAngle = mouseDelta.x * m_rotationSpeed;
-    float cosYaw = std::cos(yawAngle);
-    float sinYaw = std::sin(yawAngle);
-    
-    float3 newRight = right * cosYaw + direction * sinYaw;
-    float3 newDirection = -right * sinYaw + direction * cosYaw;
-    
-    // Apply rotation around right vector (pitch)
-    float pitchAngle = mouseDelta.y * m_rotationSpeed;
-    float cosPitch = std::cos(pitchAngle);
-    float sinPitch = std::sin(pitchAngle);
-    
-    float3 finalDirection = newDirection * cosPitch - up * sinPitch;
-    
-    // Update camera target
-    float3 newTarget = position + finalDirection * distance;
-    m_pCamera->setLookAt(newTarget);
-}
-
-void CameraUI::handlePanning(const float2& mouseDelta)
-{
-    // Get current camera position and direction
-    float3 position = m_pCamera->getPosition();
-    float3 direction = m_pCamera->getDirection();
-    float distance = length(direction);
-    direction = normalize(direction);
-    
-    // Calculate right and up vectors
-    float3 right = normalize(cross(direction, float3(0.0f, 1.0f, 0.0f)));
-    float3 up = normalize(cross(right, direction));
-    
-    // Calculate pan offset
-    float3 panOffset = -right * mouseDelta.x * m_panSpeed * distance + 
-                       up * mouseDelta.y * m_panSpeed * distance;
-    
-    // Update camera position and target
-    m_pCamera->setPosition(position + panOffset);
-    float3 newTarget = position + direction * distance + panOffset;
-    m_pCamera->setLookAt(newTarget);
-}
-
-void CameraUI::handleZooming(float scrollDelta)
-{
-    // Get current camera position and direction
-    float3 position = m_pCamera->getPosition();
-    float3 direction = m_pCamera->getDirection();
-    float distance = length(direction);
-    direction = normalize(direction);
-    
-    // Calculate new distance with zoom speed
-    float newDistance = distance * (1.0f - scrollDelta * m_zoomSpeed);
-    
-    // Clamp distance to prevent getting too close or too far
-    newDistance = std::max(0.1f, std::min(newDistance, 1000.0f));
-    
-    // Update camera position
-    float3 newPosition = position + direction * (newDistance - distance);
-    m_pCamera->setPosition(newPosition);
 }

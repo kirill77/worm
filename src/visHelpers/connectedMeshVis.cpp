@@ -33,7 +33,7 @@ void ConnectedMeshVis::updateGPUMesh(GPUQueue &gpuQueue)
     {
         GPUMesh::Vertex gpuVertex;
         convertVector(gpuVertex.vPos, m_pMesh->getVertexPosition(i));
-        (*m_pBox).grow(gpuVertex.vPos);
+        *m_pBox |= gpuVertex.vPos;
         gpuVertices.push_back(gpuVertex);
     }
 
