@@ -28,6 +28,11 @@
 #include <cassert>
 #include <cmath>
 #include <numbers>
+#include <limits>
+
+// Define epsilon and NaN constants
+constexpr float epsilon = std::numeric_limits<float>::epsilon();
+constexpr float NaN = std::numeric_limits<float>::quiet_NaN();
 
 // Undefine any existing min/max macros
 #ifdef min

@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 * Copyright (c) 2014-2021, NVIDIA CORPORATION. All rights reserved.
 *
@@ -20,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-#pragma once
+#include "affine.h"
 
 // Generic axis-aligned bounding box (AABB) struct, in mins/maxs form
 // Note: min > max (on any axis) is an empty (null) box.  All empty boxes are the same.
@@ -29,7 +31,6 @@
 template <typename T, int n>
 struct box
 {
-    cassert(n > 1);
     static constexpr int numCorners = 1 << n;
 
     vector<T, n> m_mins, m_maxs;
@@ -61,7 +62,7 @@ struct box
 
     constexpr vector<T, n> clamp(vector<T, n> const& a) const
     {
-        return dm::clamp(a, m_mins, m_maxs);
+        return clamp(a, m_mins, m_maxs);
     }
 
     constexpr vector<T, n> center() const
@@ -108,6 +109,7 @@ struct box
     }
 
     box() {}
+
     constexpr box(const vector<T, n>& mins, const vector<T, n>& maxs)
         : m_mins(mins), m_maxs(maxs) {
     }
@@ -275,7 +277,7 @@ T distanceSquared(vector<T, n> const& a, box<T, n> const& b)
 // !!! this doesn't match the behavior of isnear() for vectors and matrices -
 // returns a single result rather than a componentwise result
 template <typename T, int n>
-bool isnear(box<T, n> const& a, box<T, n> const& b, float epsilon = dm::epsilon)
+bool isnear(box<T, n> const& a, box<T, n> const& b, float epsilon = epsilon)
 {
     return all(isnear(a.m_mins, b.m_mins, epsilon)) &&
         all(isnear(a.m_maxs, b.m_maxs, epsilon));
