@@ -14,11 +14,39 @@ constexpr int DEFAULT_HEIGHT = 720;
 // Global Window class pointer for the Win32 window procedure
 Window* g_pWindow = nullptr;
 
+// ButtonOrKey implementation
+void UIState::ButtonOrKey::notifyPressed() {
+    pressCount++;
+    lastChangeTS = std::time(nullptr);
+}
+
+void UIState::ButtonOrKey::notifyReleased() {
+    releaseCount++;
+    lastChangeTS = std::time(nullptr);
+}
+
+uint32_t UIState::ButtonOrKey::getPressCount() const {
+    return pressCount;
+}
+
+uint32_t UIState::ButtonOrKey::getReleaseCount() const {
+    return releaseCount;
+}
+
 // UIState implementation
+bool UIState::isButtonOrKeyPressed(uint32_t buttonOrKeyId) const {
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
+    if (it != m_buttonsAndKeys.end()) {
+        // A button/key is considered pressed if its press count is greater than its release count
+        return it->second.getPressCount() > it->second.getReleaseCount();
+    }
+    return false;
+}
+
 uint32_t UIState::getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const {
-    auto it = m_buttonKeyPressCount.find(buttonOrKeyId);
-    if (it != m_buttonKeyPressCount.end()) {
-        return it->second;
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
+    if (it != m_buttonsAndKeys.end()) {
+        return it->second.getPressCount();
     }
     return 0;
 }
@@ -212,16 +240,28 @@ bool Window::initDirectX() {
 void Window::handleInput(UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
     case WM_KEYDOWN:
-        m_uiState->m_buttonKeyPressCount[static_cast<uint32_t>(wParam)]++;
+        m_uiState->m_buttonsAndKeys[static_cast<uint32_t>(wParam)].notifyPressed();
         break;
     case WM_LBUTTONDOWN:
-        m_uiState->m_buttonKeyPressCount[VK_LBUTTON]++;
+        m_uiState->m_buttonsAndKeys[VK_LBUTTON].notifyPressed();
         break;
     case WM_RBUTTONDOWN:
-        m_uiState->m_buttonKeyPressCount[VK_RBUTTON]++;
+        m_uiState->m_buttonsAndKeys[VK_RBUTTON].notifyPressed();
         break;
     case WM_MBUTTONDOWN:
-        m_uiState->m_buttonKeyPressCount[VK_MBUTTON]++;
+        m_uiState->m_buttonsAndKeys[VK_MBUTTON].notifyPressed();
+        break;
+    case WM_KEYUP:
+        m_uiState->m_buttonsAndKeys[static_cast<uint32_t>(wParam)].notifyReleased();
+        break;
+    case WM_LBUTTONUP:
+        m_uiState->m_buttonsAndKeys[VK_LBUTTON].notifyReleased();
+        break;
+    case WM_RBUTTONUP:
+        m_uiState->m_buttonsAndKeys[VK_RBUTTON].notifyReleased();
+        break;
+    case WM_MBUTTONUP:
+        m_uiState->m_buttonsAndKeys[VK_MBUTTON].notifyReleased();
         break;
     case WM_MOUSEMOVE:
         m_uiState->m_mousePosition.x = static_cast<float>(GET_X_LPARAM(lParam));

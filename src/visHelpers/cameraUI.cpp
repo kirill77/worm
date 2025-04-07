@@ -65,7 +65,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     }
 
     // Handle rotation with right mouse button
-    if (uiState.getButtonOrKeyPressCount(VK_RBUTTON) > 0) // Right mouse button
+    if (uiState.isButtonOrKeyPressed(VK_RBUTTON)) // Right mouse button
     {
         // Calculate rotation based on mouse movement
         float2 currentMousePos = uiState.getMousePosition();
@@ -104,7 +104,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     }
     
     // Handle panning with middle mouse button
-    if (uiState.getButtonOrKeyPressCount(VK_MBUTTON) > 0) // Middle mouse button
+    if (uiState.isButtonOrKeyPressed(VK_MBUTTON)) // Middle mouse button
     {
         // Calculate pan offset based on mouse movement
         float2 currentMousePos = uiState.getMousePosition();

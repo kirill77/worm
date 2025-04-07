@@ -20,12 +20,24 @@ class UIState
 public:
     friend class Window;
     
+    bool isButtonOrKeyPressed(uint32_t buttonOrKeyId) const;
     uint32_t getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const;
     float2 getMousePosition() const;
     float getScrollWheelState() const;
 
 private:
-    std::unordered_map<uint32_t, uint32_t> m_buttonKeyPressCount;
+    struct ButtonOrKey
+    {
+        void notifyPressed();
+        void notifyReleased();
+        uint32_t getPressCount() const;
+        uint32_t getReleaseCount() const;
+    private:
+        uint32_t pressCount = 0; // how many times was the control pressed
+        uint32_t releaseCount = 0; // how many times was the control released
+        std::time_t lastChangeTS = 0; // used to remove old entries
+    };
+    std::unordered_map<uint32_t, ButtonOrKey> m_buttonsAndKeys;
     float2 m_mousePosition = float2(0.0f, 0.0f);
     float m_scrollWheelState = 0.0f;
 };
