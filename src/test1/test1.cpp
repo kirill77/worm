@@ -10,7 +10,9 @@
 #include "visHelpers/cameraUI.h"
 #include <memory>
 
-std::shared_ptr<ConnectedMeshVis> createCortexVis(std::shared_ptr<Worm> pWorm, std::shared_ptr<Window> pWindow)
+std::shared_ptr<ConnectedMeshVis> createCortexVis(
+    std::shared_ptr<Worm> pWorm,
+    std::shared_ptr<Window> pWindow)
 {
     // get a connected mesh that shows how the cortex looks like
     auto pCell = pWorm->getCells()[0];
