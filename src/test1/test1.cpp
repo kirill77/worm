@@ -62,8 +62,10 @@ int main()
         pWindow->processMessages();
         if (pWindow->shouldExit())
             break;
+
+        cameraUI.setWorldBox(*pCortexVis->getConnectedBox());
         cameraUI.notifyNewUIState(pWindow->getCurrentUIState());
-        
+
         // Simulate one step
         world.simulateStep(fDtSec);
         fCurrentTimeSec += fDtSec;

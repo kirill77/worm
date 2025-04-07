@@ -1,7 +1,8 @@
 #pragma once
 
-#include "visualization/Window.h"
 #include <memory>
+#include "math/box.h"
+#include "visualization/Window.h"
 
 class GPUCamera;
 
@@ -10,6 +11,8 @@ class CameraUI
 public:
     CameraUI();
     ~CameraUI();
+
+    void setWorldBox(const box3& worldBox) { m_worldBox = worldBox; }
 
     // Attach a camera to control
     void attachToCamera(std::shared_ptr<GPUCamera> pCamera);
@@ -22,6 +25,8 @@ private:
     float m_rotationSpeed = 0.01f;
     float m_panSpeed = 0.01f;
     float m_zoomSpeed = 0.1f;
+
+    box3 m_worldBox;
     
     // Camera reference
     std::shared_ptr<GPUCamera> m_pCamera;
