@@ -64,7 +64,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         }
     }
 
-    // Handle rotation with right mouse button
+    // Handle rotation
     if (uiState.isButtonOrKeyPressed(VK_RBUTTON)) // Right mouse button
     {
         // Calculate rotation based on mouse movement
@@ -103,8 +103,8 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         m_pCamera->setLookAt(newTarget);
     }
     
-    // Handle panning with middle mouse button
-    if (uiState.isButtonOrKeyPressed(VK_MBUTTON)) // Middle mouse button
+    // Handle panning
+    if (uiState.isButtonOrKeyPressed(VK_LBUTTON))
     {
         // Calculate pan offset based on mouse movement
         float2 currentMousePos = uiState.getMousePosition();
