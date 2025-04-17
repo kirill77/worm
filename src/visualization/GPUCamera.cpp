@@ -13,9 +13,9 @@ void GPUCamera::setPosition(const float3& position)
     m_position = position;
 }
 
-void GPUCamera::setLookAt(const float3& target)
+void GPUCamera::setDirection(const float3& direction)
 {
-    m_target = target;
+    m_direction = normalize(direction);
 }
 
 void GPUCamera::setFOV(float fovInDegrees)
@@ -35,8 +35,7 @@ float3 GPUCamera::getPosition() const
 
 float3 GPUCamera::getDirection() const
 {
-    // Calculate direction vector from position to target
-    return normalize(m_target - m_position);
+    return m_direction;
 }
 
 float GPUCamera::getFOV() const
@@ -48,7 +47,11 @@ DirectX::XMMATRIX GPUCamera::getViewMatrix() const
 {
     // Convert float3 to XMVECTOR
     DirectX::XMVECTOR eyePosition = DirectX::XMVectorSet(m_position.x, m_position.y, m_position.z, 1.0f);
-    DirectX::XMVECTOR focusPosition = DirectX::XMVectorSet(m_target.x, m_target.y, m_target.z, 1.0f);
+    DirectX::XMVECTOR focusPosition = DirectX::XMVectorSet(
+        m_position.x + m_direction.x,
+        m_position.y + m_direction.y,
+        m_position.z + m_direction.z,
+        1.0f);
     DirectX::XMVECTOR upDirection = DirectX::XMVectorSet(m_up.x, m_up.y, m_up.z, 0.0f);
     
     // Create view matrix

@@ -10,7 +10,7 @@ public:
     
     // Camera manipulation methods
     void setPosition(const float3& position);
-    void setLookAt(const float3& target);
+    void setDirection(const float3& direction);
     void setFOV(float fovInDegrees);
     void setAspectRatio(float aspectRatio);
     
@@ -24,7 +24,7 @@ public:
     
 private:
     float3 m_position = float3(0.0f, 0.0f, -5.0f);
-    float3 m_target = float3(0.0f, 0.0f, 0.0f);
+    float3 m_direction = float3(0.0f, 0.0f, 1.0f);  // Default looking along positive Z
     float3 m_up = float3(0.0f, 1.0f, 0.0f);
     float m_fov = 45.0f;
     float m_aspectRatio = 16.0f / 9.0f;

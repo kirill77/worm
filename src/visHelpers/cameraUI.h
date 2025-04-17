@@ -38,5 +38,7 @@ private:
     void handleRotation(const float2& mouseDelta);
     void handlePanning(const float2& mouseDelta);
     void handleZooming(float scrollDelta);
+
+    void moveForward(float fDistance);
 };
 

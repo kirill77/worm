@@ -19,6 +19,23 @@ void CameraUI::attachToCamera(std::shared_ptr<GPUCamera> camera)
     m_pCamera = camera;
 }
 
+void CameraUI::moveForward(float fDistance)
+{
+    if (!m_pCamera)
+        return;
+
+    // Get current camera position and direction
+    float3 cameraPos = m_pCamera->getPosition();
+    float3 direction = m_pCamera->getDirection();
+    direction = normalize(direction);
+    
+    // Move camera forward by the given distance
+    float3 newPosition = cameraPos + direction * fDistance;
+    
+    // Update camera position
+    m_pCamera->setPosition(newPosition);
+}
+
 void CameraUI::notifyNewUIState(const UIState& uiState)
 {
     if (!m_pCamera)
@@ -58,7 +75,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
             
             // Set the camera position and target
             m_pCamera->setPosition(newPosition);
-            m_pCamera->setLookAt(boxCenter);
+            m_pCamera->setDirection(boxCenter - newPosition);
             
             return; // Skip other camera controls when fitting to view
         }
@@ -99,8 +116,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         float3 finalDirection = newDirection * cosPitch - up * sinPitch;
         
         // Update camera target
-        float3 newTarget = cameraPos + finalDirection * distance;
-        m_pCamera->setLookAt(newTarget);
+        m_pCamera->setDirection(finalDirection);
     }
     
     // Handle panning
@@ -127,8 +143,6 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         
         // Update camera position and target
         m_pCamera->setPosition(cameraPos + panOffset);
-        float3 newTarget = cameraPos + direction * distance + panOffset;
-        m_pCamera->setLookAt(newTarget);
     }
     
     // Handle zooming with mouse wheel
@@ -155,6 +169,22 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         
         // Update camera position
         m_pCamera->setPosition(newPosition);
+    }
+
+    // Handle forward movement with 'w' key
+    if (uiState.isButtonOrKeyPressed('W'))
+    {
+        // Calculate move speed based on world box size
+        float moveSpeed = 0.1f;
+        if (!m_worldBox.isempty())
+        {
+            float3 boxDiagonal = m_worldBox.diagonal();
+            float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
+            moveSpeed = maxDimension * 0.1f; // Move 10% of the world size per frame
+        }
+        
+        // Move camera forward
+        moveForward(moveSpeed);
     }
     
     // Store the current UI state for the next frame

@@ -12,7 +12,7 @@ GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow)
 {
     // Set default camera settings
     m_pCamera->setPosition(float3(0.0f, 0.0f, -5.0f));
-    m_pCamera->setLookAt(float3(0.0f, 0.0f, 0.0f));
+    m_pCamera->setDirection(float3(0.0f, 0.0f, 1.0f));
     m_pCamera->setFOV(45.0f);
     
     // Get window dimensions
