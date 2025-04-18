@@ -19,6 +19,18 @@ void CameraUI::attachToCamera(std::shared_ptr<GPUCamera> camera)
     m_pCamera = camera;
 }
 
+float CameraUI::calculateMoveSpeed() const
+{
+    float moveSpeed = 0.1f;
+    if (!m_worldBox.isempty())
+    {
+        float3 boxDiagonal = m_worldBox.diagonal();
+        float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
+        moveSpeed = maxDimension * 0.1f; // Move 10% of the world size per frame
+    }
+    return moveSpeed;
+}
+
 void CameraUI::moveForward(float fDistance)
 {
     if (!m_pCamera)
@@ -174,17 +186,14 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     // Handle forward movement with 'w' key
     if (uiState.isButtonOrKeyPressed('W'))
     {
-        // Calculate move speed based on world box size
-        float moveSpeed = 0.1f;
-        if (!m_worldBox.isempty())
-        {
-            float3 boxDiagonal = m_worldBox.diagonal();
-            float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
-            moveSpeed = maxDimension * 0.1f; // Move 10% of the world size per frame
-        }
-        
         // Move camera forward
-        moveForward(moveSpeed);
+        moveForward(calculateMoveSpeed());
+    }
+    // Handle backward movement with 's' key
+    if (uiState.isButtonOrKeyPressed('S'))
+    {
+        // Move camera forward
+        moveForward(-calculateMoveSpeed());
     }
     
     // Store the current UI state for the next frame

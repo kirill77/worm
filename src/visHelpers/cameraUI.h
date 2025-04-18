@@ -40,5 +40,6 @@ private:
     void handleZooming(float scrollDelta);
 
     void moveForward(float fDistance);
+    float calculateMoveSpeed() const;
 };
 
