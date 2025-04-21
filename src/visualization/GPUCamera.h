@@ -16,6 +16,7 @@ public:
     
     float3 getPosition() const;
     float3 getDirection() const;
+    float3 getUp() const { return m_up; }
     float getFOV() const;
     
     // Matrix getters

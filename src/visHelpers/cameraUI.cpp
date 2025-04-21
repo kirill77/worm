@@ -48,6 +48,26 @@ void CameraUI::moveForward(float fDistance)
     m_pCamera->setPosition(newPosition);
 }
 
+void CameraUI::moveLeft(float fDistance)
+{
+    if (!m_pCamera)
+        return;
+
+    // Get current camera position and direction
+    float3 cameraPos = m_pCamera->getPosition();
+    float3 direction = m_pCamera->getDirection();
+    direction = normalize(direction);
+    
+    // Calculate left vector using camera's up vector
+    float3 left = normalize(cross(direction, m_pCamera->getUp()));
+    
+    // Move camera left by the given distance
+    float3 newPosition = cameraPos + left * fDistance;
+    
+    // Update camera position
+    m_pCamera->setPosition(newPosition);
+}
+
 void CameraUI::notifyNewUIState(const UIState& uiState)
 {
     if (!m_pCamera)
@@ -183,17 +203,21 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         m_pCamera->setPosition(newPosition);
     }
 
-    // Handle forward movement with 'w' key
     if (uiState.isButtonOrKeyPressed('W'))
     {
-        // Move camera forward
         moveForward(calculateMoveSpeed());
     }
-    // Handle backward movement with 's' key
     if (uiState.isButtonOrKeyPressed('S'))
     {
-        // Move camera forward
         moveForward(-calculateMoveSpeed());
+    }
+    if (uiState.isButtonOrKeyPressed('A'))
+    {
+         moveLeft(calculateMoveSpeed());
+    }
+    if (uiState.isButtonOrKeyPressed('D'))
+    {
+        moveLeft(-calculateMoveSpeed());
     }
     
     // Store the current UI state for the next frame
