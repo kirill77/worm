@@ -293,8 +293,15 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
             window->m_shouldExit = true;
             return 0;
         case WM_SIZE:
-            // Handle window resize
+        {
+            // Get the new window dimensions
+            window->m_width = LOWORD(lParam);
+            window->m_height = HIWORD(lParam);
+
+            // Notify GPUWorld about the resize
+            window->onWindowResize(LOWORD(lParam), HIWORD(lParam));
             return 0;
+        }
         case WM_KEYDOWN:
         case WM_KEYUP:
         case WM_LBUTTONDOWN:
@@ -308,4 +315,30 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
     }
 
     return DefWindowProc(hwnd, message, wParam, lParam);
+}
+
+void Window::onWindowResize(UINT width, UINT height)
+{
+    if (width == 0 || height == 0)
+        return;
+
+    if (m_swapChain)
+    {
+        // Wait for GPU to complete all operations
+        if (m_gpuQueue)
+        {
+            m_gpuQueue->flush();
+        }
+
+        // Get current swap chain description
+        DXGI_SWAP_CHAIN_DESC1 desc = {};
+        ThrowIfFailed(m_swapChain->GetDesc1(&desc));
+
+        // Resize the swap chain
+        ThrowIfFailed(m_swapChain->ResizeBuffers(0, width, height, desc.Format, desc.Flags));
+    }
+
+    // Update window dimensions
+    m_width = width;
+    m_height = height;
 }

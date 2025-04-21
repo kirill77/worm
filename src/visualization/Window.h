@@ -59,6 +59,7 @@ public:
     HWND getWindowHandle() const;
     void handleInput(UINT message, WPARAM wParam, LPARAM lParam);
     bool shouldExit() const { return m_shouldExit; }
+    void onWindowResize(UINT width, UINT height);
 
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -20,6 +20,7 @@ public:
     Microsoft::WRL::ComPtr<ID3D12CommandQueue> getQueue();
     Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> beginRecording();
     bool execute(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> pCmdList);
+    void flush();
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Device> m_device;

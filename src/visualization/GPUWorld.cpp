@@ -398,6 +398,7 @@ void GPUWorld::drawMeshesIntoWindow(GPUStats* pStats)
     // Update the transform constant buffer
     if (m_transformBufferData)
     {
+        m_pCamera->setAspectRatio(width / (float)height);
         // Update matrices
         m_transformBufferMatrix.World = DirectX::XMMatrixIdentity();
         m_transformBufferMatrix.View = m_pCamera->getViewMatrix();

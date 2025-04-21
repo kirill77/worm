@@ -47,7 +47,14 @@ bool GPUQueue::execute(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> pCmdLis
     // Execute the command list
     ID3D12CommandList* ppCommandLists[] = { pCmdList.Get() };
     m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+    flush();
     
+    return true;
+}
+
+void GPUQueue::flush()
+{
     // Create fence for synchronization
     Microsoft::WRL::ComPtr<ID3D12Fence> fence;
     ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
@@ -57,7 +64,7 @@ bool GPUQueue::execute(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> pCmdLis
     if (eventHandle == nullptr)
     {
         ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-        return false;
+        return;
     }
     
     // Signal the fence
@@ -72,6 +79,4 @@ bool GPUQueue::execute(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> pCmdLis
     }
     
     CloseHandle(eventHandle);
-    
-    return true;
 } 
