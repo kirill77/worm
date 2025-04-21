@@ -9,9 +9,10 @@ public:
     GPUCamera();
     
     // Camera manipulation methods
-    void setPosition(const float3& position);
-    void setDirection(const float3& direction);
-    void setFOV(float fovInDegrees);
+    void setPosition(const float3& pos);
+    void setDirection(const float3& dir);
+    void setUp(const float3& up);
+    void setFOV(float fov);
     void setAspectRatio(float aspectRatio);
     
     float3 getPosition() const;

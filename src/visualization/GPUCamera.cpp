@@ -18,6 +18,11 @@ void GPUCamera::setDirection(const float3& direction)
     m_direction = normalize(direction);
 }
 
+void GPUCamera::setUp(const float3& up)
+{
+    m_up = normalize(up);
+}
+
 void GPUCamera::setFOV(float fovInDegrees)
 {
     m_fov = fovInDegrees;

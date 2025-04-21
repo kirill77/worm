@@ -74,7 +74,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         return;
 
     // Handle Ctrl+A to fit world box in view
-    if (uiState.getButtonOrKeyPressCount(VK_CONTROL) &&
+    if (uiState.isButtonOrKeyPressed(VK_CONTROL) &&
         uiState.getButtonOrKeyPressCount('A') > m_prevUIState.getButtonOrKeyPressCount('A'))
     {
         if (!m_worldBox.isempty())
@@ -113,7 +113,72 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         }
     }
 
-    // Handle rotation
+    // rotation of camera arond the world center
+    if (uiState.isButtonOrKeyPressed(VK_LBUTTON)) // Left mouse button for world rotation
+    {
+        // Calculate rotation based on mouse movement
+        float2 currentMousePos = uiState.getMousePosition();
+        float2 prevMousePos = m_prevUIState.getMousePosition();
+        float deltaX = currentMousePos.x - prevMousePos.x;
+        float deltaY = currentMousePos.y - prevMousePos.y;
+        
+        // Get current camera position and direction
+        float3 cameraPos = m_pCamera->getPosition();
+        float3 direction = m_pCamera->getDirection();
+        float3 up = m_pCamera->getUp();
+        float distance = length(direction);
+        direction = normalize(direction);
+        
+        // Calculate the world center (use origin if world box is empty)
+        float3 worldCenter = m_worldBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : m_worldBox.center();
+        
+        // Calculate the vector from camera to world center
+        float3 centerToCamera = worldCenter - cameraPos;
+        
+        // Fixed coordinate system for rotation
+        float3 worldUp = up;
+        float3 right = normalize(cross(direction, worldUp));
+        
+        // Calculate rotation angles
+        float yawAngle = deltaX * m_rotationSpeed * 0.01f;
+        float pitchAngle = -deltaY * m_rotationSpeed * 0.01f;
+        
+        // Create rotation quaternions
+        DirectX::XMVECTOR yawQuat = DirectX::XMQuaternionRotationAxis(
+            DirectX::XMVectorSet(worldUp.x, worldUp.y, worldUp.z, 0.0f),
+            yawAngle
+        );
+        DirectX::XMVECTOR pitchQuat = DirectX::XMQuaternionRotationAxis(
+            DirectX::XMVectorSet(right.x, right.y, right.z, 0.0f),
+            pitchAngle
+        );
+        
+        // Combine rotations
+        DirectX::XMVECTOR rotationQuat = DirectX::XMQuaternionMultiply(pitchQuat, yawQuat);
+        
+        // Rotate the center-to-camera vector
+        DirectX::XMVECTOR centerToCameraVec = DirectX::XMVectorSet(centerToCamera.x, centerToCamera.y, centerToCamera.z, 0.0f);
+        DirectX::XMVECTOR rotatedVector = DirectX::XMVector3Rotate(centerToCameraVec, rotationQuat);
+        
+        // Calculate new camera position and direction
+        DirectX::XMFLOAT3 newCenterToCamera;
+        DirectX::XMStoreFloat3(&newCenterToCamera, rotatedVector);
+        float3 newCameraPos = worldCenter - float3(newCenterToCamera.x, newCenterToCamera.y, newCenterToCamera.z);
+        float3 newDirection = normalize(worldCenter - newCameraPos);
+        
+        // Rotate the up vector
+        DirectX::XMVECTOR upVec = DirectX::XMVectorSet(up.x, up.y, up.z, 0.0f);
+        DirectX::XMVECTOR rotatedUp = DirectX::XMVector3Rotate(upVec, rotationQuat);
+        DirectX::XMFLOAT3 newUp;
+        DirectX::XMStoreFloat3(&newUp, rotatedUp);
+        
+        // Update camera position, direction, and up vector
+        m_pCamera->setPosition(newCameraPos);
+        m_pCamera->setDirection(newDirection);
+        m_pCamera->setUp(float3(newUp.x, newUp.y, newUp.z));
+    }
+
+    // rotation of camera around camera center
     if (uiState.isButtonOrKeyPressed(VK_RBUTTON)) // Right mouse button
     {
         // Calculate rotation based on mouse movement
@@ -150,33 +215,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         // Update camera target
         m_pCamera->setDirection(finalDirection);
     }
-    
-    // Handle panning
-    if (uiState.isButtonOrKeyPressed(VK_LBUTTON))
-    {
-        // Calculate pan offset based on mouse movement
-        float2 currentMousePos = uiState.getMousePosition();
-        float2 prevMousePos = m_prevUIState.getMousePosition();
-        float deltaX = currentMousePos.x - prevMousePos.x;
-        float deltaY = currentMousePos.y - prevMousePos.y;
-        
-        // Get current camera position and direction
-        float3 cameraPos = m_pCamera->getPosition();
-        float3 direction = m_pCamera->getDirection();
-        float distance = length(direction);
-        direction = normalize(direction);
-        
-        // Calculate right and up vectors
-        float3 right = normalize(cross(direction, float3(0.0f, 1.0f, 0.0f)));
-        float3 up = normalize(cross(right, direction));
-        
-        // Calculate the pan offset
-        float3 panOffset = -right * deltaX * m_panSpeed * distance - up * deltaY * m_panSpeed * distance;
-        
-        // Update camera position and target
-        m_pCamera->setPosition(cameraPos + panOffset);
-    }
-    
+
     // Handle zooming with mouse wheel
     float scrollDelta = uiState.getScrollWheelState();
     if (std::abs(scrollDelta) > 0.0f)
