@@ -43,6 +43,11 @@ float3 GPUCamera::getDirection() const
     return m_direction;
 }
 
+float3 GPUCamera::getRight() const
+{
+    return normalize(cross(m_up, m_direction));
+}
+
 float GPUCamera::getFOV() const
 {
     return m_fov;

@@ -59,10 +59,10 @@ void CameraUI::moveLeft(float fDistance)
     direction = normalize(direction);
     
     // Calculate left vector using camera's up vector
-    float3 left = normalize(cross(direction, m_pCamera->getUp()));
+    float3 vRight = m_pCamera->getRight();
     
     // Move camera left by the given distance
-    float3 newPosition = cameraPos + left * fDistance;
+    float3 newPosition = cameraPos - vRight * fDistance;
     
     // Update camera position
     m_pCamera->setPosition(newPosition);
@@ -113,7 +113,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         }
     }
 
-    // rotation of camera arond the world center
+    // Handle rotation
     if (uiState.isButtonOrKeyPressed(VK_LBUTTON)) // Left mouse button for world rotation
     {
         // Calculate rotation based on mouse movement
@@ -126,6 +126,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         float3 cameraPos = m_pCamera->getPosition();
         float3 direction = m_pCamera->getDirection();
         float3 up = m_pCamera->getUp();
+        float3 right = m_pCamera->getRight();
         float distance = length(direction);
         direction = normalize(direction);
         
@@ -135,17 +136,13 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         // Calculate the vector from camera to world center
         float3 centerToCamera = worldCenter - cameraPos;
         
-        // Fixed coordinate system for rotation
-        float3 worldUp = up;
-        float3 right = normalize(cross(direction, worldUp));
-        
         // Calculate rotation angles
         float yawAngle = deltaX * m_rotationSpeed * 0.01f;
-        float pitchAngle = -deltaY * m_rotationSpeed * 0.01f;
+        float pitchAngle = deltaY * m_rotationSpeed * 0.01f;
         
         // Create rotation quaternions
         DirectX::XMVECTOR yawQuat = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(worldUp.x, worldUp.y, worldUp.z, 0.0f),
+            DirectX::XMVectorSet(up.x, up.y, up.z, 0.0f),
             yawAngle
         );
         DirectX::XMVECTOR pitchQuat = DirectX::XMQuaternionRotationAxis(
@@ -194,11 +191,11 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         direction = normalize(direction);
         
         // Calculate right and up vectors
-        float3 right = normalize(cross(direction, float3(0.0f, 1.0f, 0.0f)));
-        float3 up = normalize(cross(right, direction));
+        float3 right = m_pCamera->getRight();
+        float3 up = m_pCamera->getUp();
         
         // Apply rotation around up vector (yaw)
-        float yawAngle = deltaX * m_rotationSpeed * 0.01f;
+        float yawAngle = -deltaX * m_rotationSpeed * 0.01f;
         float cosYaw = std::cos(yawAngle);
         float sinYaw = std::sin(yawAngle);
         
