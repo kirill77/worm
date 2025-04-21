@@ -36,11 +36,8 @@ uint32_t UIState::ButtonOrKey::getReleaseCount() const {
 // UIState implementation
 bool UIState::isButtonOrKeyPressed(uint32_t buttonOrKeyId) const {
     auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it != m_buttonsAndKeys.end()) {
-        // A button/key is considered pressed if its press count is greater than its release count
-        return it->second.getPressCount() > it->second.getReleaseCount();
-    }
-    return false;
+    if (it == m_buttonsAndKeys.end()) return false;
+    return (GetAsyncKeyState(buttonOrKeyId) & 0x8000) != 0;
 }
 
 uint32_t UIState::getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const {
