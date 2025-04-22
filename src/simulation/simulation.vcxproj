@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BindingSurface.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="CellTypes.h" />
     <ClInclude Include="Chromosome.h" />
@@ -155,13 +156,12 @@
     <ClInclude Include="Cortex.h" />
     <ClInclude Include="Metabolite.h" />
     <ClInclude Include="Mitochondrion.h" />
+    <ClInclude Include="Molecule.h" />
     <ClInclude Include="MRNA.h" />
     <ClInclude Include="Nucleus.h" />
     <ClInclude Include="Organelle.h" />
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Protein.h" />
-    <ClInclude Include="ProteinBindingSurface.h" />
     <ClInclude Include="ProteinInteraction.h" />
     <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />

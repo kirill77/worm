@@ -6,7 +6,7 @@
 #include <cmath>
 
 Cortex::Cortex(std::shared_ptr<Medium> pInternalMedium, double fThickness)
-    : ProteinBindingSurface(ProteinWiki::BindingSurface::CORTEX) // Initialize binding surface with enum
+    : BindingSurface(ProteinWiki::BindingSurface::CORTEX) // Initialize binding surface with enum
     , m_pInternalMedium(pInternalMedium)
     , m_fThickness(fThickness)
 {
@@ -44,13 +44,13 @@ bool Cortex::transportProteinInward(Medium& externalMedium,
     }
     
     // Create a protein population for the amount we want to transport
-    ProteinPopulation protein(proteinName, amount);
+    MPopulation protein(proteinName, amount);
     
     // Remove from external medium
     // Note: This is a simplification. In reality, we would need to modify
     // the protein count directly in the external medium.
     float3 externalPos = position;
-    ProteinPopulation externalProtein(proteinName, -amount); // Negative amount for removal
+    MPopulation externalProtein(proteinName, -amount); // Negative amount for removal
     externalMedium.addProtein(externalProtein, externalPos);
     
     // Add to internal medium
@@ -71,11 +71,11 @@ bool Cortex::transportProteinOutward(Medium& externalMedium,
     }
     
     // Create a protein population for the amount we want to transport
-    ProteinPopulation protein(proteinName, amount);
+    MPopulation protein(proteinName, amount);
     
     // Remove from internal medium
     float3 internalPos = position;
-    ProteinPopulation internalProtein(proteinName, -amount); // Negative amount for removal
+    MPopulation internalProtein(proteinName, -amount); // Negative amount for removal
     m_pInternalMedium->addProtein(internalProtein, internalPos);
     
     // Add to external medium
@@ -154,7 +154,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 );
                 
                 // Create binding site protein and add to the medium
-                ProteinPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::CORTEX), amountPerPosition);
+                MPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 m_pInternalMedium->addProtein(bindingSites, normalizedPos);
             }

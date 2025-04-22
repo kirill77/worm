@@ -3,7 +3,7 @@
 #include "PhosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
 #include "DephosphorylationInteraction.h"
-#include "ProteinBindingSurface.h"
+#include "BindingSurface.h"
 #include "ProteinInteractionLoader.h"
 #include "log/ILog.h"
 #include "fileUtils/fileUtils.h"

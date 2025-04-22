@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Worm.h"
 #include "simulation/Cell.h"
-#include "simulation/Protein.h"
+#include "simulation/Molecule.h"
 #include "simulation/Medium.h"
 #include "simulation/Cortex.h"
 #include "simulation/Spindle.h"
@@ -56,28 +56,28 @@ std::shared_ptr<Cortex> Worm::createZygoteCortex()
     std::shared_ptr<Medium> pInternalMedium = std::make_shared<Medium>();
 
     // Create and add anterior proteins at the anterior cortex
-    ProteinPopulation par3("PAR-3", 3.9e5);
+    MPopulation par3("PAR-3", 3.9e5);
     pInternalMedium->addProtein(par3, float3(0, 1.f, 0));
 
-    ProteinPopulation par6("PAR-6", 3.9e5);
+    MPopulation par6("PAR-6", 3.9e5);
     pInternalMedium->addProtein(par6, float3(0, 1.f, 0));
 
-    ProteinPopulation pkc3("PKC-3", 3.9e5);
+    MPopulation pkc3("PKC-3", 3.9e5);
     pInternalMedium->addProtein(pkc3, float3(0, 1.f, 0));
 
     // Create and add posterior proteins at the posterior cortex
-    ProteinPopulation par1("PAR-1", 3.9e5);
+    MPopulation par1("PAR-1", 3.9e5);
     pInternalMedium->addProtein(par1, float3(0, -1.f, 0));
 
-    ProteinPopulation par2("PAR-2", 3.9e5);
+    MPopulation par2("PAR-2", 3.9e5);
     pInternalMedium->addProtein(par2, float3(0, -1.f, 0));
 
     // Initialize maternal proteins at cell center
     float3 center(0.0f, 0.0f, 0.0f);
 
     // Add maternal CDK-1 and CYB-1 (Cyclin B)
-    ProteinPopulation cdk1("CDK-1", 1500.0);  // Initial amount above threshold (1000)
-    ProteinPopulation cyb1("CYB-1", 1500.0);  // Initial amount above threshold (1000)
+    MPopulation cdk1("CDK-1", 1500.0);  // Initial amount above threshold (1000)
+    MPopulation cyb1("CYB-1", 1500.0);  // Initial amount above threshold (1000)
     pInternalMedium->addProtein(cdk1, center);
     pInternalMedium->addProtein(cyb1, center);
 

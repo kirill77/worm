@@ -45,9 +45,6 @@
     <ClInclude Include="Gene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Protein.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Metabolite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -87,9 +84,6 @@
     <ClInclude Include="ProteinWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProteinBindingSurface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DephosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -100,6 +94,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cortex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Molecule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BindingSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

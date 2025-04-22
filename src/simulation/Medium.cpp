@@ -77,10 +77,10 @@ std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
     return vecNeighbors;
 }
 
-void Medium::addProtein(const ProteinPopulation& protein, const float3& position)
+void Medium::addProtein(const MPopulation& protein, const float3& position)
 {
     GridCell& gridCell = findCell(position);
-    ProteinPopulation& cellProtein = gridCell.getOrCreateProtein(protein.m_sName);
+    MPopulation& cellProtein = gridCell.getOrCreateProtein(protein.m_sName);
 
     cellProtein.bindTo(protein.getBindingSurface());
     cellProtein.m_fNumber += protein.m_fNumber;
@@ -248,10 +248,10 @@ void Medium::updateProteinDiffusionPhysical(double dt)
 
         // Update protein amounts in source and target cells
         // Use the getOrCreateProtein method instead of direct [] access to avoid default constructor issues
-        ProteinPopulation& sourceProtein = gridNew[sourceIndex].getOrCreateProtein(selectedProtein);
+        MPopulation& sourceProtein = gridNew[sourceIndex].getOrCreateProtein(selectedProtein);
         sourceProtein.m_fNumber -= transferAmount;
         
-        ProteinPopulation& targetProtein = gridNew[targetIndex].getOrCreateProtein(selectedProtein);
+        MPopulation& targetProtein = gridNew[targetIndex].getOrCreateProtein(selectedProtein);
         targetProtein.m_fNumber += transferAmount;
     }
     

@@ -3,13 +3,13 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "Protein.h"
+#include "Molecule.h"
 
 class MRNA
 {
 private:
     std::string m_sGeneName;     // Gene that produced this mRNA
-    std::string m_sProteinName;  // Protein it produces
+    std::string m_sProteinName;  // Molecule it produces
     double m_fNumber;            // Amount of this mRNA in the cell
     double m_fHalfLife;          // How quickly it degrades (in time units)
     double m_fTranslationRate;   // Rate of protein production
@@ -37,7 +37,7 @@ public:
     }
 
     // Translation
-    std::shared_ptr<ProteinPopulation> translate(double dt, const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
+    std::shared_ptr<MPopulation> translate(double dt, const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
 
     // RNA processing
     void splice();  // For future implementation of RNA processing

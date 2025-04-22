@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "Protein.h"
+#include "Molecule.h"
 
 // Forward declarations
 class GridCell;
@@ -24,7 +24,7 @@ public:
         BINDING,            // Physical binding
         CORTICAL_EXCLUSION, // Competitive binding to cortex
         RECRUITMENT,        // Recruiting to location
-        DEGRADATION,        // Protein degradation
+        DEGRADATION,        // Molecule degradation
         ACTIVATION,         // Conformational change activation
         INHIBITION          // Conformational change inhibition
     };

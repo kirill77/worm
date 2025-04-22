@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "ProteinBindingSurface.h"
+#include "BindingSurface.h"
 
 class Cell;
 class Medium;
@@ -10,7 +10,7 @@ enum class CellCycleState;
  * Base class for all cellular organelles.
  * Organelles can bind proteins and interact with the cell's internal medium.
  */
-class Organelle : public ProteinBindingSurface
+class Organelle : public BindingSurface
 {
 public:
     /**
@@ -19,7 +19,7 @@ public:
      * @param fSurfaceArea Surface area in square micrometers
      */
     Organelle()
-        : ProteinBindingSurface()
+        : BindingSurface()
     {}
     
     /**

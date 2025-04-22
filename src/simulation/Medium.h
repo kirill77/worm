@@ -5,7 +5,7 @@
 #include <string>
 #include <array>
 #include <unordered_map>
-#include "Protein.h"
+#include "Molecule.h"
 #include "MRNA.h"
 #include "math/vector.h"
 #include "ProteinWiki.h"
@@ -29,7 +29,7 @@ public:
     Medium();
 
     // Add protein population to specific location
-    void addProtein(const ProteinPopulation& protein, const float3& position);
+    void addProtein(const MPopulation& protein, const float3& position);
     
     // Add mRNA to specific location
     void addMRNA(std::shared_ptr<MRNA> mRNA, const float3& position);
