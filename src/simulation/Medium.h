@@ -55,11 +55,7 @@ private:
     GridCell& findCell(const float3& position);
     const GridCell& findCell(const float3& position) const;
     std::vector<size_t> getNeighborIndices(size_t cellIndex) const;
-    
-    // Different diffusion implementations
-    void updateProteinDiffusionGrid(double dt);       // Original grid-based diffusion
-    void updateProteinDiffusionPhysical(double dt);   // New physically-based diffusion
-    
+
     // Update functions
     void updateProteinDiffusion(double dt);
     void updateProteinInteraction(double dt);
