@@ -45,9 +45,6 @@
     <ClInclude Include="Gene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Metabolite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>

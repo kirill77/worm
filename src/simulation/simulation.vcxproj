@@ -154,7 +154,6 @@
     <ClInclude Include="GeneWiki.h" />
     <ClInclude Include="Medium.h" />
     <ClInclude Include="Cortex.h" />
-    <ClInclude Include="Metabolite.h" />
     <ClInclude Include="Mitochondrion.h" />
     <ClInclude Include="Molecule.h" />
     <ClInclude Include="MRNA.h" />
