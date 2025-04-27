@@ -17,39 +17,57 @@ void GridDiffusion::updateDiffusion(Grid& grid, const std::string& moleculeName,
 {
     copyATPToProteins(grid);
 
-    // Create temporary grid for updated numbers
-    auto gridNew = grid;
+    std::vector<double> diffusionAmounts(grid.size());
 
-    // Update each cell
-    for (uint32_t i = 0; i < grid.size(); ++i)
+    // Execute three passes with the same code structure
+    for (uint32_t pass = 0, uDiffusionIndex = 0; pass < 3; ++pass)
     {
-        auto vecNeighbors = grid.getNeighborIndices(i);
-
-        // Find the protein population in the cell
-        auto itProtein = grid[i].m_proteins.find(moleculeName);
-        if (itProtein == grid[i].m_proteins.end())
-            continue;
-
-        // Skip if protein is bound to a surface
-        if (itProtein->second.isBound())
-            continue;
-
-        // Calculate amount to diffuse
-        double fDiffusionAmount = computeDiffusionAmount(itProtein->second.m_fNumber, vecNeighbors.size(), dt);
-
-        // Get reference to population in new grid for this cell
-        auto& proteinPopSource = gridNew[i].getOrCreateProtein(moleculeName);
-
-        // Distribute to neighbors
-        for (uint32_t uNeighborIdx : vecNeighbors)
+        for (uint32_t i = 0; i < grid.size(); ++i)
         {
-            auto& proteinPopNeighbor = gridNew[uNeighborIdx].getOrCreateProtein(moleculeName);
-            proteinPopNeighbor.m_fNumber += fDiffusionAmount;
-            proteinPopSource.m_fNumber -= fDiffusionAmount;
+            auto vecNeighbors = grid.getNeighborIndices(i);
+
+            // Process all proteins in the cell
+            for (const auto& [proteinName, protein] : grid[i].m_proteins)
+            {
+                // Skip if protein is bound to a surface
+                if (protein.isBound())
+                    continue;
+
+                if (pass == 1)
+                {
+                    // Second pass: compute and store diffusion amounts
+                    double fDiffusionAmount = computeDiffusionAmount(protein.m_fNumber, vecNeighbors.size(), dt);
+                    
+                    // Store diffusion amounts for each neighbor
+                    for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
+                    {
+                        diffusionAmounts[uDiffusionIndex + uN] = fDiffusionAmount;
+                    }
+                }
+                else if (pass == 2)
+                {
+                    // Third pass: apply diffusion amounts
+                    auto& mSource = grid[i].getOrCreateProtein(proteinName);
+                    
+                    // Store diffusion amounts for each neighbor
+                    for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
+                    {
+                        auto& mDest = grid[vecNeighbors[uN]].getOrCreateProtein(proteinName);
+                        mSource.m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
+                        mDest.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
+                    }
+                }
+
+                uDiffusionIndex += vecNeighbors.size();
+            }
+
+            // After first pass, pre-allocate memory
+            if (pass == 0)
+            {
+                diffusionAmounts.resize(uDiffusionIndex);
+            }
         }
     }
-
-    grid = std::move(gridNew);
 
     copyATPFromProteins(grid);
 }
