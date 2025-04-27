@@ -23,19 +23,6 @@ struct Grid
     uint32_t positionToIndex(const float3& position) const;
     float3 indexToPosition(size_t index) const;
 
-    uint32_t getNCells() const
-    {
-        return (uint32_t)m_grid.size();
-    }
-    GridCell& getCell(uint32_t i)
-    {
-        return m_grid[i];
-    }
-    const GridCell& getCell(uint32_t i) const
-    {
-        return m_grid[i];
-    }
-
     // Add iterator support
     auto begin() { return m_grid.begin(); }
     auto end() { return m_grid.end(); }

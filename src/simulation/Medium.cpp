@@ -141,12 +141,12 @@ void Medium::updateProteinDiffusion(double dt)
     auto gridNew = m_grid;
 
     // Update each cell
-    for (uint32_t i = 0; i < m_grid.getNCells(); ++i)
+    for (uint32_t i = 0; i < m_grid.size(); ++i)
     {
         auto vecNeighbors = m_grid.getNeighborIndices(i);
 
         // For each protein population in the cell
-        for (auto& [sProteinName, proteinPop] : m_grid.getCell(i).m_proteins)
+        for (auto& [sProteinName, proteinPop] : m_grid[i].m_proteins)
         {
             // proteins attached to surfaces don't participate in diffusion
             if (proteinPop.isBound())
@@ -156,12 +156,12 @@ void Medium::updateProteinDiffusion(double dt)
             double fDiffusionAmount = proteinPop.m_fNumber * DIFFUSION_RATE * dt / vecNeighbors.size();
 
             // Get reference to population in new grid for this cell
-            auto& proteinPopSource = gridNew.getCell(i).getOrCreateProtein(sProteinName);
+            auto& proteinPopSource = gridNew[i].getOrCreateProtein(sProteinName);
 
             // Distribute to neighbors
             for (uint32_t uNeighborIdx : vecNeighbors)
             {
-                auto& proteinPopNeighbor = gridNew.getCell(uNeighborIdx).getOrCreateProtein(sProteinName);
+                auto& proteinPopNeighbor = gridNew[uNeighborIdx].getOrCreateProtein(sProteinName);
                 proteinPopNeighbor.m_fNumber += fDiffusionAmount;
                 proteinPopSource.m_fNumber -= fDiffusionAmount;
             }
@@ -265,7 +265,7 @@ void Medium::updateATPDiffusion(double fDt)
     auto gridNew = m_grid;
 
     // Update each cell
-    for (uint32_t i = 0; i < m_grid.getNCells(); ++i)
+    for (uint32_t i = 0; i < m_grid.size(); ++i)
     {
         auto vecNeighbors = m_grid.getNeighborIndices(i);
         
