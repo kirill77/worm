@@ -10,7 +10,7 @@
 // Global random number generator for consistent randomness
 static std::mt19937 g_rng(std::random_device{}());
 
-uint32_t Medium::positionToIndex(const float3& position) const
+uint32_t Grid::positionToIndex(const float3& position) const
 {
     uint32_t uIndex = 0;
     for (int i = 0; i < 3; ++i)
@@ -23,7 +23,7 @@ uint32_t Medium::positionToIndex(const float3& position) const
     return uIndex;
 }
 
-float3 Medium::indexToPosition(size_t index) const
+float3 Grid::indexToPosition(size_t index) const
 {
     float3 vecPos;
     for (int i = 2; i >= 0; --i)
@@ -35,19 +35,19 @@ float3 Medium::indexToPosition(size_t index) const
     return vecPos;
 }
 
-GridCell& Medium::findCell(const float3& position)
+GridCell& Grid::findCell(const float3& position)
 {
     return m_grid[positionToIndex(position)];
 }
 
-const GridCell& Medium::findCell(const float3& position) const
+const GridCell& Grid::findCell(const float3& position) const
 {
     return m_grid[positionToIndex(position)];
 }
 
-std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
+std::vector<uint32_t> Grid::getNeighborIndices(size_t cellIndex) const
 {
-    std::vector<size_t> vecNeighbors;
+    std::vector<uint32_t> vecNeighbors;
     size_t uZ = cellIndex % GRID_RES;
     size_t uY = (cellIndex / GRID_RES) % GRID_RES;
     size_t uX = cellIndex / (GRID_RES * GRID_RES);
@@ -69,7 +69,7 @@ std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
             iNewY >= 0 && iNewY < GRID_RES &&
             iNewZ >= 0 && iNewZ < GRID_RES)
         {
-            size_t uNeighborIndex = iNewX * GRID_RES * GRID_RES + iNewY * GRID_RES + iNewZ;
+            uint32_t uNeighborIndex = static_cast<uint32_t>(iNewX * GRID_RES * GRID_RES + iNewY * GRID_RES + iNewZ);
             vecNeighbors.push_back(uNeighborIndex);
         }
     }
@@ -79,7 +79,7 @@ std::vector<size_t> Medium::getNeighborIndices(size_t cellIndex) const
 
 void Medium::addProtein(const MPopulation& protein, const float3& position)
 {
-    GridCell& gridCell = findCell(position);
+    GridCell& gridCell = m_grid.findCell(position);
     MPopulation& cellProtein = gridCell.getOrCreateProtein(protein.m_sName);
 
     cellProtein.bindTo(protein.getBindingSurface());
@@ -88,12 +88,12 @@ void Medium::addProtein(const MPopulation& protein, const float3& position)
 
 void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
 {
-    findCell(position).m_pMRNAs.push_back(pMRNA);
+    m_grid.findCell(position).m_pMRNAs.push_back(pMRNA);
 }
 
 double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
 {
-    const auto& gridCell = findCell(position);
+    const auto& gridCell = m_grid.findCell(position);
     auto itProtein = gridCell.m_proteins.find(proteinName);
     return (itProtein != gridCell.m_proteins.end()) ? itProtein->second.m_fNumber : 0.0;
 }
@@ -141,12 +141,12 @@ void Medium::updateProteinDiffusion(double dt)
     auto gridNew = m_grid;
 
     // Update each cell
-    for (size_t i = 0; i < m_grid.size(); ++i)
+    for (uint32_t i = 0; i < m_grid.getNCells(); ++i)
     {
-        auto vecNeighbors = getNeighborIndices(i);
+        auto vecNeighbors = m_grid.getNeighborIndices(i);
 
         // For each protein population in the cell
-        for (auto& [sProteinName, proteinPop] : m_grid[i].m_proteins)
+        for (auto& [sProteinName, proteinPop] : m_grid.getCell(i).m_proteins)
         {
             // proteins attached to surfaces don't participate in diffusion
             if (proteinPop.isBound())
@@ -156,12 +156,12 @@ void Medium::updateProteinDiffusion(double dt)
             double fDiffusionAmount = proteinPop.m_fNumber * DIFFUSION_RATE * dt / vecNeighbors.size();
 
             // Get reference to population in new grid for this cell
-            auto& proteinPopSource = gridNew[i].getOrCreateProtein(sProteinName);
+            auto& proteinPopSource = gridNew.getCell(i).getOrCreateProtein(sProteinName);
 
             // Distribute to neighbors
-            for (size_t uNeighborIdx : vecNeighbors)
+            for (uint32_t uNeighborIdx : vecNeighbors)
             {
-                auto& proteinPopNeighbor = gridNew[uNeighborIdx].getOrCreateProtein(sProteinName);
+                auto& proteinPopNeighbor = gridNew.getCell(uNeighborIdx).getOrCreateProtein(sProteinName);
                 proteinPopNeighbor.m_fNumber += fDiffusionAmount;
                 proteinPopSource.m_fNumber -= fDiffusionAmount;
             }
@@ -181,7 +181,7 @@ void Medium::updateProteinInteraction(double fDt)
     {
         // at first make a dry run to figure out who needs which resources
         m_resDistributor.notifyNewDryRun(m_grid[uCell]);
-        for (int i = 0; i < vecInteractions.size(); ++i)
+        for (size_t i = 0; i < vecInteractions.size(); ++i)
         {
             m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]);
             vecInteractions[i]->apply(m_grid[uCell], fDt, m_resDistributor);
@@ -189,7 +189,7 @@ void Medium::updateProteinInteraction(double fDt)
 
         // now do the real run to distribute the resources
         m_resDistributor.notifyNewRealRun();
-        for (int i = 0; i < vecInteractions.size(); ++i)
+        for (size_t i = 0; i < vecInteractions.size(); ++i)
         {
             if (!m_resDistributor.notifyNewInteractionStarting(*vecInteractions[i]))
                 continue;
@@ -197,7 +197,7 @@ void Medium::updateProteinInteraction(double fDt)
         }
 
         // Ensure ATP doesn't go below zero
-        m_grid[uCell].m_fAtp = std::max(0.0, m_grid[uCell].m_fAtp);
+        m_grid[uCell].m_fAtp = std::max<double>(0.0, m_grid[uCell].m_fAtp);
     }
 }
 
@@ -238,13 +238,13 @@ void Medium::translateMRNAs(double fDt)
 
 void Medium::addATP(double fAmount, const float3& position)
 {
-    auto& gridCell = findCell(position);
-    gridCell.m_fAtp = std::min(gridCell.m_fAtp + fAmount, MAX_ATP_PER_CELL);
+    auto& gridCell = m_grid.findCell(position);
+    gridCell.m_fAtp = std::min<double>(gridCell.m_fAtp + fAmount, MAX_ATP_PER_CELL);
 }
 
 bool Medium::consumeATP(double fAmount, const float3& position)
 {
-    auto& gridCell = findCell(position);
+    auto& gridCell = m_grid.findCell(position);
     if (gridCell.m_fAtp >= fAmount)
     {
         gridCell.m_fAtp -= fAmount;
@@ -255,40 +255,32 @@ bool Medium::consumeATP(double fAmount, const float3& position)
 
 double Medium::getAvailableATP(const float3& position) const
 {
-    const auto& gridCell = findCell(position);
+    const auto& gridCell = m_grid.findCell(position);
     return gridCell.m_fAtp;
 }
 
 void Medium::updateATPDiffusion(double fDt)
 {
-    // Create a temporary copy of ATP levels
-    std::vector<double> vecNewATPLevels(m_grid.size());
-    
-    // Calculate diffusion for each cell
-    for (size_t i = 0; i < m_grid.size(); ++i)
+    // Create temporary grid for updated numbers
+    auto gridNew = m_grid;
+
+    // Update each cell
+    for (uint32_t i = 0; i < m_grid.getNCells(); ++i)
     {
-        double fCurrentATP = m_grid[i].m_fAtp;
-        auto vecNeighbors = getNeighborIndices(i);
+        auto vecNeighbors = m_grid.getNeighborIndices(i);
         
-        // Calculate net ATP change due to diffusion
-        double fAtpChange = 0.0;
-        for (size_t uNeighborIdx : vecNeighbors)
+        // Calculate amount to diffuse
+        double fDiffusionAmount = m_grid[i].m_fAtp * ATP_DIFFUSION_RATE * fDt / vecNeighbors.size();
+        
+        // Distribute to neighbors
+        for (uint32_t uNeighborIdx : vecNeighbors)
         {
-            double fNeighborATP = m_grid[uNeighborIdx].m_fAtp;
-            double fDiffusion = (fNeighborATP - fCurrentATP) * ATP_DIFFUSION_RATE * fDt;
-            fAtpChange += fDiffusion;
+            gridNew[uNeighborIdx].m_fAtp += fDiffusionAmount;
+            gridNew[i].m_fAtp -= fDiffusionAmount;
         }
-        
-        // Store new ATP level
-        vecNewATPLevels[i] = std::min(MAX_ATP_PER_CELL, 
-                                  std::max(0.0, fCurrentATP + fAtpChange));
     }
-    
-    // Update ATP levels
-    for (size_t i = 0; i < m_grid.size(); ++i)
-    {
-        m_grid[i].m_fAtp = vecNewATPLevels[i];
-    }
+
+    m_grid = std::move(gridNew);
 }
 
 Medium::Medium()

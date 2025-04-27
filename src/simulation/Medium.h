@@ -12,12 +12,53 @@
 #include "GridCell.h"
 #include "ResourceDistributor.h"
 
+struct Grid
+{
+    // Helper functions
+    GridCell& findCell(const float3& position);
+    const GridCell& findCell(const float3& position) const;
+    std::vector<uint32_t> getNeighborIndices(size_t cellIndex) const;
+
+    // Convert between grid indices and 3D coordinates
+    uint32_t positionToIndex(const float3& position) const;
+    float3 indexToPosition(size_t index) const;
+
+    uint32_t getNCells() const
+    {
+        return (uint32_t)m_grid.size();
+    }
+    GridCell& getCell(uint32_t i)
+    {
+        return m_grid[i];
+    }
+    const GridCell& getCell(uint32_t i) const
+    {
+        return m_grid[i];
+    }
+
+    // Add iterator support
+    auto begin() { return m_grid.begin(); }
+    auto end() { return m_grid.end(); }
+    auto begin() const { return m_grid.begin(); }
+    auto end() const { return m_grid.end(); }
+
+    // Add size() function
+    size_t size() const { return m_grid.size(); }
+
+    // Add operator[] for direct access
+    GridCell& operator[](size_t index) { return m_grid[index]; }
+    const GridCell& operator[](size_t index) const { return m_grid[index]; }
+
+private:
+    static constexpr uint32_t GRID_RES = 3;  // 3x3x3 grid
+    std::array<GridCell, GRID_RES* GRID_RES* GRID_RES> m_grid;
+};
+
 class Medium
 {
 private:
-    static constexpr uint32_t GRID_RES = 3;  // 3x3x3 grid
-    std::array<GridCell, GRID_RES * GRID_RES * GRID_RES> m_grid;
-    
+    Grid m_grid;
+
     static constexpr double DIFFUSION_RATE = 0.1;          // Rate of movement between cells
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
     static constexpr int DIFFUSION_SAMPLES = 1000;         // Number of random samples per diffusion update
@@ -51,20 +92,11 @@ public:
 private:
     ResourceDistributor m_resDistributor;
 
-    // Helper functions
-    GridCell& findCell(const float3& position);
-    const GridCell& findCell(const float3& position) const;
-    std::vector<size_t> getNeighborIndices(size_t cellIndex) const;
-
     // Update functions
     void updateProteinDiffusion(double dt);
     void updateProteinInteraction(double dt);
     void translateMRNAs(double dt);
     void updateATPDiffusion(double dt);
-    
-    // Convert between grid indices and 3D coordinates
-    uint32_t positionToIndex(const float3& position) const;
-    float3 indexToPosition(size_t index) const;
     
     // Helper functions for physically-based diffusion
     float3 generateRandomPosition() const;
