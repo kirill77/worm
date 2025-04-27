@@ -28,6 +28,8 @@ const GridCell& Grid::findCell(const float3& position) const
 std::vector<uint32_t> Grid::getNeighborIndices(size_t cellIndex) const
 {
     std::vector<uint32_t> vecNeighbors;
+    vecNeighbors.reserve(6);  // Reserve space for 6 face neighbors
+    
     size_t uZ = cellIndex % GRID_RES;
     size_t uY = (cellIndex / GRID_RES) % GRID_RES;
     size_t uX = cellIndex / (GRID_RES * GRID_RES);

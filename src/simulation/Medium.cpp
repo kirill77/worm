@@ -137,8 +137,9 @@ void Medium::updateProteinInteraction(double fDt)
 double Medium::getTotalProteinNumber(const std::string& proteinName) const
 {
     double fTotal = 0.0;
-    for (const auto& gridCell : m_grid)
+    for (uint32_t uCell = 0; uCell < m_grid.size(); ++uCell)
     {
+        const GridCell& gridCell = m_grid[uCell];
         auto itProtein = gridCell.m_proteins.find(proteinName);
         if (itProtein != gridCell.m_proteins.end()) {
             fTotal += itProtein->second.m_fNumber;
