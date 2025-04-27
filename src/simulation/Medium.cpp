@@ -31,79 +31,6 @@ double Medium::getProteinNumber(const std::string& proteinName, const float3& po
     return (itProtein != gridCell.m_proteins.end()) ? itProtein->second.m_fNumber : 0.0;
 }
 
-float3 Medium::generateRandomPosition() const
-{
-    // Generate random coordinates in [-1,1] range
-    std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-    return float3(dist(g_rng), dist(g_rng), dist(g_rng));
-}
-
-float3 Medium::generateRandomDirection() const
-{
-    // Generate random direction vector on unit sphere
-    std::normal_distribution<float> dist(0.0f, 1.0f);
-    float3 dir(dist(g_rng), dist(g_rng), dist(g_rng));
-    
-    // Normalize to get unit vector
-    float len = length(dir);
-    if (len > 0.001f) {
-        dir = dir * (1.0f / len);
-    } else {
-        // Fallback for unlikely case of very small vector
-        dir = float3(1.0f, 0.0f, 0.0f);
-    }
-    
-    return dir;
-}
-
-float Medium::generateRandomDistance(double dt) const
-{
-    // Use normal distribution for distance to match diffusion physics
-    // Scale by diffusion rate and time step (sqrt of dt for correct diffusion scaling)
-    float sigma = static_cast<float>(DIFFUSION_SIGMA * std::sqrt(dt * DIFFUSION_RATE));
-    std::normal_distribution<float> dist(0.0f, sigma);
-    
-    // Take absolute value to ensure positive distance
-    return std::abs(dist(g_rng));
-}
-
-void Medium::updateProteinDiffusion(double dt)
-{
-    // Original grid-based diffusion implementation
-    // Create temporary grid for updated numbers
-    auto gridNew = m_grid;
-
-    // Update each cell
-    for (uint32_t i = 0; i < m_grid.size(); ++i)
-    {
-        auto vecNeighbors = m_grid.getNeighborIndices(i);
-
-        // For each protein population in the cell
-        for (auto& [sProteinName, proteinPop] : m_grid[i].m_proteins)
-        {
-            // proteins attached to surfaces don't participate in diffusion
-            if (proteinPop.isBound())
-                continue;
-
-            // Calculate amount to diffuse
-            double fDiffusionAmount = proteinPop.m_fNumber * DIFFUSION_RATE * dt / vecNeighbors.size();
-
-            // Get reference to population in new grid for this cell
-            auto& proteinPopSource = gridNew[i].getOrCreateProtein(sProteinName);
-
-            // Distribute to neighbors
-            for (uint32_t uNeighborIdx : vecNeighbors)
-            {
-                auto& proteinPopNeighbor = gridNew[uNeighborIdx].getOrCreateProtein(sProteinName);
-                proteinPopNeighbor.m_fNumber += fDiffusionAmount;
-                proteinPopSource.m_fNumber -= fDiffusionAmount;
-            }
-        }
-    }
-
-    m_grid = std::move(gridNew);
-}
-
 void Medium::updateProteinInteraction(double fDt)
 {
     // Get all protein interactions 
@@ -150,9 +77,7 @@ double Medium::getTotalProteinNumber(const std::string& proteinName) const
 
 void Medium::update(double fDt)
 {
-    // Update diffusion of proteins and ATP
-    updateProteinDiffusion(fDt);
-    updateATPDiffusion(fDt);
+    m_diffusion.updateDiffusion(m_grid, fDt);
     
     // Interaction of proteins between each other
     updateProteinInteraction(fDt);
@@ -191,30 +116,6 @@ double Medium::getAvailableATP(const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
     return gridCell.m_fAtp;
-}
-
-void Medium::updateATPDiffusion(double fDt)
-{
-    // Create temporary grid for updated numbers
-    auto gridNew = m_grid;
-
-    // Update each cell
-    for (uint32_t i = 0; i < m_grid.size(); ++i)
-    {
-        auto vecNeighbors = m_grid.getNeighborIndices(i);
-        
-        // Calculate amount to diffuse
-        double fDiffusionAmount = m_grid[i].m_fAtp * ATP_DIFFUSION_RATE * fDt / vecNeighbors.size();
-        
-        // Distribute to neighbors
-        for (uint32_t uNeighborIdx : vecNeighbors)
-        {
-            gridNew[uNeighborIdx].m_fAtp += fDiffusionAmount;
-            gridNew[i].m_fAtp -= fDiffusionAmount;
-        }
-    }
-
-    m_grid = std::move(gridNew);
 }
 
 Medium::Medium()

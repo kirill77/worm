@@ -3,69 +3,116 @@
 #include "Grid.h"
 #include <cassert>
 
-GridDiffusion::GridDiffusion(const Parameters& params)
-    : m_params(params)
+GridDiffusion::GridDiffusion()
 {
 }
 
 double GridDiffusion::computeDiffusionAmount(double moleculeCount, size_t numNeighbors, double dt) const
 {
-    return moleculeCount * m_params.diffusionRate * dt / numNeighbors;
+    return moleculeCount * DIFFUSION_RATE * dt / numNeighbors;
 }
 
-void GridDiffusion::updateDiffusion(Grid& grid, const std::string& moleculeName, double dt)
+void GridDiffusion::updateDiffusion(Grid& grid, double dt)
 {
     copyATPToProteins(grid);
 
-    std::vector<double> diffusionAmounts(grid.size());
-
-    // Execute three passes with the same code structure
-    for (uint32_t pass = 0, uDiffusionIndex = 0; pass < 3; ++pass)
+    // Create an array of source populations that will participate in diffusion
+    std::vector<uint32_t> nSourcePopsPerCell;
+    std::vector<MPopulation*> pSourcePops;
+    nSourcePopsPerCell.resize(grid.size(), 0);
+    for (uint32_t uPass = 0; uPass < 2; ++uPass)
     {
-        for (uint32_t i = 0; i < grid.size(); ++i)
+        uint32_t nTotalSourcePops = 0;
+        for (uint32_t uSourceCell = 0; uSourceCell < grid.size(); ++uSourceCell)
         {
-            auto vecNeighbors = grid.getNeighborIndices(i);
-
-            // Process all proteins in the cell
-            for (const auto& [proteinName, protein] : grid[i].m_proteins)
+            auto& sourcePops = grid[uSourceCell].m_proteins;
+            for (auto itSourcePop = sourcePops.begin(); itSourcePop != sourcePops.end(); )
             {
-                // Skip if protein is bound to a surface
-                if (protein.isBound())
+                MPopulation& sourcePop = itSourcePop->second;
+                 if (sourcePop.m_fNumber == 0)
+                {
+                    itSourcePop = sourcePops.erase(itSourcePop);
+                    continue;
+                }
+                ++itSourcePop;
+                // if population is bound to a surface - it doesn't diffuse
+                if (sourcePop.isBound())
                     continue;
 
-                if (pass == 1)
+                if (uPass == 0)
                 {
-                    // Second pass: compute and store diffusion amounts
-                    double fDiffusionAmount = computeDiffusionAmount(protein.m_fNumber, vecNeighbors.size(), dt);
-                    
-                    // Store diffusion amounts for each neighbor
-                    for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
-                    {
-                        diffusionAmounts[uDiffusionIndex + uN] = fDiffusionAmount;
-                    }
-                }
-                else if (pass == 2)
+                    ++nSourcePopsPerCell[uSourceCell];
+                 }
+                else if (uPass == 1)
                 {
-                    // Third pass: apply diffusion amounts
-                    auto& mSource = grid[i].getOrCreateProtein(proteinName);
-                    
-                    // Store diffusion amounts for each neighbor
-                    for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
-                    {
-                        auto& mDest = grid[vecNeighbors[uN]].getOrCreateProtein(proteinName);
-                        mSource.m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
-                        mDest.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
-                    }
+                    pSourcePops[nTotalSourcePops] = &sourcePop;
                 }
-
-                uDiffusionIndex += vecNeighbors.size();
+                ++nTotalSourcePops;
             }
+        }
 
-            // After first pass, pre-allocate memory
-            if (pass == 0)
+        if (uPass == 0)
+        {
+            pSourcePops.resize(nTotalSourcePops, nullptr);
+        }
+    }
+
+    // Execute three passes: first pass allocates memory for diffusion amounts, second
+    // pass calculation diffusion amount per destination population, and the third pass
+    // deposits the diffused amount
+    std::vector<double> diffusionAmounts;
+    for (uint32_t uPass = 0; uPass < 3; ++uPass)
+    {
+        uint32_t uDiffusionIndex = 0;
+        uint32_t uPopIndex = 0;
+
+        for (uint32_t uSourceCell = 0; uSourceCell < grid.size(); ++uSourceCell)
+        {
+            auto vecNeighbors = grid.getNeighborIndices(uSourceCell);
+            uint32_t uCellStartIndex = uPopIndex;
+
+            if (uPass == 0)
             {
-                diffusionAmounts.resize(uDiffusionIndex);
+                uDiffusionIndex += nSourcePopsPerCell[uSourceCell] * (uint32_t)vecNeighbors.size();
             }
+            else
+            {
+                // For each source population in this cell
+                for (uint32_t uCellPopIndex = 0; uCellPopIndex < nSourcePopsPerCell[uSourceCell]; ++uCellPopIndex)
+                {
+                    MPopulation* pSourcePop = pSourcePops[uCellStartIndex + uCellPopIndex];
+                    if (uPass == 1)
+                    {
+                        // Second pass: compute and store diffusion amounts
+                        double fDiffusionAmount = computeDiffusionAmount(pSourcePop->m_fNumber, vecNeighbors.size(), dt);
+
+                        // Store diffusion amounts for each neighbor
+                        for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
+                        {
+                            diffusionAmounts[uDiffusionIndex + uN] = fDiffusionAmount;
+                        }
+                    }
+                    else if (uPass == 2)
+                    {
+                        // Third pass: apply diffusion amounts
+                        // Apply diffusion to each neighbor
+                        for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
+                        {
+                            auto& destMPop = grid[vecNeighbors[uN]].getOrCreateProtein(pSourcePop->m_sName);
+                            pSourcePop->m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
+                            destMPop.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
+                        }
+                    }
+                    uDiffusionIndex += (uint32_t)vecNeighbors.size();
+                }
+            }
+            uPopIndex += nSourcePopsPerCell[uSourceCell];
+        }
+
+        // After first pass, pre-allocate memory
+        if (uPass == 0)
+        {
+            diffusionAmounts.resize(uDiffusionIndex);
         }
     }
 

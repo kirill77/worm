@@ -11,14 +11,15 @@
 #include "ProteinWiki.h"
 #include "GridCell.h"
 #include "Grid.h"
+#include "GridDiffusion.h"
 #include "ResourceDistributor.h"
 
 class Medium
 {
 private:
     Grid m_grid;
+    GridDiffusion m_diffusion;
 
-    static constexpr double DIFFUSION_RATE = 0.1;          // Rate of movement between cells
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
     static constexpr int DIFFUSION_SAMPLES = 1000;         // Number of random samples per diffusion update
     static constexpr double DIFFUSION_SIGMA = 0.2;         // Standard deviation for diffusion distance (as fraction of medium size)
@@ -52,14 +53,7 @@ private:
     ResourceDistributor m_resDistributor;
 
     // Update functions
-    void updateProteinDiffusion(double dt);
     void updateProteinInteraction(double dt);
     void translateMRNAs(double dt);
-    void updateATPDiffusion(double dt);
-    
-    // Helper functions for physically-based diffusion
-    float3 generateRandomPosition() const;
-    float3 generateRandomDirection() const;
-    float generateRandomDistance(double dt) const;
 };
 
