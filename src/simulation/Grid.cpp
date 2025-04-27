@@ -15,18 +15,6 @@ uint32_t Grid::positionToIndex(const float3& position) const
     return uIndex;
 }
 
-float3 Grid::indexToPosition(size_t index) const
-{
-    float3 vecPos;
-    for (int i = 2; i >= 0; --i)
-    {
-        size_t uGridPos = index % GRID_RES;
-        index /= GRID_RES;
-        vecPos[i] = (2.0f * uGridPos / (GRID_RES - 1.0f)) - 1.0f;
-    }
-    return vecPos;
-}
-
 GridCell& Grid::findCell(const float3& position)
 {
     return m_grid[positionToIndex(position)];
