@@ -13,7 +13,7 @@ static std::mt19937 g_rng(std::random_device{}());
 void Medium::addProtein(const MPopulation& protein, const float3& position)
 {
     GridCell& gridCell = m_grid.findCell(position);
-    MPopulation& cellProtein = gridCell.getOrCreateProtein(protein.m_sName);
+    MPopulation& cellProtein = gridCell.getOrCreateMolecule(protein.m_sName);
 
     cellProtein.bindTo(protein.getBindingSurface());
     cellProtein.m_fNumber += protein.m_fNumber;
@@ -27,8 +27,8 @@ void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
 double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itProtein = gridCell.m_proteins.find(proteinName);
-    return (itProtein != gridCell.m_proteins.end()) ? itProtein->second.m_fNumber : 0.0;
+    auto itProtein = gridCell.m_molecules.find(proteinName);
+    return (itProtein != gridCell.m_molecules.end()) ? itProtein->second.m_fNumber : 0.0;
 }
 
 void Medium::updateProteinInteraction(double fDt)
@@ -57,8 +57,8 @@ void Medium::updateProteinInteraction(double fDt)
         }
 
         // Ensure ATP doesn't go below zero
-        auto& atpProtein = m_grid[uCell].getOrCreateProtein("ATP");
-        atpProtein.m_fNumber = std::max(0.0, atpProtein.m_fNumber);
+        auto& atpMolecule = m_grid[uCell].getOrCreateMolecule("ATP");
+        atpMolecule.m_fNumber = std::max(0.0, atpMolecule.m_fNumber);
     }
 }
 
@@ -68,8 +68,8 @@ double Medium::getTotalProteinNumber(const std::string& proteinName) const
     for (uint32_t uCell = 0; uCell < m_grid.size(); ++uCell)
     {
         const GridCell& gridCell = m_grid[uCell];
-        auto itProtein = gridCell.m_proteins.find(proteinName);
-        if (itProtein != gridCell.m_proteins.end()) {
+        auto itProtein = gridCell.m_molecules.find(proteinName);
+        if (itProtein != gridCell.m_molecules.end()) {
             fTotal += itProtein->second.m_fNumber;
         }
     }
@@ -99,17 +99,17 @@ void Medium::translateMRNAs(double fDt)
 void Medium::addATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpProtein = gridCell.getOrCreateProtein("ATP");
-    atpProtein.m_fNumber = std::min<double>(atpProtein.m_fNumber + fAmount, MAX_ATP_PER_CELL);
+    auto& atpMolecule = gridCell.getOrCreateMolecule("ATP");
+    atpMolecule.m_fNumber = std::min<double>(atpMolecule.m_fNumber + fAmount, MAX_ATP_PER_CELL);
 }
 
 bool Medium::consumeATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpProtein = gridCell.getOrCreateProtein("ATP");
-    if (atpProtein.m_fNumber >= fAmount)
+    auto& atpMolecule = gridCell.getOrCreateMolecule("ATP");
+    if (atpMolecule.m_fNumber >= fAmount)
     {
-        atpProtein.m_fNumber -= fAmount;
+        atpMolecule.m_fNumber -= fAmount;
         return true;
     }
     return false;
@@ -118,8 +118,8 @@ bool Medium::consumeATP(double fAmount, const float3& position)
 double Medium::getAvailableATP(const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itProtein = gridCell.m_proteins.find("ATP");
-    return (itProtein != gridCell.m_proteins.end()) ? itProtein->second.m_fNumber : 0.0;
+    auto itMolecule = gridCell.m_molecules.find("ATP");
+    return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_fNumber : 0.0;
 }
 
 Medium::Medium()

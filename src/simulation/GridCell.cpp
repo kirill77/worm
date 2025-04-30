@@ -6,13 +6,13 @@ GridCell::GridCell()
     // Default constructor
 }
 
-MPopulation& GridCell::getOrCreateProtein(const std::string& sProteinName)
+MPopulation& GridCell::getOrCreateMolecule(const std::string& sMoleculeName)
 {
-    auto it = m_proteins.find(sProteinName);
-    if (it != m_proteins.end()) {
+    auto it = m_molecules.find(sMoleculeName);
+    if (it != m_molecules.end()) {
         return it->second;
     }
     
     // Create new population with zero initial amount
-    return m_proteins.emplace(sProteinName, MPopulation(sProteinName, 0.0)).first->second;
+    return m_molecules.emplace(sMoleculeName, MPopulation(sMoleculeName, 0.0)).first->second;
 } 

@@ -17,9 +17,9 @@ DephosphorylationInteraction::DephosphorylationInteraction(
 bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
     // Get phosphorylated protein population
-    auto phosphorylatedIt = cell.m_proteins.find(m_phosphorylatedName);
+    auto phosphorylatedIt = cell.m_molecules.find(m_phosphorylatedName);
     
-    if (phosphorylatedIt == cell.m_proteins.end() || 
+    if (phosphorylatedIt == cell.m_molecules.end() || 
         phosphorylatedIt->second.m_fNumber <= 0) {
         return false;
     }
@@ -48,13 +48,13 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     assert(phosphorylatedIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
     
     // Add back to original unphosphorylated population
-    auto& unphosphorylatedPop = cell.getOrCreateProtein(m_targetName);
+    auto& unphosphorylatedPop = cell.getOrCreateMolecule(m_targetName);
     unphosphorylatedPop.m_fNumber += recoveredAmount;
     
     // Update ATP consumption
-    auto& atpProtein = cell.getOrCreateProtein("ATP");
-    atpProtein.m_fNumber -= requiredATP;
-    assert(atpProtein.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
+    auto& atpMolecule = cell.getOrCreateMolecule("ATP");
+    atpMolecule.m_fNumber -= requiredATP;
+    assert(atpMolecule.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
     
     return true;
 } 

@@ -23,11 +23,11 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
         uint32_t nTotalSourcePops = 0;
         for (uint32_t uSourceCell = 0; uSourceCell < grid.size(); ++uSourceCell)
         {
-            auto& sourcePops = grid[uSourceCell].m_proteins;
+            auto& sourcePops = grid[uSourceCell].m_molecules;
             for (auto itSourcePop = sourcePops.begin(); itSourcePop != sourcePops.end(); )
             {
                 MPopulation& sourcePop = itSourcePop->second;
-                 if (sourcePop.m_fNumber == 0)
+                if (sourcePop.m_fNumber == 0)
                 {
                     itSourcePop = sourcePops.erase(itSourcePop);
                     continue;
@@ -40,7 +40,7 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
                 if (uPass == 0)
                 {
                     ++nSourcePopsPerCell[uSourceCell];
-                 }
+                }
                 else if (uPass == 1)
                 {
                     pSourcePops[nTotalSourcePops] = &sourcePop;
@@ -96,7 +96,7 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
                         // Apply diffusion to each neighbor
                         for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
                         {
-                            auto& destMPop = grid[vecNeighbors[uN]].getOrCreateProtein(pSourcePop->m_sName);
+                            auto& destMPop = grid[vecNeighbors[uN]].getOrCreateMolecule(pSourcePop->m_sName);
                             pSourcePop->m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
                             destMPop.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
                         }

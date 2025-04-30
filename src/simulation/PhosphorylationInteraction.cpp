@@ -21,14 +21,14 @@ PhosphorylationInteraction::PhosphorylationInteraction(
 bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
     // Get kinase amount
-    auto kinaseIt = cell.m_proteins.find(m_kinaseName);
-    if (kinaseIt == cell.m_proteins.end() || kinaseIt->second.m_fNumber <= 0) {
+    auto kinaseIt = cell.m_molecules.find(m_kinaseName);
+    if (kinaseIt == cell.m_molecules.end() || kinaseIt->second.m_fNumber <= 0) {
         return false; // No kinase present
     }
     
     // Get target amount
-    auto targetIt = cell.m_proteins.find(m_targetName);
-    if (targetIt == cell.m_proteins.end() || targetIt->second.m_fNumber <= 0) {
+    auto targetIt = cell.m_molecules.find(m_targetName);
+    if (targetIt == cell.m_molecules.end() || targetIt->second.m_fNumber <= 0) {
         return false; // No target present
     }
     
@@ -58,16 +58,16 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     // Apply the effect if any phosphorylation occurs
     if (phosphorylatedAmount > 0) {
         // Update ATP consumption
-        auto& atpProtein = cell.getOrCreateProtein("ATP");
-        atpProtein.m_fNumber -= requiredATP;
-        assert(atpProtein.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
+        auto& atpMolecule = cell.getOrCreateMolecule("ATP");
+        atpMolecule.m_fNumber -= requiredATP;
+        assert(atpMolecule.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from unphosphorylated population
         targetIt->second.m_fNumber -= phosphorylatedAmount;
         assert(targetIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to phosphorylated population
-        auto& phosphorylatedPop = cell.getOrCreateProtein(m_phosphorylatedName);
+        auto& phosphorylatedPop = cell.getOrCreateMolecule(m_phosphorylatedName);
         phosphorylatedPop.m_fNumber += phosphorylatedAmount;
         
         return true;

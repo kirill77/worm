@@ -14,12 +14,12 @@ public:
     // Minimum possible resource level (to check with assertions)
     static constexpr double MIN_RESOURCE_LEVEL = 0.0;
 
-    std::unordered_map<std::string, MPopulation> m_proteins;
+    std::unordered_map<std::string, MPopulation> m_molecules;
     std::vector<std::shared_ptr<MRNA>> m_pMRNAs;
     
     // Constructor
     GridCell();
     
-    // Helper to get or create protein population
-    MPopulation& getOrCreateProtein(const std::string& sProteinName);
+    // Helper to get or create molecule population
+    MPopulation& getOrCreateMolecule(const std::string& sMoleculeName);
 }; 
