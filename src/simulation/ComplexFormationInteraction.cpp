@@ -65,8 +65,9 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     // Apply binding if any occurs
     if (boundAmount > 0) {
         // Update ATP consumption
-        cell.m_fAtp -= requiredATP;
-        assert(cell.m_fAtp >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
+        auto& atpProtein = cell.getOrCreateProtein("ATP");
+        atpProtein.m_fNumber -= requiredATP;
+        assert(atpProtein.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from free populations
         firstProteinIt->second.m_fNumber -= boundAmount;

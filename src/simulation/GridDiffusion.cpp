@@ -14,8 +14,6 @@ double GridDiffusion::computeDiffusionAmount(double moleculeCount, size_t numNei
 
 void GridDiffusion::updateDiffusion(Grid& grid, double dt)
 {
-    copyATPToProteins(grid);
-
     // Create an array of source populations that will participate in diffusion
     std::vector<uint32_t> nSourcePopsPerCell;
     std::vector<MPopulation*> pSourcePops;
@@ -113,46 +111,6 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
         if (uPass == 0)
         {
             diffusionAmounts.resize(uDiffusionIndex);
-        }
-    }
-
-    copyATPFromProteins(grid);
-}
-
-void GridDiffusion::copyATPToProteins(Grid& grid) const
-{
-    const std::string ATP_PROTEIN_NAME = "ATP";
-    
-    // For each cell in the grid
-    for (uint32_t i = 0; i < grid.size(); ++i)
-    {
-        // Get or create the ATP protein population
-        auto& atpProtein = grid[i].getOrCreateProtein(ATP_PROTEIN_NAME);
-        
-        // Copy the ATP value from m_fAtp to the protein population
-        atpProtein.m_fNumber = grid[i].m_fAtp;
-    }
-}
-
-void GridDiffusion::copyATPFromProteins(Grid& grid) const
-{
-    const std::string ATP_PROTEIN_NAME = "ATP";
-    
-    // For each cell in the grid
-    for (uint32_t i = 0; i < grid.size(); ++i)
-    {
-        // Find the ATP protein population
-        auto itProtein = grid[i].m_proteins.find(ATP_PROTEIN_NAME);
-        
-        // If ATP protein exists, copy its value to m_fAtp
-        if (itProtein != grid[i].m_proteins.end())
-        {
-            grid[i].m_fAtp = itProtein->second.m_fNumber;
-        }
-        else
-        {
-            // If no ATP protein exists, set ATP to zero
-            grid[i].m_fAtp = 0.0;
         }
     }
 } 

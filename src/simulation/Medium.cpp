@@ -57,7 +57,8 @@ void Medium::updateProteinInteraction(double fDt)
         }
 
         // Ensure ATP doesn't go below zero
-        m_grid[uCell].m_fAtp = std::max<double>(0.0, m_grid[uCell].m_fAtp);
+        auto& atpProtein = m_grid[uCell].getOrCreateProtein("ATP");
+        atpProtein.m_fNumber = std::max(0.0, atpProtein.m_fNumber);
     }
 }
 
@@ -98,15 +99,17 @@ void Medium::translateMRNAs(double fDt)
 void Medium::addATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    gridCell.m_fAtp = std::min<double>(gridCell.m_fAtp + fAmount, MAX_ATP_PER_CELL);
+    auto& atpProtein = gridCell.getOrCreateProtein("ATP");
+    atpProtein.m_fNumber = std::min<double>(atpProtein.m_fNumber + fAmount, MAX_ATP_PER_CELL);
 }
 
 bool Medium::consumeATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    if (gridCell.m_fAtp >= fAmount)
+    auto& atpProtein = gridCell.getOrCreateProtein("ATP");
+    if (atpProtein.m_fNumber >= fAmount)
     {
-        gridCell.m_fAtp -= fAmount;
+        atpProtein.m_fNumber -= fAmount;
         return true;
     }
     return false;
@@ -115,7 +118,8 @@ bool Medium::consumeATP(double fAmount, const float3& position)
 double Medium::getAvailableATP(const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    return gridCell.m_fAtp;
+    auto itProtein = gridCell.m_proteins.find("ATP");
+    return (itProtein != gridCell.m_proteins.end()) ? itProtein->second.m_fNumber : 0.0;
 }
 
 Medium::Medium()

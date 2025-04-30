@@ -16,7 +16,6 @@ public:
 
     std::unordered_map<std::string, MPopulation> m_proteins;
     std::vector<std::shared_ptr<MRNA>> m_pMRNAs;
-    double m_fAtp;  // ATP level in this grid cell
     
     // Constructor
     GridCell();

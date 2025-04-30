@@ -89,11 +89,6 @@ void ResourceDistributor::notifyNewRealRun()
 
 void ResourceDistributor::updateAvailableResources(const GridCell &cell)
 {
-    // Special case for ATP - it's stored directly in GridCell
-    auto& atpResource = m_resources["ATP"];
-    atpResource.m_fAvailable = cell.m_fAtp;
-    atpResource.m_dryRunId = m_curDryRunId;
-
     // Update the available amounts from the current cell state by iterating over all proteins
     for (const auto& [proteinName, proteinPop] : cell.m_proteins)
     {

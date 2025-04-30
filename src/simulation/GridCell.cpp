@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "GridCell.h"
 
-GridCell::GridCell() : m_fAtp(0.0) 
+GridCell::GridCell()
 {
-    // Default constructor initializes ATP to zero
+    // Default constructor
 }
 
 MPopulation& GridCell::getOrCreateProtein(const std::string& sProteinName)
