@@ -16,14 +16,6 @@ DephosphorylationInteraction::DephosphorylationInteraction(
 
 bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
-    // Get phosphorylated protein population
-    auto phosphorylatedIt = cell.m_molecules.find(m_phosphorylatedName);
-    
-    if (phosphorylatedIt == cell.m_molecules.end() || 
-        phosphorylatedIt->second.m_fNumber <= 0) {
-        return false;
-    }
-    
     // Calculate recovery
     double phosphorylatedAmount = resDistributor.getAvailableResource(m_phosphorylatedName);
     double recoveredAmount = phosphorylatedAmount * m_recoveryRate * dt;
@@ -44,6 +36,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     }
 
     // Remove from phosphorylated population
+    auto phosphorylatedIt = cell.m_molecules.find(m_phosphorylatedName);
     phosphorylatedIt->second.m_fNumber -= recoveredAmount;
     assert(phosphorylatedIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
     

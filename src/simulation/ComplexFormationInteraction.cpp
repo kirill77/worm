@@ -20,15 +20,6 @@ ComplexFormationInteraction::ComplexFormationInteraction(
 
 bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
-    // Check for both proteins
-    auto firstProteinIt = cell.m_molecules.find(m_firstProteinName);
-    auto secondProteinIt = cell.m_molecules.find(m_secondProteinName);
-    
-    if (firstProteinIt == cell.m_molecules.end() || firstProteinIt->second.m_fNumber <= 0 ||
-        secondProteinIt == cell.m_molecules.end() || secondProteinIt->second.m_fNumber <= 0) {
-        return false; // One or both proteins missing
-    }
-    
     double firstProteinAmount = resDistributor.getAvailableResource(m_firstProteinName);
     double secondProteinAmount = resDistributor.getAvailableResource(m_secondProteinName);
     
@@ -61,6 +52,9 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         // Dissociation doesn't consume resources, but still return true if it occurs
         return dissociatedAmount > 0;
     }
+
+    auto firstProteinIt = cell.m_molecules.find(m_firstProteinName);
+    auto secondProteinIt = cell.m_molecules.find(m_secondProteinName);
 
     // Apply binding if any occurs
     if (boundAmount > 0) {

@@ -45,7 +45,11 @@ bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
     for (const auto &resourceName : m_pCurInteraction->m_requestedResourceNames)
     {
         auto it = m_resources.find(resourceName);
-        assert(it != m_resources.end() && it->second.m_dryRunId == m_curDryRunId);
+        // if the interaction needs a resource that's not available - it can't run
+        if (it == m_resources.end() || it->second.m_dryRunId != m_curDryRunId)
+        {
+            return false;
+        }
         double fResourceScalingFactor = it->second.computeScalingFactor();
         // the interaction is constrained by the most scarce resource
         m_pCurInteraction->m_fScalingFactor = std::min(m_pCurInteraction->m_fScalingFactor,
