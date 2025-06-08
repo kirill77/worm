@@ -33,7 +33,9 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderHelper::loadShader(
     std::filesystem::path foundPath;
     if (!FileUtils::findFile(filePath, foundPath))
     {
-        throw std::runtime_error("Failed to find shader file: " + std::string(filePath.begin(), filePath.end()));
+        // Convert wide string to narrow string using filesystem path
+        std::filesystem::path pathObj(filePath);
+        throw std::runtime_error("Failed to find shader file: " + pathObj.string());
     }
     
     // Compile shader

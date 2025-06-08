@@ -15,7 +15,7 @@ std::shared_ptr<GPUMesh> ConnectedMeshVis::getGPUMesh()
     return m_pGPUMesh;
 }
 
-void ConnectedMeshVis::updateGPUMesh(GPUQueue &gpuQueue)
+void ConnectedMeshVis::updateGPUMesh()
 {
     if (!m_pMesh || !m_pGPUMesh)
     {
@@ -50,5 +50,5 @@ void ConnectedMeshVis::updateGPUMesh(GPUQueue &gpuQueue)
     }
 
     // Update the GPU mesh geometry
-    m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles, gpuQueue);
+    m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);
 } 

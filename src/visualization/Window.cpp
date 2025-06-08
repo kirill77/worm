@@ -68,7 +68,7 @@ Window::Window()
 
 Window::~Window() {
     // Release DirectX resources
-    m_swapChain.Reset();
+    m_pSwapChain.reset();
     m_device.Reset();
     
     // Unregister window class
@@ -130,20 +130,6 @@ const UIState& Window::getCurrentUIState() {
     return *m_uiState;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Device> Window::getDevice() {
-    return m_device;
-}
-
-Microsoft::WRL::ComPtr<IDXGISwapChain4> Window::getSwapChain() {
-    return m_swapChain;
-}
-
-std::shared_ptr<GPUQueue> Window::createOrGetGPUQueue() {
-    if (!m_gpuQueue) {
-        m_gpuQueue = std::make_shared<GPUQueue>(m_device);
-    }
-    return m_gpuQueue;
-}
 
 void Window::processMessages() {
     MSG msg = {};
@@ -198,37 +184,11 @@ bool Window::initDirectX() {
         ThrowIfFailed(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));
     }
 
-    // Create command queue
-    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-
-    std::shared_ptr<GPUQueue> pQueue = this->createOrGetGPUQueue();
-
-    // Create swap chain
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-    swapChainDesc.BufferCount = 2;
-    swapChainDesc.Width = m_width;
-    swapChainDesc.Height = m_height;
-    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    swapChainDesc.SampleDesc.Count = 1;
-
-    Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
-    ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(
-        pQueue->getQueue().Get(),
-        m_hwnd,
-        &swapChainDesc,
-        nullptr,
-        nullptr,
-        &swapChain1));
+    // Create SwapChain object (which creates and manages the command queue)
+    m_pSwapChain = std::make_shared<SwapChain>(m_device.Get(), m_hwnd);
 
     // Disable Alt+Enter fullscreen toggle
     ThrowIfFailed(dxgiFactory->MakeWindowAssociation(m_hwnd, DXGI_MWA_NO_ALT_ENTER));
-
-    // Cast to IDXGISwapChain4
-    ThrowIfFailed(swapChain1.As(&m_swapChain));
 
     return true;
 }
@@ -322,20 +282,17 @@ void Window::onWindowResize(UINT width, UINT height)
     if (width == 0 || height == 0)
         return;
 
-    if (m_swapChain)
+    if (m_pSwapChain)
     {
         // Wait for GPU to complete all operations
-        if (m_gpuQueue)
+        GPUQueue* gpuQueue = m_pSwapChain->getGPUQueue();
+        if (gpuQueue)
         {
-            m_gpuQueue->flush();
+            gpuQueue->flush();
         }
 
-        // Get current swap chain description
-        DXGI_SWAP_CHAIN_DESC1 desc = {};
-        ThrowIfFailed(m_swapChain->GetDesc1(&desc));
-
-        // Resize the swap chain
-        ThrowIfFailed(m_swapChain->ResizeBuffers(0, width, height, desc.Format, desc.Flags));
+        // Use SwapChain's resize functionality
+        m_pSwapChain->notifyWindowResized();
     }
 
     // Update window dimensions

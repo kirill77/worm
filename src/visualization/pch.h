@@ -27,7 +27,6 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include "CD3DX12.h"
-#include "MathHelper.h"
 
 // STL headers
 #include <memory>

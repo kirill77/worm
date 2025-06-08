@@ -18,7 +18,7 @@ struct ConnectedMeshVis
     void setConnectedMesh(std::shared_ptr<ConnectedMesh> pMesh) { m_pMesh = pMesh; }
 
     std::shared_ptr<GPUMesh> getGPUMesh();
-    void updateGPUMesh(GPUQueue& gpuQueue);
+    void updateGPUMesh();
 
 private:
     std::shared_ptr<ConnectedMesh> m_pMesh;

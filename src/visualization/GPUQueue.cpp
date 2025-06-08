@@ -23,11 +23,6 @@ GPUQueue::GPUQueue(Microsoft::WRL::ComPtr<ID3D12Device> device)
     ThrowIfFailed(m_commandList->Close());
 }
 
-Microsoft::WRL::ComPtr<ID3D12CommandQueue> GPUQueue::getQueue()
-{
-    return m_commandQueue;
-}
-
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GPUQueue::beginRecording()
 {
     // Reset the command allocator

@@ -17,7 +17,8 @@ class GPUQueue
 public:
     GPUQueue(Microsoft::WRL::ComPtr<ID3D12Device> device);
     
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> getQueue();
+    ID3D12Device* getDevice() const { return m_device.Get(); }
+    ID3D12CommandQueue* getQueue() const { return m_commandQueue.Get(); };
     Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> beginRecording();
     bool execute(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> pCmdList);
     void flush();

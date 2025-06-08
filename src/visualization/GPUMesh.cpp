@@ -2,96 +2,70 @@
 #include "Window.h"
 #include "DirectXHelpers.h"
 #include "GPUMesh.h"
-#include "GPUQueue.h"
+#include <stdexcept>
 
-// Helper function to create a GPU buffer
-Microsoft::WRL::ComPtr<ID3D12Resource> createDefaultBuffer(
+// Helper function to create or update a GPU buffer in CPU-visible memory
+static Microsoft::WRL::ComPtr<ID3D12Resource> createOrUpdateUploadBuffer(
     ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList,
     const void* initData,
     UINT64 byteSize,
-    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer)
+    Microsoft::WRL::ComPtr<ID3D12Resource>& existingBuffer)
 {
-    Microsoft::WRL::ComPtr<ID3D12Resource> defaultBuffer;
+    Microsoft::WRL::ComPtr<ID3D12Resource> uploadBuffer;
 
-    // Create the actual default buffer resource
-    CD3DX12_HEAP_PROPERTIES defaultHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
-    CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
-    
-    ThrowIfFailed(device->CreateCommittedResource(
-        &defaultHeapProperties,
-        D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
-        D3D12_RESOURCE_STATE_COMMON,
-        nullptr,
-        IID_PPV_ARGS(defaultBuffer.GetAddressOf())));
+    // If buffer already exists, validate size and update it
+    if (existingBuffer)
+    {
+        D3D12_RESOURCE_DESC existingDesc = existingBuffer->GetDesc();
+        if (existingDesc.Width != byteSize)
+        {
+            throw std::runtime_error("Buffer size changed in createOrUpdateUploadBuffer. Expected: " 
+                + std::to_string(existingDesc.Width) + ", Got: " + std::to_string(byteSize));
+        }
+        
+        // Use existing buffer
+        uploadBuffer = existingBuffer;
+    }
+    else
+    {
+        // Create buffer in upload heap (CPU-visible)
+        CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
+        CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
+        
+        ThrowIfFailed(device->CreateCommittedResource(
+            &uploadHeapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &bufferDesc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
+    }
 
-    // Create an upload heap to copy the data
-    CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
-    
-    ThrowIfFailed(device->CreateCommittedResource(
-        &uploadHeapProperties,
-        D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        nullptr,
-        IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
+    // Map and copy data directly
+    void* mappedData = nullptr;
+    ThrowIfFailed(uploadBuffer->Map(0, nullptr, &mappedData));
+    memcpy(mappedData, initData, static_cast<size_t>(byteSize));
+    uploadBuffer->Unmap(0, nullptr);
 
-    // Copy data to the upload heap
-    D3D12_SUBRESOURCE_DATA subResourceData = {};
-    subResourceData.pData = initData;
-    subResourceData.RowPitch = byteSize;
-    subResourceData.SlicePitch = subResourceData.RowPitch;
-
-    // Change state and copy data
-    CD3DX12_RESOURCE_BARRIER resourceBarrier = 
-        CD3DX12_RESOURCE_BARRIER::Transition(
-            defaultBuffer.Get(),
-            D3D12_RESOURCE_STATE_COMMON,
-            D3D12_RESOURCE_STATE_COPY_DEST);
-    
-    cmdList->ResourceBarrier(1, &resourceBarrier);
-    
-    // Use the non-templated version from CD3DX12.h
-    UpdateSubresources(
-        cmdList,
-        defaultBuffer.Get(),
-        uploadBuffer.Get(),
-        0, 0, 1,
-        &subResourceData);
-    
-    resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        defaultBuffer.Get(),
-        D3D12_RESOURCE_STATE_COPY_DEST,
-        D3D12_RESOURCE_STATE_GENERIC_READ);
-    
-    cmdList->ResourceBarrier(1, &resourceBarrier);
-
-    return defaultBuffer;
+    return uploadBuffer;
 }
+
+
 
 GPUMesh::GPUMesh(Microsoft::WRL::ComPtr<ID3D12Device> device)
     : m_device(device)
 {
 }
 
-void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles, GPUQueue& gpuQueue)
+void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles)
 {
-    // Get a command list from the provided queue
-    auto commandList = gpuQueue.beginRecording();
-    
-    // Upload buffers
-    Microsoft::WRL::ComPtr<ID3D12Resource> vertexUploadBuffer;
-    Microsoft::WRL::ComPtr<ID3D12Resource> indexUploadBuffer;
-    
-    // Create vertex buffer
+    // Create vertex buffer using CPU-visible upload heap
     const UINT vbSize = static_cast<UINT>(pVertices.size() * sizeof(Vertex));
-    m_vertexBuffer = createDefaultBuffer(
+    m_vertexBuffer = createOrUpdateUploadBuffer(
         m_device.Get(),
-        commandList.Get(),
         pVertices.data(),
         vbSize,
-        vertexUploadBuffer);
+        m_vertexBuffer);
     
     // Create vertex buffer view
     m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
@@ -109,20 +83,16 @@ void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3
     
     m_indexCount = static_cast<UINT>(indices.size());
     
-    // Create index buffer
+    // Create index buffer using CPU-visible upload heap
     const UINT ibSize = static_cast<UINT>(indices.size() * sizeof(UINT));
-    m_indexBuffer = createDefaultBuffer(
+    m_indexBuffer = createOrUpdateUploadBuffer(
         m_device.Get(),
-        commandList.Get(),
         indices.data(),
         ibSize,
-        indexUploadBuffer);
+        m_indexBuffer);
     
     // Create index buffer view
     m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
     m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
     m_indexBufferView.SizeInBytes = ibSize;
-    
-    // Execute command list using the provided queue
-    gpuQueue.execute(commandList);
 } 

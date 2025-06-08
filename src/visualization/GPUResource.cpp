@@ -10,6 +10,11 @@ GPUResource::GPUResource(Microsoft::WRL::ComPtr<ID3D12Device> device)
 {
 }
 
+void GPUResource::setResource(Microsoft::WRL::ComPtr<ID3D12Resource> resource)
+{
+    m_resource = resource;
+}
+
 void GPUResource::loadFromFile(const std::filesystem::path& path, GPUQueue& queue)
 {
     // Load image using STB Image

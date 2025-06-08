@@ -6,6 +6,8 @@
 #include "visualization/Window.h"
 #include "visualization/GPUWorld.h"
 #include "visualization/GPUStats.h"
+#include "visualization/GPUText.h"
+#include "visualization/DirectXHelpers.h"
 #include "visHelpers/connectedMeshVis.h"
 #include "visHelpers/cameraUI.h"
 #include <memory>
@@ -41,17 +43,20 @@ int main()
     }
 
     // Create GPU world for visualization
-    std::shared_ptr<GPUWorld> pGPUWorld = std::make_shared<GPUWorld>(pWindow);
+    std::shared_ptr<GPUWorld> pGpuWorld = std::make_shared<GPUWorld>(pWindow, pWindow->getSwapChain()->getGPUQueue());
+
+    GPUText gpuText(pGpuWorld->getFont());
+    gpuText.printf("Hello World!");
 
     std::shared_ptr<ConnectedMeshVis> pCortexVis = createCortexVis(pWorm, pWindow);
-    pGPUWorld->addMesh(pCortexVis->getGPUMesh());
+    pGpuWorld->addMesh(pCortexVis->getGPUMesh());
 
     bool allTestsPassed = true;
     constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
     float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
 
     CameraUI cameraUI;
-    cameraUI.attachToCamera(pGPUWorld->getCamera());
+    cameraUI.attachToCamera(pGpuWorld->getCamera());
     
     GPUStats gpuStats(pWindow->getDevice());
 
@@ -83,12 +88,33 @@ int main()
             }
         }
 
-        // Render the visualization
-        pCortexVis->updateGPUMesh(*pWindow->createOrGetGPUQueue());
+        {
+            auto* pSwapChain = pWindow->getSwapChain();
 
-        pGPUWorld->drawMeshesIntoWindow(&gpuStats);
-        gpuStats.downloadStats();
-        pGPUWorld = pGPUWorld;
+            // Render the visualization
+            pCortexVis->updateGPUMesh();
+
+            auto pGpuQueue = pSwapChain->getGPUQueue();
+            auto pCmdList = pGpuQueue->beginRecording();
+
+            // Draw meshes into the command list
+            pGpuWorld->render(pSwapChain, pCmdList.Get());
+
+            // Draw text on top
+            gpuText.render(pSwapChain, pGpuWorld->getSharedRootSignature(), pCmdList.Get());
+
+            pGpuQueue->execute(pCmdList);
+
+            // Present the frame
+            ThrowIfFailed(pSwapChain->getSwapChain()->Present(1, 0));
+        }
+
+        pGpuWorld = pGpuWorld;
+    }
+
+    {
+        auto* pSwapChain = pWindow->getSwapChain();
+        pSwapChain->getGPUQueue()->flush();
     }
 
     if (allTestsPassed) {

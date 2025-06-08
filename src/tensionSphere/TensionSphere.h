@@ -20,10 +20,7 @@ public:
      */
     TensionSphere(uint32_t subdivisionLevel = 2);
 
-    void makeTimeStep(double fDtSec)
-    {
-
-    }
+    void makeTimeStep(double fDtSec);
 
     /**
      * @brief Get the underlying ConnectedMesh

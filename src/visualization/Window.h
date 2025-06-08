@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "../math/vector.h"
 #include "GPUQueue.h"
+#include "SwapChain.h"
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl/client.h>
@@ -51,9 +52,8 @@ public:
     bool createWindowDevicAndSwapChain(const std::string &sName);
     const UIState &getCurrentUIState();
 
-    Microsoft::WRL::ComPtr<ID3D12Device> getDevice();
-    Microsoft::WRL::ComPtr<IDXGISwapChain4> getSwapChain();
-    std::shared_ptr<GPUQueue> createOrGetGPUQueue();
+    ID3D12Device* getDevice() { return m_device.Get(); }
+    SwapChain* getSwapChain() { return m_pSwapChain.get(); }
 
     void processMessages();
     HWND getWindowHandle() const;
@@ -72,7 +72,8 @@ private:
     std::unique_ptr<UIState> m_uiState;
     
     Microsoft::WRL::ComPtr<ID3D12Device> m_device;
-    Microsoft::WRL::ComPtr<IDXGISwapChain4> m_swapChain;
-    std::shared_ptr<GPUQueue> m_gpuQueue;
+
+    std::shared_ptr<SwapChain> m_pSwapChain;
+
     bool m_shouldExit = false;
 };
