@@ -54,9 +54,9 @@ private:
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;
     std::vector<Face> faces;
-    std::unordered_map<std::string, uint32_t> edgeMap;
+    std::unordered_map<uint64_t, uint32_t> edgeMap;
 
-    std::string edgeKey(uint32_t startVertex, uint32_t endVertex) const;
+    uint64_t edgeKey(uint32_t startVertex, uint32_t endVertex) const;
     uint32_t findEdge(uint32_t startVertex, uint32_t endVertex) const;
     
     // Helper methods for icosahedron creation

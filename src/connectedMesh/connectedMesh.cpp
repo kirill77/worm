@@ -58,8 +58,8 @@ uint32_t ConnectedMesh::getFaceCount() const {
 }
 
 // Generate a key for edge lookup
-std::string ConnectedMesh::edgeKey(uint32_t startVertex, uint32_t endVertex) const {
-    return std::to_string(startVertex) + ":" + std::to_string(endVertex);
+uint64_t ConnectedMesh::edgeKey(uint32_t startVertex, uint32_t endVertex) const {
+    return ((uint64_t)endVertex << 32) | (uint64_t)startVertex;
 }
 
 // Find an edge by vertices
@@ -70,7 +70,7 @@ uint32_t ConnectedMesh::findEdge(uint32_t startVertex, uint32_t endVertex) const
 
 // Add an edge to the mesh
 uint32_t ConnectedMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
-    std::string key = edgeKey(startVertex, endVertex);
+    auto key = edgeKey(startVertex, endVertex);
     auto it = edgeMap.find(key);
     
     if (it != edgeMap.end()) {
