@@ -31,5 +31,22 @@ public:
 private:
     // The underlying mesh data structure
     std::shared_ptr<ConnectedMesh> m_pMesh;
+
+    // Velocity for each vertex (same indexing as mesh vertices)
+    std::vector<double3> m_vertexVelocities;
+
+    // Edge rest lengths (computed from initial mesh)
+    std::vector<double> m_edgeRestLengths;
+    
+    // Edge connectivity (pairs of vertex indices)
+    std::vector<std::pair<uint32_t, uint32_t>> m_edgeConnectivity;
+
+    // constants controlling spring behaviour
+    double m_fSpringC = 0.1, m_fDampingCoeff = 1;
+
+    // Helper methods
+    void initializePhysics();
+    void computeSpringForces(std::vector<double3>& forces, double dt);
+    void integrateMotion(const std::vector<double3>& forces, double dt);
 };
 
