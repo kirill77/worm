@@ -143,50 +143,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BindingSurface.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="CellTypes.h" />
     <ClInclude Include="Chromosome.h" />
-    <ClInclude Include="DephosphorylationInteraction.h" />
-    <ClInclude Include="DNA.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Gene.h" />
-    <ClInclude Include="GeneWiki.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridDiffusion.h" />
     <ClInclude Include="Medium.h" />
     <ClInclude Include="Cortex.h" />
     <ClInclude Include="Mitochondrion.h" />
-    <ClInclude Include="Molecule.h" />
-    <ClInclude Include="MRNA.h" />
     <ClInclude Include="Nucleus.h" />
     <ClInclude Include="Organelle.h" />
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ProteinInteraction.h" />
-    <ClInclude Include="PhosphorylationInteraction.h" />
-    <ClInclude Include="ComplexFormationInteraction.h" />
-    <ClInclude Include="ProteinInteractionLoader.h" />
-    <ClInclude Include="ProteinWiki.h" />
-    <ClInclude Include="ResourceDistributor.h" />
     <ClInclude Include="Spindle.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
-    <ClInclude Include="GridCell.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cell.cpp" />
     <ClCompile Include="Chromosome.cpp" />
-    <ClCompile Include="DephosphorylationInteraction.cpp" />
-    <ClCompile Include="DNA.cpp" />
-    <ClCompile Include="Gene.cpp" />
-    <ClCompile Include="GeneWiki.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridDiffusion.cpp" />
     <ClCompile Include="Medium.cpp" />
     <ClCompile Include="Cortex.cpp" />
     <ClCompile Include="Mitochondrion.cpp" />
-    <ClCompile Include="MRNA.cpp" />
     <ClCompile Include="Nucleus.cpp" />
     <ClCompile Include="Organelle.cpp" />
     <ClCompile Include="Organism.cpp" />
@@ -196,16 +177,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ProteinBindingSurface.cpp" />
-    <ClCompile Include="ProteinInteractionLoader.cpp" />
-    <ClCompile Include="ProteinWiki.cpp" />
-    <ClCompile Include="ResourceDistributor.cpp" />
     <ClCompile Include="Spindle.cpp" />
-    <ClCompile Include="TRNA.cpp" />
     <ClCompile Include="World.cpp" />
-    <ClCompile Include="GridCell.cpp" />
-    <ClCompile Include="PhosphorylationInteraction.cpp" />
-    <ClCompile Include="ComplexFormationInteraction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

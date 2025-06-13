@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "Medium.h"
-#include "BindingSurface.h"
+#include "molecules/BindingSurface.h"
 #include "math/vector.h"
 #include "tensionSphere/tensionSphere.h"
 

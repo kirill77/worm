@@ -2,7 +2,7 @@
 #include "simulation/Cell.h"
 #include "worm/Worm.h"
 #include "log/ILog.h"
-#include "simulation/ProteinWiki.h"
+#include "molecules/ProteinWiki.h"
 #include "visualization/Window.h"
 #include "visualization/GPUWorld.h"
 #include "visualization/GPUStats.h"

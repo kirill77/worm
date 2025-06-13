@@ -5,14 +5,14 @@
 #include <string>
 #include <array>
 #include <unordered_map>
-#include "Molecule.h"
-#include "MRNA.h"
+#include "molecules/Molecule.h"
+#include "molecules/MRNA.h"
 #include "math/vector.h"
-#include "ProteinWiki.h"
-#include "GridCell.h"
+#include "molecules/ProteinWiki.h"
+#include "molecules/GridCell.h"
 #include "Grid.h"
 #include "GridDiffusion.h"
-#include "ResourceDistributor.h"
+#include "molecules/ResourceDistributor.h"
 
 class Medium
 {

@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Worm.h"
 #include "simulation/Cell.h"
-#include "simulation/Molecule.h"
+#include "molecules/Molecule.h"
 #include "simulation/Medium.h"
 #include "simulation/Cortex.h"
 #include "simulation/Spindle.h"
-#include "simulation/ProteinWiki.h"
+#include "molecules/ProteinWiki.h"
 #include "log/ILog.h"
 #include <chrono> // For high_resolution_clock
 

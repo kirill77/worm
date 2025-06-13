@@ -3,7 +3,7 @@
 #include "Nucleus.h"
 #include "Mitochondrion.h"
 #include "Spindle.h"
-#include "MRNA.h"
+#include "molecules/MRNA.h"
 #include "log/ILog.h"
 
 Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type)

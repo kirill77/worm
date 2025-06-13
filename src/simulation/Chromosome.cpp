@@ -3,7 +3,7 @@
 #include "Cell.h"
 #include "Medium.h"
 #include "Spindle.h"
-#include "MRNA.h"
+#include "molecules/MRNA.h"
 
 void Chromosome::update(double fDt, Cell& cell, Medium& medium)
 {

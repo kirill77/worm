@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Organelle.h"
-#include "DNA.h"
+#include "molecules/DNA.h"
 #include "Chromosome.h"
 #include <memory>
 #include <vector>

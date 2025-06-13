@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Nucleus.h"
-#include "MRNA.h"
+#include "molecules/MRNA.h"
 #include "Medium.h"
 #include "Cell.h"
 #include <algorithm>

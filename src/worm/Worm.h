@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulation/Organism.h"
-#include "simulation/DNA.h"
+#include "molecules/DNA.h"
 #include "simulation/Chromosome.h"
 #include "DataCollector/DataCollector.h"
 #include <memory>

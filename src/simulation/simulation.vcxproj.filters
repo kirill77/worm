@@ -42,19 +42,7 @@
     <ClInclude Include="Medium.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DNA.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MRNA.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TRNA.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Spindle.h">
@@ -66,37 +54,7 @@
     <ClInclude Include="Chromosome.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComplexFormationInteraction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GridCell.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PhosphorylationInteraction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProteinInteraction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProteinWiki.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DephosphorylationInteraction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ResourceDistributor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProteinInteractionLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Cortex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Molecule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BindingSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
@@ -131,49 +89,10 @@
     <ClCompile Include="Medium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DNA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MRNA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TRNA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Gene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneWiki.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Spindle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Chromosome.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ComplexFormationInteraction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GridCell.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PhosphorylationInteraction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProteinWiki.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProteinBindingSurface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DephosphorylationInteraction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceDistributor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProteinInteractionLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cortex.cpp">
