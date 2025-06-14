@@ -143,7 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\simulation\BindingSurface.h" />
+    <ClInclude Include="BindingSurface.h" />
+    <ClInclude Include="TRNA.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />
     <ClInclude Include="DephosphorylationInteraction.h" />
     <ClInclude Include="DNA.h" />

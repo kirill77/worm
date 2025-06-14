@@ -89,7 +89,7 @@ Worm::Worm()
 {
     auto chromosomes = initializeGenes();
     std::shared_ptr<Cortex> pCortex = createZygoteCortex();
-    auto pCell = std::make_shared<Cell>(pCortex, chromosomes);
+    auto pCell = Cell::createCell(pCortex, chromosomes);
     m_pCells.push_back(pCell);
     
     // Set up the data collector

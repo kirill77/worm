@@ -5,8 +5,10 @@
 #include "Cell.h"
 #include <algorithm>
 
-void Nucleus::update(double fDt, Cell& cell, Medium& medium)
+void Nucleus::update(double fDt, Cell& cell)
 {
+    Medium& medium = cell.getInternalMedium();
+    
     // Update all chromosomes
     for (auto& chromosome : m_chromosomes)
     {

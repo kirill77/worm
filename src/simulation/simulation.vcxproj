@@ -146,6 +146,7 @@
     <ClInclude Include="Cell.h" />
     <ClInclude Include="CellTypes.h" />
     <ClInclude Include="Chromosome.h" />
+    <ClInclude Include="EReticulum.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridDiffusion.h" />
@@ -157,12 +158,12 @@
     <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Spindle.h" />
-    <ClInclude Include="TRNA.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cell.cpp" />
     <ClCompile Include="Chromosome.cpp" />
+    <ClCompile Include="EReticulum.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridDiffusion.cpp" />
     <ClCompile Include="Medium.cpp" />

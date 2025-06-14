@@ -20,12 +20,13 @@ private:
 
 public:
     // Constructor that takes a vector of chromosomes
-    Nucleus(const std::vector<Chromosome>& chromosomes)
-        : m_chromosomes(chromosomes)
+    Nucleus(std::weak_ptr<Cell> pCell, const std::vector<Chromosome>& chromosomes)
+        : Organelle(pCell)
+        , m_chromosomes(chromosomes)
         , m_fEnvelopeIntegrity(1.0f)
     {}
 
-    void update(double fDt, Cell& cell, Medium& medium) override;
+    void update(double fDt, Cell& cell) override;
 
     // Chromosome-related functions
     bool areChromosomesCondensed() const;

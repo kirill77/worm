@@ -27,23 +27,30 @@ struct ATPCosts
     static constexpr double fMRNA_SYNTHESIS = 2.0;         // Cost per mRNA molecule
 };
 
-class Cell
+class Cell : public std::enable_shared_from_this<Cell>
 {
 private:
     std::vector<std::shared_ptr<class Organelle>> m_pOrganelles;
     std::shared_ptr<Cortex> m_pCortex;
     CellCycleState m_cellCycleState;
     CellType m_type;  // Store type just for spindle creation
+    std::vector<Chromosome> m_chromosomes;  // Store chromosomes for delayed organelle creation
 
     // Helper functions
     void checkCellCycleTransitions();
     std::shared_ptr<class Mitochondrion> getMitochondrion() const;
     void createSpindle();
     void destroySpindle();
+    void initializeOrganelles();  // Initialize organelles after construction
+
+    // Private constructor
+    Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
 
 public:
-    // Constructor that takes a membrane instead of a medium
-    Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
+    // Static factory method to create a cell
+    static std::shared_ptr<Cell> createCell(std::shared_ptr<Cortex> pCortex, 
+                                          const std::vector<Chromosome>& chromosomes, 
+                                          CellType type = CellType::Zygote);
     
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }

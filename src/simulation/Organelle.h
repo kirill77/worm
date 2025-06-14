@@ -12,28 +12,38 @@ enum class CellCycleState;
  */
 class Organelle : public BindingSurface
 {
+private:
+    std::weak_ptr<Cell> m_pCell;  // Reference to the cell containing this organelle
+
 public:
     /**
-     * Constructor that initializes the organelle with a specific surface area.
+     * Constructor that initializes the organelle with a reference to its cell.
      * 
-     * @param fSurfaceArea Surface area in square micrometers
+     * @param pCell Weak pointer to the cell containing this organelle
      */
-    Organelle()
+    Organelle(std::weak_ptr<Cell> pCell)
         : BindingSurface()
+        , m_pCell(pCell)
     {}
     
     /**
-     * Base update function that takes cell and medium
+     * Base update function that takes cell
      * 
      * @param dt Time step in seconds
      * @param cell Reference to the cell containing this organelle
-     * @param medium Reference to the cell's internal medium
      */
-    virtual void update(double dt, Cell& cell, Medium& medium) = 0;
+    virtual void update(double dt, Cell& cell) = 0;
     
     /**
      * Virtual destructor for proper cleanup
      */
     virtual ~Organelle() {}
+
+    /**
+     * Get the cell containing this organelle
+     * 
+     * @return Shared pointer to the cell, or nullptr if the cell no longer exists
+     */
+    std::shared_ptr<Cell> getCell() const { return m_pCell.lock(); }
 };
 

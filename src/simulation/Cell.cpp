@@ -3,19 +3,25 @@
 #include "Nucleus.h"
 #include "Mitochondrion.h"
 #include "Spindle.h"
+#include "EReticulum.h"
 #include "molecules/MRNA.h"
 #include "log/ILog.h"
+
+std::shared_ptr<Cell> Cell::createCell(std::shared_ptr<Cortex> pCortex, 
+                                     const std::vector<Chromosome>& chromosomes, 
+                                     CellType type)
+{
+    auto cell = std::shared_ptr<Cell>(new Cell(pCortex, chromosomes, type));
+    cell->initializeOrganelles();
+    return cell;
+}
 
 Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type)
     : m_pCortex(pCortex)
     , m_cellCycleState(CellCycleState::INTERPHASE)
     , m_type(type)
+    , m_chromosomes(chromosomes)
 {
-    // Create organelles
-    m_pOrganelles.push_back(std::make_shared<Nucleus>(chromosomes));
-    m_pOrganelles.push_back(std::make_shared<Mitochondrion>());
-    // add other organelles as needed
-    
     // Initialize binding sites in the cell's membrane
     if (m_pCortex)
     {
@@ -23,13 +29,21 @@ Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chrom
     }
 }
 
+void Cell::initializeOrganelles()
+{
+    // Create organelles
+    m_pOrganelles.push_back(std::make_shared<Nucleus>(std::weak_ptr<Cell>(shared_from_this()), m_chromosomes));
+    m_pOrganelles.push_back(std::make_shared<Mitochondrion>(std::weak_ptr<Cell>(shared_from_this())));
+    m_pOrganelles.push_back(std::make_shared<EReticulum>(std::weak_ptr<Cell>(shared_from_this())));
+    // add other organelles as needed
+}
+
 void Cell::update(double fDt)
 {
-    // Update all organelles - pass the internal medium to organelles
-    Medium& internalMedium = m_pCortex->getInternalMedium();
+    // Update all organelles
     for (auto& pOrg : m_pOrganelles)
     {
-        pOrg->update(fDt, *this, internalMedium);
+        pOrg->update(fDt, *this);
     }
     
     // Check for cell cycle transitions based on conditions
@@ -141,7 +155,7 @@ void Cell::createSpindle()
     // Only create if we don't already have one
     if (!getSpindle())
     {
-        m_pOrganelles.push_back(std::make_shared<Spindle>(m_type));
+        m_pOrganelles.push_back(std::make_shared<Spindle>(std::weak_ptr<Cell>(shared_from_this()), m_type));
     }
 }
 

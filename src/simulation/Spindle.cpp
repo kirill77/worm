@@ -4,8 +4,10 @@
 #include "Medium.h"
 #include <algorithm>
 
-void Spindle::update(double dt, Cell& cell, Medium& medium)
+void Spindle::update(double dt, Cell& cell)
 {
+    Medium& medium = cell.getInternalMedium();
+    
     // Update assembly state first
     updateAssembly(dt, cell, medium);
     

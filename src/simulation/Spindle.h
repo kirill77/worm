@@ -23,15 +23,16 @@ private:
     static constexpr float ATP_PER_ROTATION = 2.0f;     // ATP cost for orientation change
 
 public:
-    Spindle(CellType type = CellType::Zygote)
-        : m_position(0.0f, 0.0f, 0.0f)
+    Spindle(std::weak_ptr<Cell> pCell, CellType type = CellType::Zygote)
+        : Organelle(pCell)
+        , m_position(0.0f, 0.0f, 0.0f)
         , m_orientation(1.0f, 0.0f, 0.0f)  // Start aligned with x-axis
         , m_length(INITIAL_LENGTH)
         , m_isAssembled(false)
         , m_cellType(type)
     {}
 
-    void update(double dt, Cell& cell, Medium& medium) override;
+    void update(double dt, Cell& cell) override;
 
     // Getters for spindle state
     bool isAssembled() const { return m_isAssembled; }

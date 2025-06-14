@@ -22,8 +22,8 @@ private:
     float3 generateRandomPosition();
 
 public:
-    Mitochondrion();
+    Mitochondrion(std::weak_ptr<Cell> pCell);
 
-    void update(double dt, Cell& cell, Medium& medium) override;
+    void update(double dt, Cell& cell) override;
 };
 
