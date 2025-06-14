@@ -10,24 +10,6 @@ EReticulum::EReticulum(std::weak_ptr<Cell> pCell)
 
 void EReticulum::update(double dt, Cell& cell)
 {
-    auto& internalMedium = cell.getInternalMedium();
-
-    // Calculate synthesis amounts based on time step
-    double proteinAmount = PROTEIN_SYNTHESIS_RATE * dt;
-    double lipidAmount = LIPID_SYNTHESIS_RATE * dt;
-
-    // Calculate ATP costs
-    double proteinATPCost = proteinAmount * ATP_COST_PER_PROTEIN;
-    double lipidATPCost = lipidAmount * ATP_COST_PER_LIPID;
-    double totalATPCost = proteinATPCost + lipidATPCost;
-
-    // Check if we have enough ATP
-    if (cell.consumeATP(totalATPCost))
-    {
-        // Synthesize proteins and lipids
-        synthesizeProteins(internalMedium);
-        synthesizeLipids(internalMedium);
-    }
 }
 
 void EReticulum::synthesizeProteins(Medium& medium)

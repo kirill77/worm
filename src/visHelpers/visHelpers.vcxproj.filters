@@ -21,12 +21,18 @@
     <ClCompile Include="cameraUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="centrosomeVis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="connectedMeshVis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cameraUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="centrosomeVis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
