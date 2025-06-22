@@ -12,7 +12,7 @@ struct ID3D12CommandQueue;
 struct ID3D12GraphicsCommandList;
 struct ID3D12CommandAllocator;
 
-class GPUQueue
+struct GPUQueue
 {
 public:
     GPUQueue(Microsoft::WRL::ComPtr<ID3D12Device> device);

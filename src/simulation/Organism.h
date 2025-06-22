@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-class Organism
+struct Organism
 {
 protected:
     std::vector<std::shared_ptr<class Cell>> m_pCells;

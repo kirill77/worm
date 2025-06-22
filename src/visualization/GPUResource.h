@@ -7,7 +7,7 @@
 
 // Forward declarations
 namespace Microsoft { namespace WRL { template<typename> class ComPtr; } }
-class GPUQueue;
+struct GPUQueue;
 
 struct GPUResource : public std::enable_shared_from_this<GPUResource>
 {

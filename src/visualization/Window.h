@@ -19,7 +19,7 @@ typedef struct HWND__* HWND;
 class UIState
 {
 public:
-    friend class Window;
+    friend struct Window;
     
     bool isButtonOrKeyPressed(uint32_t buttonOrKeyId) const;
     uint32_t getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const;
@@ -43,7 +43,7 @@ private:
     float m_scrollWheelState = 0.0f;
 };
 
-class Window
+struct Window
 {
 public:
     Window();

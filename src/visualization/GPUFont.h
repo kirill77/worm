@@ -8,7 +8,7 @@
 #include <wrl/client.h>
 
 // Forward declarations
-class GPUQueue;
+struct GPUQueue;
 struct ID3D12RootSignature;
 struct ID3D12PipelineState;
 

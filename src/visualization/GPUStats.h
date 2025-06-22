@@ -12,7 +12,7 @@ struct ID3D12Device;
 struct ID3D12QueryHeap;
 struct ID3D12Resource;
 
-class GPUStats
+struct GPUStats
 {
 public:
     GPUStats(Microsoft::WRL::ComPtr<ID3D12Device> device);

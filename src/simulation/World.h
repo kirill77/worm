@@ -2,10 +2,10 @@
 
 #include <memory>
 
-class World
+struct World
 {
     std::shared_ptr<class Medium> m_pMedium;
-    std::shared_ptr<class Organism> m_pOrganism;
+    std::shared_ptr<struct Organism> m_pOrganism;
 
 public:
     World(std::shared_ptr<Organism> pOrganism);

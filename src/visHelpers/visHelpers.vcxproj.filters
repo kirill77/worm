@@ -15,24 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="connectedMeshVis.cpp">
+    <ClCompile Include="ConnectedMeshVis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cameraUI.cpp">
+    <ClCompile Include="CameraUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="centrosomeVis.cpp">
+    <ClCompile Include="CentrosomeVis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VisEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="connectedMeshVis.h">
+    <ClInclude Include="ConnectedMeshVis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cameraUI.h">
+    <ClInclude Include="CameraUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="centrosomeVis.h">
+    <ClInclude Include="CentrosomeVis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VisEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

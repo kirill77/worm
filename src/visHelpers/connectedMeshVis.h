@@ -3,10 +3,10 @@
 #include <memory>
 #include <math/box.h>
 
-class Window;
+struct Window;
 class ConnectedMesh;
 class GPUMesh;
-class GPUQueue;
+struct GPUQueue;
 
 struct ConnectedMeshVis
 {

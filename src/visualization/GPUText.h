@@ -9,7 +9,7 @@
 #include <wrl/client.h>
 
 // Forward declarations
-class GPUQueue;
+struct GPUQueue;
 struct SwapChain;
 
 struct GPUText

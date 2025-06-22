@@ -15,10 +15,10 @@ struct ID3D12RootSignature;
 struct ID3D12PipelineState;
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
-class Window;
-class GPUStats;
+struct Window;
+struct GPUStats;
 
-class GPUWorld
+struct GPUWorld
 {
 public:
     GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue);
