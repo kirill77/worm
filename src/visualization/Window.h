@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "../math/vector.h"
+#include "math/vector.h"
 #include "GPUQueue.h"
 #include "SwapChain.h"
 #include <d3d12.h>

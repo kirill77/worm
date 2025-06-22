@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
-#include "../math/vector.h"
+#include "math/vector.h"
 #include "connectedMesh/connectedMesh.h"
 
 /**
