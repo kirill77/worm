@@ -87,27 +87,12 @@ std::string ProteinWiki::GetPhosphorylatedName(const std::string& proteinName)
     return proteinName + "-P";
 }
 
-std::string ProteinWiki::BindingSurfaceToString(BindingSurface surface)
+std::string ProteinWiki::GetBindingSiteName(StringDict::ID surface)
 {
-    switch (surface)
-    {
-        case BindingSurface::MEMBRANE:
-            return "MEMBRANE";
-        case BindingSurface::CORTEX:
-            return "CORTEX";
-        case BindingSurface::CENTROSOME:
-            return "CENTROSOME";
-        default:
-            return "UNKNOWN";
-    }
+    return "BINDING-SITE-" + StringDict::idToString(surface);
 }
 
-std::string ProteinWiki::GetBindingSiteName(BindingSurface surface)
+std::string ProteinWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {
-    return "BINDING-SITE-" + BindingSurfaceToString(surface);
-}
-
-std::string ProteinWiki::GetBoundProteinName(const std::string& proteinName, BindingSurface surface)
-{
-    return proteinName + "-" + BindingSurfaceToString(surface);
+    return proteinName + "-" + StringDict::idToString(surface);
 }

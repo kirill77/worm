@@ -15,7 +15,7 @@ class BindingSurface : public std::enable_shared_from_this<BindingSurface>
 {
 protected:
     // Binding surface type
-    ProteinWiki::BindingSurface m_surfaceType;
+    StringDict::ID m_surfaceType;
 
 public:
     /**
@@ -24,7 +24,7 @@ public:
      * @param surfaceType Type of binding surface
      * @param bindingSiteDensity Amount of binding sites per surface unit (default: 1000)
      */
-    BindingSurface(ProteinWiki::BindingSurface surfaceType = ProteinWiki::BindingSurface::eUNKNOWN)
+    BindingSurface(StringDict::ID surfaceType = StringDict::ID::eUNKNOWN)
         : m_surfaceType(surfaceType)
     {}
 }; 

@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BindingSurface.h" />
+    <ClInclude Include="StringDict.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />
     <ClInclude Include="DephosphorylationInteraction.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="ProteinBindingSurface.cpp" />
     <ClCompile Include="ProteinInteractionLoader.cpp" />
     <ClCompile Include="ResourceDistributor.cpp" />
+    <ClCompile Include="StringDict.cpp" />
     <ClCompile Include="TRNA.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

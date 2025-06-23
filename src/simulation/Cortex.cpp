@@ -6,7 +6,7 @@
 #include <cmath>
 
 Cortex::Cortex(std::shared_ptr<Medium> pInternalMedium, double fThickness)
-    : BindingSurface(ProteinWiki::BindingSurface::CORTEX) // Initialize binding surface with enum
+    : BindingSurface(StringDict::ID::BS_CORTEX) // Initialize binding surface with enum
     , m_pInternalMedium(pInternalMedium)
     , m_fThickness(fThickness)
 {
@@ -154,7 +154,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 );
                 
                 // Create binding site protein and add to the medium
-                MPopulation bindingSites(ProteinWiki::GetBindingSiteName(ProteinWiki::BindingSurface::CORTEX), amountPerPosition);
+                MPopulation bindingSites(ProteinWiki::GetBindingSiteName(StringDict::ID::BS_CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 m_pInternalMedium->addProtein(bindingSites, normalizedPos);
             }

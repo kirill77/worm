@@ -1,16 +1,17 @@
 #include "pch.h"
 #include "DNA.h"
+#include "StringDict.h"
 
-void DNA::addGene(const std::string& name, double expressionRate, double basalLevel)
+void DNA::addGene(StringDict::ID id, double expressionRate, double basalLevel)
 {
-    auto gene = std::make_shared<Gene>(name, expressionRate, basalLevel);
+    auto gene = std::make_shared<Gene>(id, expressionRate, basalLevel);
     m_pGenes.push_back(gene);
-    m_geneMap[name] = gene;
+    m_geneMap[id] = gene;
 }
 
-std::shared_ptr<Gene> DNA::getGene(const std::string& name) const
+std::shared_ptr<Gene> DNA::getGene(StringDict::ID id) const
 {
-    auto it = m_geneMap.find(name);
+    auto it = m_geneMap.find(id);
     return (it != m_geneMap.end()) ? it->second : nullptr;
 }
 
@@ -29,9 +30,9 @@ std::vector<std::shared_ptr<MRNA>> DNA::transcribeAll(double dt) const
     return transcribedRNA;
 }
 
-void DNA::regulateGene(const std::string& name, double newExpressionRate)
+void DNA::regulateGene(StringDict::ID id, double newExpressionRate)
 {
-    if (auto gene = getGene(name))
+    if (auto gene = getGene(id))
     {
         gene->setExpressionRate(newExpressionRate);
     }

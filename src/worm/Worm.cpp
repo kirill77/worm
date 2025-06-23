@@ -28,19 +28,19 @@ std::vector<Chromosome> Worm::initializeGenes()
 
     // Distribute genes across chromosomes (based on C. elegans genome)
     // Chromosome I
-    pDNA1->addGene("mex-3", 0.8, 0.1);  // Anterior fate
-    pDNA1->addGene("plk-1", 1.2, 0.2);  // Polo-like kinase
+    pDNA1->addGene(StringDict::ID::MEX_3, 0.8, 0.1);  // Anterior fate
+    pDNA1->addGene(StringDict::ID::PLK_1, 1.2, 0.2);  // Polo-like kinase
 
     // Chromosome II
-    pDNA2->addGene("skn-1", 0.8, 0.1);  // Endoderm specification
-    pDNA2->addGene("cyb-1", 1.2, 0.2);  // Cyclin B
+    pDNA2->addGene(StringDict::ID::SKN_1, 0.8, 0.1);  // Endoderm specification
+    pDNA2->addGene(StringDict::ID::CYB_1, 1.2, 0.2);  // Cyclin B
 
     // Chromosome III
-    pDNA3->addGene("pal-1", 0.8, 0.1);  // Posterior fate
-    pDNA3->addGene("cdk-1", 1.2, 0.2);  // Cell cycle control
+    pDNA3->addGene(StringDict::ID::PAL_1, 0.8, 0.1);  // Posterior fate
+    pDNA3->addGene(StringDict::ID::CDK_1, 1.2, 0.2);  // Cell cycle control
 
     // Chromosome IV
-    pDNA4->addGene("pie-1", 0.8, 0.1);  // Germline specification
+    pDNA4->addGene(StringDict::ID::PIE_1, 0.8, 0.1);  // Germline specification
 
     // Create chromosomes with their respective DNA
     chromosomes.emplace_back(pDNA1);
@@ -59,34 +59,34 @@ std::shared_ptr<Cortex> Worm::createZygoteCortex()
     std::shared_ptr<Medium> pInternalMedium = std::make_shared<Medium>();
 
     // Create and add anterior proteins at the anterior cortex
-    MPopulation par3("PAR-3", 3.9e5);
+    MPopulation par3(StringDict::idToString(StringDict::ID::PAR_3), 3.9e5);
     pInternalMedium->addProtein(par3, float3(0, 1.f, 0));
 
-    MPopulation par6("PAR-6", 3.9e5);
+    MPopulation par6(StringDict::idToString(StringDict::ID::PAR_6), 3.9e5);
     pInternalMedium->addProtein(par6, float3(0, 1.f, 0));
 
-    MPopulation pkc3("PKC-3", 3.9e5);
+    MPopulation pkc3(StringDict::idToString(StringDict::ID::PKC_3), 3.9e5);
     pInternalMedium->addProtein(pkc3, float3(0, 1.f, 0));
 
     // Create and add posterior proteins at the posterior cortex
-    MPopulation par1("PAR-1", 3.9e5);
+    MPopulation par1(StringDict::idToString(StringDict::ID::PAR_1), 3.9e5);
     pInternalMedium->addProtein(par1, float3(0, -1.f, 0));
 
-    MPopulation par2("PAR-2", 3.9e5);
+    MPopulation par2(StringDict::idToString(StringDict::ID::PAR_2), 3.9e5);
     pInternalMedium->addProtein(par2, float3(0, -1.f, 0));
 
     // Initialize maternal proteins at cell center
     float3 center(0.0f, 0.0f, 0.0f);
 
     // Add maternal CDK-1 and CYB-1 (Cyclin B)
-    MPopulation cdk1("CDK-1", 1500.0);  // Initial amount above threshold (1000)
-    MPopulation cyb1("CYB-1", 1500.0);  // Initial amount above threshold (1000)
+    MPopulation cdk1(StringDict::idToString(StringDict::ID::CDK_1), 1500.0);  // Initial amount above threshold (1000)
+    MPopulation cyb1(StringDict::idToString(StringDict::ID::CYB_1), 1500.0);  // Initial amount above threshold (1000)
     pInternalMedium->addProtein(cdk1, center);
     pInternalMedium->addProtein(cyb1, center);
 
     // Add centrosome-related proteins for proper centrosome function
-    MPopulation cdk2("CDK-2", 800.0);  // For centrosome duplication
-    MPopulation cce1("CCE-1", 800.0);  // Cyclin E for centrosome duplication
+    MPopulation cdk2(StringDict::idToString(StringDict::ID::CDK_2), 800.0);  // For centrosome duplication
+    MPopulation cce1(StringDict::idToString(StringDict::ID::CCE_1), 800.0);  // Cyclin E for centrosome duplication
     pInternalMedium->addProtein(cdk2, center);
     pInternalMedium->addProtein(cce1, center);
 
@@ -96,6 +96,9 @@ std::shared_ptr<Cortex> Worm::createZygoteCortex()
 
 Worm::Worm()
 {
+    // Initialize the string dictionary first
+    StringDict::initialize();
+    
     auto chromosomes = initializeGenes();
     std::shared_ptr<Cortex> pCortex = createZygoteCortex();
     auto pCell = Cell::createCell(pCortex, chromosomes);
@@ -134,27 +137,28 @@ void Worm::setupDataCollector()
     float3 centerPos(0.0f, 0.0f, 0.0f);   // Center position for centrosome tracking
     
     // Get membrane-bound protein names using the utility function
-    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::CORTEX);
-    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::CORTEX);
+    std::string par2Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::BS_CORTEX);
+    std::string par3Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::BS_CORTEX);
+    std::string bindingSiteCortex = ProteinWiki::GetBindingSiteName(StringDict::ID::BS_CORTEX);
     
     // Add collection points with specific proteins to track
     m_pDataCollector->addCollectionPoint(
         anteriorPos, 
         "Anterior", 
-        {par2Membrane, par3Membrane, "PAR-2", "PAR-3", "PKC-3", "BINDING-SITE-CORTEX"}
+        {par2Membrane, par3Membrane, StringDict::idToString(StringDict::ID::PAR_2), StringDict::idToString(StringDict::ID::PAR_3), StringDict::idToString(StringDict::ID::PKC_3), bindingSiteCortex}
     );
     
     m_pDataCollector->addCollectionPoint(
         posteriorPos, 
         "Posterior", 
-        {par2Membrane, par3Membrane, "PAR-1", "PAR-2", "BINDING-SITE-CORTEX"}
+        {par2Membrane, par3Membrane, StringDict::idToString(StringDict::ID::PAR_1), StringDict::idToString(StringDict::ID::PAR_2), bindingSiteCortex}
     );
     
     // Add collection point for centrosome tracking
     m_pDataCollector->addCollectionPoint(
         centerPos, 
         "Centrosome", 
-        {"γ-TUBULIN", "PERICENTRIN", "NINEIN", "PLK-4", "CDK-2", "CCE-1"}
+        {StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), StringDict::idToString(StringDict::ID::PERICENTRIN), StringDict::idToString(StringDict::ID::NINEIN), StringDict::idToString(StringDict::ID::PLK_4), StringDict::idToString(StringDict::ID::CDK_2), StringDict::idToString(StringDict::ID::CCE_1)}
     );
 }
 
@@ -200,8 +204,8 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     float3 posteriorPos(0.0f, -1.f, 0.0f);
     
     // Get membrane-bound protein names using the utility function
-    std::string par3Membrane = ProteinWiki::GetBoundProteinName("PAR-3", ProteinWiki::BindingSurface::CORTEX);
-    std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::CORTEX);
+    std::string par3Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::BS_CORTEX);
+    std::string par2Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::BS_CORTEX);
     
     // Check membrane-bound proteins
     double anteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, anteriorPos);
@@ -229,7 +233,7 @@ bool Worm::validateCellCycle(float fTimeSec) const
 {
     auto& internalMedium = m_pCells[0]->getInternalMedium();
     float3 nuclearPos(0.0f, 0.0f, 0.0f);
-    double cdk1Level = internalMedium.getProteinNumber("CDK-1", nuclearPos);
+    double cdk1Level = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_1), nuclearPos);
 
     // Before nuclear envelope breakdown (0-12.5 minutes): CDK-1 should be relatively low
     if (fTimeSec < NUCLEAR_ENVELOPE_BREAKDOWN_SEC && cdk1Level > 1000) {

@@ -10,21 +10,21 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& position)
     , m_duplicationTime(0.0)
 {
     // Set the binding surface type to CENTROSOME
-    m_surfaceType = ProteinWiki::BindingSurface::CENTROSOME;
+    m_surfaceType = StringDict::ID::BS_CENTROSOME;
     
     // Initialize centrosome-specific proteins
     if (auto pCellPtr = pCell.lock()) {
         auto& internalMedium = pCellPtr->getInternalMedium();
         
         // Add centrosome-specific proteins like γ-tubulin
-        MPopulation gammaTubulin("γ-TUBULIN", 1000.0);
+        MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
         internalMedium.addProtein(gammaTubulin, m_position);
         
         // Add other centrosome proteins
-        MPopulation pericentrin("PERICENTRIN", 500.0);
+        MPopulation pericentrin(StringDict::idToString(StringDict::ID::PERICENTRIN), 500.0);
         internalMedium.addProtein(pericentrin, m_position);
         
-        MPopulation ninein("NINEIN", 300.0);
+        MPopulation ninein(StringDict::idToString(StringDict::ID::NINEIN), 300.0);
         internalMedium.addProtein(ninein, m_position);
     }
 }
@@ -37,8 +37,8 @@ void Centrosome::update(double dt, Cell& cell)
     // Check for centrosome duplication during S phase
     if (!m_isDuplicated) {
         // Check if we're in S phase (high CDK-2 and Cyclin E levels)
-        double cdk2 = internalMedium.getProteinNumber("CDK-2", m_position);
-        double cyclinE = internalMedium.getProteinNumber("CCE-1", m_position);
+        double cdk2 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_2), m_position);
+        double cyclinE = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CCE_1), m_position);
         
         // Trigger duplication when CDK-2 and Cyclin E are high enough
         if (cdk2 > 800.0 && cyclinE > 800.0) {
@@ -87,7 +87,7 @@ void Centrosome::update(double dt, Cell& cell)
     
     // Update protein concentrations at the centrosome position
     // This ensures centrosome proteins are properly localized
-    MPopulation gammaTubulin("γ-TUBULIN", 1000.0);
+    MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
     internalMedium.addProtein(gammaTubulin, m_position);
 }
 
@@ -102,11 +102,11 @@ void Centrosome::duplicate()
             auto& internalMedium = pCellPtr->getInternalMedium();
             
             // Add additional γ-tubulin for the duplicated centrosome
-            MPopulation gammaTubulin("γ-TUBULIN", 500.0);
+            MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 500.0);
             internalMedium.addProtein(gammaTubulin, m_position);
             
             // Add other duplication-related proteins
-            MPopulation plk4("PLK-4", 200.0);  // Polo-like kinase 4 for centriole duplication
+            MPopulation plk4(StringDict::idToString(StringDict::ID::PLK_4), 200.0);  // Polo-like kinase 4 for centriole duplication
             internalMedium.addProtein(plk4, m_position);
         }
     }

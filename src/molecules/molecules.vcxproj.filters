@@ -18,78 +18,96 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\DNA.h">
+    <ClInclude Include="StringDict.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\Gene.h">
+    <ClInclude Include="BindingSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\GeneWiki.h">
+    <ClInclude Include="ComplexFormationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\MRNA.h">
+    <ClInclude Include="DephosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\GridCell.h">
+    <ClInclude Include="DNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\ProteinWiki.h">
+    <ClInclude Include="Gene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\ResourceDistributor.h">
+    <ClInclude Include="GeneWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\Molecule.h">
+    <ClInclude Include="GridCell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\ComplexFormationInteraction.h">
+    <ClInclude Include="Molecule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\DephosphorylationInteraction.h">
+    <ClInclude Include="MRNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\PhosphorylationInteraction.h">
+    <ClInclude Include="PhosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\ProteinInteraction.h">
+    <ClInclude Include="ProteinInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\simulation\ProteinInteractionLoader.h">
+    <ClInclude Include="ProteinInteractionLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProteinWiki.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceDistributor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TRNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\simulation\DNA.cpp">
+    <ClCompile Include="StringDict.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\Gene.cpp">
+    <ClCompile Include="ComplexFormationInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\GeneWiki.cpp">
+    <ClCompile Include="DephosphorylationInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\GridCell.cpp">
+    <ClCompile Include="DNA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\DephosphorylationInteraction.cpp">
+    <ClCompile Include="Gene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\ComplexFormationInteraction.cpp">
+    <ClCompile Include="GeneWiki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\PhosphorylationInteraction.cpp">
+    <ClCompile Include="GridCell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\ProteinBindingSurface.cpp">
+    <ClCompile Include="MRNA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\ProteinInteractionLoader.cpp">
+    <ClCompile Include="PhosphorylationInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\ResourceDistributor.cpp">
+    <ClCompile Include="ProteinBindingSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simulation\TRNA.cpp">
+    <ClCompile Include="ProteinInteractionLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProteinWiki.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceDistributor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TRNA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

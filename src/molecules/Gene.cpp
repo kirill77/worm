@@ -2,6 +2,7 @@
 #include "Gene.h"
 #include "MRNA.h"
 #include "GeneWiki.h"
+#include "StringDict.h"
 #include <random>
 
 std::shared_ptr<MRNA> Gene::transcribe(double dt) const
@@ -17,7 +18,7 @@ std::shared_ptr<MRNA> Gene::transcribe(double dt) const
 
     // Create new mRNA with typical half-life of 2.0 time units
     return std::make_shared<MRNA>(
-        m_sName,
+        StringDict::idToString(m_id),
         mRNAAmount,
         2.0,  // half-life
         1.0   // translation rate

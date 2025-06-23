@@ -4,26 +4,19 @@
 #include <string>
 #include <memory>
 #include "ProteinInteraction.h"
+#include "StringDict.h"
 
 // A static repository of protein interaction data
 class ProteinWiki
 {
 public:
-    // Enum for binding surfaces
-    enum class BindingSurface {
-        eUNKNOWN,
-        MEMBRANE,
-        CORTEX,
-        CENTROSOME
-    };
+    // Private constructor to prevent instantiation
+    ProteinWiki() = default;
     
 private:
     // List of known protein interactions
     static std::vector<std::shared_ptr<ProteinInteraction>> s_proteinInteractions;
 
-    // Private constructor to prevent instantiation
-    ProteinWiki() = default;
-    
     // Helper method to load default hardcoded interactions
     static void LoadDefaultInteractions();
 
@@ -41,11 +34,8 @@ public:
     static std::string GetPhosphorylatedName(const std::string& proteinName);
     
     // Get the binding site name for a specific surface
-    static std::string GetBindingSiteName(BindingSurface surface);
+    static std::string GetBindingSiteName(StringDict::ID surface);
     
     // Get the bound protein name for a protein on a specific surface
-    static std::string GetBoundProteinName(const std::string& proteinName, BindingSurface surface);
-    
-    // Convert binding surface enum to string
-    static std::string BindingSurfaceToString(BindingSurface surface);
+    static std::string GetBoundProteinName(const std::string& proteinName, StringDict::ID surface);
 }; 
