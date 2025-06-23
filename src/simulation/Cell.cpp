@@ -4,6 +4,7 @@
 #include "Mitochondrion.h"
 #include "Spindle.h"
 #include "EReticulum.h"
+#include "Centrosome.h"
 #include "molecules/MRNA.h"
 #include "log/ILog.h"
 
@@ -176,6 +177,25 @@ std::shared_ptr<Spindle> Cell::getSpindle() const
         if (auto pSpindle = std::dynamic_pointer_cast<Spindle>(pOrg))
         {
             return pSpindle;
+        }
+    }
+    return nullptr;
+}
+
+void Cell::addOrganelle(std::shared_ptr<Organelle> pOrganelle)
+{
+    if (pOrganelle) {
+        m_pOrganelles.push_back(pOrganelle);
+    }
+}
+
+std::shared_ptr<Centrosome> Cell::getCentrosome() const
+{
+    for (const auto& pOrg : m_pOrganelles)
+    {
+        if (auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(pOrg))
+        {
+            return pCentrosome;
         }
     }
     return nullptr;

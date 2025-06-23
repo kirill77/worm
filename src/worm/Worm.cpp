@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Worm.h"
 #include "simulation/Cell.h"
+#include "simulation/Centrosome.h"
+#include "simulation/CellTypes.h"
 #include "molecules/Molecule.h"
 #include "simulation/Medium.h"
 #include "simulation/Cortex.h"
@@ -8,6 +10,7 @@
 #include "molecules/ProteinWiki.h"
 #include "log/ILog.h"
 #include <chrono> // For high_resolution_clock
+#include <cmath>  // For std::abs
 
 std::vector<Chromosome> Worm::initializeGenes()
 {
@@ -81,6 +84,12 @@ std::shared_ptr<Cortex> Worm::createZygoteCortex()
     pInternalMedium->addProtein(cdk1, center);
     pInternalMedium->addProtein(cyb1, center);
 
+    // Add centrosome-related proteins for proper centrosome function
+    MPopulation cdk2("CDK-2", 800.0);  // For centrosome duplication
+    MPopulation cce1("CCE-1", 800.0);  // Cyclin E for centrosome duplication
+    pInternalMedium->addProtein(cdk2, center);
+    pInternalMedium->addProtein(cce1, center);
+
     // Create a membrane with the internal medium
     return std::make_shared<Cortex>(pInternalMedium);
 }
@@ -90,6 +99,12 @@ Worm::Worm()
     auto chromosomes = initializeGenes();
     std::shared_ptr<Cortex> pCortex = createZygoteCortex();
     auto pCell = Cell::createCell(pCortex, chromosomes);
+    
+    // Simulate fertilization by adding a centrosome from the sperm
+    // In C. elegans, the egg lacks a centrosome and receives one from the sperm
+    auto pCentrosome = std::make_shared<Centrosome>(std::weak_ptr<Cell>(pCell), float3(0, 0, 0));
+    pCell->addOrganelle(pCentrosome);
+    
     m_pCells.push_back(pCell);
     
     // Set up the data collector
@@ -116,6 +131,7 @@ void Worm::setupDataCollector()
     // Add collection points for anterior and posterior positions
     float3 anteriorPos(0.0f, 1.f, 0.0f);  // Anterior position
     float3 posteriorPos(0.0f, -1.f, 0.0f); // Posterior position
+    float3 centerPos(0.0f, 0.0f, 0.0f);   // Center position for centrosome tracking
     
     // Get membrane-bound protein names using the utility function
     std::string par2Membrane = ProteinWiki::GetBoundProteinName("PAR-2", ProteinWiki::BindingSurface::CORTEX);
@@ -132,6 +148,13 @@ void Worm::setupDataCollector()
         posteriorPos, 
         "Posterior", 
         {par2Membrane, par3Membrane, "PAR-1", "PAR-2", "BINDING-SITE-CORTEX"}
+    );
+    
+    // Add collection point for centrosome tracking
+    m_pDataCollector->addCollectionPoint(
+        centerPos, 
+        "Centrosome", 
+        {"γ-TUBULIN", "PERICENTRIN", "NINEIN", "PLK-4", "CDK-2", "CCE-1"}
     );
 }
 
@@ -234,6 +257,66 @@ bool Worm::validateAsymmetricDivision(float fTimeSec) const
     if (spindlePos.y > -0.1f) {
         LOG_INFO("Warning: Spindle not properly positioned toward posterior at %.2lf sec", fTimeSec);
         return false;
+    }
+    
+    return true;
+}
+
+bool Worm::validateCentrosomeBehavior(float fTimeSec) const
+{
+    auto pCentrosome = m_pCells[0]->getCentrosome();
+    if (!pCentrosome) {
+        // Before fertilization, there should be no centrosome
+        if (fTimeSec < 1.0f) {  // Assume fertilization happens within 1 second
+            return true;  // This is expected before fertilization
+        }
+        LOG_INFO("Warning: No centrosome found in cell at %.2lf sec (after expected fertilization time)", fTimeSec);
+        return false;
+    }
+    
+    // Check centrosome position during different phases
+    float3 centrosomePos = pCentrosome->getPosition();
+    CellCycleState cellCycleState = m_pCells[0]->getCellCycleState();
+    
+    switch (cellCycleState) {
+        case CellCycleState::INTERPHASE:
+            // Centrosome should be near the nucleus (center)
+            if (std::abs(centrosomePos.x) > 0.2f || std::abs(centrosomePos.y) > 0.2f || std::abs(centrosomePos.z) > 0.2f) {
+                LOG_INFO("Warning: Centrosome too far from nucleus during interphase at %.2lf sec", fTimeSec);
+                return false;
+            }
+            break;
+            
+        case CellCycleState::PROPHASE:
+        case CellCycleState::METAPHASE:
+            // Centrosome should be duplicated and moving to poles
+            if (!pCentrosome->isDuplicated()) {
+                LOG_INFO("Warning: Centrosome not duplicated during mitosis at %.2lf sec", fTimeSec);
+                return false;
+            }
+            // Check if centrosome is moving toward poles
+            if (std::abs(centrosomePos.y) < 0.5f) {
+                LOG_INFO("Warning: Centrosome not properly positioned at poles during mitosis at %.2lf sec", fTimeSec);
+                return false;
+            }
+            break;
+            
+        case CellCycleState::ANAPHASE:
+        case CellCycleState::TELOPHASE:
+            // Centrosome should be at poles
+            if (std::abs(centrosomePos.y) < 0.7f) {
+                LOG_INFO("Warning: Centrosome not at poles during anaphase/telophase at %.2lf sec", fTimeSec);
+                return false;
+            }
+            break;
+            
+        case CellCycleState::CYTOKINESIS:
+            // Centrosome should be resetting for next cycle
+            if (pCentrosome->isDuplicated()) {
+                LOG_INFO("Warning: Centrosome still duplicated during cytokinesis at %.2lf sec", fTimeSec);
+                return false;
+            }
+            break;
     }
     
     return true;

@@ -64,6 +64,10 @@ public:
     
     std::shared_ptr<class Spindle> getSpindle() const;  // Made public for Chromosome access
 
+    // Organelle management
+    void addOrganelle(std::shared_ptr<Organelle> pOrganelle);
+    std::shared_ptr<class Centrosome> getCentrosome() const;  // Get centrosome if it exists
+
     // ATP-related functions
     bool consumeATP(double fAmount);
 };

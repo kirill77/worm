@@ -38,5 +38,6 @@ public:
     bool validatePARPolarization(float fTimeSec) const;
     bool validateCellCycle(float fTimeSec) const;
     bool validateAsymmetricDivision(float fTimeSec) const;
+    bool validateCentrosomeBehavior(float fTimeSec) const;
 };
 
