@@ -2,9 +2,11 @@
 
 #include <vector>
 #include <memory>
+#include <assert.h>
 #include "Cortex.h"
 #include "CellTypes.h"
 #include "Chromosome.h"
+#include "molecules/StringDict.h"
 
 enum class CellCycleState
 {
@@ -42,6 +44,12 @@ private:
     void createSpindle();
     void destroySpindle();
     void initializeOrganelles();  // Initialize organelles after construction
+    
+    // Organelle indexing helper
+    size_t getOrganelleIndex(StringDict::ID id) const {
+        assert(id >= StringDict::ID::ORGANELLE_START && id < StringDict::ID::ORGANELLE_END);
+        return static_cast<size_t>(id) - static_cast<size_t>(StringDict::ID::ORGANELLE_START);
+    }
 
     // Private constructor
     Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
@@ -65,7 +73,7 @@ public:
     std::shared_ptr<class Spindle> getSpindle() const;  // Made public for Chromosome access
 
     // Organelle management
-    void addOrganelle(std::shared_ptr<Organelle> pOrganelle);
+    void addOrganelle(StringDict::ID id, std::shared_ptr<Organelle> pOrganelle);
     std::shared_ptr<class Centrosome> getCentrosome() const;  // Get centrosome if it exists
 
     // ATP-related functions

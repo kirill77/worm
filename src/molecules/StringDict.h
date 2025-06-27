@@ -40,6 +40,15 @@ struct StringDict
         PAL_1,
         PIE_1,
         
+        // Organelle types (must be contiguous for vector indexing)
+        ORGANELLE_START,
+        ORGANELLE_NUCLEUS = ORGANELLE_START,
+        ORGANELLE_MITOCHONDRION,
+        ORGANELLE_ENDOPLASMIC_RETICULUM,
+        ORGANELLE_SPINDLE,
+        ORGANELLE_CENTROSOME,
+        ORGANELLE_END,
+        
         // TODO: add all IDs here
     };
 

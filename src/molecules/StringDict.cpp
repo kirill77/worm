@@ -41,6 +41,14 @@ void StringDict::initialize()
     m_idToString.push_back("pal-1");    // PAL_1
     m_idToString.push_back("pie-1");    // PIE_1
     
+    // Add organelle types (ORGANELLE_START is same as ORGANELLE_NUCLEUS)
+    m_idToString.push_back("NUCLEUS");               // ORGANELLE_NUCLEUS/ORGANELLE_START
+    m_idToString.push_back("MITOCHONDRION");         // ORGANELLE_MITOCHONDRION
+    m_idToString.push_back("ENDOPLASMIC_RETICULUM"); // ORGANELLE_ENDOPLASMIC_RETICULUM
+    m_idToString.push_back("SPINDLE");               // ORGANELLE_SPINDLE
+    m_idToString.push_back("CENTROSOME");            // ORGANELLE_CENTROSOME
+    m_idToString.push_back("ORGANELLE_END");         // ORGANELLE_END
+    
     // Build reverse mapping
     for (size_t i = 0; i < m_idToString.size(); ++i) {
         m_stringToId[m_idToString[i]] = static_cast<ID>(i);

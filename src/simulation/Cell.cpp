@@ -22,6 +22,7 @@ Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chrom
     , m_cellCycleState(CellCycleState::INTERPHASE)
     , m_type(type)
     , m_chromosomes(chromosomes)
+    , m_pOrganelles(static_cast<size_t>(StringDict::ID::ORGANELLE_END) - static_cast<size_t>(StringDict::ID::ORGANELLE_START))
 {
     // Initialize binding sites in the cell's membrane
     if (m_pCortex)
@@ -32,10 +33,13 @@ Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chrom
 
 void Cell::initializeOrganelles()
 {
-    // Create organelles
-    m_pOrganelles.push_back(std::make_shared<Nucleus>(std::weak_ptr<Cell>(shared_from_this()), m_chromosomes));
-    m_pOrganelles.push_back(std::make_shared<Mitochondrion>(std::weak_ptr<Cell>(shared_from_this())));
-    m_pOrganelles.push_back(std::make_shared<EReticulum>(std::weak_ptr<Cell>(shared_from_this())));
+    // Create organelles using vector indexing
+    m_pOrganelles[getOrganelleIndex(StringDict::ID::ORGANELLE_NUCLEUS)] = 
+        std::make_shared<Nucleus>(std::weak_ptr<Cell>(shared_from_this()), m_chromosomes);
+    m_pOrganelles[getOrganelleIndex(StringDict::ID::ORGANELLE_MITOCHONDRION)] = 
+        std::make_shared<Mitochondrion>(std::weak_ptr<Cell>(shared_from_this()));
+    m_pOrganelles[getOrganelleIndex(StringDict::ID::ORGANELLE_ENDOPLASMIC_RETICULUM)] = 
+        std::make_shared<EReticulum>(std::weak_ptr<Cell>(shared_from_this()));
     // add other organelles as needed
 }
 
@@ -44,7 +48,9 @@ void Cell::update(double fDt)
     // Update all organelles
     for (auto& pOrg : m_pOrganelles)
     {
-        pOrg->update(fDt, *this);
+        if (pOrg) {
+            pOrg->update(fDt, *this);
+        }
     }
     
     // Check for cell cycle transitions based on conditions
@@ -56,12 +62,10 @@ void Cell::update(double fDt)
 
 std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
 {
-    for (const auto& pOrg : m_pOrganelles)
+    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_MITOCHONDRION);
+    if (index < m_pOrganelles.size() && m_pOrganelles[index])
     {
-        if (auto pMito = std::dynamic_pointer_cast<Mitochondrion>(pOrg))
-        {
-            return pMito;
-        }
+        return std::dynamic_pointer_cast<Mitochondrion>(m_pOrganelles[index]);
     }
     return nullptr;
 }
@@ -156,47 +160,46 @@ void Cell::createSpindle()
     // Only create if we don't already have one
     if (!getSpindle())
     {
-        m_pOrganelles.push_back(std::make_shared<Spindle>(std::weak_ptr<Cell>(shared_from_this()), m_type));
+        size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_SPINDLE);
+        m_pOrganelles[index] = std::make_shared<Spindle>(std::weak_ptr<Cell>(shared_from_this()), m_type);
     }
 }
 
 void Cell::destroySpindle()
 {
-    m_pOrganelles.erase(
-        std::remove_if(m_pOrganelles.begin(), m_pOrganelles.end(),
-            [](const std::shared_ptr<Organelle>& pOrg) {
-                return std::dynamic_pointer_cast<Spindle>(pOrg) != nullptr;
-            }),
-        m_pOrganelles.end());
+    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_SPINDLE);
+    if (index < m_pOrganelles.size())
+    {
+        m_pOrganelles[index].reset();
+    }
 }
 
 std::shared_ptr<Spindle> Cell::getSpindle() const
 {
-    for (const auto& pOrg : m_pOrganelles)
+    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_SPINDLE);
+    if (index < m_pOrganelles.size() && m_pOrganelles[index])
     {
-        if (auto pSpindle = std::dynamic_pointer_cast<Spindle>(pOrg))
-        {
-            return pSpindle;
-        }
+        return std::dynamic_pointer_cast<Spindle>(m_pOrganelles[index]);
     }
     return nullptr;
 }
 
-void Cell::addOrganelle(std::shared_ptr<Organelle> pOrganelle)
+void Cell::addOrganelle(StringDict::ID id, std::shared_ptr<Organelle> pOrganelle)
 {
     if (pOrganelle) {
-        m_pOrganelles.push_back(pOrganelle);
+        size_t index = getOrganelleIndex(id);
+        if (index < m_pOrganelles.size()) {
+            m_pOrganelles[index] = pOrganelle;
+        }
     }
 }
 
 std::shared_ptr<Centrosome> Cell::getCentrosome() const
 {
-    for (const auto& pOrg : m_pOrganelles)
+    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_CENTROSOME);
+    if (index < m_pOrganelles.size() && m_pOrganelles[index])
     {
-        if (auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(pOrg))
-        {
-            return pCentrosome;
-        }
+        return std::dynamic_pointer_cast<Centrosome>(m_pOrganelles[index]);
     }
     return nullptr;
 }
