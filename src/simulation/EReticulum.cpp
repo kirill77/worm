@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "EReticulum.h"
 #include "Cell.h"
+#include "Medium.h"
 #include <random>
 
 EReticulum::EReticulum(std::weak_ptr<Cell> pCell)

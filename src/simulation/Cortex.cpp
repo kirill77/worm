@@ -1,27 +1,23 @@
 #include "pch.h"
 #include "Cortex.h"
 #include "Medium.h"
+#include "Cell.h"
 #include "log/ILog.h"
 #include <algorithm>
 #include <cmath>
 
-Cortex::Cortex(std::shared_ptr<Medium> pInternalMedium, double fThickness)
-    : BindingSurface(StringDict::ID::BS_CORTEX) // Initialize binding surface with enum
-    , m_pInternalMedium(pInternalMedium)
+Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
+    : Organelle(pCell)
     , m_fThickness(fThickness)
 {
-    // Ensure the internal medium is valid
-    if (!m_pInternalMedium) {
-        LOG_ERROR("Internal medium cannot be null");
-        // No exception throwing, but we should still return to prevent operating on null
-        return;
-    }
+    // Set the binding surface type for cortex
+    m_surfaceType = StringDict::ID::BS_CORTEX;
 }
 
-void Cortex::update(double fDtSec)
+void Cortex::update(double fDtSec, Cell& cell)
 {
     // Update internal medium - its dynamics are independent of external medium
-    m_pInternalMedium->update(fDtSec);
+    cell.getInternalMedium().update(fDtSec);
 
     m_tensionSphere.makeTimeStep(fDtSec);
     
@@ -38,6 +34,15 @@ bool Cortex::transportProteinInward(Medium& externalMedium,
                                      double amount, 
                                      const float3& position)
 {
+    // Get the cell and its internal medium
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot transport protein: cell reference is invalid");
+        return false;
+    }
+    
+    Medium& internalMedium = pCell->getInternalMedium();
+
     // Check if the external medium has enough of the protein
     if (externalMedium.getProteinNumber(proteinName, position) < amount) {
         return false; // Not enough protein available
@@ -55,7 +60,7 @@ bool Cortex::transportProteinInward(Medium& externalMedium,
     
     // Add to internal medium
     float3 internalPos = position; // Same position in internal medium
-    m_pInternalMedium->addProtein(protein, internalPos);
+    internalMedium.addProtein(protein, internalPos);
     
     return true;
 }
@@ -65,8 +70,17 @@ bool Cortex::transportProteinOutward(Medium& externalMedium,
                                       double amount,
                                       const float3& position)
 {
+    // Get the cell and its internal medium
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot transport protein: cell reference is invalid");
+        return false;
+    }
+    
+    Medium& internalMedium = pCell->getInternalMedium();
+
     // Check if the internal medium has enough of the protein
-    if (m_pInternalMedium->getProteinNumber(proteinName, position) < amount) {
+    if (internalMedium.getProteinNumber(proteinName, position) < amount) {
         return false; // Not enough protein available
     }
     
@@ -76,7 +90,7 @@ bool Cortex::transportProteinOutward(Medium& externalMedium,
     // Remove from internal medium
     float3 internalPos = position;
     MPopulation internalProtein(proteinName, -amount); // Negative amount for removal
-    m_pInternalMedium->addProtein(internalProtein, internalPos);
+    internalMedium.addProtein(internalProtein, internalPos);
     
     // Add to external medium
     float3 externalPos = position; // Same position in external medium
@@ -89,6 +103,15 @@ bool Cortex::transportATPInward(Medium& externalMedium,
                                  double amount,
                                  const float3& position)
 {
+    // Get the cell and its internal medium
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot transport ATP: cell reference is invalid");
+        return false;
+    }
+    
+    Medium& internalMedium = pCell->getInternalMedium();
+
     // Check if the external medium has enough ATP
     if (externalMedium.getAvailableATP(position) < amount) {
         return false; // Not enough ATP available
@@ -100,7 +123,7 @@ bool Cortex::transportATPInward(Medium& externalMedium,
     }
     
     // Add ATP to internal medium
-    m_pInternalMedium->addATP(amount, position);
+    internalMedium.addATP(amount, position);
     
     return true;
 }
@@ -109,13 +132,22 @@ bool Cortex::transportATPOutward(Medium& externalMedium,
                                   double amount,
                                   const float3& position)
 {
+    // Get the cell and its internal medium
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot transport ATP: cell reference is invalid");
+        return false;
+    }
+    
+    Medium& internalMedium = pCell->getInternalMedium();
+
     // Check if the internal medium has enough ATP
-    if (m_pInternalMedium->getAvailableATP(position) < amount) {
+    if (internalMedium.getAvailableATP(position) < amount) {
         return false; // Not enough ATP available
     }
     
     // Consume ATP from internal medium
-    if (!m_pInternalMedium->consumeATP(amount, position)) {
+    if (!internalMedium.consumeATP(amount, position)) {
         return false; // Could not consume ATP
     }
     
@@ -127,12 +159,15 @@ bool Cortex::transportATPOutward(Medium& externalMedium,
 
 bool Cortex::initializeBindingSites(double totalAmount)
 {
-    // Make sure we have an internal medium
-    if (!m_pInternalMedium) {
-        LOG_ERROR("Cannot initialize binding sites: internal medium is null");
+    // Get the cell and its internal medium
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot initialize binding sites: cell reference is invalid");
         return false;
     }
     
+    Medium& internalMedium = pCell->getInternalMedium();
+
     // Number of sample points to use (adjust for desired density)
     const int sampleCount = 20; 
     
@@ -156,7 +191,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 // Create binding site protein and add to the medium
                 MPopulation bindingSites(ProteinWiki::GetBindingSiteName(StringDict::ID::BS_CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
-                m_pInternalMedium->addProtein(bindingSites, normalizedPos);
+                internalMedium.addProtein(bindingSites, normalizedPos);
             }
         }
     }

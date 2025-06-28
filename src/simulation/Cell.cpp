@@ -5,30 +5,28 @@
 #include "Spindle.h"
 #include "EReticulum.h"
 #include "Centrosome.h"
+#include "Cortex.h"
 #include "molecules/MRNA.h"
 #include "log/ILog.h"
 
-std::shared_ptr<Cell> Cell::createCell(std::shared_ptr<Cortex> pCortex, 
+std::shared_ptr<Cell> Cell::createCell(std::shared_ptr<Medium> pInternalMedium,
                                      const std::vector<Chromosome>& chromosomes, 
                                      CellType type)
 {
-    auto cell = std::shared_ptr<Cell>(new Cell(pCortex, chromosomes, type));
+    auto cell = std::shared_ptr<Cell>(new Cell(pInternalMedium, chromosomes, type));
     cell->initializeOrganelles();
+    cell->initializeCortex();
     return cell;
 }
 
-Cell::Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type)
-    : m_pCortex(pCortex)
+Cell::Cell(std::shared_ptr<Medium> pInternalMedium, const std::vector<Chromosome>& chromosomes, CellType type)
+    : m_pInternalMedium(pInternalMedium)
     , m_cellCycleState(CellCycleState::INTERPHASE)
     , m_type(type)
     , m_chromosomes(chromosomes)
     , m_pOrganelles(static_cast<size_t>(StringDict::ID::ORGANELLE_END) - static_cast<size_t>(StringDict::ID::ORGANELLE_START))
 {
-    // Initialize binding sites in the cell's membrane
-    if (m_pCortex)
-    {
-        m_pCortex->initializeBindingSites(4000000.0);
-    }
+    // Organelles will be initialized in initializeOrganelles() and initializeCortex()
 }
 
 void Cell::initializeOrganelles()
@@ -43,9 +41,33 @@ void Cell::initializeOrganelles()
     // add other organelles as needed
 }
 
+void Cell::initializeCortex()
+{
+    // Create cortex as an organelle
+    m_pOrganelles[getOrganelleIndex(StringDict::ID::ORGANELLE_CORTEX)] = 
+        std::make_shared<Cortex>(std::weak_ptr<Cell>(shared_from_this()));
+        
+    // Initialize binding sites in the cortex
+    auto pCortex = getCortex();
+    if (pCortex)
+    {
+        pCortex->initializeBindingSites(4000000.0);
+    }
+}
+
+std::shared_ptr<Cortex> Cell::getCortex() const
+{
+    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_CORTEX);
+    if (index < m_pOrganelles.size() && m_pOrganelles[index])
+    {
+        return std::dynamic_pointer_cast<Cortex>(m_pOrganelles[index]);
+    }
+    return nullptr;
+}
+
 void Cell::update(double fDt)
 {
-    // Update all organelles
+    // Update all organelles (including cortex)
     for (auto& pOrg : m_pOrganelles)
     {
         if (pOrg) {
@@ -55,9 +77,6 @@ void Cell::update(double fDt)
     
     // Check for cell cycle transitions based on conditions
     checkCellCycleTransitions();
-    
-    // Update the membrane which in turn will update the internal medium
-    m_pCortex->update(fDt);
 }
 
 std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
@@ -74,14 +93,14 @@ bool Cell::consumeATP(double fAmount)
 {
     // Consume ATP from internal medium at cell's position (center)
     float3 position(0.0f, 0.0f, 0.0f);
-    return m_pCortex->getInternalMedium().consumeATP(fAmount, position);
+    return m_pInternalMedium->consumeATP(fAmount, position);
 }
 
 void Cell::checkCellCycleTransitions()
 {
     // Get key protein concentrations from internal medium
     float3 center(0, 0, 0);
-    Medium& internalMedium = m_pCortex->getInternalMedium();
+    Medium& internalMedium = *m_pInternalMedium;
     double fCdk1 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_1), center);
     double fCyclinB = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CYB_1), center);
     double fPlk1 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::PLK_1), center);

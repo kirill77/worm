@@ -1,5 +1,7 @@
+#include "pch.h"
 #include "Centrosome.h"
 #include "Cell.h"
+#include "Medium.h"
 #include "molecules/ProteinWiki.h"
 #include "log/ILog.h"
 

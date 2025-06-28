@@ -47,6 +47,7 @@ struct StringDict
         ORGANELLE_ENDOPLASMIC_RETICULUM,
         ORGANELLE_SPINDLE,
         ORGANELLE_CENTROSOME,
+        ORGANELLE_CORTEX,
         ORGANELLE_END,
         
         // TODO: add all IDs here

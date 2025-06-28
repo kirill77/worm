@@ -47,6 +47,7 @@ void StringDict::initialize()
     m_idToString.push_back("ENDOPLASMIC_RETICULUM"); // ORGANELLE_ENDOPLASMIC_RETICULUM
     m_idToString.push_back("SPINDLE");               // ORGANELLE_SPINDLE
     m_idToString.push_back("CENTROSOME");            // ORGANELLE_CENTROSOME
+    m_idToString.push_back("CORTEX_ORGANELLE");      // ORGANELLE_CORTEX
     m_idToString.push_back("ORGANELLE_END");         // ORGANELLE_END
     
     // Build reverse mapping

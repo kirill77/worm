@@ -2,6 +2,7 @@
 #include "simulation/World.h"
 #include "simulation/Organism.h"
 #include "simulation/Cell.h"
+#include "simulation/Cortex.h"
 #include "visualization/Window.h"
 #include "visualization/GPUWorld.h"
 #include "visualization/GPUStats.h"

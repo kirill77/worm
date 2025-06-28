@@ -53,7 +53,7 @@ std::vector<Chromosome> Worm::initializeGenes()
     return chromosomes;
 }
 
-std::shared_ptr<Cortex> Worm::createZygoteCortex()
+std::shared_ptr<Medium> Worm::createZygoteMedium()
 {
     // Create the internal medium
     std::shared_ptr<Medium> pInternalMedium = std::make_shared<Medium>();
@@ -90,8 +90,7 @@ std::shared_ptr<Cortex> Worm::createZygoteCortex()
     pInternalMedium->addProtein(cdk2, center);
     pInternalMedium->addProtein(cce1, center);
 
-    // Create a membrane with the internal medium
-    return std::make_shared<Cortex>(pInternalMedium);
+    return pInternalMedium;
 }
 
 Worm::Worm()
@@ -100,8 +99,8 @@ Worm::Worm()
     StringDict::initialize();
     
     auto chromosomes = initializeGenes();
-    std::shared_ptr<Cortex> pCortex = createZygoteCortex();
-    auto pCell = Cell::createCell(pCortex, chromosomes);
+    auto pInternalMedium = createZygoteMedium();
+    auto pCell = Cell::createCell(pInternalMedium, chromosomes);
     
     // Simulate fertilization by adding a centrosome from the sperm
     // In C. elegans, the egg lacks a centrosome and receives one from the sperm

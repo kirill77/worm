@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 #include <assert.h>
-#include "Cortex.h"
 #include "CellTypes.h"
 #include "Chromosome.h"
 #include "molecules/StringDict.h"
@@ -33,7 +32,7 @@ class Cell : public std::enable_shared_from_this<Cell>
 {
 private:
     std::vector<std::shared_ptr<class Organelle>> m_pOrganelles;
-    std::shared_ptr<Cortex> m_pCortex;
+    std::shared_ptr<class Medium> m_pInternalMedium;  // Internal cellular environment
     CellCycleState m_cellCycleState;
     CellType m_type;  // Store type just for spindle creation
     std::vector<Chromosome> m_chromosomes;  // Store chromosomes for delayed organelle creation
@@ -44,6 +43,7 @@ private:
     void createSpindle();
     void destroySpindle();
     void initializeOrganelles();  // Initialize organelles after construction
+    void initializeCortex();      // Initialize cortex after construction
     
     // Organelle indexing helper
     size_t getOrganelleIndex(StringDict::ID id) const {
@@ -52,23 +52,21 @@ private:
     }
 
     // Private constructor
-    Cell(std::shared_ptr<Cortex> pCortex, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
+    Cell(std::shared_ptr<Medium> pInternalMedium, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
 
 public:
     // Static factory method to create a cell
-    static std::shared_ptr<Cell> createCell(std::shared_ptr<Cortex> pCortex, 
+    static std::shared_ptr<Cell> createCell(std::shared_ptr<Medium> pInternalMedium,
                                           const std::vector<Chromosome>& chromosomes, 
                                           CellType type = CellType::Zygote);
     
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
     
-    std::shared_ptr<Cortex> getCortex() const
-    {
-        return m_pCortex;
-    }
+    std::shared_ptr<class Cortex> getCortex() const;
+    
     // Access to internal medium
-    Medium& getInternalMedium() const { return m_pCortex->getInternalMedium(); }
+    Medium& getInternalMedium() const { return *m_pInternalMedium; }
     
     std::shared_ptr<class Spindle> getSpindle() const;  // Made public for Chromosome access
 

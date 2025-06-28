@@ -2,45 +2,42 @@
 
 #include <memory>
 #include "Medium.h"
-#include "molecules/BindingSurface.h"
+#include "Organelle.h"
 #include "math/vector.h"
 #include "tensionSphere/tensionSphere.h"
 
 /**
- * The Membrane class represents the cell membrane that separates
+ * The Cortex class represents the cell membrane that separates
  * the internal cellular environment from the external environment.
  * It mediates interactions between internal and external media.
  */
-class Cortex : public BindingSurface
+class Cortex : public Organelle
 {
 private:
-    std::shared_ptr<Medium> m_pInternalMedium;  // Internal cellular environment
     double m_fThickness;                        // Membrane thickness in micrometers
     TensionSphere m_tensionSphere;
 
 public:
     /**
-     * Constructor that initializes the membrane with an internal medium.
-     * The external medium is not stored and must be passed to methods that need it.
+     * Constructor that initializes the cortex.
      * 
-     * @param pInternalMedium Shared pointer to the cell's internal medium
+     * @param pCell Weak pointer to the cell containing this cortex
      * @param fThickness Membrane thickness in micrometers
-     * @param fSurfaceArea Surface area in square micrometers
      */
-    Cortex(std::shared_ptr<Medium> pInternalMedium,
-        double fThickness = 0.01); // Default 10nm thickness
+    Cortex(std::weak_ptr<Cell> pCell, double fThickness = 0.01); // Default 10nm thickness
 
     /**
-     * Update the membrane state.
-     * This method updates membrane dynamics and can be extended to include
+     * Update the cortex state.
+     * This method updates cortex dynamics and can be extended to include
      * passive transport, signal transduction, etc.
      * 
-     * @param dt Time step in seconds
+     * @param fDtSec Time step in seconds
+     * @param cell Reference to the cell containing this cortex
      */
-    void update(double fDtSec);
+    void update(double fDtSec, Cell& cell) override;
     
     /**
-     * Initialize binding sites in the internal medium.
+     * Initialize binding sites in the cell's internal medium.
      * This creates binding sites throughout the medium
      * that allow proteins to bind to the cell membrane surface.
      * 
@@ -102,9 +99,6 @@ public:
                             const float3& position);
 
     // Getters and setters
-    std::shared_ptr<Medium> getInternalMedium() const { return m_pInternalMedium; }
-    Medium& getInternalMedium() { return *m_pInternalMedium; }
-    
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
 
