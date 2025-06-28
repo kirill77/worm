@@ -25,9 +25,7 @@ public:
     ~GPUWorld();
 
     // Mesh management
-    std::shared_ptr<GPUMesh> createMesh();
-    void addMesh(std::shared_ptr<GPUMesh> mesh);
-    void removeMesh(std::shared_ptr<GPUMesh> mesh);
+    void addMesh(std::weak_ptr<GPUMesh> pMesh);
     
     // Camera management
     std::shared_ptr<GPUCamera> getCamera();
@@ -52,7 +50,8 @@ private:
     };
     
     std::shared_ptr<Window> m_pWindow;
-    std::vector<std::shared_ptr<GPUMesh>> m_pMeshes;
+    // when weak_ptr becomes null - it's automatically removed from the list
+    std::vector<std::weak_ptr<GPUMesh>> m_pMeshes;
     std::shared_ptr<GPUCamera> m_pCamera;
     std::shared_ptr<GPUFont> m_pFont;
     

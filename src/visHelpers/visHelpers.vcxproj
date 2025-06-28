@@ -22,12 +22,14 @@
     <ClCompile Include="CameraUI.cpp" />
     <ClCompile Include="CentrosomeVis.cpp" />
     <ClCompile Include="ConnectedMeshVis.cpp" />
+    <ClCompile Include="IObjectVis.cpp" />
     <ClCompile Include="VisEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraUI.h" />
     <ClInclude Include="CentrosomeVis.h" />
     <ClInclude Include="ConnectedMeshVis.h" />
+    <ClInclude Include="IObjectVis.h" />
     <ClInclude Include="VisEngine.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

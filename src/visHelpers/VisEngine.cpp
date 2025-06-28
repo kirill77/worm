@@ -46,8 +46,9 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
     m_gpuText->printf("Hello World!");
 
     // Create cortex visualization
-    m_pCortexVis = createCortexVis(pOrganism, m_pWindow);
-    m_pGpuWorld->addMesh(m_pCortexVis->getGPUMesh());
+    ObjectData objData;
+    objData.m_pObject = createCortexVis(pOrganism, m_pWindow);
+    m_pObjects.push_back(objData);
 
     // Initialize camera UI
     m_cameraUI.attachToCamera(m_pGpuWorld->getCamera());
@@ -68,14 +69,24 @@ bool VisEngine::update(float fDtSec)
     if (m_pWindow->shouldExit())
         return false;
 
-    m_cameraUI.setWorldBox(*m_pCortexVis->getConnectedBox());
     m_cameraUI.notifyNewUIState(m_pWindow->getCurrentUIState());
 
     // Simulate one step
     m_pWorld->simulateStep(fDtSec);
 
-    // Render the visualization
-    m_pCortexVis->updateGPUMesh();
+    // visualize all the objects
+    for (uint32_t u = 0; u < m_pObjects.size(); ++u)
+    {
+        auto& object = m_pObjects[u];
+        auto pGpuMesh = object.m_pObject->updateAndGetGpuMesh();
+        // add mesh to the world if needed
+        if (object.m_pGpuMesh != pGpuMesh)
+        {
+            object.m_pGpuMesh = pGpuMesh;
+            m_pGpuWorld->addMesh(object.m_pGpuMesh);
+        }
+        m_cameraUI.setWorldBox(*object.m_pObject->getConnectedBox());
+    }
 
     auto* pSwapChain = m_pWindow->getSwapChain();
     auto pGpuQueue = pSwapChain->getGPUQueue();

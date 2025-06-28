@@ -29,27 +29,10 @@ GPUWorld::~GPUWorld()
     // GPU synchronization should be handled by the caller when needed
 }
 
-// Create a new mesh
-std::shared_ptr<GPUMesh> GPUWorld::createMesh()
-{
-    auto device = m_pWindow->getDevice();
-    return std::make_shared<GPUMesh>(device);
-}
-
 // Add a mesh to the scene
-void GPUWorld::addMesh(std::shared_ptr<GPUMesh> mesh)
+void GPUWorld::addMesh(std::weak_ptr<GPUMesh> pMesh)
 {
-    m_pMeshes.push_back(mesh);
-}
-
-// Remove a mesh from the scene
-void GPUWorld::removeMesh(std::shared_ptr<GPUMesh> mesh)
-{
-    auto it = std::find(m_pMeshes.begin(), m_pMeshes.end(), mesh);
-    if (it != m_pMeshes.end())
-    {
-        m_pMeshes.erase(it);
-    }
+    m_pMeshes.push_back(pMesh);
 }
 
 // Get current camera
@@ -320,21 +303,27 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
     pCmdList->SetGraphicsRootDescriptorTable(0, m_pCBVHeap->GetGPUDescriptorHandleForHeapStart());
     
     // Draw meshes
-    for (const auto& mesh : m_pMeshes)
+    for (auto itMesh = m_pMeshes.begin(); itMesh != m_pMeshes.end(); ++itMesh)
     {
+        auto pMesh = itMesh->lock();
+        if (!pMesh)
+        {
+            itMesh = m_pMeshes.erase(itMesh);
+            continue;
+        }
         // Set primitive topology
         pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         
         // Set vertex buffer
-        D3D12_VERTEX_BUFFER_VIEW vbv = mesh->getVertexBufferView();
+        D3D12_VERTEX_BUFFER_VIEW vbv = pMesh->getVertexBufferView();
         pCmdList->IASetVertexBuffers(0, 1, &vbv);
         
         // Set index buffer
-        D3D12_INDEX_BUFFER_VIEW ibv = mesh->getIndexBufferView();
+        D3D12_INDEX_BUFFER_VIEW ibv = pMesh->getIndexBufferView();
         pCmdList->IASetIndexBuffer(&ibv);
         
         // Draw
-        pCmdList->DrawIndexedInstanced(mesh->getIndexCount(), 1, 0, 0, 0);
+        pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
     }
     
     // Transition render target back to present state

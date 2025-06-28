@@ -10,8 +10,9 @@ ConnectedMeshVis::ConnectedMeshVis(std::shared_ptr<Window> pWindow)
     m_pGPUMesh = std::make_shared<GPUMesh>(pWindow->getDevice());
 }
 
-std::shared_ptr<GPUMesh> ConnectedMeshVis::getGPUMesh()
+std::shared_ptr<GPUMesh> ConnectedMeshVis::updateAndGetGpuMesh()
 {
+    updateGPUMesh();
     return m_pGPUMesh;
 }
 
