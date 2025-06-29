@@ -10,7 +10,7 @@
 #include "visHelpers/ConnectedMeshVis.h"
 #include "visHelpers/CameraUI.h"
 #include "molecules/ProteinWiki.h"
-#include "log/ILog.h"
+#include "utils/log/ILog.h"
 #include "visualization/DirectXHelpers.h"
 
 static std::shared_ptr<ConnectedMeshVis> createCortexVis(

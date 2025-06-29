@@ -7,7 +7,7 @@
 #include "Centrosome.h"
 #include "Cortex.h"
 #include "molecules/MRNA.h"
-#include "log/ILog.h"
+#include "utils/log/ILog.h"
 
 std::shared_ptr<Cell> Cell::createCell(std::shared_ptr<Medium> pInternalMedium,
                                      const std::vector<Chromosome>& chromosomes, 

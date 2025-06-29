@@ -24,6 +24,7 @@
     <ProjectGuid>{250ef3cc-b8d1-4814-8ae1-4a5ad649af73}</ProjectGuid>
     <RootNamespace>visualization</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>gpu</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

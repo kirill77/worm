@@ -39,6 +39,7 @@
     <ProjectGuid>{16f70716-ba22-4002-95cc-1dafefd6c215}</ProjectGuid>
     <RootNamespace>visHelpers</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>helpers</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

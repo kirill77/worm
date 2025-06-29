@@ -2,7 +2,7 @@
 #include "Cortex.h"
 #include "Medium.h"
 #include "Cell.h"
-#include "log/ILog.h"
+#include "utils/log/ILog.h"
 #include <algorithm>
 #include <cmath>
 

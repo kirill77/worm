@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "ProteinInteractionLoader.h"
 #include "StringDict.h"
-#include "log/ILog.h"
-#include "fileUtils/fileUtils.h"
+#include "utils/log/ILog.h"
+#include "utils/fileUtils/fileUtils.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>

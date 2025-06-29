@@ -6,8 +6,8 @@
 #include <assert.h>
 #include <unordered_map>
 #include <mutex>
-#include "fileUtils/fileUtils.h"
-#include "timeUtils/timeUtils.h"
+#include "utils/fileUtils/fileUtils.h"
+#include "utils/timeUtils/timeUtils.h"
 #include "framework.h"
 #include "ILog.h"
 

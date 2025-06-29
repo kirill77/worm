@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <d3dcompiler.h>
-#include "fileUtils/fileUtils.h"
+#include "utils/fileUtils/fileUtils.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 

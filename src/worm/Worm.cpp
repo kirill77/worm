@@ -8,7 +8,7 @@
 #include "simulation/Cortex.h"
 #include "simulation/Spindle.h"
 #include "molecules/ProteinWiki.h"
-#include "log/ILog.h"
+#include "utils/log/ILog.h"
 #include <chrono> // For high_resolution_clock
 #include <cmath>  // For std::abs
 

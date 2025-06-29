@@ -24,6 +24,7 @@
     <ProjectGuid>{01ebd2e9-ba4f-4da6-bd7d-6cfb05656e77}</ProjectGuid>
     <RootNamespace>molecules</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>chemistry</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

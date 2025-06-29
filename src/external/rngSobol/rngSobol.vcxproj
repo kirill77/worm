@@ -30,6 +30,7 @@
     <ProjectGuid>{b6f0dd41-3bc3-4195-be1c-d3b0676927e1}</ProjectGuid>
     <RootNamespace>rngSobol</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>sobol</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -3,7 +3,7 @@
 #include "simulation/Organism.h"
 #include "molecules/DNA.h"
 #include "simulation/Chromosome.h"
-#include "DataCollector/DataCollector.h"
+#include "utils/dataCollector/DataCollector.h"
 #include <memory>
 
 class Worm : public Organism
