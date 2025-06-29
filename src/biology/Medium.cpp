@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Medium.h"
-#include "molecules/ProteinWiki.h"
-#include "molecules/ResourceDistributor.h"
+#include "chemistry/ProteinWiki.h"
+#include "chemistry/ResourceDistributor.h"
 #include <random>
 #include <algorithm>
 #include <cassert>
-#include "molecules/GridCell.h"
+#include "chemistry/GridCell.h"
 
 // Global random number generator for consistent randomness
 static std::mt19937 g_rng(std::random_device{}());

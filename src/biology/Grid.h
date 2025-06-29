@@ -3,7 +3,7 @@
 #include <vector>
 #include <array>
 #include "geometry/vectors/vector.h"
-#include "molecules/GridCell.h"
+#include "chemistry/GridCell.h"
 
 struct Grid
 {

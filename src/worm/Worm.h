@@ -1,8 +1,8 @@
 #pragma once
 
-#include "simulation/Organism.h"
-#include "molecules/DNA.h"
-#include "simulation/Chromosome.h"
+#include "biology/Organism.h"
+#include "chemistry/DNA.h"
+#include "biology/Chromosome.h"
 #include "utils/dataCollector/DataCollector.h"
 #include <memory>
 

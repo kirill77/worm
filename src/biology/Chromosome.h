@@ -1,7 +1,7 @@
 #pragma once
 
 #include "geometry/vectors/vector.h"
-#include "molecules/DNA.h"
+#include "chemistry/DNA.h"
 #include <memory>
 
 class Chromosome

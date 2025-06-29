@@ -2,7 +2,7 @@
 #include "Spindle.h"
 #include "Cell.h"
 #include "Medium.h"
-#include "molecules/StringDict.h"
+#include "chemistry/StringDict.h"
 #include <algorithm>
 
 void Spindle::update(double dt, Cell& cell)

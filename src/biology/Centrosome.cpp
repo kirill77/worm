@@ -2,7 +2,7 @@
 #include "Centrosome.h"
 #include "Cell.h"
 #include "Medium.h"
-#include "molecules/ProteinWiki.h"
+#include "chemistry/ProteinWiki.h"
 #include "utils/log/ILog.h"
 
 Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& position)

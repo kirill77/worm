@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "CellTypes.h"
 #include "Chromosome.h"
-#include "molecules/StringDict.h"
+#include "chemistry/StringDict.h"
 
 enum class CellCycleState
 {

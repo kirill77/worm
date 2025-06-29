@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test1", "test1\test1.vcxproj", "{239F659B-1E3B-49F1-B1B7-6713D4481F50}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biology", "simulation\simulation.vcxproj", "{627B77B9-319E-4BBD-B6A4-12C710D64840}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biology", "biology\simulation.vcxproj", "{627B77B9-319E-4BBD-B6A4-12C710D64840}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vectors", "geometry\vectors\math.vcxproj", "{7C9F50A8-B47C-4FB7-AF84-5822C3888B07}"
 EndProject
@@ -29,7 +29,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connectedMesh", "geometry\c
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "helpers", "visHelpers\visHelpers.vcxproj", "{16F70716-BA22-4002-95CC-1DAFEFD6C215}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chemistry", "molecules\molecules.vcxproj", "{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chemistry", "chemistry\molecules.vcxproj", "{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sobol", "external\rngSobol\rngSobol.vcxproj", "{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}"
 EndProject

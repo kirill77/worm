@@ -157,10 +157,10 @@
     <ProjectReference Include="..\utils\log\Log.vcxproj">
       <Project>{e08b404e-79fe-4f0b-a796-a961900cd558}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\molecules\molecules.vcxproj">
+    <ProjectReference Include="..\chemistry\molecules.vcxproj">
       <Project>{01ebd2e9-ba4f-4da6-bd7d-6cfb05656e77}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\simulation\simulation.vcxproj">
+    <ProjectReference Include="..\biology\simulation.vcxproj">
       <Project>{627b77b9-319e-4bbd-b6a4-12c710d64840}</Project>
     </ProjectReference>
     <ProjectReference Include="..\geometry\tensionSphere\tensionSphere.vcxproj">
