@@ -3,7 +3,7 @@
 #include <memory>
 #include <unordered_map>
 #include "GPUResource.h"
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include <d3d12.h>
 #include <wrl/client.h>
 

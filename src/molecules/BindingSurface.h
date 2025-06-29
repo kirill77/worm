@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include "Molecule.h"
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include "ProteinWiki.h"
 
 /**

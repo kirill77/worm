@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test1", "test1\test1.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biology", "simulation\simulation.vcxproj", "{627B77B9-319E-4BBD-B6A4-12C710D64840}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vectors", "math\math.vcxproj", "{7C9F50A8-B47C-4FB7-AF84-5822C3888B07}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vectors", "geometry\vectors\math.vcxproj", "{7C9F50A8-B47C-4FB7-AF84-5822C3888B07}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "log", "utils\log\Log.vcxproj", "{E08B404E-79FE-4F0B-A796-A961900CD558}"
 EndProject
@@ -21,11 +21,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csvFile", "utils\csvFile\CS
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataCollector", "utils\dataCollector\DataCollector.vcxproj", "{05A61EC7-4C44-4895-A25D-FF9C949DAC28}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tensionSphere", "TensionSphere\TensionSphere.vcxproj", "{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tensionSphere", "geometry\tensionSphere\TensionSphere.vcxproj", "{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpu", "visualization\visualization.vcxproj", "{250EF3CC-B8D1-4814-8AE1-4A5AD649AF73}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connectedMesh", "connectedMesh\connectedMesh.vcxproj", "{047F1162-DF2E-4DE4-A3DF-5A904BF4659B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connectedMesh", "geometry\connectedMesh\connectedMesh.vcxproj", "{047F1162-DF2E-4DE4-A3DF-5A904BF4659B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "helpers", "visHelpers\visHelpers.vcxproj", "{16F70716-BA22-4002-95CC-1DAFEFD6C215}"
 EndProject

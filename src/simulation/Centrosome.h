@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Organelle.h"
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 
 class Centrosome : public Organelle
 {

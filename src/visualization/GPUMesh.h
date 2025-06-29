@@ -2,8 +2,8 @@
 
 #include <memory>
 #include <vector>
-#include "math/vector.h"
-#include "math/box.h"
+#include "geometry/vectors/vector.h"
+#include "geometry/vectors/box.h"
 #include <d3d12.h>
 #include <wrl/client.h>
 

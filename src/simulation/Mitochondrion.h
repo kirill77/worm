@@ -2,7 +2,7 @@
 
 #include "Organelle.h"
 #include "Medium.h"
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include <random>
 
 class Mitochondrion : public Organelle

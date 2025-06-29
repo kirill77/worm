@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include "molecules/Molecule.h"
 #include "molecules/MRNA.h"
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include "molecules/ProteinWiki.h"
 #include "molecules/GridCell.h"
 #include "Grid.h"

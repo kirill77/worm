@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
-#include "math/vector.h"
-#include "connectedMesh/connectedMesh.h"
+#include "geometry/vectors/vector.h"
+#include "geometry/connectedMesh/connectedMesh.h"
 
 /**
  * @brief Class for simulating tension forces in a spherical cell cortex using a geodesic sphere model

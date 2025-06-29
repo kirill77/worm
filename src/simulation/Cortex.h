@@ -3,8 +3,8 @@
 #include <memory>
 #include "Medium.h"
 #include "Organelle.h"
-#include "math/vector.h"
-#include "tensionSphere/tensionSphere.h"
+#include "geometry/vectors/vector.h"
+#include "geometry/tensionSphere/tensionSphere.h"
 
 /**
  * The Cortex class represents the cell membrane that separates

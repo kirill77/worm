@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include "molecules/DNA.h"
 #include <memory>
 

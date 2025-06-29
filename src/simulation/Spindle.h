@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Organelle.h"
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include "CellTypes.h"
 
 class Spindle : public Organelle

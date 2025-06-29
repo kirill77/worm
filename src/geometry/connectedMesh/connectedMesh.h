@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <cstdint>
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 
 class ConnectedMesh {
 public:

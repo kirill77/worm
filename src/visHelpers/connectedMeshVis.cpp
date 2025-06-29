@@ -1,7 +1,7 @@
 #include "connectedMeshVis.h"
 #include "visualization/GPUMesh.h"
 #include "visualization/Window.h"
-#include "connectedMesh/connectedMesh.h"
+#include "geometry/connectedMesh/connectedMesh.h"
 #include <stdexcept>
 
 ConnectedMeshVis::ConnectedMeshVis(std::shared_ptr<Window> pWindow)

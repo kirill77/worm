@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "math/box.h"
+#include "geometry/vectors/box.h"
 #include "visualization/Window.h"
 
 class GPUCamera;

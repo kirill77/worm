@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <array>
-#include "math/vector.h"
+#include "geometry/vectors/vector.h"
 #include "molecules/GridCell.h"
 
 struct Grid
