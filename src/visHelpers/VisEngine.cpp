@@ -29,6 +29,9 @@ static std::shared_ptr<ConnectedMeshVis> createCortexVis(
 
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 {
+    // Store the organism for later use
+    m_pOrganism = pOrganism;
+
     // Initialize protein interaction data
     ProteinWiki::Initialize();
 
@@ -45,11 +48,6 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
     // Initialize GPU text
     m_gpuText = std::make_unique<GPUText>(m_pGpuWorld->getFont());
     m_gpuText->printf("Hello World!");
-
-    // Create cortex visualization
-    ObjectData objData;
-    objData.m_pObject = createCortexVis(pOrganism, m_pWindow);
-    m_pObjects.push_back(objData);
 
     // Initialize camera UI
     m_cameraUI.attachToCamera(m_pGpuWorld->getCamera());
@@ -75,19 +73,8 @@ bool VisEngine::update(float fDtSec)
     // Simulate one step
     m_pWorld->simulateStep(fDtSec);
 
-    // visualize all the objects
-    for (uint32_t u = 0; u < m_pObjects.size(); ++u)
-    {
-        auto& object = m_pObjects[u];
-        auto pGpuMesh = object.m_pObject->updateAndGetGpuMesh();
-        // add mesh to the world if needed
-        if (object.m_pGpuMesh != pGpuMesh)
-        {
-            object.m_pGpuMesh = pGpuMesh;
-            m_pGpuWorld->addMesh(object.m_pGpuMesh);
-        }
-        m_cameraUI.setWorldBox(*object.m_pObject->getConnectedBox());
-    }
+    // Update GPU meshes
+    updateGpuMeshes();
 
     auto* pSwapChain = m_pWindow->getSwapChain();
     auto pGpuQueue = pSwapChain->getGPUQueue();
@@ -105,6 +92,38 @@ bool VisEngine::update(float fDtSec)
     ThrowIfFailed(pSwapChain->getSwapChain()->Present(1, 0));
 
     return true;
+}
+
+void VisEngine::updateGpuMeshes()
+{
+    // Process all organelles that have visualization contexts
+    auto cells = m_pOrganism->getCells();
+    for (auto& cell : cells)
+    {
+        // For now, we only visualize the cortex, but this can be extended
+        auto pCortex = cell->getCortex();
+        if (pCortex)
+        {
+            // Initialize cortex visualization if needed  
+            if (!pCortex->getVisObjectContext())
+            {
+                auto pVisContext = std::make_shared<VisObjectContext>();
+                pVisContext->m_pObject = createCortexVis(m_pOrganism, m_pWindow);
+                pCortex->setVisObjectContext(pVisContext);
+            }
+
+            auto pVisContext = pCortex->getVisObjectContext();
+            auto pGpuMesh = pVisContext->m_pObject->updateAndGetGpuMesh();
+   
+            // Add mesh to the world if needed
+            if (pVisContext->m_pGpuMesh != pGpuMesh)
+            {
+                pVisContext->m_pGpuMesh = pGpuMesh;
+                m_pGpuWorld->addMesh(pVisContext->m_pGpuMesh);
+            }
+            m_cameraUI.setWorldBox(*pVisContext->m_pObject->getConnectedBox());
+        }
+    }
 }
 
 void VisEngine::shutdown()

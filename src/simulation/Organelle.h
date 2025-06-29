@@ -5,6 +5,7 @@
 class Cell;
 class Medium;
 enum class CellCycleState;
+struct VisObjectContext;
 
 /**
  * Base class for all cellular organelles.
@@ -14,6 +15,7 @@ class Organelle : public BindingSurface
 {
 private:
     std::weak_ptr<Cell> m_pCell;  // Reference to the cell containing this organelle
+    std::shared_ptr<VisObjectContext> m_pVisContext;  // Visualization context for this organelle
 
 public:
     /**
@@ -45,5 +47,19 @@ public:
      * @return Shared pointer to the cell, or nullptr if the cell no longer exists
      */
     std::shared_ptr<Cell> getCell() const { return m_pCell.lock(); }
+
+    /**
+     * Get the visualization context for this organelle
+     * 
+     * @return Shared pointer to the visualization context
+     */
+    std::shared_ptr<VisObjectContext> getVisObjectContext() const { return m_pVisContext; }
+
+    /**
+     * Set the visualization context for this organelle
+     * 
+     * @param pVisContext Shared pointer to the visualization context
+     */
+    void setVisObjectContext(std::shared_ptr<VisObjectContext> pVisContext) { m_pVisContext = pVisContext; }
 };
 
