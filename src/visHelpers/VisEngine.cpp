@@ -47,7 +47,6 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 
     // Initialize GPU text
     m_gpuText = std::make_unique<GPUText>(m_pGpuWorld->getFont());
-    m_gpuText->printf("https://github.com/kirill77/worm");
 
     // Initialize camera UI
     m_cameraUI.attachToCamera(m_pGpuWorld->getCamera());
@@ -75,6 +74,9 @@ bool VisEngine::update(float fDtSec)
 
     // Update GPU meshes
     updateGpuMeshes();
+
+    // Update text with current simulation time
+    m_gpuText->printf("%.2lf sec", m_pWorld->getCurrentTime());
 
     auto* pSwapChain = m_pWindow->getSwapChain();
     auto pGpuQueue = pSwapChain->getGPUQueue();
