@@ -138,7 +138,7 @@ void Worm::setupDataCollector()
     // Get membrane-bound protein names using the utility function
     std::string par2Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::BS_CORTEX);
     std::string par3Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::BS_CORTEX);
-    std::string bindingSiteCortex = ProteinWiki::GetBindingSiteName(StringDict::ID::BS_CORTEX);
+    std::string bindingSiteCortex = StringDict::idToString(StringDict::ID::BS_CORTEX);
     
     // Add collection points with specific proteins to track
     m_pDataCollector->addCollectionPoint(

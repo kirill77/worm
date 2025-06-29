@@ -87,12 +87,7 @@ std::string ProteinWiki::GetPhosphorylatedName(const std::string& proteinName)
     return proteinName + "-P";
 }
 
-std::string ProteinWiki::GetBindingSiteName(StringDict::ID surface)
-{
-    return "BINDING-SITE-" + StringDict::idToString(surface);
-}
-
 std::string ProteinWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {
-    return proteinName + "-" + StringDict::idToString(surface);
+    return proteinName + ":" + StringDict::idToString(surface);
 }

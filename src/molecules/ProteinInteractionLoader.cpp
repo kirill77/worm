@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "ProteinInteractionLoader.h"
+#include "StringDict.h"
 #include "log/ILog.h"
 #include "fileUtils/fileUtils.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <cassert>
 
 // Define the expected CSV file names
 static const std::string PHOSPHORYLATION_FILE = "phosphorylation.csv";
@@ -22,6 +24,39 @@ static std::string TrimWhitespace(const std::string& str) {
     }).base();
     
     return (start < end) ? std::string(start, end) : std::string();
+}
+
+// Helper function to validate that a protein name exists in StringDict
+// Handles complex proteins separated by colons (e.g., "PAR-1:CDC-42")
+static void ValidateProteinName(const std::string& proteinName, const std::string& context) {
+    if (proteinName.empty()) {
+        LOG_ERROR("Empty protein name found in %s", context.c_str());
+        assert(false && "Empty protein name in CSV file");
+        return;
+    }
+    
+    // Split protein name by colons to handle complex proteins
+    std::stringstream ss(proteinName);
+    std::string individualProtein;
+    
+    while (std::getline(ss, individualProtein, ':')) {
+        // Trim whitespace from individual protein name
+        individualProtein = TrimWhitespace(individualProtein);
+        
+        if (individualProtein.empty()) {
+            LOG_ERROR("Empty individual protein name in complex protein '%s' (context: %s)", 
+                      proteinName.c_str(), context.c_str());
+            assert(false && "Empty individual protein name in complex protein from CSV file");
+            continue;
+        }
+        
+        StringDict::ID id = StringDict::stringToId(individualProtein);
+        if (id == StringDict::ID::eUNKNOWN) {
+            LOG_ERROR("Individual protein '%s' from complex protein '%s' not found in StringDict (context: %s). This indicates a typo or missing definition in StringDict.", 
+                      individualProtein.c_str(), proteinName.c_str(), context.c_str());
+            assert(false && "Individual protein name from CSV file not found in StringDict");
+        }
+    }
 }
 
 std::vector<std::shared_ptr<ProteinInteraction>> ProteinInteractionLoader::LoadAllInteractions(const std::string& basePath)
@@ -124,6 +159,10 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
             double removalRate = std::stod(values[2]);
             double saturationConstant = std::stod(values[3]);
             
+            // Validate protein names
+            ValidateProteinName(kinaseName, "phosphorylation kinase");
+            ValidateProteinName(targetName, "phosphorylation target");
+            
             // Create interaction parameters
             PhosphorylationInteraction::Parameters params{
                 removalRate,
@@ -183,6 +222,9 @@ std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoa
             // Extract values
             std::string targetName = values[0]; // Already trimmed
             double recoveryRate = std::stod(values[1]);
+            
+            // Validate protein name
+            ValidateProteinName(targetName, "dephosphorylation target");
             
             // Create interaction parameters
             DephosphorylationInteraction::Parameters params{
@@ -246,6 +288,11 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> ProteinInteractionLoad
             double dissociationRate = std::stod(values[3]);
             double saturationConstant = std::stod(values[4]);
             std::string complexName = values.size() > 5 ? values[5] : firstProtein + "-" + secondProtein;
+            
+            // Validate protein names
+            ValidateProteinName(firstProtein, "complex formation first protein");
+            ValidateProteinName(secondProtein, "complex formation second protein");
+            ValidateProteinName(complexName, "complex formation complex name");
             
             // Create interaction parameters
             ComplexFormationInteraction::Parameters params{

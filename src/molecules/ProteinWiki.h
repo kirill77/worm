@@ -33,9 +33,6 @@ public:
     // Utility function to get the name of a phosphorylated protein
     static std::string GetPhosphorylatedName(const std::string& proteinName);
     
-    // Get the binding site name for a specific surface
-    static std::string GetBindingSiteName(StringDict::ID surface);
-    
     // Get the bound protein name for a protein on a specific surface
     static std::string GetBoundProteinName(const std::string& proteinName, StringDict::ID surface);
 }; 

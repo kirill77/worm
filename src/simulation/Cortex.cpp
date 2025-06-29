@@ -189,7 +189,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 );
                 
                 // Create binding site protein and add to the medium
-                MPopulation bindingSites(ProteinWiki::GetBindingSiteName(StringDict::ID::BS_CORTEX), amountPerPosition);
+                MPopulation bindingSites(StringDict::idToString(StringDict::ID::BS_CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 internalMedium.addProtein(bindingSites, normalizedPos);
             }
