@@ -6,7 +6,6 @@
 
 ConnectedMeshVis::ConnectedMeshVis(std::shared_ptr<Window> pWindow)
 {
-    m_pBox = std::make_shared<box3>(box<float, 3>::empty());
     m_pGPUMesh = std::make_shared<GPUMesh>(pWindow->getDevice());
 }
 
@@ -34,7 +33,6 @@ void ConnectedMeshVis::updateGPUMesh()
     {
         GPUMesh::Vertex gpuVertex;
         convertVector(gpuVertex.vPos, m_pMesh->getVertexPosition(i));
-        *m_pBox |= gpuVertex.vPos;
         gpuVertices.push_back(gpuVertex);
     }
 

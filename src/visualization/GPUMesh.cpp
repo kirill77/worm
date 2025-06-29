@@ -59,6 +59,27 @@ GPUMesh::GPUMesh(Microsoft::WRL::ComPtr<ID3D12Device> device)
 
 void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles)
 {
+    // Compute bounding box from vertices
+    if (!pVertices.empty())
+    {
+        float3 minPoint = pVertices[0].vPos;
+        float3 maxPoint = pVertices[0].vPos;
+        
+        for (size_t i = 1; i < pVertices.size(); ++i)
+        {
+            const float3& pos = pVertices[i].vPos;
+            minPoint = min(minPoint, pos);
+            maxPoint = max(maxPoint, pos);
+        }
+        
+        m_boundingBox = box3(minPoint, maxPoint);
+    }
+    else
+    {
+        // Empty box for empty geometry
+        m_boundingBox = box3::empty();
+    }
+    
     // Create vertex buffer using CPU-visible upload heap
     const UINT vbSize = static_cast<UINT>(pVertices.size() * sizeof(Vertex));
     m_vertexBuffer = createOrUpdateUploadBuffer(

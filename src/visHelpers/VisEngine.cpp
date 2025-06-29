@@ -96,6 +96,9 @@ bool VisEngine::update(float fDtSec)
 
 void VisEngine::updateGpuMeshes()
 {
+    // Initialize combined bounding box as empty
+    box3 combinedBoundingBox = box3::empty();
+
     // Process all organelles that have visualization contexts
     auto cells = m_pOrganism->getCells();
     for (auto& cell : cells)
@@ -121,8 +124,20 @@ void VisEngine::updateGpuMeshes()
                 pVisContext->m_pGpuMesh = pGpuMesh;
                 m_pGpuWorld->addMesh(pVisContext->m_pGpuMesh);
             }
-            m_cameraUI.setWorldBox(*pVisContext->m_pObject->getConnectedBox());
+            
+            // Combine this mesh's bounding box with the overall bounding box
+            if (pGpuMesh)
+            {
+                const box3& meshBoundingBox = pGpuMesh->getBoundingBox();
+                combinedBoundingBox = combinedBoundingBox | meshBoundingBox;
+            }
         }
+    }
+    
+    // Set the world box with the combined bounding box of all meshes
+    if (!combinedBoundingBox.isempty())
+    {
+        m_cameraUI.setWorldBox(combinedBoundingBox);
     }
 }
 
