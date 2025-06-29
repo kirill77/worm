@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "visHelpers", "visHelpers\vi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "molecules", "molecules\molecules.vcxproj", "{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rngSobol", "external\rngSobol\rngSobol.vcxproj", "{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -151,6 +153,14 @@ Global
 		{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}.Release|x64.Build.0 = Release|x64
 		{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}.Release|x86.ActiveCfg = Release|Win32
 		{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}.Release|x86.Build.0 = Release|Win32
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Debug|x64.ActiveCfg = Debug|x64
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Debug|x64.Build.0 = Debug|x64
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Debug|x86.ActiveCfg = Debug|Win32
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Debug|x86.Build.0 = Debug|Win32
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Release|x64.ActiveCfg = Release|x64
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Release|x64.Build.0 = Release|x64
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Release|x86.ActiveCfg = Release|Win32
+		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,3 +1,6 @@
 [submodule "src/external/stb"]
 	path = src/external/stb
 	url = https://github.com/nothings/stb.git
+[submodule "src/external/rngSobol/src"]
+	path = src/external/rngSobol/src
+	url = https://github.com/kirill77/RNGSobol.git

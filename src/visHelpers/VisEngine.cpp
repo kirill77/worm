@@ -47,7 +47,7 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 
     // Initialize GPU text
     m_gpuText = std::make_unique<GPUText>(m_pGpuWorld->getFont());
-    m_gpuText->printf("Hello World!");
+    m_gpuText->printf("https://github.com/kirill77/worm");
 
     // Initialize camera UI
     m_cameraUI.attachToCamera(m_pGpuWorld->getCamera());
