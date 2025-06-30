@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "geometry/vectors/box.h"
-#include "visualization/Window.h"
+#include "visualization/gpu/Window.h"
 
 class GPUCamera;
 

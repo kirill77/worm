@@ -1,5 +1,5 @@
 #include "cameraUI.h"
-#include "visualization/GPUCamera.h"
+#include "visualization/gpu/GPUCamera.h"
 #include <cmath>
 
 CameraUI::CameraUI()

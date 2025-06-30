@@ -116,7 +116,7 @@ void GPUWorld::initializeRenderResources()
 
     {
         // Fallback: Compile shaders at runtime
-        std::wstring shaderPath = L"visualization/Shaders/";
+        std::wstring shaderPath = L"visualization/gpu/Shaders/";
         if (!vertexShader)
             vertexShader = shaderHelper.loadShader(shaderPath + L"VertexShader.hlsl", "main", "vs_5_0", compileFlags);
         if (!pixelShader)

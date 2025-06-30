@@ -3,15 +3,15 @@
 #include "biology/Organism.h"
 #include "biology/Cell.h"
 #include "biology/Cortex.h"
-#include "visualization/Window.h"
-#include "visualization/GPUWorld.h"
-#include "visualization/GPUStats.h"
-#include "visualization/GPUText.h"
-#include "visHelpers/ConnectedMeshVis.h"
-#include "visHelpers/CameraUI.h"
+#include "visualization/gpu/Window.h"
+#include "visualization/gpu/GPUWorld.h"
+#include "visualization/gpu/GPUStats.h"
+#include "visualization/gpu/GPUText.h"
+#include "visualization/helpers/ConnectedMeshVis.h"
+#include "visualization/helpers/CameraUI.h"
 #include "chemistry/ProteinWiki.h"
 #include "utils/log/ILog.h"
-#include "visualization/DirectXHelpers.h"
+#include "visualization/gpu/DirectXHelpers.h"
 
 static std::shared_ptr<ConnectedMeshVis> createCortexVis(
     std::shared_ptr<Organism> pOrganism,

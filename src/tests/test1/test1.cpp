@@ -1,6 +1,6 @@
-#include "worm/Worm.h"
+#include "organisms/worm/Worm.h"
 #include "utils/log/ILog.h"
-#include "visHelpers/VisEngine.h"
+#include "visualization/helpers/VisEngine.h"
 #include <memory>
 
 int main()

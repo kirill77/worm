@@ -239,7 +239,7 @@ void GPUFont::createPSO(ID3D12RootSignature* pRootSignature)
     // Fallback: Compile at runtime
     if (!vertexShader || !pixelShader)
     {
-        shaderPath = L"visualization/Shaders/";
+        shaderPath = L"visualization/gpu/Shaders/";
         if (!vertexShader)
             vertexShader = shaderHelper.loadShader(shaderPath + L"TextVertexShader.hlsl", "main", "vs_5_0", compileFlags);
         if (!pixelShader)

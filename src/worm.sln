@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test1", "test1\test1.vcxproj", "{239F659B-1E3B-49F1-B1B7-6713D4481F50}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test1", "tests\test1\test1.vcxproj", "{239F659B-1E3B-49F1-B1B7-6713D4481F50}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biology", "biology\simulation.vcxproj", "{627B77B9-319E-4BBD-B6A4-12C710D64840}"
 EndProject
@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fileUtils", "utils\fileUtil
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "timeUtils", "utils\timeUtils\timeUtils.vcxproj", "{524ACD5B-2A15-4B58-A2C7-621BB546865F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "worm", "worm\worm.vcxproj", "{AE833F6A-DAB0-4155-9374-D5710023A461}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "worm", "organisms\worm\worm.vcxproj", "{AE833F6A-DAB0-4155-9374-D5710023A461}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csvFile", "utils\csvFile\CSVFile.vcxproj", "{BB747F64-D1FF-4023-A588-C03A903AF0FF}"
 EndProject
@@ -23,11 +23,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataCollector", "utils\data
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tensionSphere", "geometry\tensionSphere\TensionSphere.vcxproj", "{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpu", "visualization\visualization.vcxproj", "{250EF3CC-B8D1-4814-8AE1-4A5AD649AF73}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpu", "visualization\gpu\visualization.vcxproj", "{250EF3CC-B8D1-4814-8AE1-4A5AD649AF73}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connectedMesh", "geometry\connectedMesh\connectedMesh.vcxproj", "{047F1162-DF2E-4DE4-A3DF-5A904BF4659B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "helpers", "visHelpers\visHelpers.vcxproj", "{16F70716-BA22-4002-95CC-1DAFEFD6C215}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "helpers", "visualization\helpers\visHelpers.vcxproj", "{16F70716-BA22-4002-95CC-1DAFEFD6C215}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chemistry", "chemistry\molecules.vcxproj", "{01EBD2E9-BA4F-4DA6-BD7D-6CFB05656E77}"
 EndProject
@@ -44,6 +44,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "organisms", "organisms", "{988C4D4F-075C-415D-B2F3-5C9F498FD288}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{AE13D3A4-E1F5-41AC-AC47-DC49101E6AB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "physics", "physics", "{4DA7D75F-786A-42E7-B600-FD6F34A5566E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -186,7 +188,7 @@ Global
 		{AE833F6A-DAB0-4155-9374-D5710023A461} = {988C4D4F-075C-415D-B2F3-5C9F498FD288}
 		{BB747F64-D1FF-4023-A588-C03A903AF0FF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{05A61EC7-4C44-4895-A25D-FF9C949DAC28} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED} = {EF6A94C3-FE58-43D0-8057-3FFA6D90EB6E}
+		{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED} = {4DA7D75F-786A-42E7-B600-FD6F34A5566E}
 		{250EF3CC-B8D1-4814-8AE1-4A5AD649AF73} = {3EDC5281-470C-457A-8246-8AD7ADF9BBDE}
 		{047F1162-DF2E-4DE4-A3DF-5A904BF4659B} = {EF6A94C3-FE58-43D0-8057-3FFA6D90EB6E}
 		{16F70716-BA22-4002-95CC-1DAFEFD6C215} = {3EDC5281-470C-457A-8246-8AD7ADF9BBDE}

@@ -1,6 +1,6 @@
 #include "connectedMeshVis.h"
-#include "visualization/GPUMesh.h"
-#include "visualization/Window.h"
+#include "visualization/gpu/GPUMesh.h"
+#include "visualization/gpu/Window.h"
 #include "geometry/connectedMesh/connectedMesh.h"
 #include <stdexcept>
 

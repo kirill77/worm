@@ -1,10 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "visHelpers/CameraUI.h"
-#include "visHelpers/VisObjectContext.h"
-#include "visualization/GPUStats.h"
-#include "visualization/GPUText.h"
+#include "visualization/helpers/CameraUI.h"
+#include "visualization/helpers/VisObjectContext.h"
+#include "visualization/gpu/GPUStats.h"
+#include "visualization/gpu/GPUText.h"
 
 // Forward declarations
 struct World;
