@@ -163,7 +163,7 @@
     <ProjectReference Include="..\..\biology\simulation.vcxproj">
       <Project>{627b77b9-319e-4bbd-b6a4-12c710d64840}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\geometry\tensionSphere\tensionSphere.vcxproj">
+    <ProjectReference Include="..\..\physics\tensionSphere\tensionSphere.vcxproj">
       <Project>{7cf8fae5-8ffb-4ce7-90ba-42b13931f4ed}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\utils\timeUtils\timeUtils.vcxproj">

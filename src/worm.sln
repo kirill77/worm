@@ -21,7 +21,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csvFile", "utils\csvFile\CS
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataCollector", "utils\dataCollector\DataCollector.vcxproj", "{05A61EC7-4C44-4895-A25D-FF9C949DAC28}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tensionSphere", "geometry\tensionSphere\TensionSphere.vcxproj", "{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tensionSphere", "physics\tensionSphere\TensionSphere.vcxproj", "{7CF8FAE5-8FFB-4CE7-90BA-42B13931F4ED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpu", "visualization\gpu\visualization.vcxproj", "{250EF3CC-B8D1-4814-8AE1-4A5AD649AF73}"
 EndProject
