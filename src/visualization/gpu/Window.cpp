@@ -81,6 +81,26 @@ Window::~Window() {
 }
 
 bool Window::createWindowDevicAndSwapChain(const std::string& sName) {
+    // Disable Windows DPI scaling - we'll handle scaling ourselves
+    // Try the newer API first (Windows 10 version 1703+)
+    typedef BOOL(WINAPI* SetProcessDpiAwarenessContextProc)(DPI_AWARENESS_CONTEXT);
+    HMODULE user32 = GetModuleHandle(L"user32.dll");
+    if (user32) {
+        SetProcessDpiAwarenessContextProc setProcessDpiAwarenessContext = 
+            (SetProcessDpiAwarenessContextProc)GetProcAddress(user32, "SetProcessDpiAwarenessContext");
+        if (setProcessDpiAwarenessContext) {
+            // Tell Windows we are per-monitor DPI aware but will handle scaling ourselves
+            setProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        } else {
+            // Fallback for older Windows versions
+            SetProcessDPIAware();
+        }
+    }
+
+    // Get desktop resolution and set window size to match
+    m_width = GetSystemMetrics(SM_CXSCREEN);
+    m_height = GetSystemMetrics(SM_CYSCREEN);
+
     // Register window class
     WNDCLASSEX windowClass = {};
     windowClass.cbSize = sizeof(WNDCLASSEX);
@@ -93,7 +113,7 @@ bool Window::createWindowDevicAndSwapChain(const std::string& sName) {
 
     // Create window
     RECT windowRect = { 0, 0, static_cast<LONG>(m_width), static_cast<LONG>(m_height) };
-    AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+    AdjustWindowRect(&windowRect, WS_POPUP, FALSE);
 
     // Convert string name to wstring
     std::wstring wideName(sName.begin(), sName.end());
@@ -101,7 +121,7 @@ bool Window::createWindowDevicAndSwapChain(const std::string& sName) {
     m_hwnd = CreateWindow(
         windowClass.lpszClassName,
         wideName.c_str(),
-        WS_OVERLAPPEDWINDOW,
+        WS_POPUP,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
         windowRect.right - windowRect.left,
