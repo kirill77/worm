@@ -16,7 +16,7 @@ GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue)
     m_pCamera->setFOV(45.0f);
 
     // Create GPU font using the temporary queue
-    m_pFont = std::make_shared<GPUFont>(24, pGpuQueue); // 24px font size
+    m_pFont = std::make_shared<GPUFont>(48, pGpuQueue); // 48px font size
     
     // Initialize Direct3D rendering resources
     initializeRenderResources();
