@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Chromosome.h"
-#include "Cell.h"
+#include "chemistry/StringDict.h"
+#include "biology/Cell.h"
 #include "Medium.h"
 #include "Spindle.h"
 #include "chemistry/MRNA.h"
@@ -18,7 +19,7 @@ void Chromosome::update(double fDt, Cell& cell, Medium& medium)
             if (!m_bIsAttached && !m_bIsSeparated)
             {
                 // Try to attach to spindle if not already attached
-                if (auto pSpindle = cell.getSpindle())
+                if (auto pSpindle = std::dynamic_pointer_cast<Spindle>(cell.getOrganelle(StringDict::ID::ORGANELLE_SPINDLE)))
                 {
                     tryAttachToSpindle(*pSpindle);
                 }
@@ -34,7 +35,7 @@ void Chromosome::update(double fDt, Cell& cell, Medium& medium)
             if (m_bIsAttached && m_bIsSeparated)
             {
                 // Move along spindle after separation
-                if (auto pSpindle = cell.getSpindle())
+                if (auto pSpindle = std::dynamic_pointer_cast<Spindle>(cell.getOrganelle(StringDict::ID::ORGANELLE_SPINDLE)))
                 {
                     moveAlongSpindle(*pSpindle, static_cast<float>(fDt));
                 }

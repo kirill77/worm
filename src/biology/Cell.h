@@ -39,7 +39,6 @@ private:
 
     // Helper functions
     void checkCellCycleTransitions();
-    std::shared_ptr<class Mitochondrion> getMitochondrion() const;
     void createSpindle();
     void destroySpindle();
     void initializeOrganelles();  // Initialize organelles after construction
@@ -63,17 +62,12 @@ public:
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
     
-    std::shared_ptr<class Cortex> getCortex() const;
-    
     // Access to internal medium
     Medium& getInternalMedium() const { return *m_pInternalMedium; }
     
-    std::shared_ptr<class Spindle> getSpindle() const;  // Made public for Chromosome access
-
     // Organelle management
     void addOrganelle(StringDict::ID id, std::shared_ptr<Organelle> pOrganelle);
     std::shared_ptr<Organelle> getOrganelle(StringDict::ID id) const;  // Generic organelle getter
-    std::shared_ptr<class Centrosome> getCentrosome() const;  // Get centrosome if it exists
 
     // ATP-related functions
     bool consumeATP(double fAmount);

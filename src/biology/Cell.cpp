@@ -48,22 +48,14 @@ void Cell::initializeCortex()
         std::make_shared<Cortex>(std::weak_ptr<Cell>(shared_from_this()));
         
     // Initialize binding sites in the cortex
-    auto pCortex = getCortex();
+    auto pCortex = std::dynamic_pointer_cast<Cortex>(getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
     if (pCortex)
     {
         pCortex->initializeBindingSites(4000000.0);
     }
 }
 
-std::shared_ptr<Cortex> Cell::getCortex() const
-{
-    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_CORTEX);
-    if (index < m_pOrganelles.size() && m_pOrganelles[index])
-    {
-        return std::dynamic_pointer_cast<Cortex>(m_pOrganelles[index]);
-    }
-    return nullptr;
-}
+
 
 void Cell::update(double fDt)
 {
@@ -79,15 +71,7 @@ void Cell::update(double fDt)
     checkCellCycleTransitions();
 }
 
-std::shared_ptr<Mitochondrion> Cell::getMitochondrion() const
-{
-    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_MITOCHONDRION);
-    if (index < m_pOrganelles.size() && m_pOrganelles[index])
-    {
-        return std::dynamic_pointer_cast<Mitochondrion>(m_pOrganelles[index]);
-    }
-    return nullptr;
-}
+
 
 bool Cell::consumeATP(double fAmount)
 {
@@ -122,7 +106,7 @@ void Cell::checkCellCycleTransitions()
             // Transition to metaphase requires energy for spindle formation
             if (consumeATP(ATPCosts::fSPINDLE_FORMATION))
             {
-                if (auto pSpindle = getSpindle())
+                if (auto pSpindle = std::dynamic_pointer_cast<Spindle>(getOrganelle(StringDict::ID::ORGANELLE_SPINDLE)))
                 {
                     if (pSpindle->isAssembled())
                     {
@@ -177,7 +161,7 @@ void Cell::checkCellCycleTransitions()
 void Cell::createSpindle()
 {
     // Only create if we don't already have one
-    if (!getSpindle())
+    if (!getOrganelle(StringDict::ID::ORGANELLE_SPINDLE))
     {
         size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_SPINDLE);
         m_pOrganelles[index] = std::make_shared<Spindle>(std::weak_ptr<Cell>(shared_from_this()), m_type);
@@ -193,15 +177,7 @@ void Cell::destroySpindle()
     }
 }
 
-std::shared_ptr<Spindle> Cell::getSpindle() const
-{
-    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_SPINDLE);
-    if (index < m_pOrganelles.size() && m_pOrganelles[index])
-    {
-        return std::dynamic_pointer_cast<Spindle>(m_pOrganelles[index]);
-    }
-    return nullptr;
-}
+
 
 void Cell::addOrganelle(StringDict::ID id, std::shared_ptr<Organelle> pOrganelle)
 {
@@ -223,12 +199,4 @@ std::shared_ptr<Organelle> Cell::getOrganelle(StringDict::ID id) const
     return nullptr;
 }
 
-std::shared_ptr<Centrosome> Cell::getCentrosome() const
-{
-    size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_CENTROSOME);
-    if (index < m_pOrganelles.size() && m_pOrganelles[index])
-    {
-        return std::dynamic_pointer_cast<Centrosome>(m_pOrganelles[index]);
-    }
-    return nullptr;
-}
+

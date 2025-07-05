@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Worm.h"
+#include "chemistry/StringDict.h"
 #include "biology/Cell.h"
 #include "biology/Centrosome.h"
 #include "biology/CellTypes.h"
@@ -254,7 +255,7 @@ bool Worm::validateAsymmetricDivision(float fTimeSec) const
     // Only check during late stages (after 15 minutes)
     if (fTimeSec < SPINDLE_ASSEMBLY_START_SEC) return true;
     
-    auto pSpindle = m_pCells[0]->getSpindle();
+    auto pSpindle = std::dynamic_pointer_cast<Spindle>(m_pCells[0]->getOrganelle(StringDict::ID::ORGANELLE_SPINDLE));
     float3 spindlePos = pSpindle->getPosition();
     
     if (spindlePos.y > -0.1f) {
@@ -267,7 +268,7 @@ bool Worm::validateAsymmetricDivision(float fTimeSec) const
 
 bool Worm::validateCentrosomeBehavior(float fTimeSec) const
 {
-    auto pCentrosome = m_pCells[0]->getCentrosome();
+    auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(m_pCells[0]->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
     if (!pCentrosome) {
         // Before fertilization, there should be no centrosome
         if (fTimeSec < 1.0f) {  // Assume fertilization happens within 1 second

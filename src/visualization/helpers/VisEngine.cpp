@@ -20,7 +20,7 @@ static std::shared_ptr<ConnectedMeshVis> createCortexVis(
 {
     // get a connected mesh that shows how the cortex looks like
     auto pCell = pOrganism->getCells()[0];
-    auto pCortex = pCell->getCortex();
+    auto pCortex = std::dynamic_pointer_cast<Cortex>(pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
     auto pConnectedMesh = pCortex->getTensionSphere().getConnectedMesh();
 
     std::shared_ptr<ConnectedMeshVis> pCortexVis = std::make_shared<ConnectedMeshVis>(pWindow);
