@@ -9,7 +9,7 @@ struct GPUQueue;
 
 struct ConnectedMeshVis : public IObjectVis
 {
-    ConnectedMeshVis(std::shared_ptr<Window>);
+    ConnectedMeshVis(GPUQueue* pQueue);
 
     void setConnectedMesh(std::shared_ptr<ConnectedMesh> pMesh) { m_pMesh = pMesh; }
 

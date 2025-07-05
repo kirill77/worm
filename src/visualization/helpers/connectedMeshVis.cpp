@@ -4,9 +4,9 @@
 #include "geometry/connectedMesh/connectedMesh.h"
 #include <stdexcept>
 
-ConnectedMeshVis::ConnectedMeshVis(std::shared_ptr<Window> pWindow)
+ConnectedMeshVis::ConnectedMeshVis(GPUQueue *pQueue)
 {
-    m_pGPUMesh = std::make_shared<GPUMesh>(pWindow->getDevice());
+    m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
 std::shared_ptr<GPUMesh> ConnectedMeshVis::updateAndGetGpuMesh()

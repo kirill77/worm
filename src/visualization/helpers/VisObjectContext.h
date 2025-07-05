@@ -8,7 +8,7 @@ struct IObjectVis;
 class GPUMesh;
 class Organelle;
 struct Organism;
-struct Window;
+struct GPUQueue;
 
 struct VisObjectContext
 {
@@ -20,5 +20,5 @@ public:
     static std::shared_ptr<VisObjectContext> createForOrganelle(
         std::shared_ptr<Organelle> pOrganelle,
         StringDict::ID organelleId,
-        std::shared_ptr<Window> pWindow);
+        GPUQueue* pQueue);
 }; 

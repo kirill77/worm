@@ -107,7 +107,8 @@ void VisEngine::updateGpuMeshes()
                 auto pVisContext = pOrganelle->getVisObjectContext();
                 if (!pVisContext)
                 {
-                    VisObjectContext::createForOrganelle(pOrganelle, organelleId, m_pWindow);
+                    VisObjectContext::createForOrganelle(pOrganelle, organelleId,
+                        m_pWindow->getSwapChain()->getGPUQueue());
                     pVisContext = pOrganelle->getVisObjectContext();
                 }
 
