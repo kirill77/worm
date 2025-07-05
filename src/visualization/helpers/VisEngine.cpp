@@ -87,7 +87,8 @@ void VisEngine::updateGpuMeshes()
 {
     // List of organelles to visualize
     static const std::vector<StringDict::ID> organellesToVisualize = {
-        StringDict::ID::ORGANELLE_CORTEX
+        StringDict::ID::ORGANELLE_CORTEX,
+        StringDict::ID::ORGANELLE_CENTROSOME
     };
 
     // Initialize combined bounding box as empty
