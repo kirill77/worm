@@ -9,11 +9,7 @@ struct StringDict
 {
     enum class ID {
         eUNKNOWN,
-        // Binding surface types
-        BS_MEMBRANE,
-        BS_CORTEX,
-        BS_CENTROSOME,
-        
+
         // PAR proteins (polarity establishment)
         PAR_1,
         PAR_2,

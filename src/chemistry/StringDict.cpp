@@ -14,11 +14,8 @@ void StringDict::initialize()
     
     // Binding surface types
     m_idToString[static_cast<size_t>(ID::eUNKNOWN)] = "UNKNOWN";
-    m_idToString[static_cast<size_t>(ID::BS_MEMBRANE)] = "MEMBRANE";
-    m_idToString[static_cast<size_t>(ID::BS_CORTEX)] = "CORTEX";
-    m_idToString[static_cast<size_t>(ID::BS_CENTROSOME)] = "CENTROSOME";
     
-    // PAR proteins
+    // PAR proteins (polarity establishment)
     m_idToString[static_cast<size_t>(ID::PAR_1)] = "PAR-1";
     m_idToString[static_cast<size_t>(ID::PAR_2)] = "PAR-2";
     m_idToString[static_cast<size_t>(ID::PAR_3)] = "PAR-3";
@@ -50,7 +47,7 @@ void StringDict::initialize()
     m_idToString[static_cast<size_t>(ID::ORGANELLE_ENDOPLASMIC_RETICULUM)] = "ENDOPLASMIC_RETICULUM";
     m_idToString[static_cast<size_t>(ID::ORGANELLE_SPINDLE)] = "SPINDLE";
     m_idToString[static_cast<size_t>(ID::ORGANELLE_CENTROSOME)] = "CENTROSOME";
-    m_idToString[static_cast<size_t>(ID::ORGANELLE_CORTEX)] = "CORTEX_ORGANELLE";
+    m_idToString[static_cast<size_t>(ID::ORGANELLE_CORTEX)] = "CORTEX";
     m_idToString[static_cast<size_t>(ID::ORGANELLE_END)] = "ORGANELLE_END";
     
     // Build reverse mapping

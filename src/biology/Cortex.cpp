@@ -11,7 +11,7 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     , m_fThickness(fThickness)
 {
     // Set the binding surface type for cortex
-    m_surfaceType = StringDict::ID::BS_CORTEX;
+    m_surfaceType = StringDict::ID::ORGANELLE_CORTEX;
 }
 
 void Cortex::update(double fDtSec, Cell& cell)
@@ -189,7 +189,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 );
                 
                 // Create binding site protein and add to the medium
-                MPopulation bindingSites(StringDict::idToString(StringDict::ID::BS_CORTEX), amountPerPosition);
+                MPopulation bindingSites(StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 internalMedium.addProtein(bindingSites, normalizedPos);
             }

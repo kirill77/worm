@@ -12,7 +12,7 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& position)
     , m_duplicationTime(0.0)
 {
     // Set the binding surface type to CENTROSOME
-    m_surfaceType = StringDict::ID::BS_CENTROSOME;
+    m_surfaceType = StringDict::ID::ORGANELLE_CENTROSOME;
     
     // Initialize centrosome-specific proteins
     if (auto pCellPtr = pCell.lock()) {
