@@ -24,6 +24,7 @@
     <ClCompile Include="ConnectedMeshVis.cpp" />
     <ClCompile Include="IObjectVis.cpp" />
     <ClCompile Include="VisEngine.cpp" />
+    <ClCompile Include="VisObjectContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraUI.h" />

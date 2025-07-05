@@ -30,6 +30,9 @@
     <ClCompile Include="IObjectVis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VisObjectContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConnectedMeshVis.h">

@@ -14,36 +14,6 @@
 #include "utils/log/ILog.h"
 #include "visualization/gpu/DirectXHelpers.h"
 
-static std::shared_ptr<ConnectedMeshVis> createCortexVis(
-    std::shared_ptr<Organism> pOrganism,
-    std::shared_ptr<Window> pWindow)
-{
-    // get a connected mesh that shows how the cortex looks like
-    auto pCell = pOrganism->getCells()[0];
-    auto pCortex = std::dynamic_pointer_cast<Cortex>(pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
-    auto pConnectedMesh = pCortex->getTensionSphere().getConnectedMesh();
-
-    std::shared_ptr<ConnectedMeshVis> pCortexVis = std::make_shared<ConnectedMeshVis>(pWindow);
-    pCortexVis->setConnectedMesh(pConnectedMesh);
-    return pCortexVis;
-}
-
-std::shared_ptr<VisObjectContext> VisEngine::createVisContext(std::shared_ptr<Organelle> pOrganelle, StringDict::ID organelleId)
-{
-    auto pVisContext = std::make_shared<VisObjectContext>();
-    
-    // For now, we handle cortex specifically, but this can be extended
-    // to handle other organelle types
-    if (organelleId == StringDict::ID::ORGANELLE_CORTEX)
-    {
-        pVisContext->m_pObject = createCortexVis(m_pOrganism, m_pWindow);
-    }
-    // TODO: Add other organelle visualization creation logic here
-    
-    pOrganelle->setVisObjectContext(pVisContext);
-    return pVisContext;
-}
-
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 {
     // Store the organism for later use
@@ -137,7 +107,7 @@ void VisEngine::updateGpuMeshes()
                 auto pVisContext = pOrganelle->getVisObjectContext();
                 if (!pVisContext)
                 {
-                    createVisContext(pOrganelle, organelleId);
+                    VisObjectContext::createForOrganelle(pOrganelle, organelleId, m_pWindow);
                     pVisContext = pOrganelle->getVisObjectContext();
                 }
 
