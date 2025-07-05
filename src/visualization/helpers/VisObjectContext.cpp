@@ -13,10 +13,7 @@ static std::shared_ptr<CortexVis> createCortexVis(
 {
     // get a connected mesh that shows how the cortex looks like
     auto pCortex = std::dynamic_pointer_cast<Cortex>(pOrganelle);
-    auto pConnectedMesh = pCortex->getTensionSphere().getConnectedMesh();
-
-    std::shared_ptr<CortexVis> pCortexVis = std::make_shared<CortexVis>(pQueue);
-    pCortexVis->setConnectedMesh(pConnectedMesh);
+    std::shared_ptr<CortexVis> pCortexVis = std::make_shared<CortexVis>(pCortex, pQueue);
     return pCortexVis;
 }
 

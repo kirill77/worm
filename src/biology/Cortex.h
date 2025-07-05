@@ -11,7 +11,7 @@
  * the internal cellular environment from the external environment.
  * It mediates interactions between internal and external media.
  */
-class Cortex : public Organelle
+struct Cortex : public Organelle
 {
 private:
     double m_fThickness;                        // Membrane thickness in micrometers

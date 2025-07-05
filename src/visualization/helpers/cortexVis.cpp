@@ -1,11 +1,14 @@
+#include <memory>
 #include "cortexVis.h"
+#include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
-#include "visualization/gpu/Window.h"
+#include "biology/Cortex.h"
 #include "geometry/connectedMesh/connectedMesh.h"
 #include <stdexcept>
 
-CortexVis::CortexVis(GPUQueue *pQueue)
+CortexVis::CortexVis(std::shared_ptr<Cortex> pCortex, GPUQueue *pQueue)
 {
+    m_pCortex = pCortex;
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
@@ -17,14 +20,17 @@ std::shared_ptr<GPUMesh> CortexVis::updateAndGetGpuMesh()
 
 void CortexVis::updateGPUMesh()
 {
-    if (!m_pMesh || !m_pGPUMesh)
+    if (!m_pCortex || !m_pGPUMesh)
     {
         return;
     }
 
+    auto tensionSphere = m_pCortex->getTensionSphere();
+    auto pMesh = tensionSphere.getConnectedMesh();
+
     // Get vertex count and face count
-    uint32_t vertexCount = m_pMesh->getVertexCount();
-    uint32_t faceCount = m_pMesh->getFaceCount();
+    uint32_t vertexCount = pMesh->getVertexCount();
+    uint32_t faceCount = pMesh->getFaceCount();
 
     // Convert vertices to GPUMesh::Vertex format
     std::vector<GPUMesh::Vertex> gpuVertices;
@@ -32,7 +38,7 @@ void CortexVis::updateGPUMesh()
     for (uint32_t i = 0; i < vertexCount; ++i)
     {
         GPUMesh::Vertex gpuVertex;
-        convertVector(gpuVertex.vPos, m_pMesh->getVertexPosition(i));
+        convertVector(gpuVertex.vPos, pMesh->getVertexPosition(i));
         gpuVertices.push_back(gpuVertex);
     }
 
@@ -41,7 +47,7 @@ void CortexVis::updateGPUMesh()
     gpuTriangles.reserve(faceCount);
     for (uint32_t i = 0; i < faceCount; ++i)
     {
-        std::vector<uint32_t> faceVertices = m_pMesh->getFaceVertices(i);
+        std::vector<uint32_t> faceVertices = pMesh->getFaceVertices(i);
         if (faceVertices.size() == 3)
         {
             gpuTriangles.push_back(int3(faceVertices[0], faceVertices[1], faceVertices[2]));
