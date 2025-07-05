@@ -72,6 +72,7 @@ public:
 
     // Organelle management
     void addOrganelle(StringDict::ID id, std::shared_ptr<Organelle> pOrganelle);
+    std::shared_ptr<Organelle> getOrganelle(StringDict::ID id) const;  // Generic organelle getter
     std::shared_ptr<class Centrosome> getCentrosome() const;  // Get centrosome if it exists
 
     // ATP-related functions

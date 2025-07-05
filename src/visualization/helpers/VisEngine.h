@@ -5,6 +5,7 @@
 #include "visualization/helpers/VisObjectContext.h"
 #include "visualization/gpu/GPUStats.h"
 #include "visualization/gpu/GPUText.h"
+#include "chemistry/StringDict.h"
 
 // Forward declarations
 struct World;
@@ -12,6 +13,7 @@ struct Organism;
 struct Window;
 struct GPUWorld;
 struct ConnectedMeshVis;
+class Organelle;
 
 struct VisEngine
 {
@@ -21,6 +23,7 @@ struct VisEngine
 
 private:
     void updateGpuMeshes();
+    std::shared_ptr<VisObjectContext> createVisContext(std::shared_ptr<class Organelle> pOrganelle, StringDict::ID organelleId);
     std::shared_ptr<Organism> m_pOrganism;
     std::shared_ptr<World> m_pWorld;
     std::shared_ptr<Window> m_pWindow;

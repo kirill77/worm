@@ -10,6 +10,7 @@
 #include "visualization/helpers/ConnectedMeshVis.h"
 #include "visualization/helpers/CameraUI.h"
 #include "chemistry/ProteinWiki.h"
+#include "chemistry/StringDict.h"
 #include "utils/log/ILog.h"
 #include "visualization/gpu/DirectXHelpers.h"
 
@@ -25,6 +26,22 @@ static std::shared_ptr<ConnectedMeshVis> createCortexVis(
     std::shared_ptr<ConnectedMeshVis> pCortexVis = std::make_shared<ConnectedMeshVis>(pWindow);
     pCortexVis->setConnectedMesh(pConnectedMesh);
     return pCortexVis;
+}
+
+std::shared_ptr<VisObjectContext> VisEngine::createVisContext(std::shared_ptr<Organelle> pOrganelle, StringDict::ID organelleId)
+{
+    auto pVisContext = std::make_shared<VisObjectContext>();
+    
+    // For now, we handle cortex specifically, but this can be extended
+    // to handle other organelle types
+    if (organelleId == StringDict::ID::ORGANELLE_CORTEX)
+    {
+        pVisContext->m_pObject = createCortexVis(m_pOrganism, m_pWindow);
+    }
+    // TODO: Add other organelle visualization creation logic here
+    
+    pOrganelle->setVisObjectContext(pVisContext);
+    return pVisContext;
 }
 
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
@@ -98,6 +115,11 @@ bool VisEngine::update(float fDtSec)
 
 void VisEngine::updateGpuMeshes()
 {
+    // List of organelles to visualize
+    static const std::vector<StringDict::ID> organellesToVisualize = {
+        StringDict::ID::ORGANELLE_CORTEX
+    };
+
     // Initialize combined bounding box as empty
     box3 combinedBoundingBox = box3::empty();
 
@@ -105,33 +127,38 @@ void VisEngine::updateGpuMeshes()
     auto cells = m_pOrganism->getCells();
     for (auto& cell : cells)
     {
-        // For now, we only visualize the cortex, but this can be extended
-        auto pCortex = cell->getCortex();
-        if (pCortex)
+        // Loop through all organelles we want to visualize
+        for (StringDict::ID organelleId : organellesToVisualize)
         {
-            // Initialize cortex visualization if needed  
-            if (!pCortex->getVisObjectContext())
+            auto pOrganelle = cell->getOrganelle(organelleId);
+            if (pOrganelle)
             {
-                auto pVisContext = std::make_shared<VisObjectContext>();
-                pVisContext->m_pObject = createCortexVis(m_pOrganism, m_pWindow);
-                pCortex->setVisObjectContext(pVisContext);
-            }
+                // Initialize organelle visualization if needed
+                auto pVisContext = pOrganelle->getVisObjectContext();
+                if (!pVisContext)
+                {
+                    createVisContext(pOrganelle, organelleId);
+                    pVisContext = pOrganelle->getVisObjectContext();
+                }
 
-            auto pVisContext = pCortex->getVisObjectContext();
-            auto pGpuMesh = pVisContext->m_pObject->updateAndGetGpuMesh();
-   
-            // Add mesh to the world if needed
-            if (pVisContext->m_pGpuMesh != pGpuMesh)
-            {
-                pVisContext->m_pGpuMesh = pGpuMesh;
-                m_pGpuWorld->addMesh(pVisContext->m_pGpuMesh);
-            }
-            
-            // Combine this mesh's bounding box with the overall bounding box
-            if (pGpuMesh)
-            {
-                const box3& meshBoundingBox = pGpuMesh->getBoundingBox();
-                combinedBoundingBox = combinedBoundingBox | meshBoundingBox;
+                if (pVisContext && pVisContext->m_pObject)
+                {
+                    auto pGpuMesh = pVisContext->m_pObject->updateAndGetGpuMesh();
+           
+                    // Add mesh to the world if needed
+                    if (pVisContext->m_pGpuMesh != pGpuMesh)
+                    {
+                        pVisContext->m_pGpuMesh = pGpuMesh;
+                        m_pGpuWorld->addMesh(pVisContext->m_pGpuMesh);
+                    }
+                    
+                    // Combine this mesh's bounding box with the overall bounding box
+                    if (pGpuMesh)
+                    {
+                        const box3& meshBoundingBox = pGpuMesh->getBoundingBox();
+                        combinedBoundingBox = combinedBoundingBox | meshBoundingBox;
+                    }
+                }
             }
         }
     }

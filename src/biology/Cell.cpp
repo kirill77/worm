@@ -213,6 +213,16 @@ void Cell::addOrganelle(StringDict::ID id, std::shared_ptr<Organelle> pOrganelle
     }
 }
 
+std::shared_ptr<Organelle> Cell::getOrganelle(StringDict::ID id) const
+{
+    size_t index = getOrganelleIndex(id);
+    if (index < m_pOrganelles.size() && m_pOrganelles[index])
+    {
+        return m_pOrganelles[index];
+    }
+    return nullptr;
+}
+
 std::shared_ptr<Centrosome> Cell::getCentrosome() const
 {
     size_t index = getOrganelleIndex(StringDict::ID::ORGANELLE_CENTROSOME);
