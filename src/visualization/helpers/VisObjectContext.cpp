@@ -1,5 +1,5 @@
 #include "VisObjectContext.h"
-#include "ConnectedMeshVis.h"
+#include "CortexVis.h"
 #include "biology/Organelle.h"
 #include "biology/Organism.h"
 #include "biology/Cell.h"
@@ -7,7 +7,7 @@
 #include "visualization/gpu/GPUQueue.h"
 #include "chemistry/StringDict.h"
 
-static std::shared_ptr<ConnectedMeshVis> createCortexVis(
+static std::shared_ptr<CortexVis> createCortexVis(
     std::shared_ptr<Organelle> pOrganelle,
     GPUQueue* pQueue)
 {
@@ -15,7 +15,7 @@ static std::shared_ptr<ConnectedMeshVis> createCortexVis(
     auto pCortex = std::dynamic_pointer_cast<Cortex>(pOrganelle);
     auto pConnectedMesh = pCortex->getTensionSphere().getConnectedMesh();
 
-    std::shared_ptr<ConnectedMeshVis> pCortexVis = std::make_shared<ConnectedMeshVis>(pQueue);
+    std::shared_ptr<CortexVis> pCortexVis = std::make_shared<CortexVis>(pQueue);
     pCortexVis->setConnectedMesh(pConnectedMesh);
     return pCortexVis;
 }

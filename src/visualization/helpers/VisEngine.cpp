@@ -7,7 +7,7 @@
 #include "visualization/gpu/GPUWorld.h"
 #include "visualization/gpu/GPUStats.h"
 #include "visualization/gpu/GPUText.h"
-#include "visualization/helpers/ConnectedMeshVis.h"
+#include "visualization/helpers/CortexVis.h"
 #include "visualization/helpers/CameraUI.h"
 #include "chemistry/ProteinWiki.h"
 #include "chemistry/StringDict.h"

@@ -12,7 +12,7 @@ struct World;
 struct Organism;
 struct Window;
 struct GPUWorld;
-struct ConnectedMeshVis;
+struct CortexVis;
 class Organelle;
 
 struct VisEngine

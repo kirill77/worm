@@ -7,9 +7,9 @@ class ConnectedMesh;
 class GPUMesh;
 struct GPUQueue;
 
-struct ConnectedMeshVis : public IObjectVis
+struct CortexVis : public IObjectVis
 {
-    ConnectedMeshVis(GPUQueue* pQueue);
+    CortexVis(GPUQueue* pQueue);
 
     void setConnectedMesh(std::shared_ptr<ConnectedMesh> pMesh) { m_pMesh = pMesh; }
 

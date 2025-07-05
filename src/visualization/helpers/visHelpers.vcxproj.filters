@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConnectedMeshVis.cpp">
+    <ClCompile Include="CortexVis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CameraUI.cpp">
@@ -35,7 +35,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConnectedMeshVis.h">
+    <ClInclude Include="CortexVis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraUI.h">

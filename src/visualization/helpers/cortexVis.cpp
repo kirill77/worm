@@ -1,21 +1,21 @@
-#include "connectedMeshVis.h"
+#include "cortexVis.h"
 #include "visualization/gpu/GPUMesh.h"
 #include "visualization/gpu/Window.h"
 #include "geometry/connectedMesh/connectedMesh.h"
 #include <stdexcept>
 
-ConnectedMeshVis::ConnectedMeshVis(GPUQueue *pQueue)
+CortexVis::CortexVis(GPUQueue *pQueue)
 {
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
-std::shared_ptr<GPUMesh> ConnectedMeshVis::updateAndGetGpuMesh()
+std::shared_ptr<GPUMesh> CortexVis::updateAndGetGpuMesh()
 {
     updateGPUMesh();
     return m_pGPUMesh;
 }
 
-void ConnectedMeshVis::updateGPUMesh()
+void CortexVis::updateGPUMesh()
 {
     if (!m_pMesh || !m_pGPUMesh)
     {
