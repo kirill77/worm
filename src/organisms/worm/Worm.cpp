@@ -105,7 +105,9 @@ Worm::Worm()
     
     // Simulate fertilization by adding a centrosome from the sperm
     // In C. elegans, the egg lacks a centrosome and receives one from the sperm
-    auto pCentrosome = std::make_shared<Centrosome>(std::weak_ptr<Cell>(pCell), float3(0, 0, 0));
+    // The sperm enters at the posterior end, so place centrosome near posterior boundary
+    float3 posteriorEntryPoint(0.0f, -0.8f, 0.0f);  // Near posterior boundary
+    auto pCentrosome = std::make_shared<Centrosome>(std::weak_ptr<Cell>(pCell), posteriorEntryPoint);
     pCell->addOrganelle(StringDict::ID::ORGANELLE_CENTROSOME, pCentrosome);
     
     m_pCells.push_back(pCell);
