@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="edgeMesh.h" />
+    <ClInclude Include="EdgeMesh.h" />
+    <ClInclude Include="SpaceMapper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="edgeMesh.cpp" />
+    <ClCompile Include="EdgeMesh.cpp" />
+    <ClCompile Include="SpaceMapper.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
