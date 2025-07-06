@@ -3,7 +3,7 @@
 #include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/Cortex.h"
-#include "geometry/connectedMesh/connectedMesh.h"
+#include "geometry/edgeMesh/edgeMesh.h"
 #include <stdexcept>
 
 CortexVis::CortexVis(std::shared_ptr<Cortex> pCortex, GPUQueue *pQueue)
@@ -26,7 +26,7 @@ void CortexVis::updateGPUMesh()
     }
 
     auto tensionSphere = m_pCortex->getTensionSphere();
-    auto pMesh = tensionSphere.getConnectedMesh();
+    auto pMesh = tensionSphere.getEdgeMesh();
 
     // Get vertex count and face count
     uint32_t vertexCount = pMesh->getVertexCount();

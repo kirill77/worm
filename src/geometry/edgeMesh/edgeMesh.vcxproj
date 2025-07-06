@@ -19,17 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="connectedMesh.h" />
+    <ClInclude Include="edgeMesh.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="connectedMesh.cpp" />
+    <ClCompile Include="edgeMesh.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{047f1162-df2e-4de4-a3df-5a904bf4659b}</ProjectGuid>
-    <RootNamespace>connectedMesh</RootNamespace>
+    <RootNamespace>edgeMesh</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>edgeMesh</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

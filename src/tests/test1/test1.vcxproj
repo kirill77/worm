@@ -142,7 +142,7 @@
     <ClCompile Include="test1.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\geometry\connectedMesh\connectedMesh.vcxproj">
+    <ProjectReference Include="..\..\geometry\edgeMesh\edgeMesh.vcxproj">
       <Project>{047f1162-df2e-4de4-a3df-5a904bf4659b}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\utils\csvFile\CSVFile.vcxproj">

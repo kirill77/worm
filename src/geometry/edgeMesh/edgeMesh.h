@@ -6,7 +6,7 @@
 #include <cstdint>
 #include "geometry/vectors/vector.h"
 
-class ConnectedMesh {
+class EdgeMesh {
 public:
     static const uint32_t INVALID_INDEX = UINT32_MAX;
     
@@ -33,8 +33,8 @@ public:
     };
 
     // Constructors and main methods
-    ConnectedMesh();
-    ConnectedMesh(double radius, uint32_t subdivisionLevel);
+    EdgeMesh();
+    EdgeMesh(double radius, uint32_t subdivisionLevel);
     void clear();
     uint32_t addVertex(const double3& position);
     uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);

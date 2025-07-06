@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 #include "geometry/vectors/vector.h"
-#include "geometry/connectedMesh/connectedMesh.h"
+#include "geometry/edgeMesh/edgeMesh.h"
 
 /**
  * @brief Class for simulating tension forces in a spherical cell cortex using a geodesic sphere model
@@ -23,14 +23,14 @@ public:
     void makeTimeStep(double fDtSec);
 
     /**
-     * @brief Get the underlying ConnectedMesh
-     * @return Shared pointer to the ConnectedMesh
+     * @brief Get the underlying EdgeMesh
+     * @return Shared pointer to the EdgeMesh
      */
-    std::shared_ptr<ConnectedMesh> getConnectedMesh() const { return m_pMesh; }
+    std::shared_ptr<EdgeMesh> getEdgeMesh() const { return m_pMesh; }
 
 private:
     // The underlying mesh data structure
-    std::shared_ptr<ConnectedMesh> m_pMesh;
+    std::shared_ptr<EdgeMesh> m_pMesh;
 
     // Velocity for each vertex (same indexing as mesh vertices)
     std::vector<double3> m_vertexVelocities;
