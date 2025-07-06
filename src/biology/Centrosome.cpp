@@ -4,12 +4,14 @@
 #include "Medium.h"
 #include "chemistry/ProteinWiki.h"
 #include "utils/log/ILog.h"
+#include "Y_TuRC.h"
 
 Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& position)
     : Organelle(pCell)
     , m_vNormalizedPos(position)
     , m_isDuplicated(false)
     , m_duplicationTime(0.0)
+    , m_fPCMRadiusMicroM(0.5f)  // Default PCM radius of 0.5 micrometers
 {
     // Set the binding surface type to CENTROSOME
     m_surfaceType = StringDict::ID::ORGANELLE_CENTROSOME;
@@ -29,6 +31,8 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& position)
         MPopulation ninein(StringDict::idToString(StringDict::ID::NINEIN), 300.0);
         internalMedium.addProtein(ninein, m_vNormalizedPos);
     }
+    
+    // Note: Ring complexes will be created in the update method
 }
 
 void Centrosome::update(double dt, Cell& cell)
@@ -91,6 +95,28 @@ void Centrosome::update(double dt, Cell& cell)
     // This ensures centrosome proteins are properly localized
     MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
     internalMedium.addProtein(gammaTubulin, m_vNormalizedPos);
+    
+    // Manage ring complexes based on gamma-tubulin levels
+    double gammaTubulinCount = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), m_vNormalizedPos);
+    
+    // Target: ~1 ring complex per 50 gamma-tubulin proteins
+    int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);
+    int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());
+    
+        if (currentRingComplexes < targetRingComplexes) {
+        // Create new ring complexes using shared_from_this() and cast to weak_ptr
+        std::weak_ptr<Centrosome> thisWeakPtr = std::static_pointer_cast<Centrosome>(shared_from_this());
+        for (int i = currentRingComplexes; i < targetRingComplexes; i++) {
+            auto ringComplex = std::make_shared<Y_TuRC>(thisWeakPtr);
+            m_pRingComplexes.push_back(ringComplex);
+        }
+    } else if (currentRingComplexes > targetRingComplexes) {
+        // Remove excess ring complexes
+        int complexesToRemove = currentRingComplexes - targetRingComplexes;
+        for (int i = 0; i < complexesToRemove; i++) {
+            m_pRingComplexes.pop_back();
+        }
+    }
 }
 
 void Centrosome::duplicate()
@@ -110,6 +136,16 @@ void Centrosome::duplicate()
             // Add other duplication-related proteins
             MPopulation plk4(StringDict::idToString(StringDict::ID::PLK_4), 200.0);  // Polo-like kinase 4 for centriole duplication
             internalMedium.addProtein(plk4, m_vNormalizedPos);
+            
+            // Add additional ring complexes for the duplicated centrosome
+            int additionalRingComplexes = static_cast<int>(m_pRingComplexes.size() * 0.5); // 50% more
+            std::weak_ptr<Centrosome> thisWeakPtr = std::static_pointer_cast<Centrosome>(shared_from_this());
+            for (int i = 0; i < additionalRingComplexes; i++) {
+                auto ringComplex = std::make_shared<Y_TuRC>(thisWeakPtr);
+                m_pRingComplexes.push_back(ringComplex);
+            }
+            
+            LOG_INFO("Added %d additional ring complexes during centrosome duplication", additionalRingComplexes);
         }
     }
 }

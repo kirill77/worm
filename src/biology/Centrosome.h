@@ -1,7 +1,10 @@
 #pragma once
 
+#include <memory>
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
+
+struct Y_TuRC;
 
 struct Centrosome : public Organelle
 {
@@ -9,6 +12,8 @@ private:
     float3 m_vNormalizedPos;  // Position of the centrosome center in normalized coordinates (-1, 1) associated with the cell
     bool m_isDuplicated;  // Whether the centrosome has duplicated
     double m_duplicationTime;  // Time when duplication occurred
+    float m_fPCMRadiusMicroM;  // PCM (Pericentriolar Material) radius in micrometers
+    std::vector<std::shared_ptr<Y_TuRC>> m_pRingComplexes;
 
 public:
     /**
@@ -47,6 +52,27 @@ public:
      * @return True if duplicated, false otherwise
      */
     bool isDuplicated() const { return m_isDuplicated; }
+    
+    /**
+     * Get the PCM (Pericentriolar Material) radius
+     * 
+     * @return PCM radius in micrometers
+     */
+    float getPCMRadius() const { return m_fPCMRadiusMicroM; }
+    
+    /**
+     * Set the PCM (Pericentriolar Material) radius
+     * 
+     * @param radius PCM radius in micrometers
+     */
+    void setPCMRadius(float radius) { m_fPCMRadiusMicroM = radius; }
+    
+    /**
+     * Get the ring complexes associated with this centrosome
+     * 
+     * @return Vector of Y_TuRC ring complexes
+     */
+    const std::vector<std::shared_ptr<Y_TuRC>>& getRingComplexes() const { return m_pRingComplexes; }
     
     /**
      * Trigger centrosome duplication

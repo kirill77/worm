@@ -161,6 +161,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Spindle.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="Y_TuRC.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cell.cpp" />
@@ -183,6 +184,7 @@
     </ClCompile>
     <ClCompile Include="Spindle.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="Y_TuRC.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
