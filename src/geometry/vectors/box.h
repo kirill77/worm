@@ -75,6 +75,17 @@ struct box
         return m_maxs - m_mins;
     }
 
+    T computeVolume() const
+    {
+        auto diag = diagonal();
+        T result = diag[0];
+        for (uint32_t u = 1; u < n; ++u)
+        {
+            result *= diag[u];
+        }
+        return result;
+    }
+
     constexpr vector<T, n> getCorner(int iCorner) const
     {
         return select(bitvector<n>(iCorner), m_maxs, m_mins);

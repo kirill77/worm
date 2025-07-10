@@ -47,6 +47,9 @@ public:
     // Get total number of proteins across all cells
     double getTotalProteinNumber(const std::string& proteinName) const;
     
+    // Get volume in micrometers
+    double getVolumeMicroM() const { return m_fVolumeMicroM; }
+    
     // Main update function
     void update(double dt);
 

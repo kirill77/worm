@@ -15,7 +15,7 @@ struct Cortex : public Organelle
 {
 private:
     double m_fThickness; // Membrane thickness in micrometers
-    TensionSphere m_tensionSphere;
+    std::shared_ptr<TensionSphere> m_pTensionSphere;
 
 public:
     /**
@@ -102,8 +102,8 @@ public:
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
 
-    const TensionSphere &getTensionSphere() const
+    std::shared_ptr<TensionSphere> getTensionSphere() const
     {
-        return m_tensionSphere;
+        return m_pTensionSphere;
     }
 }; 

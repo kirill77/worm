@@ -77,38 +77,8 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     if (uiState.isButtonOrKeyPressed(VK_CONTROL) &&
         uiState.getButtonOrKeyPressCount('A') > m_prevUIState.getButtonOrKeyPressCount('A'))
     {
-        if (!m_worldBox.isempty())
+        if (fitWorldBoxToView())
         {
-            // Set FOV to 30 degrees
-            m_pCamera->setFOV(30.0f);
-            
-            // Calculate the center of the world box
-            float3 boxCenter = m_worldBox.center();
-            
-            // Calculate the diagonal of the world box
-            float3 boxDiagonal = m_worldBox.diagonal();
-            
-            // Calculate the maximum dimension of the box
-            float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
-            
-            // Calculate the distance needed to fit the box in view
-            // For a 30-degree FOV, we need to be at a distance of maxDimension / (2 * tan(15 degrees))
-            float fovRadians = 30.0f * 3.14159265359f / 180.0f;
-            float distance = maxDimension / (2.0f * std::tan(fovRadians / 2.0f));
-            
-            // Add a small margin to ensure the box is fully visible
-            distance *= 1.1f;
-            
-            // Calculate the new camera position
-            // Position the camera at the center of the box, offset by the calculated distance
-            // along the negative z-axis (assuming the camera looks along the positive z-axis)
-            float3 newPosition = boxCenter;
-            newPosition.z -= distance;
-            
-            // Set the camera position and target
-            m_pCamera->setPosition(newPosition);
-            m_pCamera->setDirection(boxCenter - newPosition);
-            
             return; // Skip other camera controls when fitting to view
         }
     }
@@ -258,4 +228,42 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     
     // Store the current UI state for the next frame
     m_prevUIState = uiState;
+}
+
+bool CameraUI::fitWorldBoxToView()
+{
+    if (!m_pCamera || m_worldBox.isempty())
+        return false;
+    
+    // Set FOV to 30 degrees
+    m_pCamera->setFOV(30.0f);
+    
+    // Calculate the center of the world box
+    float3 boxCenter = m_worldBox.center();
+    
+    // Calculate the diagonal of the world box
+    float3 boxDiagonal = m_worldBox.diagonal();
+    
+    // Calculate the maximum dimension of the box
+    float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
+    
+    // Calculate the distance needed to fit the box in view
+    // For a 30-degree FOV, we need to be at a distance of maxDimension / (2 * tan(15 degrees))
+    float fovRadians = 30.0f * 3.14159265359f / 180.0f;
+    float distance = maxDimension / (2.0f * std::tan(fovRadians / 2.0f));
+    
+    // Add a small margin to ensure the box is fully visible
+    distance *= 1.1f;
+    
+    // Calculate the new camera position
+    // Position the camera at the center of the box, offset by the calculated distance
+    // along the negative z-axis (assuming the camera looks along the positive z-axis)
+    float3 newPosition = boxCenter;
+    newPosition.z -= distance;
+    
+    // Set the camera position and target
+    m_pCamera->setPosition(newPosition);
+    m_pCamera->setDirection(boxCenter - newPosition);
+    
+    return true;
 }

@@ -19,6 +19,9 @@ public:
     
     // Update camera based on UI state changes
     void notifyNewUIState(const UIState& uiState);
+    
+    // Fit the world box to the camera view
+    bool fitWorldBoxToView();
 
 private:
     // Camera movement parameters

@@ -25,8 +25,8 @@ void CortexVis::updateGPUMesh()
         return;
     }
 
-    auto tensionSphere = m_pCortex->getTensionSphere();
-    auto pMesh = tensionSphere.getEdgeMesh();
+    auto pTensionSphere = m_pCortex->getTensionSphere();
+    auto pMesh = pTensionSphere->getEdgeMesh();
 
     // Get vertex count and face count
     uint32_t vertexCount = pMesh->getVertexCount();

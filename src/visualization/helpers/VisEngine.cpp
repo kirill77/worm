@@ -139,6 +139,13 @@ void VisEngine::updateGpuMeshes()
     if (!combinedBoundingBox.isempty())
     {
         m_cameraUI.setWorldBox(combinedBoundingBox);
+        double fVolume = combinedBoundingBox.computeVolume();
+        // if the volume change is too large - re-fit the camera
+        if (fVolume != 0 && abs(fVolume - m_fPrevFittedVolume) / fVolume > 0.5)
+        {
+            m_cameraUI.fitWorldBoxToView();
+        }
+        m_fPrevFittedVolume = fVolume;
     }
 }
 

@@ -17,8 +17,9 @@ public:
     /**
      * @brief Constructor
      * @param subdivisionLevel Number of times to subdivide the base icosahedron (increases detail)
+     * @param volume Initial volume of the tension sphere
      */
-    TensionSphere(uint32_t subdivisionLevel = 2);
+    TensionSphere(uint32_t subdivisionLevel = 2, double volume = 0.0);
 
     void makeTimeStep(double fDtSec);
 
@@ -39,6 +40,12 @@ public:
      * @param volume Volume value to set
      */
     void setVolume(double volume);
+
+    /**
+     * @brief Get the current volume of the simulated sphere
+     * @return Current volume calculated from the mesh
+     */
+    double getCurrentVolume() const;
 
 private:
     // The underlying mesh data structure
@@ -63,5 +70,7 @@ private:
     void initializePhysics();
     void computeSpringForces(std::vector<double3>& forces, double dt);
     void integrateMotion(const std::vector<double3>& forces, double dt);
+    double calculateCurrentVolume() const;
+    void applyVolumeConstraint();
 };
 

@@ -29,6 +29,8 @@ private:
     std::shared_ptr<GPUWorld> m_pGpuWorld;
     std::unique_ptr<GPUText> m_gpuText;
     std::unique_ptr<GPUStats> m_gpuStats;
+
     CameraUI m_cameraUI;
+    double m_fPrevFittedVolume = 0;
 };
 
