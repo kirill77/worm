@@ -10,6 +10,9 @@ constexpr double PI = 3.14159265358979323846;
 // TensionSphere implementation
 TensionSphere::TensionSphere(uint32_t subdivisionLevel)
 {
+    // Initialize volume to default value
+    m_fVolume = 0.0;
+    
     // Create the base mesh with icosahedron and subdivisions
     m_pMesh = std::make_shared<EdgeMesh>(1, subdivisionLevel);
     
@@ -138,4 +141,14 @@ void TensionSphere::makeTimeStep(double fDtSec)
     
     // Integrate motion
     integrateMotion(forces, fDtSec);
+}
+
+double TensionSphere::getVolume() const
+{
+    return m_fVolume;
+}
+
+void TensionSphere::setVolume(double volume)
+{
+    m_fVolume = volume;
 }

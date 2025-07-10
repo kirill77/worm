@@ -28,6 +28,18 @@ public:
      */
     std::shared_ptr<EdgeMesh> getEdgeMesh() const { return m_pMesh; }
 
+    /**
+     * @brief Get the volume of the tension sphere
+     * @return Volume value
+     */
+    double getVolume() const;
+
+    /**
+     * @brief Set the volume of the tension sphere
+     * @param volume Volume value to set
+     */
+    void setVolume(double volume);
+
 private:
     // The underlying mesh data structure
     std::shared_ptr<EdgeMesh> m_pMesh;
@@ -43,6 +55,9 @@ private:
 
     // constants controlling spring behaviour
     double m_fSpringC = 0.1, m_fDampingCoeff = 1;
+
+    // Volume of the tension sphere
+    double m_fVolume;
 
     // Helper methods
     void initializePhysics();

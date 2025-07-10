@@ -14,7 +14,7 @@
 struct Cortex : public Organelle
 {
 private:
-    double m_fThickness;                        // Membrane thickness in micrometers
+    double m_fThickness; // Membrane thickness in micrometers
     TensionSphere m_tensionSphere;
 
 public:

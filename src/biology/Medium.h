@@ -19,6 +19,7 @@ class Medium
 private:
     Grid m_grid;
     GridDiffusion m_diffusion;
+    double m_fVolumeMicroM;  // Volume in micrometers
 
     static constexpr double ATP_DIFFUSION_RATE = 0.2;      // Rate of ATP diffusion between cells
     static constexpr int DIFFUSION_SAMPLES = 1000;         // Number of random samples per diffusion update
