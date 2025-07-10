@@ -82,8 +82,6 @@ void Centrosome::update(double dt, Cell& cell)
             // Reset duplication state after cell division
             m_isDuplicated = false;
             m_duplicationTime = 0.0;
-            // Reset position to center for next cycle
-            m_vNormalizedPos = float3(0, 0, 0);
             break;
             
         default:
