@@ -2,7 +2,7 @@
 #include "cortexVis.h"
 #include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
-#include "biology/Cortex.h"
+#include "biology/organelles/Cortex.h"
 #include "geometry/edgeMesh/edgeMesh.h"
 #include <stdexcept>
 

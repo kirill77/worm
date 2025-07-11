@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Chromosome.h"
 #include "chemistry/StringDict.h"
-#include "biology/Cell.h"
+#include "Cell.h"
 #include "Medium.h"
 #include "Spindle.h"
 #include "chemistry/MRNA.h"

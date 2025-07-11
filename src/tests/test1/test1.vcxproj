@@ -160,7 +160,7 @@
     <ProjectReference Include="..\..\chemistry\molecules.vcxproj">
       <Project>{01ebd2e9-ba4f-4da6-bd7d-6cfb05656e77}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\biology\simulation.vcxproj">
+    <ProjectReference Include="..\..\biology\organelles\organelles.vcxproj">
       <Project>{627b77b9-319e-4bbd-b6a4-12c710d64840}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\physics\tensionSphere\tensionSphere.vcxproj">

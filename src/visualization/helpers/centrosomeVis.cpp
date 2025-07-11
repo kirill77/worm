@@ -1,7 +1,7 @@
 #include "CentrosomeVis.h"
 #include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
-#include "biology/Centrosome.h"
+#include "biology/organelles/Centrosome.h"
 #include "geometry/vectors/vector.h"
 #include <memory>
 #include <vector>

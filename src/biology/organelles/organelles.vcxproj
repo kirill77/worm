@@ -24,7 +24,7 @@
     <ProjectGuid>{627b77b9-319e-4bbd-b6a4-12c710d64840}</ProjectGuid>
     <RootNamespace>simulation</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>biology</ProjectName>
+    <ProjectName>organelles</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -176,12 +176,6 @@
     <ClCompile Include="Nucleus.cpp" />
     <ClCompile Include="Organelle.cpp" />
     <ClCompile Include="Organism.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Spindle.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="Y_TuRC.cpp" />
