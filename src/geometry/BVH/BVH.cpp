@@ -1,7 +1,7 @@
 #include "BVH.h"
 #include <algorithm>
 
-std::vector<BVH::IObject*>& BVH::accessObjects()
+std::vector<std::shared_ptr<BVH::IObject>>& BVH::accessObjects()
 {
     return m_pObjects;
 }
@@ -11,7 +11,7 @@ void BVH::trace(IRay& ray)
     if (m_pRoot == nullptr)
     {
         // Fallback to linear traversal if no hierarchy is built
-        for (IObject* pObject : m_pObjects)
+        for (auto pObject : m_pObjects)
         {
             if (pObject != nullptr)
             {
@@ -38,11 +38,42 @@ void BVH::rebuildHierarchy()
         return;
     }
 
-    // Create a copy of the objects vector for building
-    std::vector<IObject*> objects = m_pObjects;
+    // Expand all objects into their sub-objects
+    std::vector<SubObj> subObjects;
+    
+    // Calculate total number of sub-objects to reserve space
+    size_t totalSubObjects = 0;
+    for (auto pObject : m_pObjects)
+    {
+        if (pObject != nullptr && pObject->m_nSubObjects > 0)
+        {
+            totalSubObjects += pObject->m_nSubObjects;
+        }
+    }
+    subObjects.reserve(totalSubObjects);
+    
+    for (auto pObject : m_pObjects)
+    {
+        if (pObject != nullptr && pObject->m_nSubObjects > 0)
+        {
+            for (uint32_t i = 0; i < pObject->m_nSubObjects; ++i)
+            {
+                SubObj subObj;
+                subObj.pObj = pObject.get();
+                subObj.m_uSubObj = i;
+                subObjects.push_back(subObj);
+            }
+        }
+    }
+
+    if (subObjects.empty())
+    {
+        m_pRoot = nullptr;
+        return;
+    }
 
     // Build the tree recursively
-    m_pRoot = buildNode(objects, 0);
+    m_pRoot = buildNode(subObjects, 0);
 }
 
 bool BVH::rayIntersectsBox(const IRay& ray, const box3& box)
@@ -64,40 +95,40 @@ bool BVH::rayIntersectsBox(const IRay& ray, const box3& box)
     return tNear <= tFar && tFar >= ray.m_fMin && tNear <= ray.m_fMax;
 }
 
-std::unique_ptr<BVH::Node> BVH::buildNode(std::vector<IObject*>& objects, int depth)
+std::unique_ptr<BVH::Node> BVH::buildNode(std::vector<SubObj>& subObjects, int depth)
 {
     auto node = std::make_unique<Node>();
     
     // Calculate bounding box for this node
-    node->m_boundingBox = calculateBoundingBox(objects);
+    node->m_boundingBox = calculateBoundingBox(subObjects);
     
     // Leaf node criteria: few objects or max depth reached
     const int MAX_LEAF_OBJECTS = 4;
     const int MAX_DEPTH = 20;
     
-    if (objects.size() <= MAX_LEAF_OBJECTS || depth >= MAX_DEPTH)
+    if (subObjects.size() <= MAX_LEAF_OBJECTS || depth >= MAX_DEPTH)
     {
         // Create leaf node
-        node->m_objects = objects;
+        node->m_pSubObjects = subObjects;
         return node;
     }
     
     // Split objects along longest axis
     int axis = getLongestAxis(node->m_boundingBox);
     
-    // Sort objects by their center position along the split axis
-    std::sort(objects.begin(), objects.end(), [axis](IObject* a, IObject* b) {
-        box3 boxA = a->getBox();
-        box3 boxB = b->getBox();
+    // Sort sub-objects by their center position along the split axis
+    std::sort(subObjects.begin(), subObjects.end(), [axis](const SubObj& a, const SubObj& b) {
+        box3 boxA = a.pObj->getSubObjectBox(a.m_uSubObj);
+        box3 boxB = b.pObj->getSubObjectBox(b.m_uSubObj);
         float3 centerA = (boxA.m_mins + boxA.m_maxs) * 0.5f;
         float3 centerB = (boxB.m_mins + boxB.m_maxs) * 0.5f;
         return centerA[axis] < centerB[axis];
     });
     
     // Split at median
-    size_t mid = objects.size() / 2;
-    std::vector<IObject*> leftObjects(objects.begin(), objects.begin() + mid);
-    std::vector<IObject*> rightObjects(objects.begin() + mid, objects.end());
+    size_t mid = subObjects.size() / 2;
+    std::vector<SubObj> leftObjects(subObjects.begin(), subObjects.begin() + mid);
+    std::vector<SubObj> rightObjects(subObjects.begin() + mid, subObjects.end());
     
     // Recursively build child nodes
     node->m_pLeft = buildNode(leftObjects, depth + 1);
@@ -117,12 +148,19 @@ void BVH::traceNode(IRay& ray, const Node* node)
     
     if (node->isLeaf())
     {
-        // Leaf node - test all objects
-        for (IObject* pObject : node->m_objects)
+        // Leaf node - test all sub-objects
+        for (const SubObj& subObj : node->m_pSubObjects)
         {
-            if (pObject != nullptr)
+            if (subObj.pObj != nullptr)
             {
-                pObject->trace(ray);
+                // Test the bounding box of this specific sub-object first
+                box3 subObjBox = subObj.pObj->getSubObjectBox(subObj.m_uSubObj);
+                if (rayIntersectsBox(ray, subObjBox))
+                {
+                    // Let the object handle ray tracing for this specific sub-object
+                    // The object's trace method should internally check which sub-objects to test
+                    subObj.pObj->trace(ray);
+                }
             }
         }
     }
@@ -134,23 +172,25 @@ void BVH::traceNode(IRay& ray, const Node* node)
     }
 }
 
-box3 BVH::calculateBoundingBox(const std::vector<IObject*>& objects)
+box3 BVH::calculateBoundingBox(const std::vector<SubObj>& subObjects)
 {
-    if (objects.empty())
+    if (subObjects.empty())
         return box3();
     
-    box3 result = objects[0]->getBox();
+    box3 result = subObjects[0].pObj->getSubObjectBox(subObjects[0].m_uSubObj);
     
-    for (size_t i = 1; i < objects.size(); ++i)
+    for (size_t i = 1; i < subObjects.size(); ++i)
     {
-        if (objects[i] != nullptr)
+        if (subObjects[i].pObj != nullptr)
         {
-            result = result | objects[i]->getBox();
+            result = result | subObjects[i].pObj->getSubObjectBox(subObjects[i].m_uSubObj);
         }
     }
     
     return result;
 }
+
+
 
 int BVH::getLongestAxis(const box3& box)
 {
