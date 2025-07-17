@@ -2,7 +2,6 @@
 #include "CortexVis.h"
 #include "CentrosomeVis.h"
 #include "biology/organelles/Organelle.h"
-#include "biology/organelles/Organism.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Centrosome.h"

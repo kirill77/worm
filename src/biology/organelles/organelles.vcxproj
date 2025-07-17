@@ -157,10 +157,8 @@
     <ClInclude Include="Mitochondrion.h" />
     <ClInclude Include="Nucleus.h" />
     <ClInclude Include="Organelle.h" />
-    <ClInclude Include="Organism.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Spindle.h" />
-    <ClInclude Include="World.h" />
     <ClInclude Include="Y_TuRC.h" />
   </ItemGroup>
   <ItemGroup>
@@ -175,9 +173,7 @@
     <ClCompile Include="Mitochondrion.cpp" />
     <ClCompile Include="Nucleus.cpp" />
     <ClCompile Include="Organelle.cpp" />
-    <ClCompile Include="Organism.cpp" />
     <ClCompile Include="Spindle.cpp" />
-    <ClCompile Include="World.cpp" />
     <ClCompile Include="Y_TuRC.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "biology/organelles/Organism.h"
+#include "biology/simulation/Organism.h"
 #include "chemistry/DNA.h"
 #include "biology/organelles/Chromosome.h"
 #include "utils/dataCollector/DataCollector.h"

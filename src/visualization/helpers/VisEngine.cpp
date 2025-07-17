@@ -1,6 +1,6 @@
 #include "VisEngine.h"
-#include "biology/organelles/World.h"
-#include "biology/organelles/Organism.h"
+#include "biology/simulation/World.h"
+#include "biology/simulation/Organism.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
 #include "visualization/gpu/Window.h"

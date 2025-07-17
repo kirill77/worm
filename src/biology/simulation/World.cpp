@@ -1,6 +1,5 @@
-#include "pch.h"
 #include "World.h"
-#include "Organism.h"
+#include "biology/simulation/Organism.h"
 
 World::World(std::shared_ptr<Organism> pOrganism)
     : m_fCurTimeSec(0.0)
