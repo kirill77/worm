@@ -1,33 +1,35 @@
 #include "BVH.h"
 #include <algorithm>
 
-std::vector<std::shared_ptr<BVH::IObject>>& BVH::accessObjects()
+BVH::BVH()
+{
+    // BVH has exactly one sub-object (itself)
+    m_nSubObjects = 1;
+}
+
+std::vector<std::shared_ptr<ITraceableObject>>& BVH::accessObjects()
 {
     return m_pObjects;
 }
 
+box3 BVH::getBox()
+{
+    assert(m_pRoot != nullptr);
+    return m_pRoot->m_boundingBox;
+}
+
+box3 BVH::getSubObjectBox(uint32_t uSubObj)
+{
+    // BVH has only one sub-object (itself)
+    assert(uSubObj == 0);
+    return getBox();
+}
+
 void BVH::trace(IRay& ray)
 {
-    if (m_pRoot == nullptr)
-    {
-        // Fallback to linear traversal if no hierarchy is built
-        for (auto pObject : m_pObjects)
-        {
-            if (pObject != nullptr)
-            {
-                box3 objectBox = pObject->getBox();
-                if (rayIntersectsBox(ray, objectBox))
-                {
-                    pObject->trace(ray);
-                }
-            }
-        }
-    }
-    else
-    {
-        // Use hierarchical traversal
-        traceNode(ray, m_pRoot.get());
-    }
+    assert(m_pRoot != nullptr);
+    // Use hierarchical traversal
+    traceNode(ray, m_pRoot.get());
 }
 
 void BVH::rebuildHierarchy()

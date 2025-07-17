@@ -3,43 +3,28 @@
 #include <vector>
 #include <memory>
 #include "geometry/vectors/box.h"
+#include "ITraceableObject.h"
 
-class BVH
+// inheriting BVH from ITraceableObject enables hierarchy of BVHs
+class BVH : public ITraceableObject
 {
 public:
-    struct IObject;
-
-    struct IRay
-    {
-        float3 m_vPos;
-        float3 m_vDir;
-        float m_fMin, m_fMax;
-        virtual void notifyIntersection(float fDist, IObject *pObject, uint32_t uSubObj) = 0;
-    };
+    BVH();
     
-    // Can represent triangular mesh for example where every
-    // sub-object is a triangle. Must have at least one sub-object
-    struct IObject : std::enable_shared_from_this<IObject>
-    {
-        uint32_t m_nSubObjects = 0;
-        // bounding box of the whole object
-        virtual box3 getBox() = 0;
-        // bounding box of a sub-object
-        virtual box3 getSubObjectBox(uint32_t uSubObj) = 0;
-        virtual void trace(IRay& ray) = 0;
-    };
-
-    std::vector<std::shared_ptr<IObject>>& accessObjects();
-
-    void trace(IRay& ray);
+    std::vector<std::shared_ptr<ITraceableObject>>& accessObjects();
 
     // Build/rebuild the BVH hierarchy
     void rebuildHierarchy();
+    
+    // ITraceableObject interface
+    void trace(IRay& ray) override;
+    virtual box3 getBox() override;
+    virtual box3 getSubObjectBox(uint32_t uSubObj) override;
 
 private:
     struct SubObj
     {
-        IObject* pObj;
+        ITraceableObject* pObj;
         uint32_t m_uSubObj;
     };
     struct Node
@@ -52,7 +37,7 @@ private:
         bool isLeaf() const { return m_pLeft == nullptr && m_pRight == nullptr; }
     };
 
-    std::vector<std::shared_ptr<IObject>> m_pObjects;
+    std::vector<std::shared_ptr<ITraceableObject>> m_pObjects;
     std::unique_ptr<Node> m_pRoot;
 
     // Helper methods
