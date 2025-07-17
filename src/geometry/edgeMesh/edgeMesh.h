@@ -49,6 +49,11 @@ public:
     void setVertexPosition(uint32_t index, const double3& position);
     uint32_t getVertexCount() const;
     uint32_t getFaceCount() const;
+    
+    // Edge access methods
+    uint32_t getEdgeCount() const;
+    std::pair<uint32_t, uint32_t> getEdge(uint32_t edgeIndex) const;
+    std::vector<std::pair<uint32_t, uint32_t>> getAllEdges() const;
 
 private:
     std::vector<Vertex> vertices;

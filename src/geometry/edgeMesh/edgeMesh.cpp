@@ -57,6 +57,32 @@ uint32_t EdgeMesh::getFaceCount() const {
     return static_cast<uint32_t>(faces.size());
 }
 
+// Get number of edges
+uint32_t EdgeMesh::getEdgeCount() const {
+    return static_cast<uint32_t>(edges.size());
+}
+
+// Get a specific edge as a pair of vertex indices
+std::pair<uint32_t, uint32_t> EdgeMesh::getEdge(uint32_t edgeIndex) const {
+    if (edgeIndex < edges.size()) {
+        const Edge& edge = edges[edgeIndex];
+        return std::make_pair(edge.startVertex, edge.endVertex);
+    }
+    return std::make_pair(INVALID_INDEX, INVALID_INDEX);
+}
+
+// Get all edges as pairs of vertex indices
+std::vector<std::pair<uint32_t, uint32_t>> EdgeMesh::getAllEdges() const {
+    std::vector<std::pair<uint32_t, uint32_t>> result;
+    result.reserve(edges.size());
+    
+    for (const Edge& edge : edges) {
+        result.emplace_back(edge.startVertex, edge.endVertex);
+    }
+    
+    return result;
+}
+
 // Generate a key for edge lookup
 uint64_t EdgeMesh::edgeKey(uint32_t startVertex, uint32_t endVertex) const {
     return ((uint64_t)endVertex << 32) | (uint64_t)startVertex;

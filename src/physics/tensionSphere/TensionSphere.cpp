@@ -3,7 +3,6 @@
 #include <cmath>
 #include <algorithm>
 #include <cassert>
-#include <set>
 
 constexpr double PI = 3.14159265358979323846;
 
@@ -30,37 +29,15 @@ void TensionSphere::initializePhysics()
     // Initialize velocities to zero
     m_vertexVelocities.resize(vertexCount, double3(0, 0, 0));
     
-    // Build edge connectivity by examining all vertex pairs
-    // Since we don't have direct edge access, we'll build edges from face information
-    std::set<std::pair<uint32_t, uint32_t>> uniqueEdges;
+    // Get edge connectivity directly from the mesh
+    m_edgeConnectivity = m_pMesh->getAllEdges();
     
-    const uint32_t faceCount = m_pMesh->getFaceCount();
-    for (uint32_t faceIdx = 0; faceIdx < faceCount; ++faceIdx)
-    {
-        std::vector<uint32_t> faceVertices = m_pMesh->getFaceVertices(faceIdx);
-        if (faceVertices.size() == 3) // Triangle face
-        {
-            // Add the three edges of this triangle
-            for (int i = 0; i < 3; ++i)
-            {
-                uint32_t v1 = faceVertices[i];
-                uint32_t v2 = faceVertices[(i + 1) % 3];
-                
-                // Ensure consistent edge ordering (smaller index first)
-                if (v1 > v2) std::swap(v1, v2);
-                uniqueEdges.insert({v1, v2});
-            }
-        }
-    }
-    
-    // Convert set to vector and compute rest lengths
-    m_edgeConnectivity.clear();
+    // Compute rest lengths for each edge
     m_edgeRestLengths.clear();
+    m_edgeRestLengths.reserve(m_edgeConnectivity.size());
 
-    for (const auto& edge : uniqueEdges)
+    for (const auto& edge : m_edgeConnectivity)
     {
-        m_edgeConnectivity.push_back(edge);
-        
         // Compute rest length as current distance between vertices
         double3 pos1 = m_pMesh->getVertexPosition(edge.first);
         double3 pos2 = m_pMesh->getVertexPosition(edge.second);
