@@ -3,7 +3,7 @@
 #include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/organelles/Cortex.h"
-#include "geometry/edgeMesh/edgeMesh.h"
+#include "geometry/mesh/edgeMesh.h"
 #include <stdexcept>
 
 CortexVis::CortexVis(std::shared_ptr<Cortex> pCortex, GPUQueue *pQueue)

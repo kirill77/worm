@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 #include "geometry/vectors/vector.h"
-#include "geometry/edgeMesh/edgeMesh.h"
+#include "geometry/mesh/edgeMesh.h"
 
 /**
  * @brief Class for simulating tension forces in a spherical cell cortex using a geodesic sphere model

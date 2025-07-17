@@ -25,7 +25,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tensionSphere", "physics\te
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpu", "visualization\gpu\visualization.vcxproj", "{250EF3CC-B8D1-4814-8AE1-4A5AD649AF73}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "edgeMesh", "geometry\edgeMesh\edgeMesh.vcxproj", "{047F1162-DF2E-4DE4-A3DF-5A904BF4659B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mesh", "geometry\mesh\mesh.vcxproj", "{047F1162-DF2E-4DE4-A3DF-5A904BF4659B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "helpers", "visualization\helpers\visHelpers.vcxproj", "{16F70716-BA22-4002-95CC-1DAFEFD6C215}"
 EndProject

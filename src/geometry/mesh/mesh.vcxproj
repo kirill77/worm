@@ -30,9 +30,9 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{047f1162-df2e-4de4-a3df-5a904bf4659b}</ProjectGuid>
-    <RootNamespace>edgeMesh</RootNamespace>
+    <RootNamespace>mesh</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>edgeMesh</ProjectName>
+    <ProjectName>mesh</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
