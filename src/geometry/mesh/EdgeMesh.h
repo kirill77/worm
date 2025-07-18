@@ -27,11 +27,6 @@ public:
             , nextEdge(INVALID_INDEX) {}
     };
 
-    struct Triangle {
-        uint32_t edgeIndex;
-        Triangle(uint32_t edge) : edgeIndex(edge) {}
-    };
-
     // Constructors and main methods
     EdgeMesh();
     EdgeMesh(double radius, uint32_t subdivisionLevel);
@@ -58,7 +53,7 @@ public:
 private:
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;
-    std::vector<Triangle> triangles;
+    std::vector<uint3> triangles;
     std::unordered_map<uint64_t, uint32_t> edgeMap;
 
     uint64_t edgeKey(uint32_t startVertex, uint32_t endVertex) const;

@@ -134,16 +134,16 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
     }
 #endif
     
-    // Add or find edges
+    // Store triangle vertices directly
+    triangles.emplace_back(v1, v2, v3);
+    uint32_t triangleIndex = static_cast<uint32_t>(triangles.size() - 1);
+    
+    // Still maintain edges for neighbor queries and other functionality
     uint32_t e1 = addEdge(v1, v2);
     uint32_t e2 = addEdge(v2, v3);
     uint32_t e3 = addEdge(v3, v1);
     
-    // Create new triangle
-    triangles.emplace_back(e1);
-    uint32_t triangleIndex = static_cast<uint32_t>(triangles.size() - 1);
-    
-    // Link edges to this triangle and to each other
+    // Link edges to this triangle and to each other for neighbor traversal
     edges[e1].rightTriangle = triangleIndex;
     edges[e2].rightTriangle = triangleIndex;
     edges[e3].rightTriangle = triangleIndex;
@@ -158,28 +158,7 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 
 // Get all vertices of a triangle
 uint3 EdgeMesh::getTriangleVertices(uint32_t triangleIndex) const {
-    if (triangleIndex >= triangles.size()) {
-        return uint3(INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
-    }
-    
-    uint32_t startEdgeIndex = triangles[triangleIndex].edgeIndex;
-    if (startEdgeIndex >= edges.size()) {
-        return uint3(INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
-    }
-    
-    // Follow the edge loop and collect vertices
-    uint32_t vertices[3];
-    uint32_t currentEdge = startEdgeIndex;
-    for (int i = 0; i < 3; ++i) {
-        if (currentEdge == INVALID_INDEX || currentEdge >= edges.size()) {
-            return uint3(INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
-        }
-        
-        vertices[i] = edges[currentEdge].startVertex;
-        currentEdge = edges[currentEdge].nextEdge;
-    }
-    
-    return uint3(vertices[0], vertices[1], vertices[2]);
+    return triangles[triangleIndex];
 }
 
 // Get neighboring triangles
@@ -304,7 +283,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
     
     for (uint32_t level = 0; level < levels; ++level) {
         // Store original mesh data
-        std::vector<Triangle> originalTriangles = triangles;
+        std::vector<uint3> originalTriangles = triangles;
         std::vector<Vertex> originalVertices = vertices;
         
         // Map to store midpoints to avoid duplication
@@ -317,20 +296,14 @@ void EdgeMesh::subdivide(uint32_t levels) {
         }
         radius /= vertices.size();
         
-        // Get triangle vertex indices before clearing
-        std::vector<uint3> triangleVertices;
-        for (uint32_t i = 0; i < originalTriangles.size(); ++i) {
-            triangleVertices.push_back(getTriangleVertices(i));
-        }
-        
         // Clear triangles and edge data
         triangles.clear();
         edges.clear();
         edgeMap.clear();
         
         // Process each original triangle
-        for (size_t triangleIdx = 0; triangleIdx < triangleVertices.size(); ++triangleIdx) {
-            const uint3& triangleVerts = triangleVertices[triangleIdx];
+        for (size_t triangleIdx = 0; triangleIdx < originalTriangles.size(); ++triangleIdx) {
+            const uint3& triangleVerts = originalTriangles[triangleIdx];
             
 
             
