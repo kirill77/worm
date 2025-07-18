@@ -157,30 +157,29 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 }
 
 // Get all vertices of a triangle
-std::vector<uint32_t> EdgeMesh::getTriangleVertices(uint32_t triangleIndex) const {
-    std::vector<uint32_t> result;
-    
+uint3 EdgeMesh::getTriangleVertices(uint32_t triangleIndex) const {
     if (triangleIndex >= triangles.size()) {
-        return result;
+        return uint3(INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
     }
     
     uint32_t startEdgeIndex = triangles[triangleIndex].edgeIndex;
     if (startEdgeIndex >= edges.size()) {
-        return result;
+        return uint3(INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
     }
     
     // Follow the edge loop and collect vertices
+    uint32_t vertices[3];
     uint32_t currentEdge = startEdgeIndex;
-    for (int i = 0; i < 3; ++i) { // assuming triangular triangles
+    for (int i = 0; i < 3; ++i) {
         if (currentEdge == INVALID_INDEX || currentEdge >= edges.size()) {
-            break;
+            return uint3(INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
         }
         
-        result.push_back(edges[currentEdge].startVertex);
+        vertices[i] = edges[currentEdge].startVertex;
         currentEdge = edges[currentEdge].nextEdge;
     }
     
-    return result;
+    return uint3(vertices[0], vertices[1], vertices[2]);
 }
 
 // Get neighboring triangles
@@ -192,15 +191,12 @@ std::vector<uint32_t> EdgeMesh::getTriangleNeighbors(uint32_t triangleIndex) con
     }
     
     // Get triangle vertices
-    std::vector<uint32_t> verts = getTriangleVertices(triangleIndex);
-    if (verts.size() < 3) {
-        return neighbors;
-    }
+    uint3 verts = getTriangleVertices(triangleIndex);
     
     // Check each edge's opposite
-    for (size_t i = 0; i < verts.size(); ++i) {
+    for (int i = 0; i < 3; ++i) {
         uint32_t v1 = verts[i];
-        uint32_t v2 = verts[(i + 1) % verts.size()];
+        uint32_t v2 = verts[(i + 1) % 3];
         
         // Find edge going the other way
         uint32_t oppositeEdge = findEdge(v2, v1);
@@ -220,14 +216,11 @@ std::vector<uint32_t> EdgeMesh::getTriangleNeighbors(uint32_t triangleIndex) con
 
 // Calculate the area of a triangle
 double EdgeMesh::calculateTriangleArea(uint32_t triangleIndex) const {
-    std::vector<uint32_t> verts = getTriangleVertices(triangleIndex);
-    if (verts.size() < 3) {
-        return 0.0;
-    }
+    uint3 verts = getTriangleVertices(triangleIndex);
     
-    const double3& p1 = vertices[verts[0]].position;
-    const double3& p2 = vertices[verts[1]].position;
-    const double3& p3 = vertices[verts[2]].position;
+    const double3& p1 = vertices[verts.x].position;
+    const double3& p2 = vertices[verts.y].position;
+    const double3& p3 = vertices[verts.z].position;
     
     // Area = 0.5 * |cross(v1, v2)|
     return 0.5 * length(cross(p2 - p1, p3 - p1));
@@ -235,14 +228,11 @@ double EdgeMesh::calculateTriangleArea(uint32_t triangleIndex) const {
 
 // Calculate triangle normal
 double3 EdgeMesh::calculateTriangleNormal(uint32_t triangleIndex) const {
-    std::vector<uint32_t> verts = getTriangleVertices(triangleIndex);
-    if (verts.size() < 3) {
-        return double3(0.0, 0.0, 1.0); // Default normal if triangle is invalid
-    }
+    uint3 verts = getTriangleVertices(triangleIndex);
     
-    const double3& p1 = vertices[verts[0]].position;
-    const double3& p2 = vertices[verts[1]].position;
-    const double3& p3 = vertices[verts[2]].position;
+    const double3& p1 = vertices[verts.x].position;
+    const double3& p2 = vertices[verts.y].position;
+    const double3& p3 = vertices[verts.z].position;
     
     // Normal = normalize(cross(v1, v2))
     double3 normal = cross(p2 - p1, p3 - p1);
@@ -328,7 +318,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
         radius /= vertices.size();
         
         // Get triangle vertex indices before clearing
-        std::vector<std::vector<uint32_t>> triangleVertices;
+        std::vector<uint3> triangleVertices;
         for (uint32_t i = 0; i < originalTriangles.size(); ++i) {
             triangleVertices.push_back(getTriangleVertices(i));
         }
@@ -340,16 +330,13 @@ void EdgeMesh::subdivide(uint32_t levels) {
         
         // Process each original triangle
         for (size_t triangleIdx = 0; triangleIdx < triangleVertices.size(); ++triangleIdx) {
-            const auto& triangleVerts = triangleVertices[triangleIdx];
+            const uint3& triangleVerts = triangleVertices[triangleIdx];
             
-            if (triangleVerts.size() != 3) {
-                // Skip invalid triangles
-                continue;
-            }
+
             
-            uint32_t v1 = triangleVerts[0];
-            uint32_t v2 = triangleVerts[1];
-            uint32_t v3 = triangleVerts[2];
+            uint32_t v1 = triangleVerts.x;
+            uint32_t v2 = triangleVerts.y;
+            uint32_t v3 = triangleVerts.z;
             
             // Create midpoints
             uint32_t m12 = getMidpoint(v1, v2, midpoints, radius);

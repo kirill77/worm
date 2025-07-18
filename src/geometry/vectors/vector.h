@@ -27,6 +27,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <numbers>
 #include <limits>
 
@@ -162,6 +163,9 @@ struct vector<T, 4>
 
 // Concrete vectors for the most common types and dimensions
 
+// Define uint as uint32_t for cleaner vector naming
+typedef uint32_t uint;
+
 #define DEFINE_CONCRETE_VECTORS(type) \
 			typedef vector<type, 2> type##2; \
 			typedef vector<type, 3> type##3; \
@@ -171,6 +175,7 @@ DEFINE_CONCRETE_VECTORS(float);
 DEFINE_CONCRETE_VECTORS(double);
 DEFINE_CONCRETE_VECTORS(int);
 DEFINE_CONCRETE_VECTORS(bool);
+DEFINE_CONCRETE_VECTORS(uint);
 
 #undef DEFINE_CONCRETE_VECTORS
 

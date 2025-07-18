@@ -39,7 +39,7 @@ public:
     uint32_t addVertex(const double3& position);
     uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);
     uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3);
-    std::vector<uint32_t> getTriangleVertices(uint32_t triangleIndex) const;
+    uint3 getTriangleVertices(uint32_t triangleIndex) const;
     std::vector<uint32_t> getTriangleNeighbors(uint32_t triangleIndex) const;
     double calculateTriangleArea(uint32_t triangleIndex) const;
     double3 calculateTriangleNormal(uint32_t triangleIndex) const;

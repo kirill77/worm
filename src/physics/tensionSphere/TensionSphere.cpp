@@ -133,18 +133,16 @@ double TensionSphere::calculateCurrentVolume() const
     
     for (uint32_t triangleIdx = 0; triangleIdx < triangleCount; ++triangleIdx)
     {
-        std::vector<uint32_t> triangleVertices = m_pMesh->getTriangleVertices(triangleIdx);
-        if (triangleVertices.size() == 3) // Triangle
-        {
-            // Get vertex positions
-            double3 v0 = m_pMesh->getVertexPosition(triangleVertices[0]);
-            double3 v1 = m_pMesh->getVertexPosition(triangleVertices[1]);
-            double3 v2 = m_pMesh->getVertexPosition(triangleVertices[2]);
-            
-            // Calculate volume contribution using divergence theorem
-            // V = (1/6) * sum over triangles of (v0 · (v1 × v2))
-            volume += (1.0 / 6.0) * dot(v0, cross(v1, v2));
-        }
+        uint3 triangleVertices = m_pMesh->getTriangleVertices(triangleIdx);
+        
+        // Get vertex positions
+        double3 v0 = m_pMesh->getVertexPosition(triangleVertices.x);
+        double3 v1 = m_pMesh->getVertexPosition(triangleVertices.y);
+        double3 v2 = m_pMesh->getVertexPosition(triangleVertices.z);
+        
+        // Calculate volume contribution using divergence theorem
+        // V = (1/6) * sum over triangles of (v0 · (v1 × v2))
+        volume += (1.0 / 6.0) * dot(v0, cross(v1, v2));
     }
     
     return std::abs(volume); // Take absolute value to ensure positive volume

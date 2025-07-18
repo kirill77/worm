@@ -47,11 +47,8 @@ void CortexVis::updateGPUMesh()
     gpuTriangles.reserve(triangleCount);
     for (uint32_t i = 0; i < triangleCount; ++i)
     {
-        std::vector<uint32_t> triangleVertices = pMesh->getTriangleVertices(i);
-        if (triangleVertices.size() == 3)
-        {
-            gpuTriangles.push_back(int3(triangleVertices[0], triangleVertices[1], triangleVertices[2]));
-        }
+        uint3 triangleVertices = pMesh->getTriangleVertices(i);
+        gpuTriangles.push_back(int3(triangleVertices.x, triangleVertices.y, triangleVertices.z));
     }
 
     // Update the GPU mesh geometry
