@@ -84,19 +84,22 @@ std::vector<std::pair<uint32_t, uint32_t>> EdgeMesh::getAllEdges() const {
 }
 
 // Generate a key for edge lookup
-uint64_t EdgeMesh::edgeKey(uint32_t startVertex, uint32_t endVertex) const {
+uint64_t EdgeMesh::directionalEdgeKey(uint32_t startVertex, uint32_t endVertex) {
     return ((uint64_t)endVertex << 32) | (uint64_t)startVertex;
+}
+uint64_t EdgeMesh::directionlessEdgeKey(uint32_t v1, uint32_t v2) {
+    return (v1 <= v2) ? directionalEdgeKey(v1, v2) : directionalEdgeKey(v2, v1);
 }
 
 // Find an edge by vertices
 uint32_t EdgeMesh::findEdge(uint32_t startVertex, uint32_t endVertex) const {
-    auto it = edgeMap.find(edgeKey(startVertex, endVertex));
+    auto it = edgeMap.find(directionalEdgeKey(startVertex, endVertex));
     return (it != edgeMap.end()) ? it->second : INVALID_INDEX;
 }
 
 // Add an edge to the mesh
 uint32_t EdgeMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
-    auto key = edgeKey(startVertex, endVertex);
+    auto key = directionalEdgeKey(startVertex, endVertex);
     auto it = edgeMap.find(key);
     
     if (it != edgeMap.end()) {
@@ -287,7 +290,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
         std::vector<Vertex> originalVertices = vertices;
         
         // Map to store midpoints to avoid duplication
-        std::unordered_map<std::string, uint32_t> midpoints;
+        std::unordered_map<uint64_t, uint32_t> midpoints;
         
         // Calculate average radius for vertex projection
         double radius = 0.0;
@@ -327,12 +330,10 @@ void EdgeMesh::subdivide(uint32_t levels) {
 
 // Helper to get or create midpoint between two vertices
 uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2, 
-                               std::unordered_map<std::string, uint32_t>& midpoints,
+                               std::unordered_map<uint64_t, uint32_t>& midpoints,
                                double radius) {
     // Use a normalized edge key (smaller vertex index first)
-    std::string key = (v1 < v2) ? 
-        (std::to_string(v1) + ":" + std::to_string(v2)) : 
-        (std::to_string(v2) + ":" + std::to_string(v1));
+    uint64_t key = directionlessEdgeKey(v1, v2);
     
     // Check if midpoint already exists
     auto it = midpoints.find(key);

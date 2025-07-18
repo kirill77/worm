@@ -56,13 +56,14 @@ private:
     std::vector<uint3> triangles;
     std::unordered_map<uint64_t, uint32_t> edgeMap;
 
-    uint64_t edgeKey(uint32_t startVertex, uint32_t endVertex) const;
+    static uint64_t directionalEdgeKey(uint32_t startVertex, uint32_t endVertex);
+    static uint64_t directionlessEdgeKey(uint32_t v1, uint32_t v2);
     uint32_t findEdge(uint32_t startVertex, uint32_t endVertex) const;
     
     // Helper methods for icosahedron creation
     void createIcosahedron(double radius);
     void subdivide(uint32_t levels);
     uint32_t getMidpoint(uint32_t v1, uint32_t v2, 
-                       std::unordered_map<std::string, uint32_t>& midpoints,
+                       std::unordered_map<uint64_t, uint32_t>& midpoints,
                        double radius);
 };
