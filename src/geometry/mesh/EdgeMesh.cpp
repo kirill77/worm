@@ -1,4 +1,4 @@
-#include "edgeMesh.h"
+#include "EdgeMesh.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -18,43 +18,13 @@ EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel) {
     }
 }
 
+
+
 // Clear all mesh data
 void EdgeMesh::clear() {
-    vertices.clear();
+    Mesh::clear(); // Clear base class data (vertices and triangles)
     edges.clear();
-    triangles.clear();
     edgeMap.clear();
-}
-
-// Add a vertex to the mesh
-uint32_t EdgeMesh::addVertex(const double3& position) {
-    vertices.emplace_back(position);
-    return static_cast<uint32_t>(vertices.size() - 1);
-}
-
-// Get vertex position
-double3 EdgeMesh::getVertexPosition(uint32_t index) const {
-    if (index < vertices.size()) {
-        return vertices[index].position;
-    }
-    return double3(0.0, 0.0, 0.0); // Return zero vector for invalid index
-}
-
-// Set vertex position
-void EdgeMesh::setVertexPosition(uint32_t index, const double3& position) {
-    if (index < vertices.size()) {
-        vertices[index].position = position;
-    }
-}
-
-// Get number of vertices
-uint32_t EdgeMesh::getVertexCount() const {
-    return static_cast<uint32_t>(vertices.size());
-}
-
-// Get number of triangles
-uint32_t EdgeMesh::getTriangleCount() const {
-    return static_cast<uint32_t>(triangles.size());
 }
 
 // Get number of edges
@@ -121,9 +91,9 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 {
 #ifndef NDEBUG
     {
-        const double3& p1 = vertices[v1].position;
-        const double3& p2 = vertices[v2].position;
-        const double3& p3 = vertices[v3].position;
+        const auto& p1 = getVertexPosition(v1);
+        const auto& p2 = getVertexPosition(v2);
+        const auto& p3 = getVertexPosition(v3);
         
         // Calculate triangle normal
         double3 normal = cross(p2 - p1, p3 - p1);
@@ -137,9 +107,8 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
     }
 #endif
     
-    // Store triangle vertices directly
-    triangles.emplace_back(v1, v2, v3);
-    uint32_t triangleIndex = static_cast<uint32_t>(triangles.size() - 1);
+    // Store triangle vertices using base class method
+    uint32_t triangleIndex = Mesh::addTriangle(v1, v2, v3);
     
     // Still maintain edges for neighbor queries and other functionality
     uint32_t e1 = addEdge(v1, v2);
@@ -159,18 +128,21 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
     return triangleIndex;
 }
 
-// Get all vertices of a triangle
-uint3 EdgeMesh::getTriangleVertices(uint32_t triangleIndex) const {
-    return triangles[triangleIndex];
+// Extract triangles and clear edge connectivity data
+std::vector<uint3> EdgeMesh::extractTriangles() {
+    // Extract triangles using base class method
+    std::vector<uint3> extracted = Mesh::extractTriangles();
+    
+    // Clear edge connectivity data since triangles are gone
+    edges.clear();
+    edgeMap.clear();
+    
+    return extracted;
 }
 
 // Get neighboring triangles
 std::vector<uint32_t> EdgeMesh::getTriangleNeighbors(uint32_t triangleIndex) const {
     std::vector<uint32_t> neighbors;
-    
-    if (triangleIndex >= triangles.size()) {
-        return neighbors;
-    }
     
     // Get triangle vertices
     uint3 verts = getTriangleVertices(triangleIndex);
@@ -196,36 +168,7 @@ std::vector<uint32_t> EdgeMesh::getTriangleNeighbors(uint32_t triangleIndex) con
     return neighbors;
 }
 
-// Calculate the area of a triangle
-double EdgeMesh::calculateTriangleArea(uint32_t triangleIndex) const {
-    uint3 verts = getTriangleVertices(triangleIndex);
-    
-    const double3& p1 = vertices[verts.x].position;
-    const double3& p2 = vertices[verts.y].position;
-    const double3& p3 = vertices[verts.z].position;
-    
-    // Area = 0.5 * |cross(v1, v2)|
-    return 0.5 * length(cross(p2 - p1, p3 - p1));
-}
 
-// Calculate triangle normal
-double3 EdgeMesh::calculateTriangleNormal(uint32_t triangleIndex) const {
-    uint3 verts = getTriangleVertices(triangleIndex);
-    
-    const double3& p1 = vertices[verts.x].position;
-    const double3& p2 = vertices[verts.y].position;
-    const double3& p3 = vertices[verts.z].position;
-    
-    // Normal = normalize(cross(v1, v2))
-    double3 normal = cross(p2 - p1, p3 - p1);
-    double len = length(normal);
-    
-    if (len > 1e-10) {
-        return normal / len;
-    } else {
-        return double3(0.0, 0.0, 1.0); // Default normal if degenerate triangle
-    }
-}
 
 // Create an icosahedron with the given radius
 void EdgeMesh::createIcosahedron(double radius) {
@@ -285,30 +228,26 @@ void EdgeMesh::subdivide(uint32_t levels) {
     if (levels == 0) return;
     
     for (uint32_t level = 0; level < levels; ++level) {
-        // Store original mesh data
-        std::vector<uint3> originalTriangles = triangles;
-        std::vector<Vertex> originalVertices = vertices;
+        // Extract original triangles (vertices remain in place)
+        std::vector<uint3> originalTriangles = extractTriangles();
         
         // Map to store midpoints to avoid duplication
         std::unordered_map<uint64_t, uint32_t> midpoints;
         
         // Calculate average radius for vertex projection
         double radius = 0.0;
-        for (const auto& vertex : vertices) {
-            radius += length(vertex.position);
+        for (uint32_t i = 0; i < getVertexCount(); ++i) {
+            radius += length(getVertexPosition(i));
         }
-        radius /= vertices.size();
+        radius /= getVertexCount();
         
-        // Clear triangles and edge data
-        triangles.clear();
+        // Clear edge data (triangles are already extracted)
         edges.clear();
         edgeMap.clear();
         
         // Process each original triangle
-        for (size_t triangleIdx = 0; triangleIdx < originalTriangles.size(); ++triangleIdx) {
+        for (uint32_t triangleIdx = 0; triangleIdx < originalTriangles.size(); ++triangleIdx) {
             const uint3& triangleVerts = originalTriangles[triangleIdx];
-            
-
             
             uint32_t v1 = triangleVerts.x;
             uint32_t v2 = triangleVerts.y;
@@ -341,9 +280,9 @@ uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
         return it->second;
     }
     
-    // Create a new midpoint
-    double3 pos1 = vertices[v1].position;
-    double3 pos2 = vertices[v2].position;
+    // Create a new midpoint using current mesh vertex positions
+    const auto &pos1 = getVertexPosition(v1);
+    const auto &pos2 = getVertexPosition(v2);
     
     // Calculate midpoint and project onto sphere
     double3 midpoint = (pos1 + pos2) * 0.5;
@@ -358,4 +297,6 @@ uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
     
     return midpointIdx;
 }
+
+
 

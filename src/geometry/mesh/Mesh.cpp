@@ -1,0 +1,99 @@
+#include "Mesh.h"
+#include <algorithm>
+#include <cmath>
+
+// Constructor
+Mesh::Mesh() {
+}
+
+
+
+// Clear all mesh data
+void Mesh::clear() {
+    vertices.clear();
+    triangles.clear();
+}
+
+// Add a vertex to the mesh
+uint32_t Mesh::addVertex(const double3& position) {
+    vertices.emplace_back(position);
+    return static_cast<uint32_t>(vertices.size() - 1);
+}
+
+// Get vertex position
+double3 Mesh::getVertexPosition(uint32_t index) const {
+    if (index < vertices.size()) {
+        return vertices[index].position;
+    }
+    return double3(0.0, 0.0, 0.0); // Return zero vector for invalid index
+}
+
+// Set vertex position
+void Mesh::setVertexPosition(uint32_t index, const double3& position) {
+    if (index < vertices.size()) {
+        vertices[index].position = position;
+    }
+}
+
+// Get number of vertices
+uint32_t Mesh::getVertexCount() const {
+    return static_cast<uint32_t>(vertices.size());
+}
+
+// Get all vertices of a triangle
+uint3 Mesh::getTriangleVertices(uint32_t triangleIndex) const {
+    return triangles[triangleIndex];
+}
+
+// Get number of triangles
+uint32_t Mesh::getTriangleCount() const {
+    return static_cast<uint32_t>(triangles.size());
+}
+
+// Calculate the area of a triangle
+double Mesh::calculateTriangleArea(uint32_t triangleIndex) const {
+    uint3 verts = getTriangleVertices(triangleIndex);
+    
+    const double3& p1 = vertices[verts.x].position;
+    const double3& p2 = vertices[verts.y].position;
+    const double3& p3 = vertices[verts.z].position;
+    
+    // Area = 0.5 * |cross(v1, v2)|
+    return 0.5 * length(cross(p2 - p1, p3 - p1));
+}
+
+// Calculate triangle normal
+double3 Mesh::calculateTriangleNormal(uint32_t triangleIndex) const {
+    uint3 verts = getTriangleVertices(triangleIndex);
+    
+    const double3& p1 = vertices[verts.x].position;
+    const double3& p2 = vertices[verts.y].position;
+    const double3& p3 = vertices[verts.z].position;
+    
+    // Normal = normalize(cross(v1, v2))
+    double3 normal = cross(p2 - p1, p3 - p1);
+    double len = length(normal);
+    
+    if (len > 1e-10) {
+        return normal / len;
+    } else {
+        return double3(0.0, 0.0, 1.0); // Default normal if degenerate triangle
+    }
+}
+
+// Helper method for derived classes to add triangles directly to storage
+uint32_t Mesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) {
+    triangles.emplace_back(v1, v2, v3);
+    return static_cast<uint32_t>(triangles.size() - 1);
+}
+
+// Extract triangles (move out, leaving vertices intact)
+std::vector<uint3> Mesh::extractTriangles() {
+    std::vector<uint3> extracted = std::move(triangles);
+    triangles.clear(); // Ensure triangles is in a valid empty state
+    return extracted;
+}
+
+
+
+ 

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BVH.h" />
+    <ClInclude Include="ITraceableObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVH.cpp" />

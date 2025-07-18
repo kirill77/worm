@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EdgeMesh.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="SpaceMapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EdgeMesh.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="SpaceMapper.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

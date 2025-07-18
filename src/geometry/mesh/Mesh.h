@@ -1,0 +1,45 @@
+#pragma once
+
+#include <vector>
+#include <cstdint>
+#include <memory>
+#include "geometry/vectors/vector.h"
+
+class Mesh : public std::enable_shared_from_this<Mesh>
+{
+public:
+    static const uint32_t INVALID_INDEX = UINT32_MAX;
+    
+    struct Vertex {
+        double3 position;
+        Vertex(const double3& pos) : position(pos) {}
+    };
+
+    // Constructors and main methods
+    Mesh();
+    virtual ~Mesh() = default;
+    
+    // Vertex operations
+    uint32_t addVertex(const double3& position);
+    double3 getVertexPosition(uint32_t index) const;
+    void setVertexPosition(uint32_t index, const double3& position);
+    uint32_t getVertexCount() const;
+    
+    // Triangle operations (basic access, no connectivity)
+    uint3 getTriangleVertices(uint32_t triangleIndex) const;
+    uint32_t getTriangleCount() const;
+    double calculateTriangleArea(uint32_t triangleIndex) const;
+    double3 calculateTriangleNormal(uint32_t triangleIndex) const;
+    
+    virtual uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3);
+
+    // Clear mesh data
+    virtual void clear();
+    
+    // Extract triangles (move out, leaving vertices intact)
+    virtual std::vector<uint3> extractTriangles();
+
+private:
+    std::vector<Vertex> vertices;
+    std::vector<uint3> triangles;
+}; 
