@@ -28,9 +28,9 @@ void CortexVis::updateGPUMesh()
     auto pTensionSphere = m_pCortex->getTensionSphere();
     auto pMesh = pTensionSphere->getEdgeMesh();
 
-    // Get vertex count and face count
+    // Get vertex count and triangle count
     uint32_t vertexCount = pMesh->getVertexCount();
-    uint32_t faceCount = pMesh->getFaceCount();
+    uint32_t triangleCount = pMesh->getTriangleCount();
 
     // Convert vertices to GPUMesh::Vertex format
     std::vector<GPUMesh::Vertex> gpuVertices;
@@ -42,15 +42,15 @@ void CortexVis::updateGPUMesh()
         gpuVertices.push_back(gpuVertex);
     }
 
-    // Convert faces to triangles
+    // Convert triangles to GPU triangles
     std::vector<int3> gpuTriangles;
-    gpuTriangles.reserve(faceCount);
-    for (uint32_t i = 0; i < faceCount; ++i)
+    gpuTriangles.reserve(triangleCount);
+    for (uint32_t i = 0; i < triangleCount; ++i)
     {
-        std::vector<uint32_t> faceVertices = pMesh->getFaceVertices(i);
-        if (faceVertices.size() == 3)
+        std::vector<uint32_t> triangleVertices = pMesh->getTriangleVertices(i);
+        if (triangleVertices.size() == 3)
         {
-            gpuTriangles.push_back(int3(faceVertices[0], faceVertices[1], faceVertices[2]));
+            gpuTriangles.push_back(int3(triangleVertices[0], triangleVertices[1], triangleVertices[2]));
         }
     }
 

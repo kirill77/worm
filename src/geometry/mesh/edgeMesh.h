@@ -18,18 +18,18 @@ public:
     struct Edge {
         uint32_t startVertex;
         uint32_t endVertex;
-        uint32_t rightFace;
+        uint32_t rightTriangle;
         uint32_t nextEdge;
         Edge(uint32_t start, uint32_t end) 
             : startVertex(start)
             , endVertex(end)
-            , rightFace(INVALID_INDEX)
+            , rightTriangle(INVALID_INDEX)
             , nextEdge(INVALID_INDEX) {}
     };
 
-    struct Face {
+    struct Triangle {
         uint32_t edgeIndex;
-        Face(uint32_t edge) : edgeIndex(edge) {}
+        Triangle(uint32_t edge) : edgeIndex(edge) {}
     };
 
     // Constructors and main methods
@@ -38,17 +38,17 @@ public:
     void clear();
     uint32_t addVertex(const double3& position);
     uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);
-    uint32_t addFace(uint32_t v1, uint32_t v2, uint32_t v3);
-    std::vector<uint32_t> getFaceVertices(uint32_t faceIndex) const;
-    std::vector<uint32_t> getFaceNeighbors(uint32_t faceIndex) const;
-    double calculateFaceArea(uint32_t faceIndex) const;
-    double3 calculateFaceNormal(uint32_t faceIndex) const;
+    uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3);
+    std::vector<uint32_t> getTriangleVertices(uint32_t triangleIndex) const;
+    std::vector<uint32_t> getTriangleNeighbors(uint32_t triangleIndex) const;
+    double calculateTriangleArea(uint32_t triangleIndex) const;
+    double3 calculateTriangleNormal(uint32_t triangleIndex) const;
     
     // Additional accessor methods
     double3 getVertexPosition(uint32_t index) const;
     void setVertexPosition(uint32_t index, const double3& position);
     uint32_t getVertexCount() const;
-    uint32_t getFaceCount() const;
+    uint32_t getTriangleCount() const;
     
     // Edge access methods
     uint32_t getEdgeCount() const;
@@ -58,7 +58,7 @@ public:
 private:
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;
-    std::vector<Face> faces;
+    std::vector<Triangle> triangles;
     std::unordered_map<uint64_t, uint32_t> edgeMap;
 
     uint64_t edgeKey(uint32_t startVertex, uint32_t endVertex) const;

@@ -22,7 +22,7 @@ EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel) {
 void EdgeMesh::clear() {
     vertices.clear();
     edges.clear();
-    faces.clear();
+    triangles.clear();
     edgeMap.clear();
 }
 
@@ -52,9 +52,9 @@ uint32_t EdgeMesh::getVertexCount() const {
     return static_cast<uint32_t>(vertices.size());
 }
 
-// Get number of faces
-uint32_t EdgeMesh::getFaceCount() const {
-    return static_cast<uint32_t>(faces.size());
+// Get number of triangles
+uint32_t EdgeMesh::getTriangleCount() const {
+    return static_cast<uint32_t>(triangles.size());
 }
 
 // Get number of edges
@@ -113,8 +113,8 @@ uint32_t EdgeMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
     return edgeIndex;
 }
 
-// Add a face to the mesh
-uint32_t EdgeMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
+// Add a triangle to the mesh
+uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 {
 #ifndef NDEBUG
     {
@@ -122,14 +122,14 @@ uint32_t EdgeMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
         const double3& p2 = vertices[v2].position;
         const double3& p3 = vertices[v3].position;
         
-        // Calculate face normal
+        // Calculate triangle normal
         double3 normal = cross(p2 - p1, p3 - p1);
         
         // For a sphere mesh, the normal should point outward from the center
         // So the dot product with the position vector should be positive
         double dotProduct = dot(normal, p1);
         
-        // Assert that the normal faces outward (for convex meshes like spheres)
+        // Assert that the normal triangles outward (for convex meshes like spheres)
         assert(dotProduct > 0.0 && "Vertices must be in counter-clockwise order!");
     }
 #endif
@@ -139,39 +139,39 @@ uint32_t EdgeMesh::addFace(uint32_t v1, uint32_t v2, uint32_t v3)
     uint32_t e2 = addEdge(v2, v3);
     uint32_t e3 = addEdge(v3, v1);
     
-    // Create new face
-    faces.emplace_back(e1);
-    uint32_t faceIndex = static_cast<uint32_t>(faces.size() - 1);
+    // Create new triangle
+    triangles.emplace_back(e1);
+    uint32_t triangleIndex = static_cast<uint32_t>(triangles.size() - 1);
     
-    // Link edges to this face and to each other
-    edges[e1].rightFace = faceIndex;
-    edges[e2].rightFace = faceIndex;
-    edges[e3].rightFace = faceIndex;
+    // Link edges to this triangle and to each other
+    edges[e1].rightTriangle = triangleIndex;
+    edges[e2].rightTriangle = triangleIndex;
+    edges[e3].rightTriangle = triangleIndex;
     
     // Link edges in a loop: e1 -> e2 -> e3 -> e1
     edges[e1].nextEdge = e2;
     edges[e2].nextEdge = e3;
     edges[e3].nextEdge = e1;
     
-    return faceIndex;
+    return triangleIndex;
 }
 
-// Get all vertices of a face
-std::vector<uint32_t> EdgeMesh::getFaceVertices(uint32_t faceIndex) const {
+// Get all vertices of a triangle
+std::vector<uint32_t> EdgeMesh::getTriangleVertices(uint32_t triangleIndex) const {
     std::vector<uint32_t> result;
     
-    if (faceIndex >= faces.size()) {
+    if (triangleIndex >= triangles.size()) {
         return result;
     }
     
-    uint32_t startEdgeIndex = faces[faceIndex].edgeIndex;
+    uint32_t startEdgeIndex = triangles[triangleIndex].edgeIndex;
     if (startEdgeIndex >= edges.size()) {
         return result;
     }
     
     // Follow the edge loop and collect vertices
     uint32_t currentEdge = startEdgeIndex;
-    for (int i = 0; i < 3; ++i) { // assuming triangular faces
+    for (int i = 0; i < 3; ++i) { // assuming triangular triangles
         if (currentEdge == INVALID_INDEX || currentEdge >= edges.size()) {
             break;
         }
@@ -183,16 +183,16 @@ std::vector<uint32_t> EdgeMesh::getFaceVertices(uint32_t faceIndex) const {
     return result;
 }
 
-// Get neighboring faces
-std::vector<uint32_t> EdgeMesh::getFaceNeighbors(uint32_t faceIndex) const {
+// Get neighboring triangles
+std::vector<uint32_t> EdgeMesh::getTriangleNeighbors(uint32_t triangleIndex) const {
     std::vector<uint32_t> neighbors;
     
-    if (faceIndex >= faces.size()) {
+    if (triangleIndex >= triangles.size()) {
         return neighbors;
     }
     
-    // Get face vertices
-    std::vector<uint32_t> verts = getFaceVertices(faceIndex);
+    // Get triangle vertices
+    std::vector<uint32_t> verts = getTriangleVertices(triangleIndex);
     if (verts.size() < 3) {
         return neighbors;
     }
@@ -205,11 +205,11 @@ std::vector<uint32_t> EdgeMesh::getFaceNeighbors(uint32_t faceIndex) const {
         // Find edge going the other way
         uint32_t oppositeEdge = findEdge(v2, v1);
         if (oppositeEdge != INVALID_INDEX && oppositeEdge < edges.size()) {
-            uint32_t neighborFace = edges[oppositeEdge].rightFace;
-            if (neighborFace != INVALID_INDEX && neighborFace != faceIndex) {
+            uint32_t neighborTriangle = edges[oppositeEdge].rightTriangle;
+            if (neighborTriangle != INVALID_INDEX && neighborTriangle != triangleIndex) {
                 // Avoid duplicates
-                if (std::find(neighbors.begin(), neighbors.end(), neighborFace) == neighbors.end()) {
-                    neighbors.push_back(neighborFace);
+                if (std::find(neighbors.begin(), neighbors.end(), neighborTriangle) == neighbors.end()) {
+                    neighbors.push_back(neighborTriangle);
                 }
             }
         }
@@ -218,9 +218,9 @@ std::vector<uint32_t> EdgeMesh::getFaceNeighbors(uint32_t faceIndex) const {
     return neighbors;
 }
 
-// Calculate the area of a face
-double EdgeMesh::calculateFaceArea(uint32_t faceIndex) const {
-    std::vector<uint32_t> verts = getFaceVertices(faceIndex);
+// Calculate the area of a triangle
+double EdgeMesh::calculateTriangleArea(uint32_t triangleIndex) const {
+    std::vector<uint32_t> verts = getTriangleVertices(triangleIndex);
     if (verts.size() < 3) {
         return 0.0;
     }
@@ -233,11 +233,11 @@ double EdgeMesh::calculateFaceArea(uint32_t faceIndex) const {
     return 0.5 * length(cross(p2 - p1, p3 - p1));
 }
 
-// Calculate face normal
-double3 EdgeMesh::calculateFaceNormal(uint32_t faceIndex) const {
-    std::vector<uint32_t> verts = getFaceVertices(faceIndex);
+// Calculate triangle normal
+double3 EdgeMesh::calculateTriangleNormal(uint32_t triangleIndex) const {
+    std::vector<uint32_t> verts = getTriangleVertices(triangleIndex);
     if (verts.size() < 3) {
-        return double3(0.0, 0.0, 1.0); // Default normal if face is invalid
+        return double3(0.0, 0.0, 1.0); // Default normal if triangle is invalid
     }
     
     const double3& p1 = vertices[verts[0]].position;
@@ -251,7 +251,7 @@ double3 EdgeMesh::calculateFaceNormal(uint32_t faceIndex) const {
     if (len > 1e-10) {
         return normal / len;
     } else {
-        return double3(0.0, 0.0, 1.0); // Default normal if degenerate face
+        return double3(0.0, 0.0, 1.0); // Default normal if degenerate triangle
     }
 }
 
@@ -281,31 +281,31 @@ void EdgeMesh::createIcosahedron(double radius) {
     addVertex(double3(b, 0, -a)); // 10
     addVertex(double3(-b, 0, -a)); // 11
     
-    // Add 20 triangular faces
-    addFace(0, 8, 4);
-    addFace(0, 4, 5);
-    addFace(0, 5, 9);
-    addFace(0, 9, 2);
-    addFace(0, 2, 8);
+    // Add 20 triangular triangles
+    addTriangle(0, 8, 4);
+    addTriangle(0, 4, 5);
+    addTriangle(0, 5, 9);
+    addTriangle(0, 9, 2);
+    addTriangle(0, 2, 8);
     
-    addFace(1, 5, 4);
-    addFace(1, 4, 10);
-    addFace(1, 10, 3);
-    addFace(1, 3, 11);
-    addFace(1, 11, 5);
+    addTriangle(1, 5, 4);
+    addTriangle(1, 4, 10);
+    addTriangle(1, 10, 3);
+    addTriangle(1, 3, 11);
+    addTriangle(1, 11, 5);
     
-    addFace(2, 7, 6);
-    addFace(2, 6, 8);
-    addFace(2, 9, 7);
+    addTriangle(2, 7, 6);
+    addTriangle(2, 6, 8);
+    addTriangle(2, 9, 7);
     
-    addFace(3, 6, 7);
-    addFace(3, 7, 11);
-    addFace(3, 10, 6);
+    addTriangle(3, 6, 7);
+    addTriangle(3, 7, 11);
+    addTriangle(3, 10, 6);
     
-    addFace(4, 8, 10);
-    addFace(5, 11, 9);
-    addFace(6, 10, 8);
-    addFace(7, 9, 11);
+    addTriangle(4, 8, 10);
+    addTriangle(5, 11, 9);
+    addTriangle(6, 10, 8);
+    addTriangle(7, 9, 11);
 }
 
 // Subdivide the mesh
@@ -314,7 +314,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
     
     for (uint32_t level = 0; level < levels; ++level) {
         // Store original mesh data
-        std::vector<Face> originalFaces = faces;
+        std::vector<Triangle> originalTriangles = triangles;
         std::vector<Vertex> originalVertices = vertices;
         
         // Map to store midpoints to avoid duplication
@@ -327,40 +327,40 @@ void EdgeMesh::subdivide(uint32_t levels) {
         }
         radius /= vertices.size();
         
-        // Get face vertex indices before clearing
-        std::vector<std::vector<uint32_t>> faceVertices;
-        for (uint32_t i = 0; i < originalFaces.size(); ++i) {
-            faceVertices.push_back(getFaceVertices(i));
+        // Get triangle vertex indices before clearing
+        std::vector<std::vector<uint32_t>> triangleVertices;
+        for (uint32_t i = 0; i < originalTriangles.size(); ++i) {
+            triangleVertices.push_back(getTriangleVertices(i));
         }
         
-        // Clear faces and edge data
-        faces.clear();
+        // Clear triangles and edge data
+        triangles.clear();
         edges.clear();
         edgeMap.clear();
         
-        // Process each original face
-        for (size_t faceIdx = 0; faceIdx < faceVertices.size(); ++faceIdx) {
-            const auto& faceVerts = faceVertices[faceIdx];
+        // Process each original triangle
+        for (size_t triangleIdx = 0; triangleIdx < triangleVertices.size(); ++triangleIdx) {
+            const auto& triangleVerts = triangleVertices[triangleIdx];
             
-            if (faceVerts.size() != 3) {
-                // Skip invalid faces
+            if (triangleVerts.size() != 3) {
+                // Skip invalid triangles
                 continue;
             }
             
-            uint32_t v1 = faceVerts[0];
-            uint32_t v2 = faceVerts[1];
-            uint32_t v3 = faceVerts[2];
+            uint32_t v1 = triangleVerts[0];
+            uint32_t v2 = triangleVerts[1];
+            uint32_t v3 = triangleVerts[2];
             
             // Create midpoints
             uint32_t m12 = getMidpoint(v1, v2, midpoints, radius);
             uint32_t m23 = getMidpoint(v2, v3, midpoints, radius);
             uint32_t m31 = getMidpoint(v3, v1, midpoints, radius);
             
-            // Create four new triangular faces
-            addFace(v1, m12, m31);
-            addFace(m12, v2, m23);
-            addFace(m31, m23, v3);
-            addFace(m12, m23, m31);
+            // Create four new triangular triangles
+            addTriangle(v1, m12, m31);
+            addTriangle(m12, v2, m23);
+            addTriangle(m31, m23, v3);
+            addTriangle(m12, m23, m31);
         }
     }
 }

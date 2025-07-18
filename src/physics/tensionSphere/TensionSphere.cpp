@@ -129,20 +129,20 @@ void TensionSphere::makeTimeStep(double fDtSec)
 double TensionSphere::calculateCurrentVolume() const
 {
     double volume = 0.0;
-    const uint32_t faceCount = m_pMesh->getFaceCount();
+    const uint32_t triangleCount = m_pMesh->getTriangleCount();
     
-    for (uint32_t faceIdx = 0; faceIdx < faceCount; ++faceIdx)
+    for (uint32_t triangleIdx = 0; triangleIdx < triangleCount; ++triangleIdx)
     {
-        std::vector<uint32_t> faceVertices = m_pMesh->getFaceVertices(faceIdx);
-        if (faceVertices.size() == 3) // Triangle face
+        std::vector<uint32_t> triangleVertices = m_pMesh->getTriangleVertices(triangleIdx);
+        if (triangleVertices.size() == 3) // Triangle
         {
             // Get vertex positions
-            double3 v0 = m_pMesh->getVertexPosition(faceVertices[0]);
-            double3 v1 = m_pMesh->getVertexPosition(faceVertices[1]);
-            double3 v2 = m_pMesh->getVertexPosition(faceVertices[2]);
+            double3 v0 = m_pMesh->getVertexPosition(triangleVertices[0]);
+            double3 v1 = m_pMesh->getVertexPosition(triangleVertices[1]);
+            double3 v2 = m_pMesh->getVertexPosition(triangleVertices[2]);
             
             // Calculate volume contribution using divergence theorem
-            // V = (1/6) * sum over faces of (v0 · (v1 × v2))
+            // V = (1/6) * sum over triangles of (v0 · (v1 × v2))
             volume += (1.0 / 6.0) * dot(v0, cross(v1, v2));
         }
     }
