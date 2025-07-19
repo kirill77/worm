@@ -53,6 +53,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "biology", "biology", "{F434
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simulation", "biology\simulation\simulation.vcxproj", "{27B8E515-3AC4-4A7E-95BA-08D6692397B4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "geomHelpers", "geometry\geomHelpers\geomHelpers.vcxproj", "{DCD230D7-B87B-4568-9A41-6140EDAF7568}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -197,6 +199,14 @@ Global
 		{27B8E515-3AC4-4A7E-95BA-08D6692397B4}.Release|x64.Build.0 = Release|x64
 		{27B8E515-3AC4-4A7E-95BA-08D6692397B4}.Release|x86.ActiveCfg = Release|Win32
 		{27B8E515-3AC4-4A7E-95BA-08D6692397B4}.Release|x86.Build.0 = Release|Win32
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Debug|x64.ActiveCfg = Debug|x64
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Debug|x64.Build.0 = Debug|x64
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Debug|x86.ActiveCfg = Debug|Win32
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Debug|x86.Build.0 = Debug|Win32
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Release|x64.ActiveCfg = Release|x64
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Release|x64.Build.0 = Release|x64
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Release|x86.ActiveCfg = Release|Win32
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -218,6 +228,7 @@ Global
 		{B6F0DD41-3BC3-4195-BE1C-D3B0676927E1} = {6374D11D-138F-43FA-A2BB-81A9A0067195}
 		{D4BF6A4F-AC08-4A25-BD7D-013551EE1C19} = {EF6A94C3-FE58-43D0-8057-3FFA6D90EB6E}
 		{27B8E515-3AC4-4A7E-95BA-08D6692397B4} = {F4341C4E-42D4-455A-8CAA-56E5E3F78716}
+		{DCD230D7-B87B-4568-9A41-6140EDAF7568} = {EF6A94C3-FE58-43D0-8057-3FFA6D90EB6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {03D017DA-220B-45B1-A7FD-342A1562B553}
