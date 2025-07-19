@@ -12,11 +12,13 @@ Mesh::Mesh() {
 void Mesh::clear() {
     vertices.clear();
     triangles.clear();
+    ++m_version;
 }
 
 // Add a vertex to the mesh
 uint32_t Mesh::addVertex(const double3& position) {
     vertices.emplace_back(position);
+    ++m_version;
     return static_cast<uint32_t>(vertices.size() - 1);
 }
 
@@ -32,6 +34,7 @@ double3 Mesh::getVertexPosition(uint32_t index) const {
 void Mesh::setVertexPosition(uint32_t index, const double3& position) {
     if (index < vertices.size()) {
         vertices[index].position = position;
+        ++m_version;
     }
 }
 
@@ -84,6 +87,7 @@ double3 Mesh::calculateTriangleNormal(uint32_t triangleIndex) const {
 // Helper method for derived classes to add triangles directly to storage
 uint32_t Mesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) {
     triangles.emplace_back(v1, v2, v3);
+    ++m_version;
     return static_cast<uint32_t>(triangles.size() - 1);
 }
 
@@ -91,6 +95,7 @@ uint32_t Mesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) {
 std::vector<uint3> Mesh::extractTriangles() {
     std::vector<uint3> extracted = std::move(triangles);
     triangles.clear(); // Ensure triangles is in a valid empty state
+    ++m_version;
     return extracted;
 }
 

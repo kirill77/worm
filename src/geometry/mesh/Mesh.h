@@ -39,7 +39,11 @@ public:
     // Extract triangles (move out, leaving vertices intact)
     virtual std::vector<uint3> extractTriangles();
 
+    // Version tracking
+    uint64_t getVersion() const { return m_version; }
+
 private:
     std::vector<Vertex> vertices;
     std::vector<uint3> triangles;
+    uint64_t m_version = 0;
 }; 
