@@ -145,6 +145,12 @@
     <ProjectReference Include="..\..\biology\simulation\simulation.vcxproj">
       <Project>{27b8e515-3ac4-4a7e-95ba-08d6692397b4}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\geometry\BVH\BVH.vcxproj">
+      <Project>{d4bf6a4f-ac08-4a25-bd7d-013551ee1c19}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\geometry\geomHelpers\geomHelpers.vcxproj">
+      <Project>{dcd230d7-b87b-4568-9a41-6140edaf7568}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\geometry\mesh\mesh.vcxproj">
       <Project>{047f1162-df2e-4de4-a3df-5a904bf4659b}</Project>
     </ProjectReference>
