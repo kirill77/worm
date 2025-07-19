@@ -3,15 +3,15 @@
 #include <vector>
 #include <memory>
 
-struct Organism
+class Organism
 {
 protected:
-    std::vector<std::shared_ptr<class Cell>> m_pCells;
+    std::vector<std::shared_ptr<class CellSim>> m_pCells;
 
 public:
     virtual void simulateStep(double dt);
 
-    const std::vector<std::shared_ptr<class Cell>>& getCells() const
+    const std::vector<std::shared_ptr<class CellSim>>& getCells() const
     {
         return m_pCells;
     }

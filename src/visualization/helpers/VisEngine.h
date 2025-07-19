@@ -8,8 +8,8 @@
 #include "chemistry/StringDict.h"
 
 // Forward declarations
-struct World;
-struct Organism;
+class World;
+class Organism;
 struct Window;
 struct GPUWorld;
 struct CortexVis;

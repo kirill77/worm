@@ -2,6 +2,7 @@
 #include "Worm.h"
 #include "chemistry/StringDict.h"
 #include "biology/organelles/Cell.h"
+#include "biology/simulation/CellSim.h"
 #include "biology/organelles/Centrosome.h"
 #include "biology/organelles/CellTypes.h"
 #include "chemistry/Molecule.h"
@@ -110,7 +111,9 @@ Worm::Worm()
     auto pCentrosome = std::make_shared<Centrosome>(std::weak_ptr<Cell>(pCell), posteriorEntryPoint);
     pCell->addOrganelle(StringDict::ID::ORGANELLE_CENTROSOME, pCentrosome);
     
-    m_pCells.push_back(pCell);
+    // Create CellSim to wrap the Cell
+    auto pCellSim = std::make_shared<CellSim>(pCell);
+    m_pCells.push_back(pCellSim);
     
     // Set up the data collector
     setupDataCollector();
@@ -124,7 +127,7 @@ void Worm::setupDataCollector()
         return;
     }
     
-    auto& internalMedium = m_pCells[0]->getInternalMedium();
+    auto& internalMedium = m_pCells[0]->getCell()->getInternalMedium();
     
     // Initialize the DataCollector with the cell's internal medium
     m_pDataCollector = std::make_unique<DataCollector>(
@@ -200,7 +203,7 @@ static constexpr uint32_t DIVISION_START = 11000;               // 18.3 minutes
 
 bool Worm::validatePARPolarization(float fTimeSec) const
 {
-    auto& internalMedium = m_pCells[0]->getInternalMedium();
+    auto& internalMedium = m_pCells[0]->getCell()->getInternalMedium();
     
     float3 anteriorPos(0.0f, 1.f, 0.0f);
     float3 posteriorPos(0.0f, -1.f, 0.0f);
@@ -233,7 +236,7 @@ bool Worm::validatePARPolarization(float fTimeSec) const
 
 bool Worm::validateCellCycle(float fTimeSec) const
 {
-    auto& internalMedium = m_pCells[0]->getInternalMedium();
+    auto& internalMedium = m_pCells[0]->getCell()->getInternalMedium();
     float3 nuclearPos(0.0f, 0.0f, 0.0f);
     double cdk1Level = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_1), nuclearPos);
 
@@ -257,7 +260,7 @@ bool Worm::validateAsymmetricDivision(float fTimeSec) const
     // Only check during late stages (after 15 minutes)
     if (fTimeSec < SPINDLE_ASSEMBLY_START_SEC) return true;
     
-    auto pSpindle = std::dynamic_pointer_cast<Spindle>(m_pCells[0]->getOrganelle(StringDict::ID::ORGANELLE_SPINDLE));
+    auto pSpindle = std::dynamic_pointer_cast<Spindle>(m_pCells[0]->getCell()->getOrganelle(StringDict::ID::ORGANELLE_SPINDLE));
     float3 spindlePos = pSpindle->getPosition();
     
     if (spindlePos.y > -0.1f) {
@@ -270,7 +273,7 @@ bool Worm::validateAsymmetricDivision(float fTimeSec) const
 
 bool Worm::validateCentrosomeBehavior(float fTimeSec) const
 {
-    auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(m_pCells[0]->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
+    auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(m_pCells[0]->getCell()->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
     if (!pCentrosome) {
         // Before fertilization, there should be no centrosome
         if (fTimeSec < 1.0f) {  // Assume fertilization happens within 1 second
@@ -282,7 +285,7 @@ bool Worm::validateCentrosomeBehavior(float fTimeSec) const
     
     // Check centrosome position during different phases
     float3 centrosomePos = pCentrosome->getPosition();
-    CellCycleState cellCycleState = m_pCells[0]->getCellCycleState();
+    CellCycleState cellCycleState = m_pCells[0]->getCell()->getCellCycleState();
     
     switch (cellCycleState) {
         case CellCycleState::INTERPHASE:

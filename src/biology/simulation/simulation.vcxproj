@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CellSim.h" />
     <ClInclude Include="Organism.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CellSim.cpp" />
     <ClCompile Include="Organism.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>

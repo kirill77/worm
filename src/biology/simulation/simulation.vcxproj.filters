@@ -21,12 +21,18 @@
     <ClInclude Include="Organism.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CellSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Organism.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CellSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

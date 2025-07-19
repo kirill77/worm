@@ -1,6 +1,7 @@
 #include "VisEngine.h"
 #include "biology/simulation/World.h"
 #include "biology/simulation/Organism.h"
+#include "biology/simulation/CellSim.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
 #include "visualization/gpu/Window.h"
@@ -101,7 +102,7 @@ void VisEngine::updateGpuMeshes()
         // Loop through all organelles we want to visualize
         for (StringDict::ID organelleId : organellesToVisualize)
         {
-            auto pOrganelle = cell->getOrganelle(organelleId);
+            auto pOrganelle = cell->getCell()->getOrganelle(organelleId);
             if (pOrganelle)
             {
                 // Initialize organelle visualization if needed

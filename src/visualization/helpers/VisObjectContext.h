@@ -7,7 +7,7 @@
 struct IObjectVis;
 class GPUMesh;
 class Organelle;
-struct Organism;
+class Organism;
 struct GPUQueue;
 
 struct VisObjectContext

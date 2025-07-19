@@ -1,5 +1,5 @@
 #include "Organism.h"
-#include "biology/organelles/Cell.h"
+#include "CellSim.h"
 
 void Organism::simulateStep(double dt)
 {

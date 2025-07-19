@@ -8,9 +8,6 @@
 #include "geometry/vectors/vector.h"
 #include "geometry/mesh/edgeMesh.h"
 
-class BVH;
-class BVHMesh;
-
 /**
  * @brief Class for simulating tension forces in a spherical cell cortex using a geodesic sphere model
  * implemented with Winged-Edge Data Structure for efficient mesh traversal
@@ -54,10 +51,6 @@ private:
     // The underlying mesh data structure
     std::shared_ptr<EdgeMesh> m_pMesh;
     
-    // Data structures for ray tracing
-    std::shared_ptr<BVH> m_pBVH;
-    std::shared_ptr<BVHMesh> m_pBVHMesh;
-
     // Velocity for each vertex (same indexing as mesh vertices)
     std::vector<double3> m_vertexVelocities;
 
