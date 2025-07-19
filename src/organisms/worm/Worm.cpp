@@ -14,6 +14,18 @@
 #include <chrono> // For high_resolution_clock
 #include <cmath>  // For std::abs
 
+// Validation thresholds based on experimental data
+static constexpr double ANTERIOR_POSTERIOR_RATIO_THRESHOLD = 3.0;  // Minimum ratio for proper PAR polarization
+static constexpr double NUCLEAR_SIZE_THRESHOLD = 0.8;             // Relative to initial size
+static constexpr double ASYMMETRIC_DIVISION_RATIO = 0.6;         // Ratio of anterior to posterior cell size
+
+// Development timing constants (in seconds)
+static constexpr float POLARITY_ESTABLISHMENT_END_SEC = 360.0f;    // 6 minutes
+static constexpr float POLARITY_MAINTENANCE_END_SEC = 600.0f;      // 10 minutes
+static constexpr float NUCLEAR_ENVELOPE_BREAKDOWN_SEC = 750.0f;    // 12.5 minutes
+static constexpr float SPINDLE_ASSEMBLY_START_SEC = 900.0f;        // 15 minutes
+static constexpr float DIVISION_START_SEC = 1100.0f;               // 18.3 minutes
+
 std::vector<Chromosome> Worm::initializeGenes()
 {
     // Create chromosomes (C. elegans has 6 chromosomes)
@@ -188,18 +200,6 @@ void Worm::simulateStep(double dt)
         m_pDataCollector->forceCollection(m_fTotalTime, stepTimeMsec);
     }
 }
-
-// Validation thresholds based on experimental data
-static constexpr double ANTERIOR_POSTERIOR_RATIO_THRESHOLD = 3.0;
-static constexpr double NUCLEAR_SIZE_THRESHOLD = 0.8;
-static constexpr double ASYMMETRIC_DIVISION_RATIO = 0.6;
-
-// Timing constants (in simulation steps, where each step is 0.1 seconds)
-static constexpr uint32_t POLARITY_ESTABLISHMENT_END = 3600;    // 6 minutes
-static constexpr uint32_t POLARITY_MAINTENANCE_END = 6000;      // 10 minutes
-static constexpr uint32_t NUCLEAR_ENVELOPE_BREAKDOWN = 7500;    // 12.5 minutes
-static constexpr uint32_t SPINDLE_ASSEMBLY_START = 9000;        // 15 minutes
-static constexpr uint32_t DIVISION_START = 11000;               // 18.3 minutes
 
 bool Worm::validatePARPolarization(float fTimeSec) const
 {
