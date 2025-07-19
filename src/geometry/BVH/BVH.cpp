@@ -12,20 +12,20 @@ std::vector<std::shared_ptr<ITraceableObject>>& BVH::accessObjects()
     return m_pObjects;
 }
 
-box3 BVH::getBox()
+box3 BVH::getBox() const
 {
     assert(m_pRoot != nullptr);
     return m_pRoot->m_boundingBox;
 }
 
-box3 BVH::getSubObjectBox(uint32_t uSubObj)
+box3 BVH::getSubObjectBox(uint32_t uSubObj) const
 {
     // BVH has only one sub-object (itself)
     assert(uSubObj == 0);
     return getBox();
 }
 
-void BVH::trace(IRay& ray, uint32_t uSubObj)
+void BVH::trace(IRay& ray, uint32_t uSubObj) const
 {
     assert(m_pRoot != nullptr && uSubObj == 0);
     // Use hierarchical traversal
@@ -78,7 +78,7 @@ void BVH::rebuildHierarchy()
     m_pRoot = buildNode(subObjects, 0);
 }
 
-bool BVH::rayIntersectsBox(const IRay& ray, const box3& box)
+bool BVH::rayIntersectsBox(const IRay& ray, const box3& box) const
 {
     // Ray-box intersection test using slab method
     float3 invDir = float3(1.0f / ray.m_vDir.x, 1.0f / ray.m_vDir.y, 1.0f / ray.m_vDir.z);
@@ -139,7 +139,7 @@ std::unique_ptr<BVH::Node> BVH::buildNode(std::vector<SubObj>& subObjects, int d
     return node;
 }
 
-void BVH::traceNode(IRay& ray, const Node* node)
+void BVH::traceNode(IRay& ray, const Node* node) const
 {
     if (node == nullptr)
         return;

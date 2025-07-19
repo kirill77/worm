@@ -2,6 +2,33 @@
 #include <limits>
 #include <algorithm>
 
+// Custom ray implementation for finding mesh intersections
+class BVHMeshRay : public IRay
+{
+public:
+    float m_closestDistance;
+    bool m_hasIntersection;
+    
+    BVHMeshRay(const float3& pos, const float3& dir, float maxDist = std::numeric_limits<float>::max())
+        : m_closestDistance(std::numeric_limits<float>::max())
+        , m_hasIntersection(false)
+    {
+        m_vPos = pos;
+        m_vDir = normalize(dir);
+        m_fMin = 0.0f;
+        m_fMax = maxDist;
+    }
+    
+    virtual void notifyIntersection(float fDist, const ITraceableObject* pObject, uint32_t uSubObj) override
+    {
+        if (fDist >= m_fMin && fDist <= m_fMax && fDist < m_closestDistance)
+        {
+            m_closestDistance = fDist;
+            m_hasIntersection = true;
+        }
+    }
+};
+
 BVHMesh::BVHMesh(std::shared_ptr<Mesh> pMesh)
     : m_pMesh(pMesh)
 {
@@ -28,12 +55,12 @@ const BVH &BVHMesh::updateAndGetBVH()
     return m_bvh;
 }
 
-box3 BVHMesh::getBox()
+box3 BVHMesh::getBox() const
 {
     return m_pMesh->getBox();
 }
 
-box3 BVHMesh::getSubObjectBox(uint32_t uSubObj)
+box3 BVHMesh::getSubObjectBox(uint32_t uSubObj) const
 {
     // Get triangle vertices
     uint3 triangle = m_pMesh->getTriangleVertices(uSubObj);
@@ -48,7 +75,7 @@ box3 BVHMesh::getSubObjectBox(uint32_t uSubObj)
     return box3(mins, maxs);
 }
 
-void BVHMesh::trace(IRay& ray, uint32_t triangleIndex)
+void BVHMesh::trace(IRay& ray, uint32_t triangleIndex) const
 {
     assert(m_cachedVersion == m_pMesh->getVersion());
     const float EPSILON = 1e-8f;
@@ -93,4 +120,49 @@ void BVHMesh::trace(IRay& ray, uint32_t triangleIndex)
         // Valid intersection found
         ray.notifyIntersection(t, this, triangleIndex);
     }
+}
+
+float3 BVHMesh::normalizedToWorld(const float3& normalizedPos)
+{
+    // Get the bounding box of the mesh
+    box3 boundingBox = getBox();
+    
+    // Calculate the center of the bounding box
+    float3 center = boundingBox.center();
+    
+    // Create direction vector from center towards the normalized position
+    // If normalizedPos is at origin, we can't determine direction, so return center
+    if (length(normalizedPos) < 1e-6f)
+    {
+        return center;
+    }
+    
+    float3 direction = normalize(normalizedPos);
+    
+    // Create ray from center in the direction of the normalized point
+    BVHMeshRay ray(center, direction);
+    
+    // Update BVH and trace the ray to find intersection with mesh
+    const BVH& bvh = updateAndGetBVH();
+    bvh.trace(ray, 0);
+    
+    if (!ray.m_hasIntersection)
+    {
+        // If no intersection found, fallback to simple mapping using bounding box
+        float3 diagonal = boundingBox.diagonal();
+        float3 worldPos = center + normalizedPos * (diagonal * 0.5f);
+        return worldPos;
+    }
+    
+    // Linear interpolation based on intersection distance
+    // normalizedPos is in [-1,1] range, intersection is at boundary (length 1)
+    float normalizedLength = length(normalizedPos);
+    
+    // Clamp to [-1,1] range
+    normalizedLength = std::min(1.0f, std::max(-1.0f, normalizedLength));
+    
+    // Map from normalized space to world space
+    float3 worldPos = center + direction * (ray.m_closestDistance * normalizedLength);
+    
+    return worldPos;
 }

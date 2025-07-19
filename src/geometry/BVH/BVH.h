@@ -17,9 +17,9 @@ public:
     void rebuildHierarchy();
     
     // ITraceableObject interface
-    void trace(IRay& ray, uint32_t uSubObj) override;
-    virtual box3 getBox() override;
-    virtual box3 getSubObjectBox(uint32_t uSubObj) override;
+    void trace(IRay& ray, uint32_t uSubObj) const override;
+    virtual box3 getBox() const override;
+    virtual box3 getSubObjectBox(uint32_t uSubObj) const override;
 
 private:
     struct SubObj
@@ -41,9 +41,9 @@ private:
     std::unique_ptr<Node> m_pRoot;
 
     // Helper methods
-    bool rayIntersectsBox(const IRay& ray, const box3& box);
+    bool rayIntersectsBox(const IRay& ray, const box3& box) const;
     std::unique_ptr<Node> buildNode(std::vector<SubObj>& subObjects, int depth = 0);
-    void traceNode(IRay& ray, const Node* node);
+    void traceNode(IRay& ray, const Node* node) const;
     box3 calculateBoundingBox(const std::vector<SubObj>& subObjects);
     int getLongestAxis(const box3& box);
 };
