@@ -17,25 +17,13 @@ BVHMesh::BVHMesh(std::shared_ptr<Mesh> pMesh)
 
 box3 BVHMesh::getBox()
 {
-    if (!m_pMesh || m_pMesh->getVertexCount() == 0)
+    if (!m_pMesh)
     {
         return box3::empty();
     }
 
-    // Get first vertex to initialize bounds
-    float3 firstVertex = m_pMesh->getVertexPosition(0);
-    float3 mins = firstVertex;
-    float3 maxs = firstVertex;
-
-    // Expand bounds to include all vertices
-    for (uint32_t i = 1; i < m_pMesh->getVertexCount(); ++i)
-    {
-        float3 vertex = m_pMesh->getVertexPosition(i);
-        mins = min(mins, vertex);
-        maxs = max(maxs, vertex);
-    }
-
-    return box3(mins, maxs);
+    // Use the cached bounding box computation from Mesh
+    return m_pMesh->getBox();
 }
 
 box3 BVHMesh::getSubObjectBox(uint32_t uSubObj)

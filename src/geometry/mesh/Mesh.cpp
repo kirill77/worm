@@ -6,7 +6,36 @@
 Mesh::Mesh() {
 }
 
-
+// Get bounding box (cached based on version)
+box3 Mesh::getBox() const {
+    // Check if cached box is valid for current version
+    if (m_cachedBoxVersion == m_version) {
+        return m_cachedBox;
+    }
+    
+    // Recompute bounding box
+    if (vertices.empty()) {
+        m_cachedBox = box3::empty();
+    } else {
+        // Initialize with first vertex
+        float3 minPt = vertices[0].position;
+        float3 maxPt = vertices[0].position;
+        
+        // Find min/max for all vertices
+        for (size_t i = 1; i < vertices.size(); ++i) {
+            const float3& pos = vertices[i].position;
+            minPt = min(minPt, pos);
+            maxPt = max(maxPt, pos);
+        }
+        
+        m_cachedBox = box3(minPt, maxPt);
+    }
+    
+    // Update cached version
+    m_cachedBoxVersion = m_version;
+    
+    return m_cachedBox;
+}
 
 // Clear all mesh data
 void Mesh::clear() {

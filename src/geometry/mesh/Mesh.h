@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include "geometry/vectors/vector.h"
+#include "geometry/vectors/box.h"
 
 class Mesh : public std::enable_shared_from_this<Mesh>
 {
@@ -42,8 +43,15 @@ public:
     // Version tracking
     uint64_t getVersion() const { return m_version; }
 
+    // Bounding box (cached based on version)
+    box3 getBox() const;
+
 private:
     std::vector<Vertex> vertices;
     std::vector<uint3> triangles;
     uint64_t m_version = 0;
+    
+    // Cached bounding box
+    mutable box3 m_cachedBox = box3::empty();
+    mutable uint64_t m_cachedBoxVersion = UINT64_MAX; // Invalid version initially
 }; 
