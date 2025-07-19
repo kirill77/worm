@@ -25,9 +25,9 @@ box3 BVH::getSubObjectBox(uint32_t uSubObj)
     return getBox();
 }
 
-void BVH::trace(IRay& ray)
+void BVH::trace(IRay& ray, uint32_t uSubObj)
 {
-    assert(m_pRoot != nullptr);
+    assert(m_pRoot != nullptr && uSubObj == 0);
     // Use hierarchical traversal
     traceNode(ray, m_pRoot.get());
 }
@@ -161,7 +161,7 @@ void BVH::traceNode(IRay& ray, const Node* node)
                 {
                     // Let the object handle ray tracing for this specific sub-object
                     // The object's trace method should internally check which sub-objects to test
-                    subObj.pObj->trace(ray);
+                    subObj.pObj->trace(ray, subObj.m_uSubObj);
                 }
             }
         }

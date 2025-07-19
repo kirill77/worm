@@ -28,7 +28,7 @@ struct ITraceableObject : std::enable_shared_from_this<ITraceableObject>
     // bounding box of a sub-object
     virtual box3 getSubObjectBox(uint32_t uSubObj) = 0;
     
-    virtual void trace(IRay& ray) = 0;
+    virtual void trace(IRay& ray, uint32_t uSubObj) = 0;
     
     virtual ~ITraceableObject() = default;
 }; 

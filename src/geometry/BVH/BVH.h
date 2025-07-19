@@ -17,7 +17,7 @@ public:
     void rebuildHierarchy();
     
     // ITraceableObject interface
-    void trace(IRay& ray) override;
+    void trace(IRay& ray, uint32_t uSubObj) override;
     virtual box3 getBox() override;
     virtual box3 getSubObjectBox(uint32_t uSubObj) override;
 
