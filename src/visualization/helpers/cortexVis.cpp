@@ -25,8 +25,7 @@ void CortexVis::updateGPUMesh()
         return;
     }
 
-    auto pTensionSphere = m_pCortex->getTensionSphere();
-    auto pMesh = pTensionSphere->getEdgeMesh();
+    auto pMesh = m_pCortex->getMesh();
 
     // Get vertex count and triangle count
     uint32_t vertexCount = pMesh->getVertexCount();

@@ -3,8 +3,8 @@
 
 void Organism::simulateStep(double dt)
 {
-    for (uint32_t u = 0; u < m_pCells.size(); ++u)
+    for (uint32_t u = 0; u < m_pCellSims.size(); ++u)
     {
-        m_pCells[u]->update(dt);
+        m_pCellSims[u]->update(dt);
     }
 }

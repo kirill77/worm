@@ -102,8 +102,8 @@ public:
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
 
-    std::shared_ptr<TensionSphere> getTensionSphere() const
+    std::shared_ptr<Mesh> getMesh() const
     {
-        return m_pTensionSphere;
+        return m_pTensionSphere->getEdgeMesh();
     }
 }; 

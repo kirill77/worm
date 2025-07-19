@@ -1,4 +1,5 @@
 #include "CellSim.h"
+#include "biology/organelles/Cell.h"
 
 CellSim::CellSim(std::shared_ptr<Cell> pCell)
     : m_pCell(pCell)
@@ -7,6 +8,5 @@ CellSim::CellSim(std::shared_ptr<Cell> pCell)
 
 void CellSim::update(double dt)
 {
-    // TODO: Implement cell simulation logic
-    // This could include updating organelles, chemical reactions, etc.
+    m_pCell->update(dt);
 }

@@ -96,7 +96,7 @@ void VisEngine::updateGpuMeshes()
     box3 combinedBoundingBox = box3::empty();
 
     // Process all organelles that have visualization contexts
-    auto cells = m_pOrganism->getCells();
+    auto cells = m_pOrganism->getCellSims();
     for (auto& cell : cells)
     {
         // Loop through all organelles we want to visualize
