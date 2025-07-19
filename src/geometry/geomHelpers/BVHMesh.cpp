@@ -23,14 +23,14 @@ box3 BVHMesh::getBox()
     }
 
     // Get first vertex to initialize bounds
-    double3 firstVertex = m_pMesh->getVertexPosition(0);
-    float3 mins = toFloat3(firstVertex);
-    float3 maxs = toFloat3(firstVertex);
+    float3 firstVertex = m_pMesh->getVertexPosition(0);
+    float3 mins = firstVertex;
+    float3 maxs = firstVertex;
 
     // Expand bounds to include all vertices
     for (uint32_t i = 1; i < m_pMesh->getVertexCount(); ++i)
     {
-        float3 vertex = toFloat3(m_pMesh->getVertexPosition(i));
+        float3 vertex = m_pMesh->getVertexPosition(i);
         mins = min(mins, vertex);
         maxs = max(maxs, vertex);
     }
@@ -47,9 +47,9 @@ box3 BVHMesh::getSubObjectBox(uint32_t uSubObj)
 
     // Get triangle vertices
     uint3 triangle = m_pMesh->getTriangleVertices(uSubObj);
-    float3 v0 = toFloat3(m_pMesh->getVertexPosition(triangle.x));
-    float3 v1 = toFloat3(m_pMesh->getVertexPosition(triangle.y));
-    float3 v2 = toFloat3(m_pMesh->getVertexPosition(triangle.z));
+    float3 v0 = m_pMesh->getVertexPosition(triangle.x);
+    float3 v1 = m_pMesh->getVertexPosition(triangle.y);
+    float3 v2 = m_pMesh->getVertexPosition(triangle.z);
 
     // Calculate bounding box of triangle
     float3 mins = min(min(v0, v1), v2);
@@ -70,9 +70,9 @@ void BVHMesh::trace(IRay& ray)
     {
         // Get triangle vertices
         uint3 triangle = m_pMesh->getTriangleVertices(triangleIndex);
-        float3 v0 = toFloat3(m_pMesh->getVertexPosition(triangle.x));
-        float3 v1 = toFloat3(m_pMesh->getVertexPosition(triangle.y));
-        float3 v2 = toFloat3(m_pMesh->getVertexPosition(triangle.z));
+        float3 v0 = m_pMesh->getVertexPosition(triangle.x);
+        float3 v1 = m_pMesh->getVertexPosition(triangle.y);
+        float3 v2 = m_pMesh->getVertexPosition(triangle.z);
 
         // Möller-Trumbore ray-triangle intersection algorithm
         float3 edge1 = v1 - v0;

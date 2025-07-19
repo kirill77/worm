@@ -39,8 +39,8 @@ void TensionSphere::initializePhysics()
     for (const auto& edge : m_edgeConnectivity)
     {
         // Compute rest length as current distance between vertices
-        double3 pos1 = m_pMesh->getVertexPosition(edge.first);
-        double3 pos2 = m_pMesh->getVertexPosition(edge.second);
+        float3 pos1 = m_pMesh->getVertexPosition(edge.first);
+        float3 pos2 = m_pMesh->getVertexPosition(edge.second);
         double restLength = length(pos2 - pos1);
         m_edgeRestLengths.push_back(restLength);
     }
@@ -57,13 +57,13 @@ void TensionSphere::computeSpringForces(std::vector<double3>& forces, double dt)
         uint32_t v1 = m_edgeConnectivity[edgeIdx].first;
         uint32_t v2 = m_edgeConnectivity[edgeIdx].second;
         
-        double3 pos1 = m_pMesh->getVertexPosition(v1);
-        double3 pos2 = m_pMesh->getVertexPosition(v2);
+        float3 pos1 = m_pMesh->getVertexPosition(v1);
+        float3 pos2 = m_pMesh->getVertexPosition(v2);
         double3 vel1 = m_vertexVelocities[v1];
         double3 vel2 = m_vertexVelocities[v2];
         
         // Edge vector and current length
-        double3 edgeVector = pos2 - pos1;
+        double3 edgeVector = double3(pos2) - double3(pos1);
         double currentLength = length(edgeVector);
         
         if (currentLength > 1e-10) // Avoid division by zero
@@ -104,10 +104,10 @@ void TensionSphere::integrateMotion(const std::vector<double3>& forces, double d
         m_vertexVelocities[i] += acceleration * dt;
         
         // Update position: x = x + v * dt  
-        double3 currentPos = m_pMesh->getVertexPosition(i);
+        double3 currentPos = double3(m_pMesh->getVertexPosition(i));
         double3 newPos = currentPos + m_vertexVelocities[i] * dt;
         
-        m_pMesh->setVertexPosition(i, newPos);
+        m_pMesh->setVertexPosition(i, float3(newPos));
     }
 }
 
@@ -136,9 +136,9 @@ double TensionSphere::calculateCurrentVolume() const
         uint3 triangleVertices = m_pMesh->getTriangleVertices(triangleIdx);
         
         // Get vertex positions
-        double3 v0 = m_pMesh->getVertexPosition(triangleVertices.x);
-        double3 v1 = m_pMesh->getVertexPosition(triangleVertices.y);
-        double3 v2 = m_pMesh->getVertexPosition(triangleVertices.z);
+        double3 v0 = double3(m_pMesh->getVertexPosition(triangleVertices.x));
+        double3 v1 = double3(m_pMesh->getVertexPosition(triangleVertices.y));
+        double3 v2 = double3(m_pMesh->getVertexPosition(triangleVertices.z));
         
         // Calculate volume contribution using divergence theorem
         // V = (1/6) * sum over triangles of (v0 · (v1 × v2))
@@ -171,17 +171,17 @@ void TensionSphere::applyVolumeConstraint()
     double3 center(0, 0, 0);
     for (uint32_t i = 0; i < vertexCount; ++i)
     {
-        center += m_pMesh->getVertexPosition(i);
+        center += double3(m_pMesh->getVertexPosition(i));
     }
     center /= static_cast<double>(vertexCount);
     
     // Apply geometric scale to all vertices relative to the center
     for (uint32_t i = 0; i < vertexCount; ++i)
     {
-        double3 vertexPos = m_pMesh->getVertexPosition(i);
+        double3 vertexPos = double3(m_pMesh->getVertexPosition(i));
         double3 relativePos = vertexPos - center;
         double3 scaledPos = center + relativePos * scaleFactor;
-        m_pMesh->setVertexPosition(i, scaledPos);
+        m_pMesh->setVertexPosition(i, float3(scaledPos));
     }
 }
 

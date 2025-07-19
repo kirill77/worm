@@ -11,8 +11,8 @@ public:
     static const uint32_t INVALID_INDEX = UINT32_MAX;
     
     struct Vertex {
-        double3 position;
-        Vertex(const double3& pos) : position(pos) {}
+        float3 position;
+        Vertex(const float3& pos) : position(pos) {}
     };
 
     // Constructors and main methods
@@ -20,9 +20,9 @@ public:
     virtual ~Mesh() = default;
     
     // Vertex operations
-    uint32_t addVertex(const double3& position);
-    double3 getVertexPosition(uint32_t index) const;
-    void setVertexPosition(uint32_t index, const double3& position);
+    uint32_t addVertex(const float3& position);
+    float3 getVertexPosition(uint32_t index) const;
+    void setVertexPosition(uint32_t index, const float3& position);
     uint32_t getVertexCount() const;
     
     // Triangle operations (basic access, no connectivity)

@@ -96,7 +96,7 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
         const auto& p3 = getVertexPosition(v3);
         
         // Calculate triangle normal
-        double3 normal = cross(p2 - p1, p3 - p1);
+        float3 normal = cross(p2 - p1, p3 - p1);
         
         // For a sphere mesh, the normal should point outward from the center
         // So the dot product with the position vector should be positive
@@ -179,22 +179,22 @@ void EdgeMesh::createIcosahedron(double radius) {
     
     // Calculate vertex positions for a unit icosahedron
     double norm = std::sqrt(1.0 + PHI * PHI);
-    double a = radius / norm;
-    double b = radius * PHI / norm;
+    float a = (float)(radius / norm);
+    float b = (float)(radius * PHI / norm);
     
     // Add 12 vertices of the icosahedron
-    addVertex(double3(0, a, b));  // 0
-    addVertex(double3(0, a, -b)); // 1
-    addVertex(double3(0, -a, b)); // 2
-    addVertex(double3(0, -a, -b)); // 3
-    addVertex(double3(a, b, 0));  // 4
-    addVertex(double3(-a, b, 0)); // 5
-    addVertex(double3(a, -b, 0)); // 6
-    addVertex(double3(-a, -b, 0)); // 7
-    addVertex(double3(b, 0, a));  // 8
-    addVertex(double3(-b, 0, a)); // 9
-    addVertex(double3(b, 0, -a)); // 10
-    addVertex(double3(-b, 0, -a)); // 11
+    addVertex(float3(0, a, b));  // 0
+    addVertex(float3(0, a, -b)); // 1
+    addVertex(float3(0, -a, b)); // 2
+    addVertex(float3(0, -a, -b)); // 3
+    addVertex(float3(a, b, 0));  // 4
+    addVertex(float3(-a, b, 0)); // 5
+    addVertex(float3(a, -b, 0)); // 6
+    addVertex(float3(-a, -b, 0)); // 7
+    addVertex(float3(b, 0, a));  // 8
+    addVertex(float3(-b, 0, a)); // 9
+    addVertex(float3(b, 0, -a)); // 10
+    addVertex(float3(-b, 0, -a)); // 11
     
     // Add 20 triangular triangles
     addTriangle(0, 8, 4);
@@ -254,9 +254,10 @@ void EdgeMesh::subdivide(uint32_t levels) {
             uint32_t v3 = triangleVerts.z;
             
             // Create midpoints
-            uint32_t m12 = getMidpoint(v1, v2, midpoints, radius);
-            uint32_t m23 = getMidpoint(v2, v3, midpoints, radius);
-            uint32_t m31 = getMidpoint(v3, v1, midpoints, radius);
+            float fRadius = (float)radius;
+            uint32_t m12 = getMidpoint(v1, v2, midpoints, fRadius);
+            uint32_t m23 = getMidpoint(v2, v3, midpoints, fRadius);
+            uint32_t m31 = getMidpoint(v3, v1, midpoints, fRadius);
             
             // Create four new triangular triangles
             addTriangle(v1, m12, m31);
@@ -270,7 +271,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
 // Helper to get or create midpoint between two vertices
 uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2, 
                                std::unordered_map<uint64_t, uint32_t>& midpoints,
-                               double radius) {
+                               float radius) {
     // Use a normalized edge key (smaller vertex index first)
     uint64_t key = directionlessEdgeKey(v1, v2);
     
@@ -285,8 +286,8 @@ uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
     const auto &pos2 = getVertexPosition(v2);
     
     // Calculate midpoint and project onto sphere
-    double3 midpoint = (pos1 + pos2) * 0.5;
-    double len = length(midpoint);
+    float3 midpoint = (pos1 + pos2) * 0.5f;
+    float len = length(midpoint);
     if (len > 1e-10) {
         midpoint = (midpoint / len) * radius;
     }

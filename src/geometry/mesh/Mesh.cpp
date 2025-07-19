@@ -16,22 +16,22 @@ void Mesh::clear() {
 }
 
 // Add a vertex to the mesh
-uint32_t Mesh::addVertex(const double3& position) {
+uint32_t Mesh::addVertex(const float3& position) {
     vertices.emplace_back(position);
     ++m_version;
     return static_cast<uint32_t>(vertices.size() - 1);
 }
 
 // Get vertex position
-double3 Mesh::getVertexPosition(uint32_t index) const {
+float3 Mesh::getVertexPosition(uint32_t index) const {
     if (index < vertices.size()) {
         return vertices[index].position;
     }
-    return double3(0.0, 0.0, 0.0); // Return zero vector for invalid index
+    return float3(0.0f, 0.0f, 0.0f); // Return zero vector for invalid index
 }
 
 // Set vertex position
-void Mesh::setVertexPosition(uint32_t index, const double3& position) {
+void Mesh::setVertexPosition(uint32_t index, const float3& position) {
     if (index < vertices.size()) {
         vertices[index].position = position;
         ++m_version;
@@ -57,9 +57,10 @@ uint32_t Mesh::getTriangleCount() const {
 double Mesh::calculateTriangleArea(uint32_t triangleIndex) const {
     uint3 verts = getTriangleVertices(triangleIndex);
     
-    const double3& p1 = vertices[verts.x].position;
-    const double3& p2 = vertices[verts.y].position;
-    const double3& p3 = vertices[verts.z].position;
+    // Convert float3 to double3 for precise calculations
+    const double3 p1 = double3(vertices[verts.x].position);
+    const double3 p2 = double3(vertices[verts.y].position);
+    const double3 p3 = double3(vertices[verts.z].position);
     
     // Area = 0.5 * |cross(v1, v2)|
     return 0.5 * length(cross(p2 - p1, p3 - p1));
@@ -69,9 +70,10 @@ double Mesh::calculateTriangleArea(uint32_t triangleIndex) const {
 double3 Mesh::calculateTriangleNormal(uint32_t triangleIndex) const {
     uint3 verts = getTriangleVertices(triangleIndex);
     
-    const double3& p1 = vertices[verts.x].position;
-    const double3& p2 = vertices[verts.y].position;
-    const double3& p3 = vertices[verts.z].position;
+    // Convert float3 to double3 for precise calculations
+    const double3 p1 = double3(vertices[verts.x].position);
+    const double3 p2 = double3(vertices[verts.y].position);
+    const double3 p3 = double3(vertices[verts.z].position);
     
     // Normal = normalize(cross(v1, v2))
     double3 normal = cross(p2 - p1, p3 - p1);

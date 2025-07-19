@@ -51,5 +51,5 @@ private:
     void subdivide(uint32_t levels);
     uint32_t getMidpoint(uint32_t v1, uint32_t v2, 
                        std::unordered_map<uint64_t, uint32_t>& midpoints,
-                       double radius);
+                       float radius);
 };
