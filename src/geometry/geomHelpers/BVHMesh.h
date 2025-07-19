@@ -18,6 +18,8 @@ public:
     // Convert normalized coordinates [-1,1] to world coordinates using mesh geometry
     float3 normalizedToWorld(const float3& normalizedPos);
 
+    std::shared_ptr<Mesh> getMesh() const { return m_pMesh; }
+
 private:
     std::shared_ptr<Mesh> m_pMesh;
     BVH m_bvh;

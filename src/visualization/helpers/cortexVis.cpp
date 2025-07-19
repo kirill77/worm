@@ -25,7 +25,7 @@ void CortexVis::updateGPUMesh()
         return;
     }
 
-    auto pMesh = m_pCortex->getMesh();
+    auto pMesh = m_pCortex->getBVHMesh()->getMesh();
 
     // Get vertex count and triangle count
     uint32_t vertexCount = pMesh->getVertexCount();

@@ -12,24 +12,14 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
 {
     // Set the binding surface type for cortex
     m_surfaceType = StringDict::ID::ORGANELLE_CORTEX;
-    
-    // Create the tension sphere with the cell's medium volume
-    if (auto pCellPtr = pCell.lock()) {
-        double volume = pCellPtr->getInternalMedium().getVolumeMicroM();
-        m_pTensionSphere = std::make_shared<TensionSphere>(2, volume);
-    } else {
-        // Fallback: create with default volume if cell reference is invalid
-        m_pTensionSphere = std::make_shared<TensionSphere>(2, 0.0);
-    }
 }
 
 void Cortex::update(double fDtSec, Cell& cell)
 {
     // Update internal medium - its dynamics are independent of external medium
     cell.getInternalMedium().update(fDtSec);
-
-    m_pTensionSphere->makeTimeStep(fDtSec);
     
+    // Note: TensionSphere physics is now handled by CellSim
     // Note: In a more advanced implementation, this method could include:
     // - Membrane fluidity changes
     // - Lipid raft formation/movement
