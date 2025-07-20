@@ -22,7 +22,7 @@ public:
      * @param pCell Weak pointer to the cell containing this centrosome
      * @param position Initial position of the centrosome in normalized coordinates (-1, 1)
      */
-    Centrosome(std::weak_ptr<Cell> pCell, const float3& position = float3(0, 0, 0));
+    Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos = float3(0, 0, 0));
     
     /**
      * Update function for centrosome behavior

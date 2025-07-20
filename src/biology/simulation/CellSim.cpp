@@ -29,16 +29,8 @@ void CellSim::update(double dt)
         {
             m_pCortexBVH = std::make_shared<BVHMesh>(pCortexMesh);
             
-            // Set the BVH mesh in the cortex organelle
-            auto pCortexOrganelle = m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX);
-            if (pCortexOrganelle)
-            {
-                auto pCortex = std::dynamic_pointer_cast<Cortex>(pCortexOrganelle);
-                if (pCortex)
-                {
-                    pCortex->setBVHMesh(m_pCortexBVH);
-                }
-            }
+            // Set the BVH mesh in the cell (so all organelles can access it)
+            m_pCell->setCortexBVH(m_pCortexBVH);
         }
     }
 

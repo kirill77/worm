@@ -6,9 +6,9 @@
 #include "utils/log/ILog.h"
 #include "Y_TuRC.h"
 
-Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& position)
+Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     : Organelle(pCell)
-    , m_vNormalizedPos(position)
+    , m_vNormalizedPos(vNormalizedPos)
     , m_isDuplicated(false)
     , m_duplicationTime(0.0)
     , m_fPCMRadiusMicroM(0.5f)  // Default PCM radius of 0.5 micrometers

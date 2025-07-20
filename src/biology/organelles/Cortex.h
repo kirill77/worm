@@ -4,7 +4,6 @@
 #include "Medium.h"
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
-#include "geometry/geomHelpers/BVHMesh.h"
 
 /**
  * The Cortex class represents the cell membrane that separates
@@ -15,7 +14,6 @@ struct Cortex : public Organelle
 {
 private:
     double m_fThickness; // Membrane thickness in micrometers
-    std::shared_ptr<BVHMesh> m_pBVHMesh;
 
 public:
     /**
@@ -101,18 +99,4 @@ public:
     // Getters and setters
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
-    
-    /**
-     * Get the cortex BVH mesh
-     * 
-     * @return Shared pointer to the BVH mesh
-     */
-    std::shared_ptr<BVHMesh> getBVHMesh() const { return m_pBVHMesh; }
-    
-    /**
-     * Set the cortex BVH mesh
-     * 
-     * @param pBVHMesh Shared pointer to the BVH mesh
-     */
-    void setBVHMesh(std::shared_ptr<BVHMesh> pBVHMesh) { m_pBVHMesh = pBVHMesh; }
 }; 

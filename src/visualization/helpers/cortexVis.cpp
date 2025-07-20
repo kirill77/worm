@@ -2,13 +2,14 @@
 #include "cortexVis.h"
 #include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
-#include "biology/organelles/Cortex.h"
-#include "geometry/mesh/edgeMesh.h"
+#include "biology/organelles/Organelle.h"
+#include "biology/organelles/Cell.h"
+#include "geometry/geomHelpers/BVHMesh.h"
 #include <stdexcept>
 
-CortexVis::CortexVis(std::shared_ptr<Cortex> pCortex, GPUQueue *pQueue)
+CortexVis::CortexVis(std::shared_ptr<Organelle> pOrganelle, GPUQueue *pQueue)
 {
-    m_pCortex = pCortex;
+    m_pOrganelle = pOrganelle;
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
@@ -20,12 +21,32 @@ std::shared_ptr<GPUMesh> CortexVis::updateAndGetGpuMesh()
 
 void CortexVis::updateGPUMesh()
 {
-    if (!m_pCortex || !m_pGPUMesh)
+    if (!m_pOrganelle || !m_pGPUMesh)
     {
+        assert(false);
         return;
     }
 
-    auto pMesh = m_pCortex->getBVHMesh()->getMesh();
+    auto pCell = m_pOrganelle->getCell();
+    if (!pCell)
+    {
+        assert(false);
+        return;
+    }
+
+    auto pBVHMesh = pCell->getCortexBVH();
+    if (!pBVHMesh)
+    {
+        assert(false);
+        return;
+    }
+
+    auto pMesh = pBVHMesh->getMesh();
+    if (!pMesh)
+    {
+        assert(false);
+        return;
+    }
 
     // Get vertex count and triangle count
     uint32_t vertexCount = pMesh->getVertexCount();
