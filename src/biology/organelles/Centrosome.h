@@ -37,15 +37,8 @@ public:
      * 
      * @return Position vector in normalized coordinates (-1, 1)
      */
-    const float3& getPosition() const { return m_vNormalizedPos; }
-    
-    /**
-     * Set the position of the centrosome
-     * 
-     * @param position New position in normalized coordinates (-1, 1)
-     */
-    void setPosition(const float3& position) { m_vNormalizedPos = position; }
-    
+    const float3& getNormalizedPosition() const { return m_vNormalizedPos; }
+
     /**
      * Check if the centrosome has duplicated
      * 

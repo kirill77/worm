@@ -2,6 +2,8 @@
 #include "visualization/gpu/GPUQueue.h"
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/organelles/Centrosome.h"
+#include "biology/organelles/Cell.h"
+#include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/vectors/vector.h"
 #include <memory>
 #include <vector>
@@ -23,11 +25,29 @@ void CentrosomeVis::updateGPUMesh()
 {
     if (!m_pCentrosome || !m_pGPUMesh)
     {
+        assert(false);
         return;
     }
 
-    // Create a cross/X shape representation for the centrosome (two centrioles at right angles)
-    const float3& position = m_pCentrosome->getPosition();  // Position in normalized coordinates (-1, 1)
+    // Get the cell from the organelle
+    auto pCell = m_pCentrosome->getCell();
+    if (!pCell)
+    {
+        assert(false);
+        return;
+    }
+    // Get the cortex BVH for coordinate conversion
+    auto pCortexBVH = pCell->getCortexBVH();
+    if (!pCortexBVH)
+    {
+        assert(false);
+        return;
+    }
+
+    // Convert normalized position to world coordinates
+    const float3& normalizedPosition = m_pCentrosome->getNormalizedPosition();  // Position in normalized coordinates (-1, 1)
+    float3 position = pCortexBVH->normalizedToWorld(normalizedPosition);  // Convert to world coordinates
+
     const float radius = 0.1f;        // Cylinder radius
     const float length = 0.8f;        // Cylinder length
     const int segments = 8;           // Number of segments around cylinder

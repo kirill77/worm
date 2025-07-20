@@ -284,7 +284,7 @@ bool Worm::validateCentrosomeBehavior(float fTimeSec) const
     }
     
     // Check centrosome position during different phases
-    float3 centrosomePos = pCentrosome->getPosition();
+    float3 centrosomePos = pCentrosome->getNormalizedPosition();
     CellCycleState cellCycleState = m_pCellSims[0]->getCell()->getCellCycleState();
     
     switch (cellCycleState) {
