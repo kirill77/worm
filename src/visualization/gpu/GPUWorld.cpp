@@ -63,12 +63,13 @@ void GPUWorld::initializeRenderResources()
     
     // Create shared root signature for both mesh and text rendering
     CD3DX12_DESCRIPTOR_RANGE ranges[2];
-    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 0);  // b0-b1: Constant buffers (transform + text params)
+    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 0);  // b0-b1: Constant buffers (view/projection + text params)
     ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);  // t0-t3: Textures (font atlas, future textures)
     
-    CD3DX12_ROOT_PARAMETER rootParameters[2];
+    CD3DX12_ROOT_PARAMETER rootParameters[3];
     rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_ALL);
     rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_ALL);
+    rootParameters[2].InitAsConstants(16, 2, 0, D3D12_SHADER_VISIBILITY_VERTEX);  // 16 floats for 4x4 world matrix at b2
     
     // Static sampler for texture sampling (font atlas, etc.)
     D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -282,16 +283,15 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
     pCmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     pCmdList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
     
-    // Update the transform constant buffer
+    // Update the transform constant buffer with camera matrices (shared by all meshes)
     if (m_pTransformData)
     {
         m_pCamera->setAspectRatio(width / (float)height);
-        // Update matrices
-        m_transformBufferMatrix.World = DirectX::XMMatrixIdentity();
+        // Update view and projection matrices once
         m_transformBufferMatrix.View = m_pCamera->getViewMatrix();
         m_transformBufferMatrix.Projection = m_pCamera->getProjectionMatrix();
         
-        // Copy to GPU memory
+        // Copy updated transform buffer to GPU memory (View and Projection only)
         memcpy(m_pTransformData, &m_transformBufferMatrix, sizeof(TransformBuffer));
     }
     
@@ -302,7 +302,7 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
     pCmdList->SetPipelineState(m_pPipelineState.Get());
     pCmdList->SetGraphicsRootDescriptorTable(0, m_pCBVHeap->GetGPUDescriptorHandleForHeapStart());
     
-    // Draw meshes
+    // Draw meshes - set world matrix as root constants per mesh
     for (auto itMesh = m_pMeshes.begin(); itMesh != m_pMeshes.end(); ++itMesh)
     {
         auto pMesh = itMesh->lock();
@@ -311,6 +311,11 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
             itMesh = m_pMeshes.erase(itMesh);
             continue;
         }
+        
+        // Set the world matrix as root constants for this specific mesh
+        DirectX::XMMATRIX worldMatrix = pMesh->getWorldMatrix();
+        pCmdList->SetGraphicsRoot32BitConstants(2, 16, &worldMatrix, 0);  // Root parameter 2, 16 floats (4x4 matrix)
+        
         // Set primitive topology
         pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         

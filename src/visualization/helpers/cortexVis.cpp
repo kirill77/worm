@@ -5,6 +5,7 @@
 #include "biology/organelles/Organelle.h"
 #include "biology/organelles/Cell.h"
 #include "geometry/geomHelpers/BVHMesh.h"
+#include "geometry/vectors/affine.h"
 #include <stdexcept>
 
 CortexVis::CortexVis(std::shared_ptr<Organelle> pOrganelle, GPUQueue *pQueue)
@@ -73,4 +74,7 @@ void CortexVis::updateGPUMesh()
 
     // Update the GPU mesh geometry
     m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);
+    
+    // Set the transform for the cortex mesh (identity for now since cortex defines the coordinate system)
+    m_pGPUMesh->setTransform(affine3::identity());
 } 

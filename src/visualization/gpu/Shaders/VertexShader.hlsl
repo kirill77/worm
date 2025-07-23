@@ -12,12 +12,17 @@ struct VSOutput
     float3 Color : COLOR;
 };
 
-// Constant buffer for transformation matrices
+// Constant buffer for view and projection matrices
 cbuffer TransformCB : register(b0)
 {
-    matrix World;
     matrix View;
     matrix Projection;
+};
+
+// Root constants for world matrix (per-object)
+cbuffer WorldMatrix : register(b2)
+{
+    matrix World;
 };
 
 // Entry point of the vertex shader

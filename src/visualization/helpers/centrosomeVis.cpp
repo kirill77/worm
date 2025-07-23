@@ -44,9 +44,20 @@ void CentrosomeVis::updateGPUMesh()
         return;
     }
 
-    // Convert normalized position to world coordinates
+    // Get the centrosome's transform and convert to world coordinates
     const float3& normalizedPosition = m_pCentrosome->getNormalizedPosition();  // Position in normalized coordinates (-1, 1)
     float3 position = pCortexBVH->normalizedToWorld(normalizedPosition);  // Convert to world coordinates
+    
+    // Get the full transform matrix from centrosome space to cell space
+    const affine3& centrosomeToCell = m_pCentrosome->getToParentTransform();
+    
+    // Convert the centrosome's transform to world space coordinates
+    // This combines the centrosome-to-cell transform with cell-to-world transform
+    affine3 centrosomeToWorld = affine3::identity();
+    centrosomeToWorld.m_translation = position;  // Set world position
+    
+    // For now, we only use position. Later, you can include rotation by composing transforms:
+    // centrosomeToWorld = cellToWorld * centrosomeToCell;
 
     const float radius = 0.1f;        // Cylinder radius
     const float length = 0.8f;        // Cylinder length
@@ -70,7 +81,7 @@ void CentrosomeVis::updateGPUMesh()
         
         // Create vertices for cylinder ends
         for (int end = 0; end < 2; ++end) {
-            float3 center = position + axis * (length * 0.5f * (end == 0 ? -1.0f : 1.0f));
+            float3 center = axis * (length * 0.5f * (end == 0 ? -1.0f : 1.0f));
             
             // Center vertex for the end cap
             GPUMesh::Vertex centerVertex;
@@ -329,4 +340,7 @@ void CentrosomeVis::updateGPUMesh()
     
     // Update the GPU mesh geometry
     m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);
+    
+    // Set the transform for this mesh
+    m_pGPUMesh->setTransform(centrosomeToWorld);
 }

@@ -44,7 +44,6 @@ private:
     void initializeRenderResources();
     
     struct TransformBuffer {
-        DirectX::XMMATRIX World;
         DirectX::XMMATRIX View;
         DirectX::XMMATRIX Projection;
     };
