@@ -8,11 +8,14 @@
 
 Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     : Organelle(pCell)
-    , m_vNormalizedPos(vNormalizedPos)
+    , m_mToParent(affine3::identity())  // Initialize as identity transform
     , m_isDuplicated(false)
     , m_duplicationTime(0.0)
     , m_fPCMRadiusMicroM(0.5f)  // Default PCM radius of 0.5 micrometers
 {
+    // Set the position component of the transform
+    m_mToParent.m_translation = vNormalizedPos;
+    
     // Set the binding surface type to CENTROSOME
     m_surfaceType = StringDict::ID::ORGANELLE_CENTROSOME;
     
@@ -22,14 +25,14 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
         
         // Add centrosome-specific proteins like γ-tubulin
         MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
-        internalMedium.addProtein(gammaTubulin, m_vNormalizedPos);
+        internalMedium.addProtein(gammaTubulin, m_mToParent.m_translation);
         
         // Add other centrosome proteins
         MPopulation pericentrin(StringDict::idToString(StringDict::ID::PERICENTRIN), 500.0);
-        internalMedium.addProtein(pericentrin, m_vNormalizedPos);
+        internalMedium.addProtein(pericentrin, m_mToParent.m_translation);
         
         MPopulation ninein(StringDict::idToString(StringDict::ID::NINEIN), 300.0);
-        internalMedium.addProtein(ninein, m_vNormalizedPos);
+        internalMedium.addProtein(ninein, m_mToParent.m_translation);
     }
     
     // Note: Ring complexes will be created in the update method
@@ -43,14 +46,14 @@ void Centrosome::update(double dt, Cell& cell)
     // Check for centrosome duplication during S phase
     if (!m_isDuplicated) {
         // Check if we're in S phase (high CDK-2 and Cyclin E levels)
-        double cdk2 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_2), m_vNormalizedPos);
-        double cyclinE = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CCE_1), m_vNormalizedPos);
+        double cdk2 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_2), m_mToParent.m_translation);
+        double cyclinE = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CCE_1), m_mToParent.m_translation);
         
         // Trigger duplication when CDK-2 and Cyclin E are high enough
         if (cdk2 > 800.0 && cyclinE > 800.0) {
             duplicate();
             LOG_INFO("Centrosome duplication triggered at position (%.2f, %.2f, %.2f)", 
-                     m_vNormalizedPos.x, m_vNormalizedPos.y, m_vNormalizedPos.z);
+                     m_mToParent.m_translation.x, m_mToParent.m_translation.y, m_mToParent.m_translation.z);
         }
     }
     
@@ -63,13 +66,13 @@ void Centrosome::update(double dt, Cell& cell)
             // During mitosis, centrosomes move to opposite poles
             if (m_isDuplicated) {
                 // Move to opposite poles (simplified - in reality this is more complex)
-                float3 polePosition = m_vNormalizedPos;
-                if (m_vNormalizedPos.y > 0) {
+                float3 polePosition = m_mToParent.m_translation;
+                if (m_mToParent.m_translation.y > 0) {
                     polePosition.y = 0.8f;  // Anterior pole
                 } else {
                     polePosition.y = -0.8f; // Posterior pole
                 }
-                m_vNormalizedPos = polePosition;
+                m_mToParent.m_translation = polePosition;
             }
             break;
             
@@ -92,10 +95,10 @@ void Centrosome::update(double dt, Cell& cell)
     // Update protein concentrations at the centrosome position
     // This ensures centrosome proteins are properly localized
     MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
-    internalMedium.addProtein(gammaTubulin, m_vNormalizedPos);
+    internalMedium.addProtein(gammaTubulin, m_mToParent.m_translation);
     
     // Manage ring complexes based on gamma-tubulin levels
-    double gammaTubulinCount = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), m_vNormalizedPos);
+    double gammaTubulinCount = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), m_mToParent.m_translation);
     
     // Target: ~1 ring complex per 50 gamma-tubulin proteins
     int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);
@@ -129,11 +132,11 @@ void Centrosome::duplicate()
             
             // Add additional γ-tubulin for the duplicated centrosome
             MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 500.0);
-            internalMedium.addProtein(gammaTubulin, m_vNormalizedPos);
+            internalMedium.addProtein(gammaTubulin, m_mToParent.m_translation);
             
             // Add other duplication-related proteins
             MPopulation plk4(StringDict::idToString(StringDict::ID::PLK_4), 200.0);  // Polo-like kinase 4 for centriole duplication
-            internalMedium.addProtein(plk4, m_vNormalizedPos);
+            internalMedium.addProtein(plk4, m_mToParent.m_translation);
             
             // Add additional ring complexes for the duplicated centrosome
             int additionalRingComplexes = static_cast<int>(m_pRingComplexes.size() * 0.5); // 50% more
