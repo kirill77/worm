@@ -8,6 +8,7 @@
 #include "GPUCamera.h"
 #include "GPUFont.h"
 #include "IObjectVis.h"
+#include "geometry/vectors/box.h"
 
 // Forward declarations
 namespace Microsoft { namespace WRL { template<typename> class ComPtr; } }
@@ -37,8 +38,8 @@ public:
     // Root signature access (shared between mesh and text rendering)
     ID3D12RootSignature* getSharedRootSignature() const { return m_pRootSignature.Get(); }
     
-    // Rendering
-    void render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList);
+    // Rendering - returns bounding box of all visualized objects
+    box3 render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList);
 
 private:
     void initializeRenderResources();

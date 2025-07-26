@@ -236,8 +236,8 @@ void GPUWorld::initializeRenderResources()
     ThrowIfFailed(m_pTransformRes->Map(0, &readRange, reinterpret_cast<void**>(&m_pTransformData)));
 }
 
-// Draw all meshes
-void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList)
+// Draw all meshes and return combined bounding box
+box3 GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList)
 {
     // Get swap chain dimensions
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
@@ -304,6 +304,12 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
     pCmdList->SetPipelineState(m_pPipelineState.Get());
     pCmdList->SetGraphicsRootDescriptorTable(0, m_pCBVHeap->GetGPUDescriptorHandleForHeapStart());
     
+    // Initialize bounding box accumulator (start with empty box)
+    box3 sceneBoundingBox;
+    sceneBoundingBox.m_mins = float3(FLT_MAX, FLT_MAX, FLT_MAX);
+    sceneBoundingBox.m_maxs = float3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+    bool hasValidBounds = false;
+    
     // Draw objects - get mesh from each object and render
     for (auto itObject = m_pObjects.begin(); itObject != m_pObjects.end(); )
     {
@@ -340,6 +346,25 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
         // Draw
         pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
         
+        // Accumulate bounding box - transform local mesh bounds to world space
+        const box3& localBounds = pMesh->getBoundingBox();
+        if (!localBounds.isempty())
+        {
+            // Transform bounding box to world space using mesh transform
+            box3 worldBounds = localBounds * pMesh->getTransform();
+            
+            // Union with scene bounding box
+            if (hasValidBounds)
+            {
+                sceneBoundingBox = sceneBoundingBox | worldBounds;
+            }
+            else
+            {
+                sceneBoundingBox = worldBounds;
+                hasValidBounds = true;
+            }
+        }
+        
         ++itObject; // Move to next object
     }
     
@@ -350,4 +375,13 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
         D3D12_RESOURCE_STATE_PRESENT);
     
     pCmdList->ResourceBarrier(1, &renderTargetBarrier);
+    
+    // Return the computed scene bounding box (empty if no valid meshes)
+    if (!hasValidBounds)
+    {
+        sceneBoundingBox.m_mins = float3(0.0f, 0.0f, 0.0f);
+        sceneBoundingBox.m_maxs = float3(0.0f, 0.0f, 0.0f);
+    }
+    
+    return sceneBoundingBox;
 } 
