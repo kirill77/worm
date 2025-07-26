@@ -4,6 +4,8 @@
 #include "ShaderHelper.h"
 #include "GPUWorld.h"
 #include "GPUStats.h"
+#include "GPUMesh.h"
+#include "IObjectVis.h"
 
 // Constructor
 GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue)
@@ -29,10 +31,10 @@ GPUWorld::~GPUWorld()
     // GPU synchronization should be handled by the caller when needed
 }
 
-// Add a mesh to the scene
-void GPUWorld::addMesh(std::weak_ptr<GPUMesh> pMesh)
+// Add an object to the scene
+void GPUWorld::addObject(std::weak_ptr<IObjectVis> pObject)
 {
-    m_pMeshes.push_back(pMesh);
+    m_pObjects.push_back(pObject);
 }
 
 // Get current camera
@@ -302,14 +304,22 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
     pCmdList->SetPipelineState(m_pPipelineState.Get());
     pCmdList->SetGraphicsRootDescriptorTable(0, m_pCBVHeap->GetGPUDescriptorHandleForHeapStart());
     
-    // Draw meshes - set world matrix as root constants per mesh
-    for (auto itMesh = m_pMeshes.begin(); itMesh != m_pMeshes.end(); ++itMesh)
+    // Draw objects - get mesh from each object and render
+    for (auto itObject = m_pObjects.begin(); itObject != m_pObjects.end(); )
     {
-        auto pMesh = itMesh->lock();
+        auto pObject = itObject->lock();
+        if (!pObject)
+        {
+            itObject = m_pObjects.erase(itObject);
+            continue;
+        }
+        
+        // Get the mesh from the object
+        auto pMesh = pObject->updateAndGetGpuMesh();
         if (!pMesh)
         {
-            itMesh = m_pMeshes.erase(itMesh);
-            continue;
+            ++itObject; // Move to next object if no mesh
+            continue; // Skip objects that don't have a mesh
         }
         
         // Set the world matrix as root constants for this specific mesh
@@ -329,6 +339,8 @@ void GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
         
         // Draw
         pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
+        
+        ++itObject; // Move to next object
     }
     
     // Transition render target back to present state

@@ -22,7 +22,6 @@
     <ClCompile Include="CameraUI.cpp" />
     <ClCompile Include="CentrosomeVis.cpp" />
     <ClCompile Include="CortexVis.cpp" />
-    <ClCompile Include="IObjectVis.cpp" />
     <ClCompile Include="VisEngine.cpp" />
     <ClCompile Include="VisObjectContext.cpp" />
   </ItemGroup>
@@ -30,7 +29,6 @@
     <ClInclude Include="CameraUI.h" />
     <ClInclude Include="CentrosomeVis.h" />
     <ClInclude Include="CortexVis.h" />
-    <ClInclude Include="IObjectVis.h" />
     <ClInclude Include="VisEngine.h" />
     <ClInclude Include="VisObjectContext.h" />
   </ItemGroup>

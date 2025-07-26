@@ -6,6 +6,7 @@
 #include "biology/organelles/Cortex.h"
 #include "visualization/gpu/Window.h"
 #include "visualization/gpu/GPUWorld.h"
+#include "visualization/gpu/GPUMesh.h"
 #include "visualization/gpu/GPUStats.h"
 #include "visualization/gpu/GPUText.h"
 #include "visualization/helpers/CortexVis.h"
@@ -112,19 +113,13 @@ void VisEngine::updateGpuMeshes()
                     VisObjectContext::createForOrganelle(pOrganelle, organelleId,
                         m_pWindow->getSwapChain()->getGPUQueue());
                     pVisContext = pOrganelle->getVisObjectContext();
+                    m_pGpuWorld->addObject(pVisContext->m_pObject);
                 }
 
                 if (pVisContext && pVisContext->m_pObject)
                 {
                     auto pGpuMesh = pVisContext->m_pObject->updateAndGetGpuMesh();
            
-                    // Add mesh to the world if needed
-                    if (pVisContext->m_pGpuMesh != pGpuMesh)
-                    {
-                        pVisContext->m_pGpuMesh = pGpuMesh;
-                        m_pGpuWorld->addMesh(pVisContext->m_pGpuMesh);
-                    }
-                    
                     // Combine this mesh's bounding box with the overall bounding box
                     if (pGpuMesh)
                     {

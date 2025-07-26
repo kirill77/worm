@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IObjectVis.h"
+#include "visualization/gpu/IObjectVis.h"
 #include <memory>
 
 struct Centrosome;

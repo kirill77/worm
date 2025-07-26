@@ -27,9 +27,6 @@
     <ClCompile Include="VisEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IObjectVis.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VisObjectContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,9 +42,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VisEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IObjectVis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VisObjectContext.h">

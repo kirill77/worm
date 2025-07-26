@@ -5,9 +5,9 @@
 #include <DirectXMath.h>
 #include <d3d12.h>
 #include <wrl/client.h>
-#include "GPUMesh.h"
 #include "GPUCamera.h"
 #include "GPUFont.h"
+#include "IObjectVis.h"
 
 // Forward declarations
 namespace Microsoft { namespace WRL { template<typename> class ComPtr; } }
@@ -24,8 +24,8 @@ public:
     GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue);
     ~GPUWorld();
 
-    // Mesh management
-    void addMesh(std::weak_ptr<GPUMesh> pMesh);
+    // Object management
+    void addObject(std::weak_ptr<IObjectVis> pObject);
     
     // Camera management
     std::shared_ptr<GPUCamera> getCamera();
@@ -50,7 +50,7 @@ private:
     
     std::shared_ptr<Window> m_pWindow;
     // when weak_ptr becomes null - it's automatically removed from the list
-    std::vector<std::weak_ptr<GPUMesh>> m_pMeshes;
+    std::vector<std::weak_ptr<IObjectVis>> m_pObjects;
     std::shared_ptr<GPUCamera> m_pCamera;
     std::shared_ptr<GPUFont> m_pFont;
     
