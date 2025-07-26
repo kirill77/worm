@@ -71,8 +71,21 @@ bool VisEngine::update(float fDtSec)
     auto pGpuQueue = pSwapChain->getGPUQueue();
     auto pCmdList = pGpuQueue->beginRecording();
 
-    // Draw meshes into the command list
-    m_pGpuWorld->render(pSwapChain, pCmdList.Get());
+    // Draw meshes into the command list and get the combined bounding box
+    box3 combinedBoundingBox = m_pGpuWorld->render(pSwapChain, pCmdList.Get());
+
+    // Set the world box with the combined bounding box of all meshes
+    if (!combinedBoundingBox.isempty())
+    {
+        m_cameraUI.setWorldBox(combinedBoundingBox);
+        double fVolume = combinedBoundingBox.computeVolume();
+        // if the volume change is too large - re-fit the camera
+        if (fVolume != 0 && abs(fVolume - m_fPrevFittedVolume) / fVolume > 0.5)
+        {
+            m_cameraUI.fitWorldBoxToView();
+        }
+        m_fPrevFittedVolume = fVolume;
+    }
 
     // Draw text on top
     m_gpuText->render(pSwapChain, m_pGpuWorld->getSharedRootSignature(), pCmdList.Get());
@@ -93,9 +106,6 @@ void VisEngine::updateGpuMeshes()
         StringDict::ID::ORGANELLE_CENTROSOME
     };
 
-    // Initialize combined bounding box as empty
-    box3 combinedBoundingBox = box3::empty();
-
     // Process all organelles that have visualization contexts
     auto cells = m_pOrganism->getCellSims();
     for (auto& cell : cells)
@@ -115,33 +125,8 @@ void VisEngine::updateGpuMeshes()
                     pVisContext = pOrganelle->getVisObjectContext();
                     m_pGpuWorld->addObject(pVisContext->m_pObject);
                 }
-
-                if (pVisContext && pVisContext->m_pObject)
-                {
-                    auto pGpuMesh = pVisContext->m_pObject->updateAndGetGpuMesh();
-           
-                    // Combine this mesh's bounding box with the overall bounding box
-                    if (pGpuMesh)
-                    {
-                        const box3& meshBoundingBox = pGpuMesh->getBoundingBox();
-                        combinedBoundingBox = combinedBoundingBox | meshBoundingBox;
-                    }
-                }
             }
         }
-    }
-    
-    // Set the world box with the combined bounding box of all meshes
-    if (!combinedBoundingBox.isempty())
-    {
-        m_cameraUI.setWorldBox(combinedBoundingBox);
-        double fVolume = combinedBoundingBox.computeVolume();
-        // if the volume change is too large - re-fit the camera
-        if (fVolume != 0 && abs(fVolume - m_fPrevFittedVolume) / fVolume > 0.5)
-        {
-            m_cameraUI.fitWorldBoxToView();
-        }
-        m_fPrevFittedVolume = fVolume;
     }
 }
 
