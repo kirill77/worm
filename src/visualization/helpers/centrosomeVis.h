@@ -11,7 +11,7 @@ struct CentrosomeVis : public IVisObject
 {
     CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* pQueue);
 
-    virtual std::shared_ptr<GPUMesh> updateAndGetGpuMesh() override;
+    virtual std::vector<std::shared_ptr<GPUMesh>> updateAndGetGpuMeshes() override;
 
 private:
     void updateGPUMesh();

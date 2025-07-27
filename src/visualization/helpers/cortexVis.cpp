@@ -14,10 +14,15 @@ CortexVis::CortexVis(std::shared_ptr<Organelle> pOrganelle, GPUQueue *pQueue)
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
-std::shared_ptr<GPUMesh> CortexVis::updateAndGetGpuMesh()
+std::vector<std::shared_ptr<GPUMesh>> CortexVis::updateAndGetGpuMeshes()
 {
     updateGPUMesh();
-    return m_pGPUMesh;
+    std::vector<std::shared_ptr<GPUMesh>> meshes;
+    if (m_pGPUMesh)
+    {
+        meshes.push_back(m_pGPUMesh);
+    }
+    return meshes;
 }
 
 void CortexVis::updateGPUMesh()

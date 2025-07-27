@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 class GPUMesh;
 
@@ -8,5 +9,5 @@ class GPUMesh;
 // needs to know the declaration of this object
 struct IVisObject
 {
-    virtual std::shared_ptr<GPUMesh> updateAndGetGpuMesh() = 0;
+    virtual std::vector<std::shared_ptr<GPUMesh>> updateAndGetGpuMeshes() = 0;
 }; 

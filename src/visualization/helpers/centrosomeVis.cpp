@@ -15,10 +15,15 @@ CentrosomeVis::CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* 
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
-std::shared_ptr<GPUMesh> CentrosomeVis::updateAndGetGpuMesh()
+std::vector<std::shared_ptr<GPUMesh>> CentrosomeVis::updateAndGetGpuMeshes()
 {
     updateGPUMesh();
-    return m_pGPUMesh;
+    std::vector<std::shared_ptr<GPUMesh>> meshes;
+    if (m_pGPUMesh)
+    {
+        meshes.push_back(m_pGPUMesh);
+    }
+    return meshes;
 }
 
 void CentrosomeVis::updateGPUMesh()

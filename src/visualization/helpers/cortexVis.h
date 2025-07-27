@@ -10,7 +10,7 @@ struct CortexVis : public IVisObject
 {
     CortexVis(std::shared_ptr<Organelle> pOrganelle, GPUQueue* pQueue);
 
-    virtual std::shared_ptr<GPUMesh> updateAndGetGpuMesh() override;
+    virtual std::vector<std::shared_ptr<GPUMesh>> updateAndGetGpuMeshes() override;
 
 private:
     void updateGPUMesh();

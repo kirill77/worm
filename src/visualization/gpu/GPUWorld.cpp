@@ -320,48 +320,57 @@ box3 GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
             continue;
         }
         
-        // Get the mesh from the object
-        auto pMesh = pObject->updateAndGetGpuMesh();
-        if (!pMesh)
+        // Get the meshes from the object
+        auto meshes = pObject->updateAndGetGpuMeshes();
+        if (meshes.empty())
         {
-            ++itObject; // Move to next object if no mesh
-            continue; // Skip objects that don't have a mesh
+            ++itObject; // Move to next object if no meshes
+            continue; // Skip objects that don't have any meshes
         }
         
-        // Set the world matrix as root constants for this specific mesh
-        DirectX::XMMATRIX worldMatrix = pMesh->getWorldMatrix();
-        pCmdList->SetGraphicsRoot32BitConstants(2, 16, &worldMatrix, 0);  // Root parameter 2, 16 floats (4x4 matrix)
-        
-        // Set primitive topology
-        pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        
-        // Set vertex buffer
-        D3D12_VERTEX_BUFFER_VIEW vbv = pMesh->getVertexBufferView();
-        pCmdList->IASetVertexBuffers(0, 1, &vbv);
-        
-        // Set index buffer
-        D3D12_INDEX_BUFFER_VIEW ibv = pMesh->getIndexBufferView();
-        pCmdList->IASetIndexBuffer(&ibv);
-        
-        // Draw
-        pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
-        
-        // Accumulate bounding box - transform local mesh bounds to world space
-        const box3& localBounds = pMesh->getBoundingBox();
-        if (!localBounds.isempty())
+        // Render each mesh from this object
+        for (auto& pMesh : meshes)
         {
-            // Transform bounding box to world space using mesh transform
-            box3 worldBounds = localBounds * pMesh->getTransform();
-            
-            // Union with scene bounding box
-            if (hasValidBounds)
+            if (!pMesh)
             {
-                sceneBoundingBox = sceneBoundingBox | worldBounds;
+                continue; // Skip null meshes
             }
-            else
+            
+            // Set the world matrix as root constants for this specific mesh
+            DirectX::XMMATRIX worldMatrix = pMesh->getWorldMatrix();
+            pCmdList->SetGraphicsRoot32BitConstants(2, 16, &worldMatrix, 0);  // Root parameter 2, 16 floats (4x4 matrix)
+            
+            // Set primitive topology
+            pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            
+            // Set vertex buffer
+            D3D12_VERTEX_BUFFER_VIEW vbv = pMesh->getVertexBufferView();
+            pCmdList->IASetVertexBuffers(0, 1, &vbv);
+            
+            // Set index buffer
+            D3D12_INDEX_BUFFER_VIEW ibv = pMesh->getIndexBufferView();
+            pCmdList->IASetIndexBuffer(&ibv);
+            
+            // Draw
+            pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
+            
+            // Accumulate bounding box - transform local mesh bounds to world space
+            const box3& localBounds = pMesh->getBoundingBox();
+            if (!localBounds.isempty())
             {
-                sceneBoundingBox = worldBounds;
-                hasValidBounds = true;
+                // Transform bounding box to world space using mesh transform
+                box3 worldBounds = localBounds * pMesh->getTransform();
+                
+                // Union with scene bounding box
+                if (hasValidBounds)
+                {
+                    sceneBoundingBox = sceneBoundingBox | worldBounds;
+                }
+                else
+                {
+                    sceneBoundingBox = worldBounds;
+                    hasValidBounds = true;
+                }
             }
         }
         
