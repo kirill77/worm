@@ -1,5 +1,5 @@
 #include "VisObjectFactory.h"
-#include "visualization/gpu/IObjectVis.h"
+#include "visualization/gpu/IVisObject.h"
 #include "CortexVis.h"
 #include "CentrosomeVis.h"
 #include "biology/organelles/Organelle.h"
@@ -28,12 +28,12 @@ static std::shared_ptr<CentrosomeVis> createCentrosomeVis(
     return pCentrosomeVis;
 }
 
-std::shared_ptr<IObjectVis> VisObjectFactory::createForOrganelle(
+std::shared_ptr<IVisObject> VisObjectFactory::createForOrganelle(
     std::shared_ptr<Organelle> pOrganelle,
     StringDict::ID organelleId,
     GPUQueue* pQueue)
 {
-    std::shared_ptr<IObjectVis> pVisObject = nullptr;
+    std::shared_ptr<IVisObject> pVisObject = nullptr;
     
     // Handle different organelle types for visualization
     switch (organelleId)

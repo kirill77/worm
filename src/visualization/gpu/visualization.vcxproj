@@ -151,7 +151,7 @@
     <ClInclude Include="GPUStats.h" />
     <ClInclude Include="GPUText.h" />
     <ClInclude Include="GPUWorld.h" />
-    <ClInclude Include="IObjectVis.h" />
+    <ClInclude Include="IVisObject.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShaderHelper.h" />
     <ClInclude Include="SwapChain.h" />
@@ -174,7 +174,6 @@
     <ClCompile Include="GPUMesh.cpp" />
     <ClCompile Include="GPUQueue.cpp" />
     <ClCompile Include="GPUWorld.cpp" />
-    <ClCompile Include="IObjectVis.cpp" />
     <ClCompile Include="ShaderHelper.cpp" />
   </ItemGroup>
   <ItemGroup>

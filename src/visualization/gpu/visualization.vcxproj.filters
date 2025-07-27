@@ -48,7 +48,7 @@
     <ClInclude Include="GPUWorld.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IObjectVis.h">
+    <ClInclude Include="IVisObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GPUStats.h">
@@ -84,9 +84,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GPUWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IObjectVis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderHelper.cpp">

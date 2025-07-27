@@ -1,13 +1,13 @@
 #pragma once
 
-#include "visualization/gpu/IObjectVis.h"
+#include "visualization/gpu/IVisObject.h"
 #include <memory>
 
 struct Centrosome;
 class GPUMesh;
 struct GPUQueue;
 
-struct CentrosomeVis : public IObjectVis
+struct CentrosomeVis : public IVisObject
 {
     CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* pQueue);
 

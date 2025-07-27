@@ -4,7 +4,7 @@
 #include "chemistry/StringDict.h"
 
 // Forward declarations
-struct IObjectVis;
+struct IVisObject;
 class Organelle;
 struct GPUQueue;
 
@@ -19,7 +19,7 @@ public:
      * @param pQueue GPU queue for resource creation
      * @return Shared pointer to the created visualization object
      */
-    static std::shared_ptr<IObjectVis> createForOrganelle(
+    static std::shared_ptr<IVisObject> createForOrganelle(
         std::shared_ptr<Organelle> pOrganelle,
         StringDict::ID organelleId,
         GPUQueue* pQueue);
