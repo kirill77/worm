@@ -7,7 +7,7 @@
 #include <wrl/client.h>
 #include "GPUCamera.h"
 #include "GPUFont.h"
-#include "IObjectVis.h"
+#include "IVisObject.h"
 #include "geometry/vectors/box.h"
 
 // Forward declarations
@@ -26,7 +26,7 @@ public:
     ~GPUWorld();
 
     // Object management
-    void addObject(std::weak_ptr<IObjectVis> pObject);
+    void addObject(std::weak_ptr<IVisObject> pObject);
     
     // Camera management
     std::shared_ptr<GPUCamera> getCamera();
@@ -51,7 +51,7 @@ private:
     
     std::shared_ptr<Window> m_pWindow;
     // when weak_ptr becomes null - it's automatically removed from the list
-    std::vector<std::weak_ptr<IObjectVis>> m_pObjects;
+    std::vector<std::weak_ptr<IVisObject>> m_pObjects;
     std::shared_ptr<GPUCamera> m_pCamera;
     std::shared_ptr<GPUFont> m_pFont;
     

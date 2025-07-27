@@ -5,7 +5,7 @@
 #include "GPUWorld.h"
 #include "GPUStats.h"
 #include "GPUMesh.h"
-#include "IObjectVis.h"
+#include "IVisObject.h"
 
 // Constructor
 GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue)
@@ -32,7 +32,7 @@ GPUWorld::~GPUWorld()
 }
 
 // Add an object to the scene
-void GPUWorld::addObject(std::weak_ptr<IObjectVis> pObject)
+void GPUWorld::addObject(std::weak_ptr<IVisObject> pObject)
 {
     m_pObjects.push_back(pObject);
 }

@@ -5,7 +5,7 @@
 class Cell;
 class Medium;
 enum class CellCycleState;
-struct IObjectVis;
+struct IVisObject;
 
 /**
  * Base class for all cellular organelles.
@@ -15,7 +15,7 @@ class Organelle : public BindingSurface
 {
 private:
     std::weak_ptr<Cell> m_pCell;  // Reference to the cell containing this organelle
-    std::shared_ptr<IObjectVis> m_pVisObject;  // Visualization object for this organelle
+    std::shared_ptr<IVisObject> m_pVisObject;  // Visualization object for this organelle
 
 public:
     /**
@@ -53,13 +53,13 @@ public:
      * 
      * @return Shared pointer to the visualization object
      */
-    std::shared_ptr<IObjectVis> getVisObject() const { return m_pVisObject; }
+    std::shared_ptr<IVisObject> getVisObject() const { return m_pVisObject; }
 
     /**
      * Set the visualization object for this organelle
      * 
      * @param pVisObject Shared pointer to the visualization object
      */
-    void setVisObject(std::shared_ptr<IObjectVis> pVisObject) { m_pVisObject = pVisObject; }
+    void setVisObject(std::shared_ptr<IVisObject> pVisObject) { m_pVisObject = pVisObject; }
 };
 

@@ -4,8 +4,7 @@
 
 class GPUMesh;
 
-struct IObjectVis
+struct IVisObject
 {
     virtual std::shared_ptr<GPUMesh> updateAndGetGpuMesh() = 0;
-};
-
+}; 

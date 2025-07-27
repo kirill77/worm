@@ -1,12 +1,12 @@
 #pragma once
 
-#include "visualization/gpu/IObjectVis.h"
+#include "visualization/gpu/IVisObject.h"
 
 class Organelle;
 class GPUMesh;
 struct GPUQueue;
 
-struct CortexVis : public IObjectVis
+struct CortexVis : public IVisObject
 {
     CortexVis(std::shared_ptr<Organelle> pOrganelle, GPUQueue* pQueue);
 
