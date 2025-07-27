@@ -146,6 +146,7 @@
     <ClInclude Include="GPUCamera.h" />
     <ClInclude Include="GPUFont.h" />
     <ClInclude Include="GPUMesh.h" />
+    <ClInclude Include="GPUMeshNode.h" />
     <ClInclude Include="GPUQueue.h" />
     <ClInclude Include="GPUResource.h" />
     <ClInclude Include="GPUStats.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="GPUCamera.cpp" />
     <ClCompile Include="GPUMesh.cpp" />
+    <ClCompile Include="GPUMeshNode.cpp" />
     <ClCompile Include="GPUQueue.cpp" />
     <ClCompile Include="GPUWorld.cpp" />
     <ClCompile Include="ShaderHelper.cpp" />

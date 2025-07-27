@@ -18,6 +18,7 @@ struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 struct Window;
 struct GPUStats;
+struct GPUMeshNode;
 
 struct GPUWorld
 {
@@ -43,6 +44,8 @@ public:
 
 private:
     void initializeRenderResources();
+    void renderMeshNode(const GPUMeshNode& node, const affine3& parentTransform, 
+                       ID3D12GraphicsCommandList* pCmdList, box3& sceneBoundingBox, bool& hasValidBounds);
     
     struct TransformBuffer {
         DirectX::XMMATRIX View;

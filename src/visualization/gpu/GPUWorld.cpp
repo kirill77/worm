@@ -6,6 +6,7 @@
 #include "GPUStats.h"
 #include "GPUMesh.h"
 #include "IVisObject.h"
+#include "GPUMeshNode.h"
 
 // Constructor
 GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue)
@@ -320,59 +321,16 @@ box3 GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
             continue;
         }
         
-        // Get the meshes from the object
-        auto meshes = pObject->updateAndGetGpuMeshes();
-        if (meshes.empty())
+        // Get the mesh node from the object
+        auto node = pObject->updateAndGetMeshNode();
+        if (node.isEmpty())
         {
-            ++itObject; // Move to next object if no meshes
-            continue; // Skip objects that don't have any meshes
+            ++itObject; // Move to next object if no meshes or children
+            continue; // Skip objects that don't have any content
         }
         
-        // Render each mesh from this object
-        for (auto& pMesh : meshes)
-        {
-            if (!pMesh)
-            {
-                continue; // Skip null meshes
-            }
-            
-            // Set the world matrix as root constants for this specific mesh
-            DirectX::XMMATRIX worldMatrix = pMesh->getWorldMatrix();
-            pCmdList->SetGraphicsRoot32BitConstants(2, 16, &worldMatrix, 0);  // Root parameter 2, 16 floats (4x4 matrix)
-            
-            // Set primitive topology
-            pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-            
-            // Set vertex buffer
-            D3D12_VERTEX_BUFFER_VIEW vbv = pMesh->getVertexBufferView();
-            pCmdList->IASetVertexBuffers(0, 1, &vbv);
-            
-            // Set index buffer
-            D3D12_INDEX_BUFFER_VIEW ibv = pMesh->getIndexBufferView();
-            pCmdList->IASetIndexBuffer(&ibv);
-            
-            // Draw
-            pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
-            
-            // Accumulate bounding box - transform local mesh bounds to world space
-            const box3& localBounds = pMesh->getBoundingBox();
-            if (!localBounds.isempty())
-            {
-                // Transform bounding box to world space using mesh transform
-                box3 worldBounds = localBounds * pMesh->getTransform();
-                
-                // Union with scene bounding box
-                if (hasValidBounds)
-                {
-                    sceneBoundingBox = sceneBoundingBox | worldBounds;
-                }
-                else
-                {
-                    sceneBoundingBox = worldBounds;
-                    hasValidBounds = true;
-                }
-            }
-        }
+        // Render the hierarchical mesh node recursively
+        renderMeshNode(node, affine3::identity(), pCmdList, sceneBoundingBox, hasValidBounds);
         
         ++itObject; // Move to next object
     }
@@ -393,4 +351,65 @@ box3 GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
     }
     
     return sceneBoundingBox;
+}
+
+void GPUWorld::renderMeshNode(const GPUMeshNode& node, const affine3& parentTransform, 
+                              ID3D12GraphicsCommandList* pCmdList, box3& sceneBoundingBox, bool& hasValidBounds)
+{
+    // Combine parent transform with this node's transform
+    affine3 worldTransform = parentTransform * node.getTransform();
+    
+    // Render all meshes at this node level
+    const auto& meshes = node.getMeshes();
+    for (const auto& pMesh : meshes)
+    {
+        if (!pMesh)
+        {
+            continue; // Skip null meshes
+        }
+        
+        // Set the world matrix as root constants for this specific mesh
+        DirectX::XMMATRIX worldMatrix = node.getWorldMatrix(parentTransform);
+        pCmdList->SetGraphicsRoot32BitConstants(2, 16, &worldMatrix, 0);  // Root parameter 2, 16 floats (4x4 matrix)
+        
+        // Set primitive topology
+        pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        
+        // Set vertex buffer
+        D3D12_VERTEX_BUFFER_VIEW vbv = pMesh->getVertexBufferView();
+        pCmdList->IASetVertexBuffers(0, 1, &vbv);
+        
+        // Set index buffer
+        D3D12_INDEX_BUFFER_VIEW ibv = pMesh->getIndexBufferView();
+        pCmdList->IASetIndexBuffer(&ibv);
+        
+        // Draw
+        pCmdList->DrawIndexedInstanced(pMesh->getIndexCount(), 1, 0, 0, 0);
+        
+        // Accumulate bounding box for this mesh
+        const box3& localBounds = pMesh->getBoundingBox();
+        if (!localBounds.isempty())
+        {
+            // Transform mesh bounds to world space using the combined transform
+            box3 worldBounds = localBounds * worldTransform;
+            
+            // Union with scene bounding box
+            if (hasValidBounds)
+            {
+                sceneBoundingBox = sceneBoundingBox | worldBounds;
+            }
+            else
+            {
+                sceneBoundingBox = worldBounds;
+                hasValidBounds = true;
+            }
+        }
+    }
+    
+    // Recursively render all child nodes
+    const auto& children = node.getChildren();
+    for (const auto& child : children)
+    {
+        renderMeshNode(child, worldTransform, pCmdList, sceneBoundingBox, hasValidBounds);
+    }
 } 

@@ -1,5 +1,6 @@
 #include "CentrosomeVis.h"
 #include "visualization/gpu/GPUQueue.h"
+#include "visualization/gpu/GPUMeshNode.h"
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/organelles/Centrosome.h"
 #include "biology/organelles/Cell.h"
@@ -15,15 +16,18 @@ CentrosomeVis::CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* 
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
 }
 
-std::vector<std::shared_ptr<GPUMesh>> CentrosomeVis::updateAndGetGpuMeshes()
+GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
 {
     updateGPUMesh();
-    std::vector<std::shared_ptr<GPUMesh>> meshes;
+    GPUMeshNode node(affine3::identity());
     if (m_pGPUMesh)
     {
-        meshes.push_back(m_pGPUMesh);
+        // Set the node's transform to the mesh's transform
+        node.setTransform(m_pGPUMesh->getTransform());
+        // Add the mesh to the node (mesh will use identity transform since node has the transform)
+        node.addMesh(m_pGPUMesh);
     }
-    return meshes;
+    return node;
 }
 
 void CentrosomeVis::updateGPUMesh()
