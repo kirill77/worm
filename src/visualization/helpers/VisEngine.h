@@ -2,7 +2,6 @@
 
 #include <memory>
 #include "visualization/helpers/CameraUI.h"
-#include "visualization/helpers/VisObjectContext.h"
 #include "visualization/gpu/GPUStats.h"
 #include "visualization/gpu/GPUText.h"
 #include "chemistry/StringDict.h"

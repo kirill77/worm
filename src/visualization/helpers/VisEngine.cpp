@@ -11,6 +11,7 @@
 #include "visualization/gpu/GPUText.h"
 #include "visualization/helpers/CortexVis.h"
 #include "visualization/helpers/CameraUI.h"
+#include "VisObjectFactory.h"
 #include "chemistry/ProteinWiki.h"
 #include "chemistry/StringDict.h"
 #include "utils/log/ILog.h"
@@ -117,13 +118,15 @@ void VisEngine::updateGpuMeshes()
             if (pOrganelle)
             {
                 // Initialize organelle visualization if needed
-                auto pVisContext = pOrganelle->getVisObjectContext();
-                if (!pVisContext)
+                auto pVisObject = pOrganelle->getVisObject();
+                if (!pVisObject)
                 {
-                    VisObjectContext::createForOrganelle(pOrganelle, organelleId,
+                    pVisObject = VisObjectFactory::createForOrganelle(pOrganelle, organelleId,
                         m_pWindow->getSwapChain()->getGPUQueue());
-                    pVisContext = pOrganelle->getVisObjectContext();
-                    m_pGpuWorld->addObject(pVisContext->m_pObject);
+                    if (pVisObject)
+                    {
+                        m_pGpuWorld->addObject(pVisObject);
+                    }
                 }
             }
         }

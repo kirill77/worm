@@ -23,14 +23,14 @@
     <ClCompile Include="CentrosomeVis.cpp" />
     <ClCompile Include="CortexVis.cpp" />
     <ClCompile Include="VisEngine.cpp" />
-    <ClCompile Include="VisObjectContext.cpp" />
+    <ClCompile Include="VisObjectFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraUI.h" />
     <ClInclude Include="CentrosomeVis.h" />
     <ClInclude Include="CortexVis.h" />
     <ClInclude Include="VisEngine.h" />
-    <ClInclude Include="VisObjectContext.h" />
+    <ClInclude Include="VisObjectFactory.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

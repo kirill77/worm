@@ -27,7 +27,7 @@
     <ClCompile Include="VisEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VisObjectContext.cpp">
+    <ClCompile Include="VisObjectFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,7 +44,7 @@
     <ClInclude Include="VisEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VisObjectContext.h">
+    <ClInclude Include="VisObjectFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
