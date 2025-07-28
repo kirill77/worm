@@ -6,6 +6,7 @@
 #include "biology/organelles/Cell.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/vectors/vector.h"
+#include "geometry/vectors/matrix.h"
 #include <memory>
 #include <vector>
 #include <cmath>
@@ -50,19 +51,45 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
     affine3 centrosomeToWorld = affine3::identity();
     centrosomeToWorld.m_translation = position;
     
-    // Create node with the calculated transform
-    GPUMeshNode node(centrosomeToWorld);
+    // Create root node with the centrosome's world position
+    GPUMeshNode rootNode(centrosomeToWorld);
+    
     if (m_pGPUMesh)
     {
-        node.addMesh(m_pGPUMesh);
+        // Create first child node: cylinder along X-axis (rotate Z->X)
+        // Rotation: 90 degrees around Y-axis to align Z with X
+        affine3 rotateToX = affine3::identity();
+        rotateToX.m_linear = float3x3(
+            0, 0, 1,   // X = old Z
+            0, 1, 0,   // Y = old Y  
+            -1, 0, 0   // Z = -old X
+        );
+        GPUMeshNode xAxisNode(rotateToX);
+        xAxisNode.addMesh(m_pGPUMesh);
+        
+        // Create second child node: cylinder along Y-axis (rotate Z->Y)  
+        // Rotation: -90 degrees around X-axis to align Z with Y
+        affine3 rotateToY = affine3::identity();
+        rotateToY.m_linear = float3x3(
+            1, 0, 0,   // X = old X
+            0, 0, 1,   // Y = old Z
+            0, -1, 0   // Z = -old Y
+        );
+        GPUMeshNode yAxisNode(rotateToY);
+        yAxisNode.addMesh(m_pGPUMesh);
+        
+        // Add both child nodes to the root
+        rootNode.addChild(std::move(xAxisNode));
+        rootNode.addChild(std::move(yAxisNode));
     }
-    return node;
+    
+    return rootNode;
 }
 
 void CentrosomeVis::createCentrosomeGeometry()
 {
-    // Create static centrosome geometry (two perpendicular cylinders)
-    // This is called once in the constructor since the geometry never changes
+    // Create static cylinder geometry (single cylinder along Z-axis)
+    // This will be reused for both X and Y orientations via transforms
     
     if (!m_pGPUMesh)
     {
@@ -77,79 +104,66 @@ void CentrosomeVis::createCentrosomeGeometry()
     std::vector<GPUMesh::Vertex> gpuVertices;
     std::vector<int3> gpuTriangles;
     
-    // Helper function to create a cylinder
-    auto createCylinder = [&](const float3& axis, int vertexOffset) {
-        // Create two perpendicular vectors to the axis
-        float3 perpVec1, perpVec2;
-        if (abs(axis.x) < 0.9f) {
-            perpVec1 = normalize(cross(axis, float3(1, 0, 0)));
-        } else {
-            perpVec1 = normalize(cross(axis, float3(0, 1, 0)));
-        }
-        perpVec2 = normalize(cross(axis, perpVec1));
+    // Create a single cylinder along Z-axis (0,0,1)
+    float3 axis = float3(0, 0, 1);
+    
+    // Create two perpendicular vectors to the Z-axis
+    float3 perpVec1 = float3(1, 0, 0);  // X-axis
+    float3 perpVec2 = float3(0, 1, 0);  // Y-axis
+    
+    // Create vertices for cylinder ends
+    for (int end = 0; end < 2; ++end) {
+        float3 center = axis * (length * 0.5f * (end == 0 ? -1.0f : 1.0f));
         
-        // Create vertices for cylinder ends
-        for (int end = 0; end < 2; ++end) {
-            float3 center = axis * (length * 0.5f * (end == 0 ? -1.0f : 1.0f));
-            
-            // Center vertex for the end cap
-            GPUMesh::Vertex centerVertex;
-            convertVector(centerVertex.vPos, center);
-            gpuVertices.push_back(centerVertex);
-            
-            // Ring vertices for the end cap
-            for (int i = 0; i < segments; ++i) {
-                float angle = 2.0f * 3.14159f * i / segments;
-                float3 offset = perpVec1 * (radius * cos(angle)) + perpVec2 * (radius * sin(angle));
-                
-                GPUMesh::Vertex vertex;
-                convertVector(vertex.vPos, center + offset);
-                gpuVertices.push_back(vertex);
-            }
-        }
+        // Center vertex for the end cap
+        GPUMesh::Vertex centerVertex;
+        convertVector(centerVertex.vPos, center);
+        gpuVertices.push_back(centerVertex);
         
-        // Create triangles for end caps
-        for (int end = 0; end < 2; ++end) {
-            int centerIdx = vertexOffset + end * (segments + 1);
+        // Ring vertices for the end cap
+        for (int i = 0; i < segments; ++i) {
+            float angle = 2.0f * 3.14159f * i / segments;
+            float3 offset = perpVec1 * (radius * cos(angle)) + perpVec2 * (radius * sin(angle));
             
-            for (int i = 0; i < segments; ++i) {
-                int next = (i + 1) % segments;
-                int idx1 = centerIdx + 1 + i;
-                int idx2 = centerIdx + 1 + next;
-                
-                if (end == 0) {
-                    // First end cap (reverse winding)
-                    gpuTriangles.push_back(int3(centerIdx, idx2, idx1));
-                } else {
-                    // Second end cap (normal winding)
-                    gpuTriangles.push_back(int3(centerIdx, idx1, idx2));
-                }
-            }
+            GPUMesh::Vertex vertex;
+            convertVector(vertex.vPos, center + offset);
+            gpuVertices.push_back(vertex);
         }
+    }
+    
+    // Create triangles for end caps
+    for (int end = 0; end < 2; ++end) {
+        int centerIdx = end * (segments + 1);
         
-        // Create triangles for cylinder sides
         for (int i = 0; i < segments; ++i) {
             int next = (i + 1) % segments;
+            int idx1 = centerIdx + 1 + i;
+            int idx2 = centerIdx + 1 + next;
             
-            // Indices for the ring vertices (skip center vertices)
-            int idx1 = vertexOffset + 1 + i;                    // First ring, current vertex
-            int idx2 = vertexOffset + 1 + next;                 // First ring, next vertex
-            int idx3 = vertexOffset + (segments + 1) + 1 + i;    // Second ring, current vertex
-            int idx4 = vertexOffset + (segments + 1) + 1 + next; // Second ring, next vertex
-            
-            // Two triangles per quad
-            gpuTriangles.push_back(int3(idx1, idx3, idx2));
-            gpuTriangles.push_back(int3(idx2, idx3, idx4));
+            if (end == 0) {
+                // First end cap (reverse winding)
+                gpuTriangles.push_back(int3(centerIdx, idx2, idx1));
+            } else {
+                // Second end cap (normal winding)
+                gpuTriangles.push_back(int3(centerIdx, idx1, idx2));
+            }
         }
-        
-        return 2 * (segments + 1); // Return number of vertices added
-    };
-
-    // Create first cylinder along X-axis
-    int verticesAdded = createCylinder(float3(1, 0, 0), 0);
+    }
     
-    // Create second cylinder along Y-axis
-    verticesAdded = createCylinder(float3(0, 1, 0), verticesAdded);
+    // Create triangles for cylinder sides
+    for (int i = 0; i < segments; ++i) {
+        int next = (i + 1) % segments;
+        
+        // Indices for the ring vertices (skip center vertices)
+        int idx1 = 1 + i;                    // First ring, current vertex
+        int idx2 = 1 + next;                 // First ring, next vertex
+        int idx3 = (segments + 1) + 1 + i;    // Second ring, current vertex
+        int idx4 = (segments + 1) + 1 + next; // Second ring, next vertex
+        
+        // Two triangles per quad
+        gpuTriangles.push_back(int3(idx1, idx3, idx2));
+        gpuTriangles.push_back(int3(idx2, idx3, idx4));
+    }
     
     // Update the GPU mesh geometry
     m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);

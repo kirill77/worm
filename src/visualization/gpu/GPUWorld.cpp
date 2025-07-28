@@ -7,6 +7,7 @@
 #include "GPUMesh.h"
 #include "IVisObject.h"
 #include "GPUMeshNode.h"
+#include <DirectXMath.h>
 
 // Constructor
 GPUWorld::GPUWorld(std::shared_ptr<Window> pWindow, GPUQueue* pGpuQueue)
@@ -357,7 +358,7 @@ void GPUWorld::renderMeshNode(const GPUMeshNode& node, const affine3& parentTran
                               ID3D12GraphicsCommandList* pCmdList, box3& sceneBoundingBox, bool& hasValidBounds)
 {
     // Combine parent transform with this node's transform
-    affine3 worldTransform = parentTransform * node.getTransform();
+    affine3 worldTransform = node.getTransform() * parentTransform;
     
     // Render all meshes at this node level
     const auto& meshes = node.getMeshes();
@@ -369,7 +370,15 @@ void GPUWorld::renderMeshNode(const GPUMeshNode& node, const affine3& parentTran
         }
         
         // Set the world matrix as root constants for this specific mesh
-        DirectX::XMMATRIX worldMatrix = node.getWorldMatrix(parentTransform);
+        // Convert the already-calculated worldTransform to DirectX matrix
+        const auto& m = worldTransform.m_linear;
+        const auto& t = worldTransform.m_translation;
+        DirectX::XMMATRIX worldMatrix(
+            m.m00, m.m01, m.m02, 0.0f,
+            m.m10, m.m11, m.m12, 0.0f,
+            m.m20, m.m21, m.m22, 0.0f,
+            t.x,   t.y,   t.z,   1.0f
+        );
         pCmdList->SetGraphicsRoot32BitConstants(2, 16, &worldMatrix, 0);  // Root parameter 2, 16 floats (4x4 matrix)
         
         // Set primitive topology
