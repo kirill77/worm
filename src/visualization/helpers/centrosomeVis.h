@@ -14,7 +14,7 @@ struct CentrosomeVis : public IVisObject
     virtual GPUMeshNode updateAndGetMeshNode() override;
 
 private:
-    void updateGPUMesh();
+    void createCentrosomeGeometry();
     std::shared_ptr<Centrosome> m_pCentrosome;
     std::shared_ptr<GPUMesh> m_pGPUMesh;
 };

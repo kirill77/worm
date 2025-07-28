@@ -14,6 +14,9 @@ CentrosomeVis::CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* 
 {
     m_pCentrosome = pCentrosome;
     m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
+    
+    // Create the static centrosome geometry once
+    createCentrosomeGeometry();
 }
 
 GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
@@ -47,9 +50,6 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
     affine3 centrosomeToWorld = affine3::identity();
     centrosomeToWorld.m_translation = position;
     
-    // Update the mesh geometry (without transform)
-    updateGPUMesh();
-    
     // Create node with the calculated transform
     GPUMeshNode node(centrosomeToWorld);
     if (m_pGPUMesh)
@@ -59,9 +59,12 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
     return node;
 }
 
-void CentrosomeVis::updateGPUMesh()
+void CentrosomeVis::createCentrosomeGeometry()
 {
-    if (!m_pCentrosome || !m_pGPUMesh)
+    // Create static centrosome geometry (two perpendicular cylinders)
+    // This is called once in the constructor since the geometry never changes
+    
+    if (!m_pGPUMesh)
     {
         assert(false);
         return;
