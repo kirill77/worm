@@ -3,10 +3,8 @@
 #include <memory>
 #include <vector>
 #include "geometry/vectors/vector.h"
-#include "geometry/vectors/affine.h"
 #include "geometry/vectors/box.h"
 #include <d3d12.h>
-#include <DirectXMath.h>
 #include <wrl/client.h>
 
 // Forward declarations
@@ -32,11 +30,6 @@ public:
     
     const box3& getBoundingBox() const { return m_boundingBox; }
     
-    // Transform methods
-    void setTransform(const affine3& transform) { m_mToParent = transform; }
-    const affine3& getTransform() const { return m_mToParent; }
-    DirectX::XMMATRIX getWorldMatrix() const;
-    
 private:
     Microsoft::WRL::ComPtr<ID3D12Device> m_device;
     Microsoft::WRL::ComPtr<ID3D12Resource> m_vertexBuffer;
@@ -45,7 +38,4 @@ private:
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
     uint32_t m_indexCount = 0;
     box3 m_boundingBox;
-    
-    // Transform from mesh local space to parent space
-    affine3 m_mToParent;
 }; 

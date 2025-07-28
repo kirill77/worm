@@ -18,12 +18,10 @@ CortexVis::CortexVis(std::shared_ptr<Organelle> pOrganelle, GPUQueue *pQueue)
 GPUMeshNode CortexVis::updateAndGetMeshNode()
 {
     updateGPUMesh();
+    // Cortex uses identity transform since it defines the coordinate system
     GPUMeshNode node(affine3::identity());
     if (m_pGPUMesh)
     {
-        // Set the node's transform to the mesh's transform
-        node.setTransform(m_pGPUMesh->getTransform());
-        // Add the mesh to the node (mesh will use identity transform since node has the transform)
         node.addMesh(m_pGPUMesh);
     }
     return node;
@@ -83,7 +81,4 @@ void CortexVis::updateGPUMesh()
 
     // Update the GPU mesh geometry
     m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);
-    
-    // Set the transform for the cortex mesh (identity for now since cortex defines the coordinate system)
-    m_pGPUMesh->setTransform(affine3::identity());
 } 

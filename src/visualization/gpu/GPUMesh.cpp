@@ -54,7 +54,6 @@ static Microsoft::WRL::ComPtr<ID3D12Resource> createOrUpdateUploadBuffer(
 
 GPUMesh::GPUMesh(Microsoft::WRL::ComPtr<ID3D12Device> device)
     : m_device(device)
-    , m_mToParent(affine3::identity())  // Initialize transform as identity
     , m_indexCount(0)
 {
     // Initialize buffer views
@@ -62,20 +61,7 @@ GPUMesh::GPUMesh(Microsoft::WRL::ComPtr<ID3D12Device> device)
     m_indexBufferView = {};
 }
 
-DirectX::XMMATRIX GPUMesh::getWorldMatrix() const
-{
-    // Convert affine3 to DirectX::XMMATRIX
-    // affine3 stores row-major, DirectX uses row-major as well
-    const auto& m = m_mToParent.m_linear;
-    const auto& t = m_mToParent.m_translation;
-    
-    return DirectX::XMMATRIX(
-        m.m00, m.m01, m.m02, 0.0f,
-        m.m10, m.m11, m.m12, 0.0f,
-        m.m20, m.m21, m.m22, 0.0f,
-        t.x,   t.y,   t.z,   1.0f
-    );
-}
+
 
 void GPUMesh::setGeometry(const std::vector<Vertex>& pVertices, std::vector<int3>& pTriangles)
 {

@@ -18,13 +18,42 @@ CentrosomeVis::CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* 
 
 GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
 {
+    if (!m_pCentrosome)
+    {
+        return GPUMeshNode(affine3::identity());
+    }
+
+    // Calculate the centrosome's transform
+    auto pCell = m_pCentrosome->getCell();
+    if (!pCell)
+    {
+        return GPUMeshNode(affine3::identity());
+    }
+    
+    auto pCortexBVH = pCell->getCortexBVH();
+    if (!pCortexBVH)
+    {
+        return GPUMeshNode(affine3::identity());
+    }
+
+    // Get the centrosome's transform and convert to world coordinates
+    const float3& normalizedPosition = m_pCentrosome->getNormalizedPosition();
+    float3 position = pCortexBVH->normalizedToWorld(normalizedPosition);
+    
+    // Get the full transform matrix from centrosome space to cell space
+    const affine3& centrosomeToCell = m_pCentrosome->getToParentTransform();
+    
+    // Convert the centrosome's transform to world space coordinates
+    affine3 centrosomeToWorld = affine3::identity();
+    centrosomeToWorld.m_translation = position;
+    
+    // Update the mesh geometry (without transform)
     updateGPUMesh();
-    GPUMeshNode node(affine3::identity());
+    
+    // Create node with the calculated transform
+    GPUMeshNode node(centrosomeToWorld);
     if (m_pGPUMesh)
     {
-        // Set the node's transform to the mesh's transform
-        node.setTransform(m_pGPUMesh->getTransform());
-        // Add the mesh to the node (mesh will use identity transform since node has the transform)
         node.addMesh(m_pGPUMesh);
     }
     return node;
@@ -38,41 +67,9 @@ void CentrosomeVis::updateGPUMesh()
         return;
     }
 
-    // Get the cell from the organelle
-    auto pCell = m_pCentrosome->getCell();
-    if (!pCell)
-    {
-        assert(false);
-        return;
-    }
-    // Get the cortex BVH for coordinate conversion
-    auto pCortexBVH = pCell->getCortexBVH();
-    if (!pCortexBVH)
-    {
-        assert(false);
-        return;
-    }
-
-    // Get the centrosome's transform and convert to world coordinates
-    const float3& normalizedPosition = m_pCentrosome->getNormalizedPosition();  // Position in normalized coordinates (-1, 1)
-    float3 position = pCortexBVH->normalizedToWorld(normalizedPosition);  // Convert to world coordinates
-    
-    // Get the full transform matrix from centrosome space to cell space
-    const affine3& centrosomeToCell = m_pCentrosome->getToParentTransform();
-    
-    // Convert the centrosome's transform to world space coordinates
-    // This combines the centrosome-to-cell transform with cell-to-world transform
-    affine3 centrosomeToWorld = affine3::identity();
-    centrosomeToWorld.m_translation = position;  // Set world position
-    
-    // For now, we only use position. Later, you can include rotation by composing transforms:
-    // centrosomeToWorld = cellToWorld * centrosomeToCell;
-
     const float radius = 0.1f;        // Cylinder radius
     const float length = 0.8f;        // Cylinder length
     const int segments = 8;           // Number of segments around cylinder
-    const float microtubuleLength = 2.0f;  // Length of microtubules
-    const int microtubulesPerSegment = 2;  // Number of microtubules per cylinder segment
     
     std::vector<GPUMesh::Vertex> gpuVertices;
     std::vector<int3> gpuTriangles;
@@ -153,7 +150,4 @@ void CentrosomeVis::updateGPUMesh()
     
     // Update the GPU mesh geometry
     m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);
-    
-    // Set the transform for this mesh
-    m_pGPUMesh->setTransform(centrosomeToWorld);
 }
