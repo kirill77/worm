@@ -56,6 +56,23 @@ float UIState::getScrollWheelState() const {
     return m_scrollWheelState;
 }
 
+void UIState::notifyButtonOrKeyPressed(uint32_t buttonOrKeyId) {
+    m_buttonsAndKeys[buttonOrKeyId].notifyPressed();
+}
+
+void UIState::notifyButtonOrKeyReleased(uint32_t buttonOrKeyId) {
+    m_buttonsAndKeys[buttonOrKeyId].notifyReleased();
+}
+
+void UIState::setMousePosition(float x, float y) {
+    m_mousePosition.x = x;
+    m_mousePosition.y = y;
+}
+
+void UIState::updateScrollWheelState(float delta) {
+    m_scrollWheelState += delta;
+}
+
 // Window class implementation
 Window::Window() 
     : m_hwnd(nullptr)
@@ -217,35 +234,35 @@ bool Window::initDirectX() {
 void Window::handleInput(UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
     case WM_KEYDOWN:
-        m_uiState->m_buttonsAndKeys[static_cast<uint32_t>(wParam)].notifyPressed();
+        m_uiState->notifyButtonOrKeyPressed(static_cast<uint32_t>(wParam));
         break;
     case WM_LBUTTONDOWN:
-        m_uiState->m_buttonsAndKeys[VK_LBUTTON].notifyPressed();
+        m_uiState->notifyButtonOrKeyPressed(VK_LBUTTON);
         break;
     case WM_RBUTTONDOWN:
-        m_uiState->m_buttonsAndKeys[VK_RBUTTON].notifyPressed();
+        m_uiState->notifyButtonOrKeyPressed(VK_RBUTTON);
         break;
     case WM_MBUTTONDOWN:
-        m_uiState->m_buttonsAndKeys[VK_MBUTTON].notifyPressed();
+        m_uiState->notifyButtonOrKeyPressed(VK_MBUTTON);
         break;
     case WM_KEYUP:
-        m_uiState->m_buttonsAndKeys[static_cast<uint32_t>(wParam)].notifyReleased();
+        m_uiState->notifyButtonOrKeyReleased(static_cast<uint32_t>(wParam));
         break;
     case WM_LBUTTONUP:
-        m_uiState->m_buttonsAndKeys[VK_LBUTTON].notifyReleased();
+        m_uiState->notifyButtonOrKeyReleased(VK_LBUTTON);
         break;
     case WM_RBUTTONUP:
-        m_uiState->m_buttonsAndKeys[VK_RBUTTON].notifyReleased();
+        m_uiState->notifyButtonOrKeyReleased(VK_RBUTTON);
         break;
     case WM_MBUTTONUP:
-        m_uiState->m_buttonsAndKeys[VK_MBUTTON].notifyReleased();
+        m_uiState->notifyButtonOrKeyReleased(VK_MBUTTON);
         break;
     case WM_MOUSEMOVE:
-        m_uiState->m_mousePosition.x = static_cast<float>(GET_X_LPARAM(lParam));
-        m_uiState->m_mousePosition.y = static_cast<float>(GET_Y_LPARAM(lParam));
+        m_uiState->setMousePosition(static_cast<float>(GET_X_LPARAM(lParam)), 
+                                     static_cast<float>(GET_Y_LPARAM(lParam)));
         break;
     case WM_MOUSEWHEEL:
-        m_uiState->m_scrollWheelState += static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
+        m_uiState->updateScrollWheelState(static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA);
         break;
     }
 }

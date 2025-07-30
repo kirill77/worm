@@ -19,12 +19,16 @@ typedef struct HWND__* HWND;
 class UIState
 {
 public:
-    friend struct Window;
-    
     bool isButtonOrKeyPressed(uint32_t buttonOrKeyId) const;
     uint32_t getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const;
     float2 getMousePosition() const;
     float getScrollWheelState() const;
+    
+    // Input update methods (previously accessed through friend relationship)
+    void notifyButtonOrKeyPressed(uint32_t buttonOrKeyId);
+    void notifyButtonOrKeyReleased(uint32_t buttonOrKeyId);
+    void setMousePosition(float x, float y);
+    void updateScrollWheelState(float delta);
 
 private:
     struct ButtonOrKey
