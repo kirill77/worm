@@ -15,17 +15,17 @@ constexpr int DEFAULT_HEIGHT = 720;
 Window* g_pWindow = nullptr;
 
 // ButtonOrKey implementation
-void UIState::ButtonOrKey::notifyPressed() {
+void UIState::ButtonOrKey::notifyPressed(uint64_t inputTick) {
     pressCount++;
-    lastChangeTS = std::time(nullptr);
+    lastChangeInputTick = inputTick;
 }
 
-void UIState::ButtonOrKey::notifyReleased() {
+void UIState::ButtonOrKey::notifyReleased(uint64_t inputTick) {
     releaseCount++;
-    lastChangeTS = std::time(nullptr);
+    lastChangeInputTick = inputTick;
 }
 
-void UIState::ButtonOrKey::notifyState(UINT message, WPARAM wParam, LPARAM lParam) {
+void UIState::ButtonOrKey::notifyState(UINT message, WPARAM wParam, LPARAM lParam, uint64_t inputTick) {
     // Update counters based on message type
     if (message == WM_KEYDOWN || message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN || message == WM_MBUTTONDOWN) {
         pressCount++;
@@ -37,7 +37,7 @@ void UIState::ButtonOrKey::notifyState(UINT message, WPARAM wParam, LPARAM lPara
     lastWParam = wParam;
     lastLParam = lParam;
     lastMessage = message;
-    lastChangeTS = std::time(nullptr);
+    lastChangeInputTick = inputTick;
 }
 
 uint32_t UIState::ButtonOrKey::getPressCount() const {
@@ -96,7 +96,49 @@ void UIState::notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam)
             return; // Unknown message type
     }
     
-    m_buttonsAndKeys[keyId].notifyState(message, wParam, lParam);
+    m_buttonsAndKeys[keyId].notifyState(message, wParam, lParam, m_currentInputTick);
+}
+
+// Input tick-based timing methods (separate from rendering frames)
+void UIState::notifyBeforeInputTick() {
+    m_currentInputTick++;
+}
+
+uint64_t UIState::getCurrentInputTick() const {
+    return m_currentInputTick;
+}
+
+uint64_t UIState::getLastChangeInputTick(uint32_t buttonOrKeyId) const {
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
+    if (it != m_buttonsAndKeys.end()) {
+        return it->second.getLastChangeInputTick();
+    }
+    return 0;
+}
+
+uint64_t UIState::getInputTicksSinceLastChange(uint32_t buttonOrKeyId) const {
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
+    if (it != m_buttonsAndKeys.end() && it->second.getLastChangeInputTick() > 0) {
+        return m_currentInputTick - it->second.getLastChangeInputTick();
+    }
+    return UINT64_MAX; // Never changed
+}
+
+bool UIState::wasChangedInInputTick(uint32_t buttonOrKeyId, uint64_t inputTick) const {
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
+    if (it != m_buttonsAndKeys.end()) {
+        return it->second.getLastChangeInputTick() == inputTick;
+    }
+    return false;
+}
+
+bool UIState::wasChangedInLastNInputTicks(uint32_t buttonOrKeyId, uint64_t tickCount) const {
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
+    if (it != m_buttonsAndKeys.end() && it->second.getLastChangeInputTick() > 0) {
+        uint64_t ticksSince = m_currentInputTick - it->second.getLastChangeInputTick();
+        return ticksSince <= tickCount;
+    }
+    return false;
 }
 
 void UIState::setMousePosition(float x, float y) {
@@ -250,6 +292,10 @@ const UIState& Window::getCurrentUIState() {
 
 
 void Window::processMessages() {
+    // Increment input tick counter before processing messages
+    // NOTE: This is UIState's own timing, separate from rendering frame counters
+    m_uiState->notifyBeforeInputTick();
+    
     MSG msg = {};
     
     // Process all pending Windows messages

@@ -24,6 +24,14 @@ public:
     float2 getMousePosition() const;
     float getScrollWheelState() const;
     
+    // Input tick-based timing (separate from rendering frames)
+    void notifyBeforeInputTick();
+    uint64_t getCurrentInputTick() const;
+    uint64_t getLastChangeInputTick(uint32_t buttonOrKeyId) const;
+    uint64_t getInputTicksSinceLastChange(uint32_t buttonOrKeyId) const;
+    bool wasChangedInInputTick(uint32_t buttonOrKeyId, uint64_t inputTick) const;
+    bool wasChangedInLastNInputTicks(uint32_t buttonOrKeyId, uint64_t tickCount) const;
+    
     // Enhanced query methods for rich input information
     uint16_t getKeyRepeatCount(uint32_t keyId) const;
     uint8_t getKeyScanCode(uint32_t keyId) const;
@@ -39,11 +47,12 @@ public:
 private:
     struct ButtonOrKey
     {
-        void notifyPressed();
-        void notifyReleased();
-        void notifyState(UINT message, WPARAM wParam, LPARAM lParam);
+        void notifyPressed(uint64_t inputTick);
+        void notifyReleased(uint64_t inputTick);
+        void notifyState(UINT message, WPARAM wParam, LPARAM lParam, uint64_t inputTick);
         uint32_t getPressCount() const;
         uint32_t getReleaseCount() const;
+        uint64_t getLastChangeInputTick() const { return lastChangeInputTick; }
         
         // Access to stored Windows message data
         WPARAM getLastWParam() const { return lastWParam; }
@@ -53,7 +62,7 @@ private:
     private:
         uint32_t pressCount = 0; // how many times was the control pressed
         uint32_t releaseCount = 0; // how many times was the control released
-        std::time_t lastChangeTS = 0; // used to remove old entries
+        uint64_t lastChangeInputTick = 0; // input tick when last changed
         
         // Store full Windows message context
         WPARAM lastWParam = 0;
@@ -63,6 +72,7 @@ private:
     std::unordered_map<uint32_t, ButtonOrKey> m_buttonsAndKeys;
     float2 m_mousePosition = float2(0.0f, 0.0f);
     float m_scrollWheelState = 0.0f;
+    uint64_t m_currentInputTick = 0;
 };
 
 struct Window
