@@ -25,6 +25,21 @@ void UIState::ButtonOrKey::notifyReleased() {
     lastChangeTS = std::time(nullptr);
 }
 
+void UIState::ButtonOrKey::notifyState(UINT message, WPARAM wParam, LPARAM lParam) {
+    // Update counters based on message type
+    if (message == WM_KEYDOWN || message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN || message == WM_MBUTTONDOWN) {
+        pressCount++;
+    } else if (message == WM_KEYUP || message == WM_LBUTTONUP || message == WM_RBUTTONUP || message == WM_MBUTTONUP) {
+        releaseCount++;
+    }
+    
+    // Store full Windows message context
+    lastWParam = wParam;
+    lastLParam = lParam;
+    lastMessage = message;
+    lastChangeTS = std::time(nullptr);
+}
+
 uint32_t UIState::ButtonOrKey::getPressCount() const {
     return pressCount;
 }
@@ -56,12 +71,32 @@ float UIState::getScrollWheelState() const {
     return m_scrollWheelState;
 }
 
-void UIState::notifyButtonOrKeyPressed(uint32_t buttonOrKeyId) {
-    m_buttonsAndKeys[buttonOrKeyId].notifyPressed();
-}
-
-void UIState::notifyButtonOrKeyReleased(uint32_t buttonOrKeyId) {
-    m_buttonsAndKeys[buttonOrKeyId].notifyReleased();
+void UIState::notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam) {
+    uint32_t keyId;
+    
+    // Determine key/button ID from message type and wParam
+    switch (message) {
+        case WM_KEYDOWN:
+        case WM_KEYUP:
+            keyId = static_cast<uint32_t>(wParam);
+            break;
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+            keyId = VK_LBUTTON;
+            break;
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+            keyId = VK_RBUTTON;
+            break;
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP:
+            keyId = VK_MBUTTON;
+            break;
+        default:
+            return; // Unknown message type
+    }
+    
+    m_buttonsAndKeys[keyId].notifyState(message, wParam, lParam);
 }
 
 void UIState::setMousePosition(float x, float y) {
@@ -71,6 +106,52 @@ void UIState::setMousePosition(float x, float y) {
 
 void UIState::updateScrollWheelState(float delta) {
     m_scrollWheelState += delta;
+}
+
+// Enhanced query methods for rich input information
+uint16_t UIState::getKeyRepeatCount(uint32_t keyId) const {
+    auto it = m_buttonsAndKeys.find(keyId);
+    if (it != m_buttonsAndKeys.end() && it->second.getLastMessage() == WM_KEYDOWN) {
+        return static_cast<uint16_t>(it->second.getLastLParam() & 0xFFFF);
+    }
+    return 0;
+}
+
+uint8_t UIState::getKeyScanCode(uint32_t keyId) const {
+    auto it = m_buttonsAndKeys.find(keyId);
+    if (it != m_buttonsAndKeys.end()) {
+        return static_cast<uint8_t>((it->second.getLastLParam() >> 16) & 0xFF);
+    }
+    return 0;
+}
+
+bool UIState::isExtendedKey(uint32_t keyId) const {
+    auto it = m_buttonsAndKeys.find(keyId);
+    if (it != m_buttonsAndKeys.end()) {
+        return (it->second.getLastLParam() & (1 << 24)) != 0;
+    }
+    return false;
+}
+
+bool UIState::wasKeyRepeated(uint32_t keyId) const {
+    auto it = m_buttonsAndKeys.find(keyId);
+    if (it != m_buttonsAndKeys.end()) {
+        return (it->second.getLastLParam() & (1 << 30)) != 0; // Previous key state
+    }
+    return false;
+}
+
+float2 UIState::getLastClickPosition(uint32_t mouseButton) const {
+    auto it = m_buttonsAndKeys.find(mouseButton);
+    if (it != m_buttonsAndKeys.end()) {
+        UINT msg = it->second.getLastMessage();
+        if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN) {
+            LPARAM lParam = it->second.getLastLParam();
+            return float2(static_cast<float>(GET_X_LPARAM(lParam)),
+                         static_cast<float>(GET_Y_LPARAM(lParam)));
+        }
+    }
+    return float2(0.0f, 0.0f);
 }
 
 // Window class implementation
@@ -234,28 +315,15 @@ bool Window::initDirectX() {
 void Window::handleInput(UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
     case WM_KEYDOWN:
-        m_uiState->notifyButtonOrKeyPressed(static_cast<uint32_t>(wParam));
-        break;
-    case WM_LBUTTONDOWN:
-        m_uiState->notifyButtonOrKeyPressed(VK_LBUTTON);
-        break;
-    case WM_RBUTTONDOWN:
-        m_uiState->notifyButtonOrKeyPressed(VK_RBUTTON);
-        break;
-    case WM_MBUTTONDOWN:
-        m_uiState->notifyButtonOrKeyPressed(VK_MBUTTON);
-        break;
     case WM_KEYUP:
-        m_uiState->notifyButtonOrKeyReleased(static_cast<uint32_t>(wParam));
-        break;
+    case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
-        m_uiState->notifyButtonOrKeyReleased(VK_LBUTTON);
-        break;
+    case WM_RBUTTONDOWN:
     case WM_RBUTTONUP:
-        m_uiState->notifyButtonOrKeyReleased(VK_RBUTTON);
-        break;
+    case WM_MBUTTONDOWN:
     case WM_MBUTTONUP:
-        m_uiState->notifyButtonOrKeyReleased(VK_MBUTTON);
+        // Use the new method that captures full Windows message information
+        m_uiState->notifyButtonOrKeyState(message, wParam, lParam);
         break;
     case WM_MOUSEMOVE:
         m_uiState->setMousePosition(static_cast<float>(GET_X_LPARAM(lParam)), 

@@ -24,9 +24,15 @@ public:
     float2 getMousePosition() const;
     float getScrollWheelState() const;
     
+    // Enhanced query methods for rich input information
+    uint16_t getKeyRepeatCount(uint32_t keyId) const;
+    uint8_t getKeyScanCode(uint32_t keyId) const;
+    bool isExtendedKey(uint32_t keyId) const;
+    bool wasKeyRepeated(uint32_t keyId) const;
+    float2 getLastClickPosition(uint32_t mouseButton) const;
+    
     // Input update methods (previously accessed through friend relationship)
-    void notifyButtonOrKeyPressed(uint32_t buttonOrKeyId);
-    void notifyButtonOrKeyReleased(uint32_t buttonOrKeyId);
+    void notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam);
     void setMousePosition(float x, float y);
     void updateScrollWheelState(float delta);
 
@@ -35,12 +41,24 @@ private:
     {
         void notifyPressed();
         void notifyReleased();
+        void notifyState(UINT message, WPARAM wParam, LPARAM lParam);
         uint32_t getPressCount() const;
         uint32_t getReleaseCount() const;
+        
+        // Access to stored Windows message data
+        WPARAM getLastWParam() const { return lastWParam; }
+        LPARAM getLastLParam() const { return lastLParam; }
+        UINT getLastMessage() const { return lastMessage; }
+        
     private:
         uint32_t pressCount = 0; // how many times was the control pressed
         uint32_t releaseCount = 0; // how many times was the control released
         std::time_t lastChangeTS = 0; // used to remove old entries
+        
+        // Store full Windows message context
+        WPARAM lastWParam = 0;
+        LPARAM lastLParam = 0;
+        UINT lastMessage = 0;
     };
     std::unordered_map<uint32_t, ButtonOrKey> m_buttonsAndKeys;
     float2 m_mousePosition = float2(0.0f, 0.0f);
