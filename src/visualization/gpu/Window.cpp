@@ -127,13 +127,26 @@ uint64_t UIState::getCurrentInputTick() const {
     return m_currentInputTick;
 }
 
-void UIState::setMousePosition(float x, float y) {
-    m_mousePosition.x = x;
-    m_mousePosition.y = y;
-}
-
-void UIState::updateScrollWheelState(float delta) {
-    m_scrollWheelState += delta;
+void UIState::handleInput(UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+        notifyButtonOrKeyState(message, wParam, lParam);
+        break;
+    case WM_MOUSEMOVE:
+        m_mousePosition.x = static_cast<float>(GET_X_LPARAM(lParam));
+        m_mousePosition.y = static_cast<float>(GET_Y_LPARAM(lParam));
+        break;
+    case WM_MOUSEWHEEL:
+        m_scrollWheelState += static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
+        break;
+    }
 }
 
 const UIState::ButtonOrKey& UIState::getButtonOrKey(uint32_t buttonOrKeyId) const {
@@ -310,26 +323,7 @@ bool Window::initDirectX() {
 
 // Helper function to handle mouse/keyboard input
 void Window::handleInput(UINT message, WPARAM wParam, LPARAM lParam) {
-    switch (message) {
-    case WM_KEYDOWN:
-    case WM_KEYUP:
-    case WM_LBUTTONDOWN:
-    case WM_LBUTTONUP:
-    case WM_RBUTTONDOWN:
-    case WM_RBUTTONUP:
-    case WM_MBUTTONDOWN:
-    case WM_MBUTTONUP:
-        // Use the new method that captures full Windows message information
-        m_uiState->notifyButtonOrKeyState(message, wParam, lParam);
-        break;
-    case WM_MOUSEMOVE:
-        m_uiState->setMousePosition(static_cast<float>(GET_X_LPARAM(lParam)), 
-                                     static_cast<float>(GET_Y_LPARAM(lParam)));
-        break;
-    case WM_MOUSEWHEEL:
-        m_uiState->updateScrollWheelState(static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA);
-        break;
-    }
+    m_uiState->handleInput(message, wParam, lParam);
 }
 
 // Window procedure

@@ -60,11 +60,11 @@ public:
     uint64_t getCurrentInputTick() const;
     
     // Input update methods (previously accessed through friend relationship)
-    void notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam);
-    void setMousePosition(float x, float y);
-    void updateScrollWheelState(float delta);
+    void handleInput(UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
+    void notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam);
+    
     std::unordered_map<uint32_t, ButtonOrKey> m_buttonsAndKeys;
     float2 m_mousePosition = float2(0.0f, 0.0f);
     float m_scrollWheelState = 0.0f;
