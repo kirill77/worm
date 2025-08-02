@@ -13,6 +13,7 @@
 #include "visualization/helpers/CameraUI.h"
 #include "VisObjectFactory.h"
 #include "chemistry/ProteinWiki.h"
+#include <windows.h>
 #include "chemistry/StringDict.h"
 #include "utils/log/ILog.h"
 #include "visualization/gpu/DirectXHelpers.h"
@@ -59,14 +60,27 @@ bool VisEngine::update(float fDtSec)
 
     m_cameraUI.notifyNewUIState(m_pWindow->getCurrentUIState());
 
-    // Simulate one step
-    m_pWorld->simulateStep(fDtSec);
+    // Check for space key press to toggle pause (ignore repeats)
+    const UIState& uiState = m_pWindow->getCurrentUIState();
+    const bool bIgoreRepeats = true;
+    if (uiState.isPressed(VK_SPACE, bIgoreRepeats)) {
+        m_bPaused = !m_bPaused;
+    }
+
+    // Simulate one step only if not paused
+    if (!m_bPaused) {
+        m_pWorld->simulateStep(fDtSec);
+    }
 
     // Update GPU meshes
     updateGpuMeshes();
 
-    // Update text with current simulation time
-    m_gpuText->printf("%.2lf sec", m_pWorld->getCurrentTime());
+    // Update text with current simulation time and pause status
+    if (m_bPaused) {
+        m_gpuText->printf("%.2lf sec [PAUSED] - Press SPACE to resume", m_pWorld->getCurrentTime());
+    } else {
+        m_gpuText->printf("%.2lf sec - Press SPACE to pause", m_pWorld->getCurrentTime());
+    }
 
     auto* pSwapChain = m_pWindow->getSwapChain();
     auto pGpuQueue = pSwapChain->getGPUQueue();
