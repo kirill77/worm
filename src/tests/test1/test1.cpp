@@ -1,6 +1,7 @@
 #include "organisms/worm/Worm.h"
 #include "utils/log/ILog.h"
 #include "visualization/helpers/VisEngine.h"
+#include "biology/simulation/World.h"
 #include <memory>
 
 int main()
@@ -17,7 +18,7 @@ int main()
 
     bool allTestsPassed = true;
     constexpr float fDtSec = 0.1f;  // 0.1 seconds per timestep
-    float fCurrentTimeSec = 0.0f;   // Current simulation time in seconds
+    uint32_t frameCount = 0;        // Frame counter for validation timing
 
     // Main simulation loop
     while (true)
@@ -26,10 +27,13 @@ int main()
             break;
         }
 
-        fCurrentTimeSec += fDtSec;
+        frameCount++;
 
-        // Run validation checks every 10 seconds
-        if ((static_cast<uint32_t>(fCurrentTimeSec / fDtSec) + 1) % 100 == 0) {
+        // Run validation checks every 10 seconds (every 100 frames at 0.1s per frame)
+        if (frameCount % 100 == 0) {
+            // Get the actual simulation time from the World
+            float fCurrentTimeSec = static_cast<float>(visEngine.getWorld()->getCurrentTime());
+            
             bool parValid = pWorm->validatePARPolarization(fCurrentTimeSec);
             bool cycleValid = pWorm->validateCellCycle(fCurrentTimeSec);
             bool divisionValid = pWorm->validateAsymmetricDivision(fCurrentTimeSec);
@@ -41,11 +45,11 @@ int main()
             
             if (!criticalValidationPassed) {
                 allTestsPassed = false;
-                LOG_ERROR("Critical validation failed at %.2lf sec", fCurrentTimeSec);
+                LOG_ERROR("Critical validation failed at %.2f sec", fCurrentTimeSec);
                 break;
             }
             
-            LOG_INFO("Validation at %.2lf sec - PAR: %s, Cycle: %s, Division: %s, Centrosome: %s", 
+            LOG_INFO("Validation at %.2f sec - PAR: %s, Cycle: %s, Division: %s, Centrosome: %s", 
                      fCurrentTimeSec, 
                      parValid ? "PASS" : "FAIL",
                      cycleValid ? "PASS" : "FAIL", 

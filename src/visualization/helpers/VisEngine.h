@@ -19,6 +19,9 @@ struct VisEngine
     bool initialize(std::shared_ptr<Organism> pOrganism);
     bool update(float fDtSec);
     void shutdown();
+    
+    // Access to the World object
+    std::shared_ptr<World> getWorld() const { return m_pWorld; }
 
 private:
     void updateGpuMeshes();

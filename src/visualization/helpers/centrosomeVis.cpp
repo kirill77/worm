@@ -56,13 +56,16 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
     
     if (m_pGPUMesh)
     {
+        // Get scale factor based on PCM radius
+        float scaleFactorBase = m_pCentrosome->getPCMRadius() * 0.8f;
+        
         // Create first child node: cylinder along X-axis (rotate Z->X)
         // Rotation: 90 degrees around Y-axis to align Z with X
         affine3 rotateToX = affine3::identity();
         rotateToX.m_linear = float3x3(
-            0, 0, 1,   // X = old Z
-            0, 1, 0,   // Y = old Y  
-            -1, 0, 0   // Z = -old X
+            0, 0, scaleFactorBase,   // X = old Z * scale
+            0, scaleFactorBase, 0,   // Y = old Y * scale
+            -scaleFactorBase, 0, 0   // Z = -old X * scale
         );
         GPUMeshNode xAxisNode(rotateToX);
         xAxisNode.addMesh(m_pGPUMesh);
@@ -71,9 +74,9 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
         // Rotation: -90 degrees around X-axis to align Z with Y
         affine3 rotateToY = affine3::identity();
         rotateToY.m_linear = float3x3(
-            1, 0, 0,   // X = old X
-            0, 0, 1,   // Y = old Z
-            0, -1, 0   // Z = -old Y
+            scaleFactorBase, 0, 0,   // X = old X * scale
+            0, 0, scaleFactorBase,   // Y = old Z * scale
+            0, -scaleFactorBase, 0   // Z = -old Y * scale
         );
         GPUMeshNode yAxisNode(rotateToY);
         yAxisNode.addMesh(m_pGPUMesh);
@@ -98,7 +101,7 @@ void CentrosomeVis::createCentrosomeGeometry()
     }
 
     const float radius = 0.1f;        // Cylinder radius
-    const float length = 0.8f;        // Cylinder length
+    const float length = 1.0f;        // Cylinder length
     const int segments = 8;           // Number of segments around cylinder
     
     std::vector<GPUMesh::Vertex> gpuVertices;
