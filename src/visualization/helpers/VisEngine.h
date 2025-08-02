@@ -34,6 +34,6 @@ private:
 
     CameraUI m_cameraUI;
     double m_fPrevFittedVolume = 0;
-    bool m_bPaused = false;
+    bool m_bPaused = true;
 };
 

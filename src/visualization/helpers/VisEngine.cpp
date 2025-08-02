@@ -67,8 +67,8 @@ bool VisEngine::update(float fDtSec)
         m_bPaused = !m_bPaused;
     }
 
-    // Simulate one step only if not paused
-    if (!m_bPaused) {
+    if (!m_bPaused || // don't simulate if paused
+        m_pWorld->getCurrentTime() < 5) { // need at least one step
         m_pWorld->simulateStep(fDtSec);
     }
 
