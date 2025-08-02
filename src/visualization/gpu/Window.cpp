@@ -15,52 +15,40 @@ constexpr int DEFAULT_HEIGHT = 720;
 Window* g_pWindow = nullptr;
 
 // ButtonOrKey implementation
-void UIState::ButtonOrKey::notifyPressed(uint64_t inputTick) {
-    pressCount++;
-    lastChangeInputTick = inputTick;
-}
-
-void UIState::ButtonOrKey::notifyReleased(uint64_t inputTick) {
-    releaseCount++;
-    lastChangeInputTick = inputTick;
-}
-
 void UIState::ButtonOrKey::notifyState(UINT message, WPARAM wParam, LPARAM lParam, uint64_t inputTick) {
-    // Update counters based on message type
-    if (message == WM_KEYDOWN || message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN || message == WM_MBUTTONDOWN) {
-        pressCount++;
-    } else if (message == WM_KEYUP || message == WM_LBUTTONUP || message == WM_RBUTTONUP || message == WM_MBUTTONUP) {
-        releaseCount++;
-    }
-    
     // Store full Windows message context
-    lastWParam = wParam;
     lastLParam = lParam;
+    lastWParam = wParam;
     lastMessage = message;
     lastChangeInputTick = inputTick;
 }
 
-uint32_t UIState::ButtonOrKey::getPressCount() const {
-    return pressCount;
-}
-
-uint32_t UIState::ButtonOrKey::getReleaseCount() const {
-    return releaseCount;
-}
-
-// UIState implementation
-bool UIState::isButtonOrKeyPressed(uint32_t buttonOrKeyId) const {
-    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it == m_buttonsAndKeys.end()) return false;
-    return (GetAsyncKeyState(buttonOrKeyId) & 0x8000) != 0;
-}
-
-uint32_t UIState::getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const {
-    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it != m_buttonsAndKeys.end()) {
-        return it->second.getPressCount();
+uint16_t UIState::ButtonOrKey::getRepeatCount() const {
+    if (lastMessage == WM_KEYDOWN) {
+        return static_cast<uint16_t>(lastLParam & 0xFFFF);
     }
     return 0;
+}
+
+uint8_t UIState::ButtonOrKey::getScanCode() const {
+    return static_cast<uint8_t>((lastLParam >> 16) & 0xFF);
+}
+
+bool UIState::ButtonOrKey::isExtended() const {
+    return (lastLParam & (1 << 24)) != 0;
+}
+
+bool UIState::ButtonOrKey::wasRepeated() const {
+    return (lastLParam & (1 << 30)) != 0; // Previous key state
+}
+
+float2 UIState::ButtonOrKey::getLastClickPosition() const {
+    UINT msg = lastMessage;
+    if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN) {
+        return float2(static_cast<float>(GET_X_LPARAM(lastLParam)),
+                     static_cast<float>(GET_Y_LPARAM(lastLParam)));
+    }
+    return float2(0.0f, 0.0f);
 }
 
 float2 UIState::getMousePosition() const {
@@ -69,6 +57,37 @@ float2 UIState::getMousePosition() const {
 
 float UIState::getScrollWheelState() const {
     return m_scrollWheelState;
+}
+
+bool UIState::isPressed(uint32_t keyId, bool bIgnoreRepeats) const
+{
+    if (!bIgnoreRepeats)
+        return (GetAsyncKeyState(keyId) & 0x8000) != 0;
+    
+    // Check if the key was pressed in the current input tick
+    auto it = m_buttonsAndKeys.find(keyId);
+    if (it != m_buttonsAndKeys.end()) {
+        const ButtonOrKey& buttonOrKey = it->second;
+        
+        // Check if the key was changed in the current input tick
+        if (buttonOrKey.getLastChangeInputTick() == m_currentInputTick) {
+            // Check if the last message was a "key down" event (indicating press)
+            UINT lastMessage = buttonOrKey.getLastMessage();
+            bool isKeyDown = (lastMessage == WM_KEYDOWN || 
+                             lastMessage == WM_LBUTTONDOWN || 
+                             lastMessage == WM_RBUTTONDOWN || 
+                             lastMessage == WM_MBUTTONDOWN);
+            
+            // For keyboard events, ignore repeats; mouse events don't have repeats
+            if (lastMessage == WM_KEYDOWN) {
+                return isKeyDown && !buttonOrKey.wasRepeated();
+            } else {
+                return isKeyDown; // Mouse events
+            }
+        }
+    }
+    
+    return false;
 }
 
 void UIState::notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam) {
@@ -108,39 +127,6 @@ uint64_t UIState::getCurrentInputTick() const {
     return m_currentInputTick;
 }
 
-uint64_t UIState::getLastChangeInputTick(uint32_t buttonOrKeyId) const {
-    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it != m_buttonsAndKeys.end()) {
-        return it->second.getLastChangeInputTick();
-    }
-    return 0;
-}
-
-uint64_t UIState::getInputTicksSinceLastChange(uint32_t buttonOrKeyId) const {
-    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it != m_buttonsAndKeys.end() && it->second.getLastChangeInputTick() > 0) {
-        return m_currentInputTick - it->second.getLastChangeInputTick();
-    }
-    return UINT64_MAX; // Never changed
-}
-
-bool UIState::wasChangedInInputTick(uint32_t buttonOrKeyId, uint64_t inputTick) const {
-    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it != m_buttonsAndKeys.end()) {
-        return it->second.getLastChangeInputTick() == inputTick;
-    }
-    return false;
-}
-
-bool UIState::wasChangedInLastNInputTicks(uint32_t buttonOrKeyId, uint64_t tickCount) const {
-    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
-    if (it != m_buttonsAndKeys.end() && it->second.getLastChangeInputTick() > 0) {
-        uint64_t ticksSince = m_currentInputTick - it->second.getLastChangeInputTick();
-        return ticksSince <= tickCount;
-    }
-    return false;
-}
-
 void UIState::setMousePosition(float x, float y) {
     m_mousePosition.x = x;
     m_mousePosition.y = y;
@@ -150,50 +136,15 @@ void UIState::updateScrollWheelState(float delta) {
     m_scrollWheelState += delta;
 }
 
-// Enhanced query methods for rich input information
-uint16_t UIState::getKeyRepeatCount(uint32_t keyId) const {
-    auto it = m_buttonsAndKeys.find(keyId);
-    if (it != m_buttonsAndKeys.end() && it->second.getLastMessage() == WM_KEYDOWN) {
-        return static_cast<uint16_t>(it->second.getLastLParam() & 0xFFFF);
-    }
-    return 0;
-}
-
-uint8_t UIState::getKeyScanCode(uint32_t keyId) const {
-    auto it = m_buttonsAndKeys.find(keyId);
+const UIState::ButtonOrKey& UIState::getButtonOrKey(uint32_t buttonOrKeyId) const {
+    auto it = m_buttonsAndKeys.find(buttonOrKeyId);
     if (it != m_buttonsAndKeys.end()) {
-        return static_cast<uint8_t>((it->second.getLastLParam() >> 16) & 0xFF);
+        return it->second;
     }
-    return 0;
-}
-
-bool UIState::isExtendedKey(uint32_t keyId) const {
-    auto it = m_buttonsAndKeys.find(keyId);
-    if (it != m_buttonsAndKeys.end()) {
-        return (it->second.getLastLParam() & (1 << 24)) != 0;
-    }
-    return false;
-}
-
-bool UIState::wasKeyRepeated(uint32_t keyId) const {
-    auto it = m_buttonsAndKeys.find(keyId);
-    if (it != m_buttonsAndKeys.end()) {
-        return (it->second.getLastLParam() & (1 << 30)) != 0; // Previous key state
-    }
-    return false;
-}
-
-float2 UIState::getLastClickPosition(uint32_t mouseButton) const {
-    auto it = m_buttonsAndKeys.find(mouseButton);
-    if (it != m_buttonsAndKeys.end()) {
-        UINT msg = it->second.getLastMessage();
-        if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN) {
-            LPARAM lParam = it->second.getLastLParam();
-            return float2(static_cast<float>(GET_X_LPARAM(lParam)),
-                         static_cast<float>(GET_Y_LPARAM(lParam)));
-        }
-    }
-    return float2(0.0f, 0.0f);
+    
+    // Return a static default ButtonOrKey for non-existent keys
+    static const ButtonOrKey defaultButtonOrKey;
+    return defaultButtonOrKey;
 }
 
 // Window class implementation

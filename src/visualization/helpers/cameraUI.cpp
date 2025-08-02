@@ -73,22 +73,18 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     if (!m_pCamera)
         return;
 
-    // Handle Ctrl+A to fit world box in view
-    if (uiState.isButtonOrKeyPressed(VK_CONTROL) &&
-        uiState.getButtonOrKeyPressCount('A') > m_prevUIState.getButtonOrKeyPressCount('A'))
-    {
-        if (fitWorldBoxToView())
-        {
-            return; // Skip other camera controls when fitting to view
-        }
-    }
 
     // Handle rotation
-    if (uiState.isButtonOrKeyPressed(VK_LBUTTON)) // Left mouse button for world rotation
+    if (uiState.isPressed(VK_LBUTTON)) // Left mouse button for world rotation
     {
         // Calculate rotation based on mouse movement
         float2 currentMousePos = uiState.getMousePosition();
-        float2 prevMousePos = m_prevUIState.getMousePosition();
+        if (uiState.getButtonOrKey(VK_LBUTTON).getLastChangeInputTick() == uiState.getCurrentInputTick())
+        {
+            m_prevMousePos = currentMousePos;
+        }
+        float2 prevMousePos = m_prevMousePos;
+        m_prevMousePos = currentMousePos;
         float deltaX = currentMousePos.x - prevMousePos.x;
         float deltaY = currentMousePos.y - prevMousePos.y;
         
@@ -146,11 +142,16 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     }
 
     // rotation of camera around camera center
-    if (uiState.isButtonOrKeyPressed(VK_RBUTTON)) // Right mouse button
+    if (uiState.isPressed(VK_RBUTTON)) // Right mouse button
     {
         // Calculate rotation based on mouse movement
         float2 currentMousePos = uiState.getMousePosition();
-        float2 prevMousePos = m_prevUIState.getMousePosition();
+        if (uiState.getButtonOrKey(VK_RBUTTON).getLastChangeInputTick() == uiState.getCurrentInputTick())
+        {
+            m_prevMousePos = currentMousePos;
+        }
+        float2 prevMousePos = m_prevMousePos;
+        m_prevMousePos = currentMousePos;
         float deltaX = currentMousePos.x - prevMousePos.x;
         float deltaY = currentMousePos.y - prevMousePos.y;
         
@@ -209,25 +210,37 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         m_pCamera->setPosition(newPosition);
     }
 
-    if (uiState.isButtonOrKeyPressed('W'))
+    if (uiState.isPressed(VK_CONTROL))
     {
-        moveForward(calculateMoveSpeed());
+        const bool bIgnoreRepeats = true;
+        // Handle Ctrl+A to fit world box in view
+        if (uiState.isPressed('A', bIgnoreRepeats))
+        {
+            if (fitWorldBoxToView())
+            {
+                return; // Skip other camera controls when fitting to view
+            }
+        }
     }
-    if (uiState.isButtonOrKeyPressed('S'))
+    else
     {
-        moveForward(-calculateMoveSpeed());
+        if (uiState.isPressed('W'))
+        {
+            moveForward(calculateMoveSpeed());
+        }
+        if (uiState.isPressed('S'))
+        {
+            moveForward(-calculateMoveSpeed());
+        }
+        if (uiState.isPressed('A'))
+        {
+             moveLeft(calculateMoveSpeed());
+        }
+        if (uiState.isPressed('D'))
+        {
+            moveLeft(-calculateMoveSpeed());
+        }
     }
-    if (uiState.isButtonOrKeyPressed('A'))
-    {
-         moveLeft(calculateMoveSpeed());
-    }
-    if (uiState.isButtonOrKeyPressed('D'))
-    {
-        moveLeft(-calculateMoveSpeed());
-    }
-    
-    // Store the current UI state for the next frame
-    m_prevUIState = uiState;
 }
 
 bool CameraUI::fitWorldBoxToView()

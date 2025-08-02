@@ -34,8 +34,8 @@ private:
     // Camera reference
     std::shared_ptr<GPUCamera> m_pCamera;
     
-    // Previous UI state for delta calculations
-    UIState m_prevUIState;
+    // Previous mouse pos for delta calculations
+    float2 m_prevMousePos;
     
     // Helper methods
     void handleRotation(const float2& mouseDelta);

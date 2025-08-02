@@ -19,25 +19,45 @@ typedef struct HWND__* HWND;
 class UIState
 {
 public:
-    bool isButtonOrKeyPressed(uint32_t buttonOrKeyId) const;
-    uint32_t getButtonOrKeyPressCount(uint32_t buttonOrKeyId) const;
+    struct ButtonOrKey
+    {
+        uint64_t getLastChangeInputTick() const { return lastChangeInputTick; }
+        
+        // Access to stored Windows message data
+        LPARAM getLastLParam() const { return lastLParam; }
+        WPARAM getLastWParam() const { return lastWParam; }
+        UINT getLastMessage() const { return lastMessage; }
+        
+        // Button/key state query methods
+        uint16_t getRepeatCount() const;
+        uint8_t getScanCode() const;
+        bool isExtended() const;
+        bool wasRepeated() const;
+        float2 getLastClickPosition() const;
+
+        void notifyState(UINT message, WPARAM wParam, LPARAM lParam, uint64_t inputTick);
+
+    private:
+        uint64_t lastChangeInputTick = 0; // input tick when last changed
+        
+        // Store full Windows message context
+        LPARAM lastLParam = 0;
+        WPARAM lastWParam = 0;
+        UINT lastMessage = 0;
+    };
+
     float2 getMousePosition() const;
     float getScrollWheelState() const;
+    
+    // Button/key state query
+    bool isPressed(uint32_t keyId, bool bIgnoreRepeats = false) const;
+    
+    // Read-only access to ButtonOrKey struct
+    const ButtonOrKey& getButtonOrKey(uint32_t buttonOrKeyId) const;
     
     // Input tick-based timing (separate from rendering frames)
     void notifyBeforeInputTick();
     uint64_t getCurrentInputTick() const;
-    uint64_t getLastChangeInputTick(uint32_t buttonOrKeyId) const;
-    uint64_t getInputTicksSinceLastChange(uint32_t buttonOrKeyId) const;
-    bool wasChangedInInputTick(uint32_t buttonOrKeyId, uint64_t inputTick) const;
-    bool wasChangedInLastNInputTicks(uint32_t buttonOrKeyId, uint64_t tickCount) const;
-    
-    // Enhanced query methods for rich input information
-    uint16_t getKeyRepeatCount(uint32_t keyId) const;
-    uint8_t getKeyScanCode(uint32_t keyId) const;
-    bool isExtendedKey(uint32_t keyId) const;
-    bool wasKeyRepeated(uint32_t keyId) const;
-    float2 getLastClickPosition(uint32_t mouseButton) const;
     
     // Input update methods (previously accessed through friend relationship)
     void notifyButtonOrKeyState(UINT message, WPARAM wParam, LPARAM lParam);
@@ -45,30 +65,6 @@ public:
     void updateScrollWheelState(float delta);
 
 private:
-    struct ButtonOrKey
-    {
-        void notifyPressed(uint64_t inputTick);
-        void notifyReleased(uint64_t inputTick);
-        void notifyState(UINT message, WPARAM wParam, LPARAM lParam, uint64_t inputTick);
-        uint32_t getPressCount() const;
-        uint32_t getReleaseCount() const;
-        uint64_t getLastChangeInputTick() const { return lastChangeInputTick; }
-        
-        // Access to stored Windows message data
-        WPARAM getLastWParam() const { return lastWParam; }
-        LPARAM getLastLParam() const { return lastLParam; }
-        UINT getLastMessage() const { return lastMessage; }
-        
-    private:
-        uint32_t pressCount = 0; // how many times was the control pressed
-        uint32_t releaseCount = 0; // how many times was the control released
-        uint64_t lastChangeInputTick = 0; // input tick when last changed
-        
-        // Store full Windows message context
-        WPARAM lastWParam = 0;
-        LPARAM lastLParam = 0;
-        UINT lastMessage = 0;
-    };
     std::unordered_map<uint32_t, ButtonOrKey> m_buttonsAndKeys;
     float2 m_mousePosition = float2(0.0f, 0.0f);
     float m_scrollWheelState = 0.0f;
