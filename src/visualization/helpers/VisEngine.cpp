@@ -38,6 +38,9 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 
     // Initialize GPU text
     m_gpuText = std::make_unique<GPUText>(m_pGpuWorld->getFont());
+    
+    // Create simulation time display line (lives forever - 0 seconds)
+    m_pSimTimeLineText = m_gpuText->createLine();
 
     // Initialize camera UI
     m_cameraUI.attachToCamera(m_pGpuWorld->getCamera());
@@ -77,9 +80,9 @@ bool VisEngine::update(float fDtSec)
 
     // Update text with current simulation time and pause status
     if (m_bPaused) {
-        m_gpuText->printf("%.2lf sec [PAUSED] - Press SPACE to resume", m_pWorld->getCurrentTime());
+        m_pSimTimeLineText->printf("%.2lf sec [PAUSED] - Press SPACE to resume", m_pWorld->getCurrentTime());
     } else {
-        m_gpuText->printf("%.2lf sec - Press SPACE to pause", m_pWorld->getCurrentTime());
+        m_pSimTimeLineText->printf("%.2lf sec - Press SPACE to pause", m_pWorld->getCurrentTime());
     }
 
     auto* pSwapChain = m_pWindow->getSwapChain();

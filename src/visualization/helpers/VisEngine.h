@@ -32,6 +32,9 @@ private:
     std::unique_ptr<GPUText> m_gpuText;
     std::unique_ptr<GPUStats> m_gpuStats;
 
+    // Simulation time display line
+    std::shared_ptr<Line> m_pSimTimeLineText;
+
     CameraUI m_cameraUI;
     double m_fPrevFittedVolume = 0;
     bool m_bPaused = true;

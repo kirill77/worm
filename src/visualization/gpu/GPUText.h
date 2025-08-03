@@ -3,6 +3,7 @@
 #include <memory>
 #include <cstdarg>
 #include <vector>
+#include <ctime>
 #include "GPUFont.h"
 #include "geometry/vectors/vector.h"
 #include <d3d12.h>
@@ -12,13 +13,46 @@
 struct GPUQueue;
 struct SwapChain;
 
+// Line data structure for text lines
+struct Line
+{
+public:
+    Line() : m_createTS(std::time(nullptr)), m_color(1.0f, 1.0f, 1.0f, 1.0f) {}
+    
+    // Set the text content using printf-style formatting
+    int printf(const char* format, ...);
+    
+    // Getters
+    const std::string& getText() const { return m_string; }
+    bool isEmpty() const { return m_string.empty(); }
+    const float4& getColor() const { return m_color; }
+    uint32_t getLifeTimeSec() const { return m_lifeTimeSec; }
+    std::time_t getCreateTime() const { return m_createTS; }
+    
+    // Setters with validation
+    void setColor(const float4& color);
+    void setLifeTime(uint32_t lifeTimeSec) { m_lifeTimeSec = lifeTimeSec; }
+
+private:
+    std::string m_string;
+    std::time_t m_createTS; // when the line first appeared
+    uint32_t m_lifeTimeSec = 0; // how many seconds to keep it on the screen, 0 if forever
+    float4 m_color; // default - white
+};
+
 struct GPUText
 {
 public:
     GPUText(std::shared_ptr<GPUFont> pFont);
 
     void setLeftTop(const float2& vLeftTop);
-    int printf(const char* format, ...);
+    
+    // Create a new line and return a shared pointer to it
+    std::shared_ptr<Line> createLine();
+    
+    // Check if a line has expired based on its lifetime
+    bool isExpired(const std::shared_ptr<Line>& line) const;
+    
     void render(SwapChain* pSwapChain, ID3D12RootSignature *pSharedRS,
         ID3D12GraphicsCommandList *pCmdList);
     
@@ -59,7 +93,7 @@ private:
 private:
     std::shared_ptr<GPUFont> m_pFont;
     float2 m_vLeftTop;
-    std::vector<std::string> m_sLines; // lines of text it's going to draw
+    std::vector<std::shared_ptr<Line>> m_pLines; // lines of text it's going to draw
     float4 m_textColor = float4(1.0f, 1.0f, 1.0f, 1.0f); // Default: white
     
     // Rendering resources

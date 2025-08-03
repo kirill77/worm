@@ -5,6 +5,7 @@
 #include "DirectXHelpers.h"
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 GPUText::GPUText(std::shared_ptr<GPUFont> pFont)
     : m_pFont(pFont)
@@ -17,7 +18,10 @@ void GPUText::setLeftTop(const float2& vLeftTop)
     m_vLeftTop = vLeftTop;
 }
 
-int GPUText::printf(const char* format, ...)
+
+
+// Line class implementation
+int Line::printf(const char* format, ...)
 {
     if (!format) {
         return 0;
@@ -47,27 +51,44 @@ int GPUText::printf(const char* format, ...)
         return 0;
     }
     
-    // Convert to string and split by newlines
-    std::string formatted_text(buffer.data());
-    
-    // Clear existing lines
-    m_sLines.clear();
-    
-    // Split the formatted text by newlines
-    std::istringstream stream(formatted_text);
-    std::string line;
-    
-    while (std::getline(stream, line)) {
-        m_sLines.push_back(line);
-    }
-    
-    // If the formatted text doesn't end with a newline and we have content,
-    // make sure we don't lose the last line
-    if (!formatted_text.empty() && formatted_text.back() != '\n' && m_sLines.empty()) {
-        m_sLines.push_back(formatted_text);
-    }
+    // Convert to string - for Line, we store the complete formatted string (no splitting)
+    m_string = std::string(buffer.data());
     
     return formatted_chars;
+}
+
+
+
+void Line::setColor(const float4& color)
+{
+    // Validate color components (should be between 0.0 and 1.0)
+    m_color.x = std::max(0.0f, std::min(1.0f, color.x));
+    m_color.y = std::max(0.0f, std::min(1.0f, color.y));
+    m_color.z = std::max(0.0f, std::min(1.0f, color.z));
+    m_color.w = std::max(0.0f, std::min(1.0f, color.w));
+}
+
+std::shared_ptr<Line> GPUText::createLine()
+{
+    auto newLine = std::make_shared<Line>();
+    m_pLines.push_back(newLine);
+    return newLine;
+}
+
+bool GPUText::isExpired(const std::shared_ptr<Line>& line) const
+{
+    uint32_t lifeTimeSec = line->getLifeTimeSec();
+
+    // if nobody holds reference to it - we override the lifetime
+    if (line.use_count() == 1 && lifeTimeSec == 0)
+        lifeTimeSec = 5;
+
+    if (lifeTimeSec == 0) { // lives forever?
+        return false;
+    }
+
+    std::time_t currentTime = std::time(nullptr);
+    return (currentTime - line->getCreateTime()) >= static_cast<std::time_t>(lifeTimeSec);
 }
 
 void GPUText::generateTextQuads(std::vector<TextVertex>& vertices, std::vector<uint16_t>& indices, 
@@ -76,7 +97,15 @@ void GPUText::generateTextQuads(std::vector<TextVertex>& vertices, std::vector<u
     vertices.clear();
     indices.clear();
     
-    if (m_sLines.empty() || !m_pFont) {
+    // Remove expired lines first
+    m_pLines.erase(
+        std::remove_if(m_pLines.begin(), m_pLines.end(),
+            [this](const std::shared_ptr<Line>& line) {
+                return this->isExpired(line);
+            }), 
+        m_pLines.end());
+    
+    if (m_pLines.empty() || !m_pFont) {
         return;
     }
     
@@ -86,10 +115,14 @@ void GPUText::generateTextQuads(std::vector<TextVertex>& vertices, std::vector<u
     
     uint16_t vertexIndex = 0;
     
-    for (const auto& line : m_sLines) {
+    for (const auto& pLine : m_pLines) {
+        if (!pLine || pLine->isEmpty()) {
+            continue; // Skip null or empty lines
+        }
+        
         currentX = m_vLeftTop.x; // Reset X for each line
         
-        for (char c : line) {
+        for (char c : pLine->getText()) {
             const GlyphInfo* glyphInfo = m_pFont->getGlyphInfo(c);
             if (!glyphInfo) {
                 continue; // Skip unknown characters
@@ -254,7 +287,7 @@ void GPUText::ensureDescriptorHeaps(ID3D12Device* pDevice)
 void GPUText::render(SwapChain* pSwapChain, ID3D12RootSignature* pSharedRS,
                     ID3D12GraphicsCommandList* pCmdList)
 {
-    if (m_sLines.empty() || !m_pFont || !pSharedRS || !pCmdList || !pSwapChain) {
+    if (m_pLines.empty() || !m_pFont || !pSharedRS || !pCmdList || !pSwapChain) {
         return;
     }
     
