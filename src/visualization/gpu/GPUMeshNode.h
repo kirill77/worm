@@ -35,12 +35,6 @@ public:
     const std::vector<GPUMeshNode>& getChildren() const { return m_children; }
     void clearChildren() { m_children.clear(); }
     
-    // Convenience methods
-    DirectX::XMMATRIX getWorldMatrix() const;
-    DirectX::XMMATRIX getWorldMatrix(const affine3& parentTransform) const;
-    box3 getWorldBoundingBox() const;
-    box3 getWorldBoundingBox(const affine3& parentTransform) const;
-    
     // Utility methods
     bool isEmpty() const { return m_meshes.empty() && m_children.empty(); }
     void clear() { clearMeshes(); clearChildren(); }
