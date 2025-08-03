@@ -83,9 +83,9 @@ affine3 GPUCamera::getCameraTransform() const
     float3 forward = m_direction;
     
     // Create camera-to-world transform
-    // The linear part contains the camera's orientation as column vectors
+    // The linear part contains the camera's orientation as row vectors
     affine3 transform;
-    transform.m_linear = float3x3::from_cols(right, up, forward);
+    transform.m_linear = float3x3(right, up, forward);
     transform.m_translation = m_position;
     
     return transform;
@@ -96,10 +96,10 @@ void GPUCamera::setCameraTransform(const affine3& transform)
     // Extract position from translation
     m_position = transform.m_translation;
     
-    // Extract orientation vectors from linear transform (column vectors)
-    float3 right = transform.m_linear.col(0);
-    float3 up = transform.m_linear.col(1);
-    float3 forward = transform.m_linear.col(2);
+    // Extract orientation vectors from linear transform (row vectors)
+    float3 right = transform.m_linear.row0;
+    float3 up = transform.m_linear.row1;
+    float3 forward = transform.m_linear.row2;
     
     // Normalize to ensure orthonormal basis
     m_direction = normalize(forward);

@@ -1,9 +1,10 @@
 #include "cameraUI.h"
 #include "visualization/gpu/GPUCamera.h"
+#include "geometry/vectors/affine.h"
 #include <cmath>
 
 CameraUI::CameraUI()
-    : m_rotationSpeed(0.5f)
+    : m_rotationSpeed(0.005f)
     , m_panSpeed(0.01f)
     , m_zoomSpeed(0.1f)
     , m_pCamera(nullptr)
@@ -88,57 +89,41 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         float deltaX = currentMousePos.x - prevMousePos.x;
         float deltaY = currentMousePos.y - prevMousePos.y;
         
-        // Get current camera position and direction
-        float3 cameraPos = m_pCamera->getPosition();
-        float3 direction = m_pCamera->getDirection();
-        float3 up = m_pCamera->getUp();
-        float3 right = m_pCamera->getRight();
-        float distance = length(direction);
-        direction = normalize(direction);
-        
-        // Calculate the world center (use origin if world box is empty)
-        float3 worldCenter = m_worldBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : m_worldBox.center();
-        
-        // Calculate the vector from camera to world center
-        float3 centerToCamera = worldCenter - cameraPos;
-        
-        // Calculate rotation angles
-        float yawAngle = deltaX * m_rotationSpeed * 0.01f;
-        float pitchAngle = deltaY * m_rotationSpeed * 0.01f;
-        
-        // Create rotation quaternions
-        DirectX::XMVECTOR yawQuat = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(up.x, up.y, up.z, 0.0f),
-            yawAngle
-        );
-        DirectX::XMVECTOR pitchQuat = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(right.x, right.y, right.z, 0.0f),
-            pitchAngle
-        );
-        
-        // Combine rotations
-        DirectX::XMVECTOR rotationQuat = DirectX::XMQuaternionMultiply(pitchQuat, yawQuat);
-        
-        // Rotate the center-to-camera vector
-        DirectX::XMVECTOR centerToCameraVec = DirectX::XMVectorSet(centerToCamera.x, centerToCamera.y, centerToCamera.z, 0.0f);
-        DirectX::XMVECTOR rotatedVector = DirectX::XMVector3Rotate(centerToCameraVec, rotationQuat);
-        
-        // Calculate new camera position and direction
-        DirectX::XMFLOAT3 newCenterToCamera;
-        DirectX::XMStoreFloat3(&newCenterToCamera, rotatedVector);
-        float3 newCameraPos = worldCenter - float3(newCenterToCamera.x, newCenterToCamera.y, newCenterToCamera.z);
-        float3 newDirection = normalize(worldCenter - newCameraPos);
-        
-        // Rotate the up vector
-        DirectX::XMVECTOR upVec = DirectX::XMVectorSet(up.x, up.y, up.z, 0.0f);
-        DirectX::XMVECTOR rotatedUp = DirectX::XMVector3Rotate(upVec, rotationQuat);
-        DirectX::XMFLOAT3 newUp;
-        DirectX::XMStoreFloat3(&newUp, rotatedUp);
-        
-        // Update camera position, direction, and up vector
-        m_pCamera->setPosition(newCameraPos);
-        m_pCamera->setDirection(newDirection);
-        m_pCamera->setUp(float3(newUp.x, newUp.y, newUp.z));
+        if (deltaX != 0 || deltaY != 0)
+        {
+            // Get current camera vectors
+            float3 up = m_pCamera->getUp();
+            float3 right = m_pCamera->getRight();
+
+            // Calculate the world center (use origin if world box is empty)
+            float3 worldCenter = m_worldBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : m_worldBox.center();
+
+            // Calculate rotation angles
+            float yawAngle = -deltaX * m_rotationSpeed;
+            float pitchAngle = -deltaY * m_rotationSpeed;
+
+            // Create world rotation transformations around world center
+            // Yaw rotation around camera's up axis
+            affine3 yawRotation = rotation(normalize(up), yawAngle);
+            // Pitch rotation around camera's right axis  
+            affine3 pitchRotation = rotation(normalize(right), pitchAngle);
+
+            // Combine rotations (apply pitch first, then yaw)
+            affine3 combinedWorldRotation = yawRotation * pitchRotation;
+
+            // Create rotation around world center:
+            // T = Translate(worldCenter) * Rotation * Translate(-worldCenter)
+            affine3 translateToOrigin = translation(-worldCenter);
+            affine3 translateBack = translation(worldCenter);
+            affine3 worldRotationAroundCenter = translateBack * combinedWorldRotation * translateToOrigin;
+
+            // Apply inverse transformation to camera (to make world appear to rotate)
+            affine3 cameraTransform = m_pCamera->getCameraTransform();
+            affine3 newCameraTransform = cameraTransform * inverse(worldRotationAroundCenter);
+
+            // Update camera with new transform
+            m_pCamera->setCameraTransform(newCameraTransform);
+        }
     }
 
     // rotation of camera around camera center
@@ -166,7 +151,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         float3 up = m_pCamera->getUp();
         
         // Apply rotation around up vector (yaw)
-        float yawAngle = -deltaX * m_rotationSpeed * 0.01f;
+        float yawAngle = -deltaX * m_rotationSpeed;
         float cosYaw = std::cos(yawAngle);
         float sinYaw = std::sin(yawAngle);
         
@@ -174,7 +159,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         float3 newDirection = -right * sinYaw + direction * cosYaw;
         
         // Apply rotation around right vector (pitch)
-        float pitchAngle = deltaY * m_rotationSpeed * 0.01f;
+        float pitchAngle = deltaY * m_rotationSpeed;
         float cosPitch = std::cos(pitchAngle);
         float sinPitch = std::sin(pitchAngle);
         
