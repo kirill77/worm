@@ -1,6 +1,7 @@
 #pragma once
 
 #include "geometry/vectors/vector.h"
+#include "geometry/vectors/affine.h"
 #include <DirectXMath.h>
 
 class GPUCamera
@@ -24,6 +25,10 @@ public:
     // Matrix getters
     DirectX::XMMATRIX getViewMatrix() const;
     DirectX::XMMATRIX getProjectionMatrix() const;
+    
+    // Camera transform as affine (camera-to-world transform)
+    affine3 getCameraTransform() const;
+    void setCameraTransform(const affine3& transform);
     
 private:
     float3 m_position = float3(0.0f, 0.0f, -5.0f);
