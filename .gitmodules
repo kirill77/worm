@@ -4,3 +4,6 @@
 [submodule "src/external/rngSobol/src"]
 	path = src/external/rngSobol/src
 	url = https://github.com/kirill77/RNGSobol.git
+[submodule "src/utils"]
+	path = src/utils
+	url = https://github.com/kirill77/utils.git

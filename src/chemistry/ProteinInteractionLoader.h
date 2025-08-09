@@ -4,7 +4,6 @@
 #include "DephosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
 #include "ProteinWiki.h"
-#include "utils/csvFile/CSVFile.h"
 #include <string>
 #include <vector>
 #include <memory>
