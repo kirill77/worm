@@ -10,7 +10,7 @@ CellSim::CellSim(std::shared_ptr<Cell> pCell)
 {
 }
 
-void CellSim::update(double dt)
+void CellSim::update(const TimeContext& time)
 {
     // Create tension sphere if it doesn't exist
     if (!m_pTensionSphere) {
@@ -19,7 +19,7 @@ void CellSim::update(double dt)
     }
     
     // Update tension sphere physics
-    m_pTensionSphere->makeTimeStep(dt);
+    m_pTensionSphere->makeTimeStep(time.m_deltaTSec);
     
     // Create cortex BVH if it doesn't exist
     if (!m_pCortexBVH)
@@ -34,5 +34,5 @@ void CellSim::update(double dt)
         }
     }
 
-    m_pCell->update(dt);
+    m_pCell->update(time.m_deltaTSec);
 }

@@ -179,13 +179,13 @@ void Worm::setupDataCollector()
     );
 }
 
-void Worm::simulateStep(double dt)
+void Worm::simulateStep(const TimeContext& time)
 {
     // Use local variables for timing
     auto stepStartTime = std::chrono::high_resolution_clock::now();
     
     // Call the base class simulateStep to handle standard simulation
-    Organism::simulateStep(dt);
+    Organism::simulateStep(time);
     
     // Calculate time taken for this step using local variables
     auto stepEndTime = std::chrono::high_resolution_clock::now();
@@ -193,7 +193,7 @@ void Worm::simulateStep(double dt)
     double stepTimeMsec = duration.count() / 1000.0; // Convert to milliseconds
     
     // Update total simulation time
-    m_fTotalTime += static_cast<float>(dt);
+    m_fTotalTime += static_cast<float>(time.m_deltaTSec);
     
     // Force data collection at the current time (regardless of interval)
     if (m_pDataCollector) {

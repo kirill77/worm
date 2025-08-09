@@ -1,6 +1,7 @@
 #pragma once
 
 #include "biology/simulation/Organism.h"
+#include "biology/simulation/TimeContext.h"
 #include "chemistry/DNA.h"
 #include "biology/organelles/Chromosome.h"
 #include "utils/dataCollector/DataCollector.h"
@@ -20,7 +21,7 @@ public:
     Worm();
 
     // Override the simulateStep method from the base class
-    void simulateStep(double dt) override;
+    void simulateStep(const TimeContext& time) override;
 
     // Validation functions (time in seconds)
     bool validatePARPolarization(float fTimeSec) const;
