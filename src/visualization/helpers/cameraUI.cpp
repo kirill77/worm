@@ -9,6 +9,9 @@ CameraUI::CameraUI()
     , m_zoomSpeed(0.1f)
     , m_pCamera(nullptr)
 {
+    // Ensure boxes start in a well-defined empty state
+    m_worldBox = box3::empty();
+    m_focusBox = box3::empty();
 }
 
 CameraUI::~CameraUI()
@@ -23,11 +26,12 @@ void CameraUI::attachToCamera(std::shared_ptr<GPUCamera> camera)
 float CameraUI::calculateMoveSpeed() const
 {
     float moveSpeed = 0.1f;
-    if (!m_worldBox.isempty())
+    const box3& referenceBox = !m_focusBox.isempty() ? m_focusBox : m_worldBox;
+    if (!referenceBox.isempty())
     {
-        float3 boxDiagonal = m_worldBox.diagonal();
+        float3 boxDiagonal = referenceBox.diagonal();
         float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
-        moveSpeed = maxDimension * 0.1f; // Move 10% of the world size per frame
+        moveSpeed = maxDimension * 0.1f; // Move 10% of the reference size per frame
     }
     return moveSpeed;
 }
@@ -95,8 +99,9 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
             float3 up = m_pCamera->getUp();
             float3 right = m_pCamera->getRight();
 
-            // Calculate the world center (use origin if world box is empty)
-            float3 worldCenter = m_worldBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : m_worldBox.center();
+            // Choose pivot center: focus box center if set, otherwise world center (or origin)
+            const box3& pivotBox = !m_focusBox.isempty() ? m_focusBox : m_worldBox;
+            float3 worldCenter = pivotBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : pivotBox.center();
 
             // Calculate rotation angles
             float yawAngle = -deltaX * m_rotationSpeed;

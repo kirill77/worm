@@ -13,6 +13,7 @@ public:
     ~CameraUI();
 
     void setWorldBox(const box3& worldBox) { m_worldBox = worldBox; }
+    void setFocusBox(const box3& focusBox) { m_focusBox = focusBox; }
 
     // Attach a camera to control
     void attachToCamera(std::shared_ptr<GPUCamera> pCamera);
@@ -30,6 +31,7 @@ private:
     float m_zoomSpeed = 0.1f;
 
     box3 m_worldBox;
+    box3 m_focusBox; // Optional focus box for pivot and speed scaling
     
     // Camera reference
     std::shared_ptr<GPUCamera> m_pCamera;
