@@ -323,7 +323,7 @@ box3 GPUWorld::render(SwapChain* pSwapChain, ID3D12GraphicsCommandList* pCmdList
         }
         
         // Get the mesh node from the object
-        auto node = pObject->updateAndGetMeshNode();
+        auto node = pObject->updateMeshNode();
         if (node.isEmpty())
         {
             ++itObject; // Move to next object if no meshes or children

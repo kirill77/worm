@@ -11,12 +11,20 @@
 #include "visualization/gpu/GPUText.h"
 #include "visualization/helpers/CortexVis.h"
 #include "visualization/helpers/CameraUI.h"
+#include "visualization/helpers/CameraTransition.h"
 #include "VisObjectFactory.h"
 #include "chemistry/ProteinWiki.h"
 #include <windows.h>
 #include "chemistry/StringDict.h"
 #include "utils/log/ILog.h"
 #include "visualization/gpu/DirectXHelpers.h"
+#include "visualization/gpu/GPUCamera.h"
+#include "biology/organelles/Centrosome.h"
+#include "geometry/geomHelpers/BVHMesh.h"
+#include <cmath>
+#include <algorithm>
+
+VisEngine::~VisEngine() = default;
 
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 {
@@ -37,7 +45,7 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
     m_pGpuWorld = std::make_shared<GPUWorld>(m_pWindow, m_pWindow->getSwapChain()->getGPUQueue());
 
     // Initialize GPU text
-    m_gpuText = std::make_unique<GPUText>(m_pGpuWorld->getFont());
+    m_gpuText = std::make_shared<GPUText>(m_pGpuWorld->getFont());
     
     // Create simulation time display line (lives forever - 0 seconds)
     m_pSimTimeLineText = m_gpuText->createLine();
@@ -46,7 +54,7 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
     m_cameraUI.attachToCamera(m_pGpuWorld->getCamera());
 
     // Initialize GPU stats
-    m_gpuStats = std::make_unique<GPUStats>(m_pWindow->getDevice());
+    m_gpuStats = std::make_shared<GPUStats>(m_pWindow->getDevice());
 
     // Create world
     m_pWorld = std::make_shared<World>(pOrganism);
@@ -63,12 +71,10 @@ bool VisEngine::update(float fDtSec)
 
     m_cameraUI.notifyNewUIState(m_pWindow->getCurrentUIState());
 
-    // Check for space key press to toggle pause (ignore repeats)
-    const UIState& uiState = m_pWindow->getCurrentUIState();
-    const bool bIgoreRepeats = true;
-    if (uiState.isPressed(VK_SPACE, bIgoreRepeats)) {
-        m_bPaused = !m_bPaused;
-    }
+    // Process UI input (keyboard, etc.)
+    processUIMessages();
+
+    // (UI already processed above)
 
     if (!m_bPaused || // don't simulate if paused
         m_pWorld->getCurrentTime() < 5) { // need at least one step
@@ -77,6 +83,16 @@ bool VisEngine::update(float fDtSec)
 
     // Update GPU meshes
     updateGpuMeshes();
+
+    // Update active camera transition if any
+    if (m_pCameraTransition)
+    {
+        bool bContinue = m_pCameraTransition->update(fDtSec);
+        if (!bContinue)
+        {
+            m_pCameraTransition.reset();
+        }
+    }
 
     // Update text with current simulation time and pause status
     if (m_bPaused) {
@@ -100,7 +116,11 @@ bool VisEngine::update(float fDtSec)
         // if the volume change is too large - re-fit the camera
         if (fVolume != 0 && abs(fVolume - m_fPrevFittedVolume) / fVolume > 0.5)
         {
-            m_cameraUI.fitWorldBoxToView();
+            // Use camera's own helper to fit the new world bounding box
+            if (auto cam = m_pGpuWorld->getCamera())
+            {
+                cam->fitBoxToView(combinedBoundingBox);
+            }
         }
         m_fPrevFittedVolume = fVolume;
     }
@@ -149,6 +169,37 @@ void VisEngine::updateGpuMeshes()
         }
     }
 }
+
+void VisEngine::processUIMessages()
+{
+    const UIState& uiState = m_pWindow->getCurrentUIState();
+    const bool bIgnoreRepeats = true;
+
+    // SPACE toggles pause (ignore repeats)
+    if (uiState.isPressed(VK_SPACE, bIgnoreRepeats))
+    {
+        m_bPaused = !m_bPaused;
+    }
+
+    // Tab key toggles camera transition to look at the cell's Centrosome
+    if (uiState.isPressed(VK_TAB, bIgnoreRepeats))
+    {
+        auto pCurrentCamera = m_pGpuWorld->getCamera();
+        m_pCameraTransition = m_camFocuser.goToNextFocus(m_pOrganism, pCurrentCamera);
+        if (m_pCameraTransition)
+        {
+            m_cameraUI.setFocusBox(m_pCameraTransition->getFocusBox());
+            
+            // Create and display focus text for 5 seconds
+            std::string focusName = m_camFocuser.getLastFocusedOrganelleName();
+            auto pFocusLine = m_gpuText->createLine();
+            pFocusLine->printf("Focusing on: %s", focusName.c_str());
+            pFocusLine->setLifeTime(5);
+        }
+    }
+}
+
+
 
 void VisEngine::shutdown()
 {

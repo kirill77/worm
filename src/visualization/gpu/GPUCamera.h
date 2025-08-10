@@ -2,6 +2,7 @@
 
 #include "geometry/vectors/vector.h"
 #include "geometry/vectors/affine.h"
+#include "geometry/vectors/box.h"
 #include <DirectXMath.h>
 
 class GPUCamera
@@ -15,6 +16,9 @@ public:
     void setUp(const float3& up);
     void setFOV(float fov);
     void setAspectRatio(float aspectRatio);
+    
+    // Fit the provided box into view by adjusting position/direction (sets FOV to 30deg)
+    bool fitBoxToView(const box3& boxToFit);
     
     float3 getPosition() const;
     float3 getDirection() const;

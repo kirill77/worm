@@ -2,8 +2,7 @@
 
 #include <memory>
 #include "visualization/helpers/CameraUI.h"
-#include "visualization/gpu/GPUStats.h"
-#include "visualization/gpu/GPUText.h"
+#include "visualization/helpers/CamFocuser.h"
 #include "chemistry/StringDict.h"
 
 // Forward declarations
@@ -13,30 +12,41 @@ struct Window;
 struct GPUWorld;
 struct CortexVis;
 class Organelle;
+class CameraTransition;
+struct GPUStats;
+struct GPUText;
+struct Line;
 
 struct VisEngine
 {
     bool initialize(std::shared_ptr<Organism> pOrganism);
     bool update(float fDtSec);
     void shutdown();
+    ~VisEngine();
     
     // Access to the World object
     std::shared_ptr<World> getWorld() const { return m_pWorld; }
 
 private:
     void updateGpuMeshes();
+    void processUIMessages();
+
     std::shared_ptr<Organism> m_pOrganism;
     std::shared_ptr<World> m_pWorld;
     std::shared_ptr<Window> m_pWindow;
     std::shared_ptr<GPUWorld> m_pGpuWorld;
-    std::unique_ptr<GPUText> m_gpuText;
-    std::unique_ptr<GPUStats> m_gpuStats;
+    std::shared_ptr<GPUText> m_gpuText;
+    std::shared_ptr<GPUStats> m_gpuStats;
 
     // Simulation time display line
     std::shared_ptr<Line> m_pSimTimeLineText;
 
     CameraUI m_cameraUI;
+    CamFocuser m_camFocuser;
     double m_fPrevFittedVolume = 0;
     bool m_bPaused = true;
+
+    // Smooth camera transition controller (e.g., to focus on Centrosome)
+    std::shared_ptr<CameraTransition> m_pCameraTransition;
 };
 

@@ -2,6 +2,8 @@
 #include "Window.h"
 #include "DirectXHelpers.h"
 #include "GPUCamera.h"
+#include <algorithm>
+#include <cmath>
 
 GPUCamera::GPUCamera()
 {
@@ -89,6 +91,39 @@ affine3 GPUCamera::getCameraTransform() const
     transform.m_translation = m_position;
     
     return transform;
+}
+
+bool GPUCamera::fitBoxToView(const box3& boxToFit)
+{
+    if (boxToFit.isempty())
+        return false;
+
+    // Set FOV to 30 degrees for a consistent framing
+    setFOV(30.0f);
+
+    // Calculate the center and size of the box
+    float3 boxCenter = boxToFit.center();
+    float3 boxDiagonal = boxToFit.diagonal();
+    float maxDimension = std::max({boxDiagonal.x, boxDiagonal.y, boxDiagonal.z});
+
+    // Distance to fit the box given FOV
+    float fovRadians = DirectX::XMConvertToRadians(getFOV());
+    float halfFov = fovRadians * 0.5f;
+    float distance = maxDimension / (2.0f * std::tan(halfFov));
+
+    // Margin to ensure full visibility
+    distance *= 1.1f;
+
+    // Position the camera along its current forward direction
+    float3 forward = normalize(getDirection());
+    if (!std::isfinite(forward.x) || !std::isfinite(forward.y) || !std::isfinite(forward.z))
+        forward = float3(0.0f, 0.0f, 1.0f);
+
+    float3 newPosition = boxCenter - forward * distance;
+
+    setPosition(newPosition);
+    setDirection(boxCenter - newPosition);
+    return true;
 }
 
 void GPUCamera::setCameraTransform(const affine3& transform)

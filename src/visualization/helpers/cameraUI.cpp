@@ -78,7 +78,6 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
     if (!m_pCamera)
         return;
 
-
     // Handle rotation
     if (uiState.isPressed(VK_LBUTTON)) // Left mouse button for world rotation
     {
@@ -101,7 +100,7 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
 
             // Choose pivot center: focus box center if set, otherwise world center (or origin)
             const box3& pivotBox = !m_focusBox.isempty() ? m_focusBox : m_worldBox;
-            float3 worldCenter = pivotBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : pivotBox.center();
+            float3 pivotCenter = pivotBox.isempty() ? float3(0.0f, 0.0f, 0.0f) : pivotBox.center();
 
             // Calculate rotation angles
             float yawAngle = -deltaX * m_rotationSpeed;
@@ -118,9 +117,9 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
 
             // Create rotation around world center:
             // T = Translate(worldCenter) * Rotation * Translate(-worldCenter)
-            affine3 translateToOrigin = translation(-worldCenter);
-            affine3 translateBack = translation(worldCenter);
-            affine3 worldRotationAroundCenter = translateBack * combinedWorldRotation * translateToOrigin;
+            affine3 translateToOrigin = translation(-pivotCenter);
+            affine3 translateBack = translation(pivotCenter);
+            affine3 worldRotationAroundCenter = translateToOrigin * combinedWorldRotation * translateBack;
 
             // Apply inverse transformation to camera (to make world appear to rotate)
             affine3 cameraTransform = m_pCamera->getCameraTransform();
@@ -206,7 +205,8 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         // Handle Ctrl+A to fit world box in view
         if (uiState.isPressed('A', bIgnoreRepeats))
         {
-            if (fitWorldBoxToView())
+            const box3& boxToFit = !m_focusBox.isempty() ? m_focusBox : m_worldBox;
+            if (m_pCamera && m_pCamera->fitBoxToView(boxToFit))
             {
                 return; // Skip other camera controls when fitting to view
             }
@@ -232,41 +232,4 @@ void CameraUI::notifyNewUIState(const UIState& uiState)
         }
     }
 }
-
-bool CameraUI::fitWorldBoxToView()
-{
-    if (!m_pCamera || m_worldBox.isempty())
-        return false;
-    
-    // Set FOV to 30 degrees
-    m_pCamera->setFOV(30.0f);
-    
-    // Calculate the center of the world box
-    float3 boxCenter = m_worldBox.center();
-    
-    // Calculate the diagonal of the world box
-    float3 boxDiagonal = m_worldBox.diagonal();
-    
-    // Calculate the maximum dimension of the box
-    float maxDimension = std::max(std::max(boxDiagonal.x, boxDiagonal.y), boxDiagonal.z);
-    
-    // Calculate the distance needed to fit the box in view
-    // For a 30-degree FOV, we need to be at a distance of maxDimension / (2 * tan(15 degrees))
-    float fovRadians = 30.0f * 3.14159265359f / 180.0f;
-    float distance = maxDimension / (2.0f * std::tan(fovRadians / 2.0f));
-    
-    // Add a small margin to ensure the box is fully visible
-    distance *= 1.1f;
-    
-    // Calculate the new camera position
-    // Position the camera at the center of the box, offset by the calculated distance
-    // along the negative z-axis (assuming the camera looks along the positive z-axis)
-    float3 newPosition = boxCenter;
-    newPosition.z -= distance;
-    
-    // Set the camera position and target
-    m_pCamera->setPosition(newPosition);
-    m_pCamera->setDirection(boxCenter - newPosition);
-    
-    return true;
-}
+// fitBoxToView moved to GPUCamera

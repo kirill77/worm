@@ -39,6 +39,9 @@ public:
     bool isEmpty() const { return m_meshes.empty() && m_children.empty(); }
     void clear() { clearMeshes(); clearChildren(); }
     
+    // Compute combined bounding box of all meshes and children
+    box3 getBoundingBox() const;
+    
 private:
     affine3 m_transform;  // Transform from node local space to parent space
     std::vector<std::shared_ptr<GPUMesh>> m_meshes;  // Meshes at this node level

@@ -19,16 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CameraUI.cpp" />
     <ClCompile Include="CentrosomeVis.cpp" />
     <ClCompile Include="CortexVis.cpp" />
+    <ClCompile Include="CamFocuser.cpp" />
     <ClCompile Include="VisEngine.cpp" />
     <ClCompile Include="VisObjectFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="CameraUI.h" />
     <ClInclude Include="CentrosomeVis.h" />
     <ClInclude Include="CortexVis.h" />
+    <ClInclude Include="CamFocuser.h" />
     <ClInclude Include="VisEngine.h" />
     <ClInclude Include="VisObjectFactory.h" />
   </ItemGroup>

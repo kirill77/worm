@@ -23,3 +23,56 @@ void GPUMeshNode::addChild(GPUMeshNode&& child)
 {
     m_children.push_back(std::move(child));
 }
+
+box3 GPUMeshNode::getBoundingBox() const
+{
+    box3 result = box3::empty();
+    bool hasValidBounds = false;
+
+    // Accumulate bounding boxes from all meshes at this node level
+    for (const auto& pMesh : m_meshes)
+    {
+        if (!pMesh)
+            continue;
+
+        const box3& localBounds = pMesh->getBoundingBox();
+        if (!localBounds.isempty())
+        {
+            // Transform mesh bounds to this node's coordinate system
+            box3 transformedBounds = localBounds * m_transform;
+
+            if (hasValidBounds)
+            {
+                result = result | transformedBounds;
+            }
+            else
+            {
+                result = transformedBounds;
+                hasValidBounds = true;
+            }
+        }
+    }
+
+    // Recursively accumulate bounding boxes from all child nodes
+    for (const auto& child : m_children)
+    {
+        box3 childBounds = child.getBoundingBox();
+        if (!childBounds.isempty())
+        {
+            // Child bounds are already in child's local space, transform to this node's space
+            box3 transformedChildBounds = childBounds * m_transform;
+
+            if (hasValidBounds)
+            {
+                result = result | transformedChildBounds;
+            }
+            else
+            {
+                result = transformedChildBounds;
+                hasValidBounds = true;
+            }
+        }
+    }
+
+    return result;
+}
