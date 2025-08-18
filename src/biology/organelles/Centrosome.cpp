@@ -104,7 +104,7 @@ void Centrosome::update(double dt, Cell& cell)
     int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);
     int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());
     
-        if (currentRingComplexes < targetRingComplexes) {
+    if (currentRingComplexes < targetRingComplexes) {
         // Create new ring complexes using shared_from_this() and cast to weak_ptr
         std::weak_ptr<Centrosome> thisWeakPtr = std::static_pointer_cast<Centrosome>(shared_from_this());
         for (int i = currentRingComplexes; i < targetRingComplexes; i++) {

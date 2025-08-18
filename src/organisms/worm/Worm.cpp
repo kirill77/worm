@@ -157,25 +157,12 @@ void Worm::setupDataCollector()
     std::string par2Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
     std::string par3Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
     std::string bindingSiteCortex = StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX);
-    
+
     // Add collection points with specific proteins to track
     m_pDataCollector->addCollectionPoint(
-        anteriorPos, 
-        "Anterior", 
-        {par2Membrane, par3Membrane, StringDict::idToString(StringDict::ID::PAR_2), StringDict::idToString(StringDict::ID::PAR_3), StringDict::idToString(StringDict::ID::PKC_3), bindingSiteCortex}
-    );
-    
-    m_pDataCollector->addCollectionPoint(
-        posteriorPos, 
+        posteriorPos,
         "Posterior", 
-        {par2Membrane, par3Membrane, StringDict::idToString(StringDict::ID::PAR_1), StringDict::idToString(StringDict::ID::PAR_2), bindingSiteCortex}
-    );
-    
-    // Add collection point for centrosome tracking
-    m_pDataCollector->addCollectionPoint(
-        centerPos, 
-        "Centrosome", 
-        {StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), StringDict::idToString(StringDict::ID::PERICENTRIN), StringDict::idToString(StringDict::ID::NINEIN), StringDict::idToString(StringDict::ID::PLK_4), StringDict::idToString(StringDict::ID::CDK_2), StringDict::idToString(StringDict::ID::CCE_1)}
+        { StringDict::idToString(StringDict::ID::GAMMA_TUBULIN) }
     );
 }
 

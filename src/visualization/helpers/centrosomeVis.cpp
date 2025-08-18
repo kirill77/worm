@@ -164,8 +164,8 @@ void CentrosomeVis::createCentrosomeGeometry()
         int idx4 = (segments + 1) + 1 + next; // Second ring, next vertex
         
         // Two triangles per quad
-        gpuTriangles.push_back(int3(idx1, idx3, idx2));
-        gpuTriangles.push_back(int3(idx2, idx3, idx4));
+        gpuTriangles.push_back(int3(idx1, idx2, idx3));
+        gpuTriangles.push_back(int3(idx2, idx4, idx3));
     }
     
     // Update the GPU mesh geometry
