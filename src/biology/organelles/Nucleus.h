@@ -15,7 +15,7 @@ class Nucleus : public Organelle
 private:
     std::vector<Chromosome> m_chromosomes;
     double m_fEnvelopeIntegrity;  // 1.0 = intact, 0.0 = broken down
-    GridCell m_nuclearCompartment;  // Nuclear chemistry compartment
+    GridCell m_nuclearCompartment;  // Nuclear chemistry compartment (includes mRNA pool)
     
     static constexpr double fENVELOPE_BREAKDOWN_RATE = 0.2f;  // Rate of nuclear envelope breakdown
     static constexpr double fENVELOPE_REFORM_RATE = 0.5f;    // Rate of nuclear envelope reformation
@@ -49,5 +49,7 @@ public:
     double getEnvelopeIntegrity() const { return m_fEnvelopeIntegrity; }
     size_t getChromosomeCount() const { return m_chromosomes.size(); }
     const std::vector<Chromosome>& getChromosomes() const { return m_chromosomes; }
+    const std::vector<std::shared_ptr<MRNA>>& getNuclearMRNAs() const { return m_nuclearCompartment.m_pMRNAs; }
+    size_t getNuclearMRNACount() const { return m_nuclearCompartment.m_pMRNAs.size(); }
 };
 

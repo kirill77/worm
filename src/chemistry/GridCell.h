@@ -22,4 +22,7 @@ public:
     
     // Helper to get or create molecule population
     MPopulation& getOrCreateMolecule(const std::string& sMoleculeName);
+    
+    // mRNA management
+    void updateMRNAs(double dt);  // Handle mRNA degradation and cleanup
 }; 
