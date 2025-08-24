@@ -56,12 +56,15 @@ std::vector<Chromosome> Worm::initializeGenes()
     // Chromosome IV
     pDNA4->addGene(StringDict::ID::PIE_1, 0.8, 0.1);  // Germline specification
 
+    // Chromosome V - Centrosome and cytoskeleton genes
+    pDNA5->addGene(StringDict::ID::GAMMA_TUBULIN, 0.1, 0.05);  // γ-tubulin: low basal expression, will be regulated by CDK2/CyclinE
+
     // Create chromosomes with their respective DNA
     chromosomes.emplace_back(pDNA1);
     chromosomes.emplace_back(pDNA2);
     chromosomes.emplace_back(pDNA3);
     chromosomes.emplace_back(pDNA4);
-    chromosomes.emplace_back(pDNA5);  // Empty for now
+    chromosomes.emplace_back(pDNA5);  // Centrosome genes
     chromosomes.emplace_back(pDNA6);  // Empty for now
 
     return chromosomes;

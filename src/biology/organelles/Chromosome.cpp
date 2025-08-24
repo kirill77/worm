@@ -108,11 +108,15 @@ void Chromosome::moveAlongSpindle(const Spindle& spindle, float fDt)
     }
 }
 
-std::vector<std::shared_ptr<MRNA>> Chromosome::transcribe(double fDt) const
+std::vector<std::shared_ptr<MRNA>> Chromosome::transcribe(double fDt, const GridCell& nuclearCompartment) const
 {
     // Only transcribe when chromosome is not condensed (during interphase)
     if (m_fCondensation < 0.1f && m_pDNA)
     {
+        // First, update gene expression based on transcription factors in nuclear compartment
+        m_pDNA->updateTranscriptionalRegulation(fDt, nuclearCompartment);
+        
+        // Then transcribe all genes with their current expression rates
         return m_pDNA->transcribeAll(fDt);
     }
     return std::vector<std::shared_ptr<MRNA>>();

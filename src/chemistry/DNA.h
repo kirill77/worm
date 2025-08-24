@@ -8,6 +8,9 @@
 #include "MRNA.h"
 #include "StringDict.h"
 
+// Forward declarations  
+class GridCell;
+
 class DNA
 {
 private:
@@ -26,5 +29,8 @@ public:
 
     // Regulate gene expression
     void regulateGene(StringDict::ID id, double newExpressionRate);
+    
+    // Update gene expression based on transcription factors (protein concentrations)
+    void updateTranscriptionalRegulation(double dt, const class GridCell& nuclearCompartment);
 };
 

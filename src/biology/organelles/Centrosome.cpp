@@ -23,9 +23,7 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     if (auto pCellPtr = pCell.lock()) {
         auto& internalMedium = pCellPtr->getInternalMedium();
         
-        // Add centrosome-specific proteins like γ-tubulin
-        MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
-        internalMedium.addProtein(gammaTubulin, m_mToParent.m_translation);
+        // γ-tubulin is now produced through gene expression, not constant addition
         
         // Add other centrosome proteins
         MPopulation pericentrin(StringDict::idToString(StringDict::ID::PERICENTRIN), 500.0);
@@ -92,10 +90,7 @@ void Centrosome::update(double dt, Cell& cell)
             break;
     }
     
-    // Update protein concentrations at the centrosome position
-    // This ensures centrosome proteins are properly localized
-    MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 1000.0);
-    internalMedium.addProtein(gammaTubulin, m_mToParent.m_translation);
+    // γ-tubulin is now regulated through transcription, not constant addition
     
     // Manage ring complexes based on gamma-tubulin levels
     double gammaTubulinCount = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), m_mToParent.m_translation);

@@ -36,4 +36,7 @@ void GeneWiki::initializeDefaultSequences()
     m_sequences[StringDict::idToString(StringDict::ID::CDK_1)] = "ATGCCGAATTCGTCGAATCCG";  // Cell cycle control
     m_sequences[StringDict::idToString(StringDict::ID::CYB_1)] = "ATGAATTCGCCGTCGAATCCG";  // Cyclin B
     m_sequences[StringDict::idToString(StringDict::ID::PLK_1)] = "ATGCCGTCGAATTCGAATCCG";  // Polo-like kinase
+    
+    // Centrosome proteins
+    m_sequences[StringDict::idToString(StringDict::ID::GAMMA_TUBULIN)] = "ATGGCCGTCGAATTCCTGACC";  // γ-tubulin
 } 

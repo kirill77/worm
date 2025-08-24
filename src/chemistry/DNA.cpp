@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DNA.h"
 #include "StringDict.h"
+#include "GridCell.h"
 
 void DNA::addGene(StringDict::ID id, double expressionRate, double basalLevel)
 {
@@ -35,5 +36,39 @@ void DNA::regulateGene(StringDict::ID id, double newExpressionRate)
     if (auto gene = getGene(id))
     {
         gene->setExpressionRate(newExpressionRate);
+    }
+}
+
+void DNA::updateTranscriptionalRegulation(double dt, const GridCell& nuclearCompartment)
+{
+    // Regulate γ-tubulin gene expression based on CDK2/CyclinE levels
+    // This mimics E2F transcription factor activity during S/G2 phases
+    if (auto gammaTubulinGene = getGene(StringDict::ID::GAMMA_TUBULIN))
+    {
+        // Only do expensive protein lookups if gene exists
+        double cdk2Level = 0.0;
+        auto cdk2It = nuclearCompartment.m_molecules.find(StringDict::idToString(StringDict::ID::CDK_2));
+        if (cdk2It != nuclearCompartment.m_molecules.end()) {
+            cdk2Level = cdk2It->second.m_fNumber;
+        }
+        
+        double cyclinELevel = 0.0;
+        auto cyclinEIt = nuclearCompartment.m_molecules.find(StringDict::idToString(StringDict::ID::CCE_1));
+        if (cyclinEIt != nuclearCompartment.m_molecules.end()) {
+            cyclinELevel = cyclinEIt->second.m_fNumber;
+        }
+        
+        // Calculate transcriptional activation using Hill kinetics
+        // Both CDK2 and CyclinE needed for activation (AND logic)
+        double transcriptionFactorActivity = (cdk2Level * cyclinELevel) / 
+                                           (250000.0 + (cdk2Level * cyclinELevel));
+        
+        // Base expression rate + cell cycle-activated rate
+        double basalRate = 0.05;  // Low basal transcription
+        double maxActivatedRate = 0.8;  // Maximum activated transcription
+        double newExpressionRate = basalRate + (maxActivatedRate * transcriptionFactorActivity);
+        
+        // Set the new expression rate
+        gammaTubulinGene->setExpressionRate(newExpressionRate);
     }
 }

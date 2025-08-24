@@ -9,6 +9,30 @@ void Nucleus::update(double fDt, Cell& cell)
 {
     Medium& medium = cell.getInternalMedium();
     
+    // 1. Nuclear import - transport transcription factors from cytoplasm to nucleus
+    if (m_fEnvelopeIntegrity > 0.5) {
+        float3 nucleusCenter(0.0f, 0.0f, 0.0f);
+        
+        // List of proteins that should be imported into nucleus (transcription factors)
+        static const std::vector<StringDict::ID> transcriptionFactors = {
+            StringDict::ID::CDK_2,    // Cell cycle kinase
+            StringDict::ID::CCE_1,    // CyclinE
+            // Add more transcription factors here as needed
+        };
+        
+        // Simple import model: fraction of cytoplasmic amount enters nucleus per time step
+        double importRate = 0.1;  // 10% per time step
+        
+        for (const auto& proteinID : transcriptionFactors) {
+            double cytoplasmicLevel = medium.getProteinNumber(StringDict::idToString(proteinID), nucleusCenter);
+            double importAmount = cytoplasmicLevel * importRate * fDt;
+            
+            if (importAmount > 0.0) {
+                importProtein(StringDict::idToString(proteinID), importAmount);
+            }
+        }
+    }
+    
     // Update all chromosomes
     for (auto& chromosome : m_chromosomes)
     {
@@ -21,6 +45,10 @@ void Nucleus::update(double fDt, Cell& cell)
         case CellCycleState::PROPHASE:
             // Nuclear envelope breaks down during prophase
             m_fEnvelopeIntegrity = std::max(0.0, m_fEnvelopeIntegrity - fENVELOPE_BREAKDOWN_RATE * fDt);
+            // When envelope breaks down, nuclear content mixes with cytoplasm
+            if (m_fEnvelopeIntegrity < 0.1) {
+                // TODO: Export nuclear contents to cytoplasm during breakdown
+            }
             break;
 
         case CellCycleState::TELOPHASE:
@@ -29,26 +57,18 @@ void Nucleus::update(double fDt, Cell& cell)
             break;
     }
 
-    // 2. Transcription (only during interphase when envelope is mostly intact)
+    // 3. Transcription and mRNA export (only during interphase when envelope is mostly intact)
     if (cell.getCellCycleState() == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
     {
-        // Transcribe genes
+        // Transcribe genes using nuclear compartment
         auto mRNAs = transcribeAll(fDt);
         
-        // Add mRNAs to medium near nucleus (if we have ATP for synthesis)
+        // Export mRNAs to cytoplasm (if we have ATP for synthesis)
         for (const auto& mRNA : mRNAs)
         {
             if (cell.consumeATP(ATPCosts::fMRNA_SYNTHESIS))
             {
-                // Add mRNAs slightly offset from center to simulate nuclear pores
-                float angle = static_cast<float>(rand()) / RAND_MAX * 6.28318f;  // Random angle
-                float radius = 0.2f;  // Distance from center
-                float3 position(
-                    radius * cos(angle),
-                    radius * sin(angle),
-                    0.0f
-                );
-                medium.addMRNA(mRNA, position);
+                exportMRNA(mRNA);
             }
         }
     }
@@ -109,13 +129,40 @@ std::vector<std::shared_ptr<MRNA>> Nucleus::transcribeAll(double fDt) const
     // Only transcribe if nuclear envelope is mostly intact
     if (m_fEnvelopeIntegrity > 0.8)
     {
-        // Collect transcripts from all chromosomes
+        // Collect transcripts from all chromosomes using nuclear compartment
         for (const auto& chromosome : m_chromosomes)
         {
-            auto transcripts = chromosome.transcribe(fDt);
+            auto transcripts = chromosome.transcribe(fDt, m_nuclearCompartment);
             allTranscripts.insert(allTranscripts.end(), transcripts.begin(), transcripts.end());
         }
     }
     
     return allTranscripts;
+}
+
+void Nucleus::importProtein(const std::string& proteinName, double amount)
+{
+    // Import protein into nuclear compartment (only if envelope is intact)
+    if (m_fEnvelopeIntegrity > 0.5 && amount > 0.0) {
+        auto& nuclearProtein = m_nuclearCompartment.getOrCreateMolecule(proteinName);
+        nuclearProtein.m_fNumber += amount;
+    }
+}
+
+void Nucleus::exportMRNA(std::shared_ptr<MRNA> mRNA)
+{
+    // Export mRNA to cytoplasm near nucleus (only if envelope is intact)
+    if (m_fEnvelopeIntegrity > 0.5) {
+        if (auto pCell = getCell()) {
+            // Add mRNAs slightly offset from center to simulate nuclear pores
+            float angle = static_cast<float>(rand()) / RAND_MAX * 6.28318f;  // Random angle
+            float radius = 0.2f;  // Distance from center
+            float3 position(
+                radius * cos(angle),
+                radius * sin(angle),
+                0.0f
+            );
+            pCell->getInternalMedium().addMRNA(mRNA, position);
+        }
+    }
 }
