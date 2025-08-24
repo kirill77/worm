@@ -93,6 +93,9 @@ void Cell::checkCellCycleTransitions()
     switch (m_cellCycleState)
     {
         case CellCycleState::INTERPHASE:
+            // DISABLED: Cell cycle transition temporarily disabled for INTERPHASE development
+            // TODO: Re-enable when INTERPHASE processes are fully implemented
+            /*
             // Check both ATP and protein levels for transition
             if (fCdk1 > 1000 && fCyclinB > 1000 && consumeATP(ATPCosts::fCHROMOSOME_CONDENSATION))
             {
@@ -100,6 +103,7 @@ void Cell::checkCellCycleTransitions()
                 m_cellCycleState = CellCycleState::PROPHASE;
                 createSpindle();  // Create spindle as we enter prophase
             }
+            */
             break;
             
         case CellCycleState::PROPHASE:
