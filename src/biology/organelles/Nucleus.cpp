@@ -60,18 +60,27 @@ void Nucleus::update(double fDt, Cell& cell)
     // 3. Transcription and mRNA export (only during interphase when envelope is mostly intact)
     if (cell.getCellCycleState() == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
     {
-        // Transcribe genes using nuclear compartment
-        auto mRNAs = transcribeAll(fDt);
-        
-        // Export mRNAs to cytoplasm (if we have ATP for synthesis)
-        for (const auto& mRNA : mRNAs)
-        {
-            if (cell.consumeATP(ATPCosts::fMRNA_SYNTHESIS))
-            {
-                exportMRNA(mRNA);
+        // Transcribe genes using nuclear compartment and add to nuclear pool
+        auto newMRNAs = transcribeAll(fDt);
+        m_nuclearCompartment.m_pMRNAs.insert(m_nuclearCompartment.m_pMRNAs.end(), newMRNAs.begin(), newMRNAs.end());
+    }
+    
+    // 4. Try to export existing mRNAs from nuclear pool (if we have ATP and envelope is intact)
+    if (m_fEnvelopeIntegrity > 0.5)
+    {
+        auto it = m_nuclearCompartment.m_pMRNAs.begin();
+        while (it != m_nuclearCompartment.m_pMRNAs.end()) {
+            if (cell.consumeATP(ATPCosts::fMRNA_SYNTHESIS)) {
+                exportMRNA(*it);
+                it = m_nuclearCompartment.m_pMRNAs.erase(it); // Remove exported mRNA
+            } else {
+                ++it; // Keep in nucleus, try again next timestep
             }
         }
     }
+    
+    // 5. Handle mRNA degradation in nuclear pool
+    m_nuclearCompartment.updateMRNAs(fDt);
 }
 
 bool Nucleus::areChromosomesCondensed() const

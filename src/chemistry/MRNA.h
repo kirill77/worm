@@ -20,8 +20,8 @@ public:
           m_fNumber(number), m_fHalfLife(halfLife),
           m_fTranslationRate(translationRate)
     {
-        // Derive protein name from gene name (in practice, this would be more complex)
-        m_sProteinName = geneName + "_protein";
+        // Use gene name directly as protein name for consistency
+        m_sProteinName = geneName;
     }
 
     // Getters
