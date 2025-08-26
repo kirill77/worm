@@ -41,23 +41,60 @@ std::vector<Chromosome> Worm::initializeGenes()
     auto pDNA6 = std::make_shared<DNA>();  // Chromosome X
 
     // Distribute genes across chromosomes (based on C. elegans genome)
-    // Chromosome I
+    // Chromosome I - Cell fate and tRNA genes
     pDNA1->addGene(StringDict::ID::MEX_3, 0.8, 0.1);  // Anterior fate
     pDNA1->addGene(StringDict::ID::PLK_1, 1.2, 0.2);  // Polo-like kinase
+    
+    // Essential start codon tRNA (high abundance needed)
+    pDNA1->addGene(StringDict::ID::TRNA_MET_ATG, 1.5, 0.3);  // Methionine initiator
+    
+    // Common amino acid tRNAs
+    pDNA1->addGene(StringDict::ID::TRNA_GLY_GGA, 1.2, 0.2);  // Preferred Gly codon
+    pDNA1->addGene(StringDict::ID::TRNA_ALA_GCA, 1.0, 0.15); // Preferred Ala codon
+    pDNA1->addGene(StringDict::ID::TRNA_LEU_CTG, 1.4, 0.25); // Highly preferred Leu codon
 
-    // Chromosome II
+    // Chromosome II - Cell cycle and tRNA genes
     pDNA2->addGene(StringDict::ID::SKN_1, 0.8, 0.1);  // Endoderm specification
     pDNA2->addGene(StringDict::ID::CYB_1, 1.2, 0.2);  // Cyclin B
+    
+    // More common amino acid tRNAs
+    pDNA2->addGene(StringDict::ID::TRNA_GLY_GGT, 0.8, 0.15); // Second Gly choice
+    pDNA2->addGene(StringDict::ID::TRNA_ALA_GCC, 0.7, 0.12); // Second Ala choice
+    pDNA2->addGene(StringDict::ID::TRNA_LEU_CTC, 0.9, 0.18); // Second Leu choice
+    pDNA2->addGene(StringDict::ID::TRNA_SER_TCA, 1.1, 0.2);  // Common Ser codon
+    pDNA2->addGene(StringDict::ID::TRNA_VAL_GTG, 1.0, 0.18); // Preferred Val codon
 
-    // Chromosome III
+    // Chromosome III - Cell cycle and tRNA genes
     pDNA3->addGene(StringDict::ID::PAL_1, 0.8, 0.1);  // Posterior fate
     pDNA3->addGene(StringDict::ID::CDK_1, 1.2, 0.2);  // Cell cycle control
+    
+    // Additional tRNAs for abundant amino acids
+    pDNA3->addGene(StringDict::ID::TRNA_SER_TCG, 0.8, 0.15); // Alternative Ser
+    pDNA3->addGene(StringDict::ID::TRNA_VAL_GTC, 0.7, 0.14); // Alternative Val
+    pDNA3->addGene(StringDict::ID::TRNA_PRO_CCA, 0.9, 0.16); // Proline
+    pDNA3->addGene(StringDict::ID::TRNA_THR_ACA, 0.9, 0.16); // Threonine
+    pDNA3->addGene(StringDict::ID::TRNA_ASP_GAC, 1.0, 0.18); // Aspartic acid
 
-    // Chromosome IV
+    // Chromosome IV - Germline and charged amino acid tRNAs
     pDNA4->addGene(StringDict::ID::PIE_1, 0.8, 0.1);  // Germline specification
+    
+    // Charged amino acids (important for protein structure)
+    pDNA4->addGene(StringDict::ID::TRNA_GLU_GAG, 1.0, 0.18); // Glutamic acid
+    pDNA4->addGene(StringDict::ID::TRNA_LYS_AAG, 1.1, 0.2);  // Lysine
+    pDNA4->addGene(StringDict::ID::TRNA_ARG_CGA, 0.8, 0.15); // Arginine
+    pDNA4->addGene(StringDict::ID::TRNA_HIS_CAC, 0.7, 0.13); // Histidine
+    pDNA4->addGene(StringDict::ID::TRNA_ASN_AAC, 0.8, 0.15); // Asparagine
 
-    // Chromosome V - Centrosome and cytoskeleton genes
+    // Chromosome V - Centrosome, cytoskeleton, and aromatic amino acid tRNAs
     pDNA5->addGene(StringDict::ID::GAMMA_TUBULIN, 0.1, 0.05);  // γ-tubulin: low basal expression, will be regulated by CDK2/CyclinE
+    
+    // Aromatic and special amino acids (lower abundance)
+    pDNA5->addGene(StringDict::ID::TRNA_PHE_TTC, 0.8, 0.14); // Phenylalanine
+    pDNA5->addGene(StringDict::ID::TRNA_TYR_TAC, 0.7, 0.12); // Tyrosine
+    pDNA5->addGene(StringDict::ID::TRNA_TRP_TGG, 0.5, 0.08); // Tryptophan (rare)
+    pDNA5->addGene(StringDict::ID::TRNA_CYS_TGC, 0.6, 0.1);  // Cysteine
+    pDNA5->addGene(StringDict::ID::TRNA_GLN_CAG, 0.9, 0.16); // Glutamine
+    pDNA5->addGene(StringDict::ID::TRNA_ILE_ATC, 0.8, 0.15); // Isoleucine
 
     // Create chromosomes with their respective DNA
     chromosomes.emplace_back(pDNA1);
