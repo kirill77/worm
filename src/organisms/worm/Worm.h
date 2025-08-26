@@ -12,6 +12,7 @@ class Worm : public Organism
 private:
     std::shared_ptr<class Medium> createZygoteMedium();
     std::vector<Chromosome> initializeGenes();
+    void addMaternalTRNAs(Medium& medium, const float3& position);
 
     void setupDataCollector();  // Method to set up the data collector
     std::unique_ptr<DataCollector> m_pDataCollector;  // Data collector for simulation data

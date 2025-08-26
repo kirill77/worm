@@ -29,4 +29,15 @@ void GridCell::updateMRNAs(double dt)
             ++it;
         }
     }
+}
+
+void GridCell::updateTRNAs(double dt)
+{
+    // Handle tRNA charging - attempt to charge uncharged tRNAs
+    for (auto& pTRNA : m_pTRNAs) {
+        pTRNA->charge(dt);
+    }
+    
+    // Note: tRNAs don't degrade like mRNAs, so we don't remove them
+    // They get recycled after being used in translation
 } 

@@ -57,4 +57,19 @@ std::vector<uint32_t> Grid::getNeighborIndices(size_t cellIndex) const
     }
     
     return vecNeighbors;
+}
+
+float3 Grid::indexToPosition(size_t index) const
+{
+    // Convert linear index back to 3D grid coordinates
+    size_t uZ = index % GRID_RES;
+    size_t uY = (index / GRID_RES) % GRID_RES;
+    size_t uX = index / (GRID_RES * GRID_RES);
+    
+    // Convert grid coordinates to world position (-1 to 1)
+    float x = (static_cast<float>(uX) + 0.5f) / static_cast<float>(GRID_RES) * 2.0f - 1.0f;
+    float y = (static_cast<float>(uY) + 0.5f) / static_cast<float>(GRID_RES) * 2.0f - 1.0f;
+    float z = (static_cast<float>(uZ) + 0.5f) / static_cast<float>(GRID_RES) * 2.0f - 1.0f;
+    
+    return float3{x, y, z};
 } 

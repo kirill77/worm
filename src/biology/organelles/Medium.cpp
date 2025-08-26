@@ -24,6 +24,11 @@ void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
     m_grid.findCell(position).m_pMRNAs.push_back(pMRNA);
 }
 
+void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
+{
+    m_grid.findCell(position).m_pTRNAs.push_back(pTRNA);
+}
+
 double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
@@ -80,6 +85,11 @@ void Medium::update(double fDt)
 {
     m_diffusion.updateDiffusion(m_grid, fDt);
     
+    // Update tRNA charging in all grid cells
+    for (size_t i = 0; i < m_grid.size(); ++i) {
+        m_grid[i].updateTRNAs(fDt);
+    }
+    
     // Interaction of proteins between each other
     updateProteinInteraction(fDt);
     
@@ -89,11 +99,58 @@ void Medium::update(double fDt)
 
 void Medium::translateMRNAs(double fDt)
 {
-    // TODO: Implement translation of mRNAs into proteins
-    // This will need to:
-    // 1. Check for available tRNAs
-    // 2. Create new proteins
-    // 3. Add proteins to appropriate cytoplasmic regions
+    static constexpr double ATP_PER_TRANSLATION = 4.0;  // ATP cost per amino acid (approximate)
+    
+    // Process translation in each grid cell
+    for (size_t i = 0; i < m_grid.size(); ++i) {
+        GridCell& cell = m_grid[i];
+        
+        // Skip cells with no mRNAs
+        if (cell.m_pMRNAs.empty()) continue;
+        
+        // Collect available tRNAs from this cell
+        std::vector<std::shared_ptr<TRNA>> availableTRNAs;
+        for (const auto& pTRNA : cell.m_pTRNAs) {
+            if (pTRNA->isCharged() && pTRNA->getNumber() > 0.1) {
+                availableTRNAs.push_back(pTRNA);
+            }
+        }
+        
+        // Skip if no charged tRNAs available
+        if (availableTRNAs.empty()) continue;
+        
+        // Attempt translation for each mRNA
+        auto it = cell.m_pMRNAs.begin();
+        while (it != cell.m_pMRNAs.end()) {
+            auto& pMRNA = *it;
+            
+            // Check if we have enough ATP for translation
+            // (approximate cost - in reality would depend on protein length)
+            float3 cellPosition = m_grid.indexToPosition(i);
+            if (getAvailableATP(cellPosition) < ATP_PER_TRANSLATION * 10) {
+                ++it;
+                continue;
+            }
+            
+            // Attempt translation
+            auto pProtein = pMRNA->translate(fDt, availableTRNAs);
+            
+            if (pProtein && pProtein->m_fNumber > 0.0) {
+                // Translation successful - add protein to cell
+                MPopulation& cellProtein = cell.getOrCreateMolecule(pProtein->m_sName);
+                cellProtein.m_fNumber += pProtein->m_fNumber;
+                
+                // Consume ATP (simplified - should be proportional to protein length)
+                double atpCost = ATP_PER_TRANSLATION * pProtein->m_fNumber;
+                consumeATP(atpCost, cellPosition);
+                
+                // Reduce mRNA amount (simplified degradation from translation)
+                // In reality, ribosomes can translate the same mRNA multiple times
+            }
+            
+            ++it;
+        }
+    }
 }
 
 void Medium::addATP(double fAmount, const float3& position)

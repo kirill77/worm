@@ -6,6 +6,7 @@
 #include "biology/organelles/Centrosome.h"
 #include "biology/organelles/CellTypes.h"
 #include "chemistry/Molecule.h"
+#include "chemistry/TRNA.h"
 #include "biology/organelles/Medium.h"
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Spindle.h"
@@ -107,6 +108,91 @@ std::vector<Chromosome> Worm::initializeGenes()
     return chromosomes;
 }
 
+void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
+{
+    // Add essential maternal tRNAs to bootstrap translation
+    // These represent tRNAs inherited from the mother egg
+    
+    // START CODON - absolutely essential for translation initiation
+    auto pMet = std::make_shared<TRNA>("Met", "CAU", 500.0, 0.8);  // High abundance for start codon
+    pMet->charge(1.0);  // Start fully charged
+    medium.addTRNA(pMet, position);
+    
+    // MOST COMMON AMINO ACIDS - needed for early protein synthesis
+    // Glycine (highly abundant in C. elegans)
+    auto pGlyGGA = std::make_shared<TRNA>("Gly", "CCU", 300.0, 0.9);
+    pGlyGGA->charge(1.0);
+    medium.addTRNA(pGlyGGA, position);
+    
+    auto pGlyGGT = std::make_shared<TRNA>("Gly", "CCA", 200.0, 0.8);
+    pGlyGGT->charge(1.0);
+    medium.addTRNA(pGlyGGT, position);
+    
+    // Alanine (very common)
+    auto pAlaGCA = std::make_shared<TRNA>("Ala", "CGU", 250.0, 0.9);
+    pAlaGCA->charge(1.0);
+    medium.addTRNA(pAlaGCA, position);
+    
+    auto pAlaGCC = std::make_shared<TRNA>("Ala", "CGG", 150.0, 0.8);
+    pAlaGCC->charge(1.0);
+    medium.addTRNA(pAlaGCC, position);
+    
+    // Leucine (highly preferred in C. elegans)
+    auto pLeuCTG = std::make_shared<TRNA>("Leu", "GAC", 350.0, 0.9);
+    pLeuCTG->charge(1.0);
+    medium.addTRNA(pLeuCTG, position);
+    
+    auto pLeuCTC = std::make_shared<TRNA>("Leu", "GAG", 200.0, 0.8);
+    pLeuCTC->charge(1.0);
+    medium.addTRNA(pLeuCTC, position);
+    
+    // Serine (common)
+    auto pSerTCA = std::make_shared<TRNA>("Ser", "AGA", 220.0, 0.8);
+    pSerTCA->charge(1.0);
+    medium.addTRNA(pSerTCA, position);
+    
+    auto pSerTCG = std::make_shared<TRNA>("Ser", "AGC", 150.0, 0.7);
+    pSerTCG->charge(1.0);
+    medium.addTRNA(pSerTCG, position);
+    
+    // Valine
+    auto pValGTG = std::make_shared<TRNA>("Val", "GAC", 200.0, 0.8);
+    pValGTG->charge(1.0);
+    medium.addTRNA(pValGTG, position);
+    
+    // ESSENTIAL AMINO ACIDS - lower abundance but necessary
+    // Lysine (positively charged, important for proteins)
+    auto pLysAAG = std::make_shared<TRNA>("Lys", "UUC", 180.0, 0.8);
+    pLysAAG->charge(1.0);
+    medium.addTRNA(pLysAAG, position);
+    
+    // Aspartic acid (negatively charged)
+    auto pAspGAC = std::make_shared<TRNA>("Asp", "CUG", 160.0, 0.8);
+    pAspGAC->charge(1.0);
+    medium.addTRNA(pAspGAC, position);
+    
+    // Glutamic acid (negatively charged)
+    auto pGluGAG = std::make_shared<TRNA>("Glu", "CUC", 170.0, 0.8);
+    pGluGAG->charge(1.0);
+    medium.addTRNA(pGluGAG, position);
+    
+    // Proline (structure-forming)
+    auto pProCCA = std::make_shared<TRNA>("Pro", "GGU", 140.0, 0.7);
+    pProCCA->charge(1.0);
+    medium.addTRNA(pProCCA, position);
+    
+    // Threonine
+    auto pThrACA = std::make_shared<TRNA>("Thr", "GGU", 140.0, 0.7);
+    pThrACA->charge(1.0);
+    medium.addTRNA(pThrACA, position);
+    
+    // These maternal tRNAs will allow initial translation of:
+    // 1. More tRNAs (from transcribed tRNA mRNAs)
+    // 2. tRNA synthetases (to charge more tRNAs)
+    // 3. Ribosomal proteins (to make more ribosomes)
+    // 4. Other essential proteins for cellular function
+}
+
 std::shared_ptr<Medium> Worm::createZygoteMedium()
 {
     // Create the internal medium
@@ -143,6 +229,13 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
     MPopulation cce1(StringDict::idToString(StringDict::ID::CCE_1), 800.0);  // Cyclin E for centrosome duplication
     pInternalMedium->addProtein(cdk2, center);
     pInternalMedium->addProtein(cce1, center);
+    
+    // Add maternal ATP for translation
+    pInternalMedium->addATP(50000.0, center);  // Sufficient ATP for early translation
+    
+    // Add maternal tRNAs (essential for translation bootstrap)
+    // Without these, mRNAs (including tRNA mRNAs) cannot be translated
+    addMaternalTRNAs(*pInternalMedium, center);
 
     return pInternalMedium;
 }

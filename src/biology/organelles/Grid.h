@@ -11,6 +11,9 @@ struct Grid
     GridCell& findCell(const float3& position);
     const GridCell& findCell(const float3& position) const;
     uint32_t positionToIndex(const float3& position) const;
+    
+    // convert index back to approximate position (for ATP access)
+    float3 indexToPosition(size_t index) const;
 
     // find neighbors
     std::vector<uint32_t> getNeighborIndices(size_t cellIndex) const;
