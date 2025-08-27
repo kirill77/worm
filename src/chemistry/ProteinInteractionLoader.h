@@ -3,7 +3,7 @@
 #include "PhosphorylationInteraction.h"
 #include "DephosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
-#include "ProteinWiki.h"
+#include "MoleculeWiki.h"
 #include <string>
 #include <vector>
 #include <memory>

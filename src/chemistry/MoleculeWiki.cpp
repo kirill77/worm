@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ProteinWiki.h"
+#include "MoleculeWiki.h"
 #include "PhosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
 #include "DephosphorylationInteraction.h"
@@ -12,9 +12,9 @@
 #include <filesystem>
 
 // Initialize static members
-std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::s_proteinInteractions;
+std::vector<std::shared_ptr<ProteinInteraction>> MoleculeWiki::s_proteinInteractions;
 
-void ProteinWiki::Initialize()
+void MoleculeWiki::Initialize()
 {
     // Clear any existing interactions
     s_proteinInteractions.clear();
@@ -54,22 +54,22 @@ void ProteinWiki::Initialize()
     }
     
     if (dataFolderFound) {
-        LOG_INFO("Loading protein interactions from %s", dataPath.string().c_str());
+        LOG_INFO("Loading molecule interactions from %s", dataPath.string().c_str());
         s_proteinInteractions = ProteinInteractionLoader::LoadAllInteractions(dataPath.string());
         if (s_proteinInteractions.empty()) {
-            LOG_ERROR("No protein interactions were loaded from CSV files.");
+            LOG_ERROR("No molecule interactions were loaded from CSV files.");
         }
     } else {
         LOG_ERROR("Interaction data directory not found. Using default hardcoded interactions.");
     }
 }
 
-const std::vector<std::shared_ptr<ProteinInteraction>>& ProteinWiki::GetProteinInteractions()
+const std::vector<std::shared_ptr<ProteinInteraction>>& MoleculeWiki::GetProteinInteractions()
 {
     return s_proteinInteractions;
 }
 
-std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism)
+std::vector<std::shared_ptr<ProteinInteraction>> MoleculeWiki::GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism)
 {
     std::vector<std::shared_ptr<ProteinInteraction>> result;
     
@@ -82,12 +82,12 @@ std::vector<std::shared_ptr<ProteinInteraction>> ProteinWiki::GetInteractionsByM
     return result;
 }
 
-std::string ProteinWiki::GetPhosphorylatedName(const std::string& proteinName)
+std::string MoleculeWiki::GetPhosphorylatedName(const std::string& proteinName)
 {
     return proteinName + "-P";
 }
 
-std::string ProteinWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
+std::string MoleculeWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {
     return proteinName + ":" + StringDict::idToString(surface);
 }

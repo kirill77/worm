@@ -10,7 +10,7 @@
 #include "biology/organelles/Medium.h"
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Spindle.h"
-#include "chemistry/ProteinWiki.h"
+#include "chemistry/MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include <chrono> // For high_resolution_clock
 #include <cmath>  // For std::abs
@@ -287,8 +287,8 @@ void Worm::setupDataCollector()
     float3 centerPos(0.0f, 0.0f, 0.0f);   // Center position for centrosome tracking
     
     // Get membrane-bound protein names using the utility function
-    std::string par2Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
-    std::string par3Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
+    std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
+    std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
     std::string bindingSiteCortex = StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX);
 
     // Add collection points with specific proteins to track
@@ -329,8 +329,8 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     float3 posteriorPos(0.0f, -1.f, 0.0f);
     
     // Get membrane-bound protein names using the utility function
-    std::string par3Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
-    std::string par2Membrane = ProteinWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
+    std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
+    std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
     
     // Check membrane-bound proteins
     double anteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, anteriorPos);

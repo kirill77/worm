@@ -5,7 +5,7 @@
 #include <string>
 #include "Molecule.h"
 #include "geometry/vectors/vector.h"
-#include "ProteinWiki.h"
+#include "MoleculeWiki.h"
 
 /**
  * Abstract base class representing any cellular structure that can bind proteins.

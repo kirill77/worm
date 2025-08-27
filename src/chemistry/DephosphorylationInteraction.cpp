@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "DephosphorylationInteraction.h"
-#include "ProteinWiki.h"
+#include "MoleculeWiki.h"
 #include "ResourceDistributor.h"
 #include <algorithm>
 
@@ -9,7 +9,7 @@ DephosphorylationInteraction::DephosphorylationInteraction(
     const Parameters& params)
     : ProteinInteraction(Mechanism::DEPHOSPHORYLATION, 0.1)  // Lower ATP cost for dephosphorylation
     , m_targetName(target)
-    , m_phosphorylatedName(ProteinWiki::GetPhosphorylatedName(target))
+    , m_phosphorylatedName(MoleculeWiki::GetPhosphorylatedName(target))
     , m_recoveryRate(params.recoveryRate)
 {
 }

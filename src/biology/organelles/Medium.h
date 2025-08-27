@@ -9,7 +9,7 @@
 #include "chemistry/MRNA.h"
 #include "chemistry/TRNA.h"
 #include "geometry/vectors/vector.h"
-#include "chemistry/ProteinWiki.h"
+#include "chemistry/MoleculeWiki.h"
 #include "chemistry/GridCell.h"
 #include "Grid.h"
 #include "GridDiffusion.h"

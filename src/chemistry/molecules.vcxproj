@@ -158,13 +158,13 @@
     <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="ProteinInteraction.h" />
     <ClInclude Include="ProteinInteractionLoader.h" />
-    <ClInclude Include="ProteinWiki.h" />
+    <ClInclude Include="MoleculeWiki.h" />
     <ClInclude Include="ResourceDistributor.h" />
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MRNA.cpp" />
-    <ClCompile Include="ProteinWiki.cpp" />
+    <ClCompile Include="MoleculeWiki.cpp" />
     <ClCompile Include="ComplexFormationInteraction.cpp" />
     <ClCompile Include="DephosphorylationInteraction.cpp" />
     <ClCompile Include="DNA.cpp" />

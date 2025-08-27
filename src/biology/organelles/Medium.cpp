@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Medium.h"
-#include "chemistry/ProteinWiki.h"
+#include "chemistry/MoleculeWiki.h"
 #include "chemistry/ResourceDistributor.h"
 #include <random>
 #include <algorithm>
@@ -39,7 +39,7 @@ double Medium::getProteinNumber(const std::string& proteinName, const float3& po
 void Medium::updateProteinInteraction(double fDt)
 {
     // Get all protein interactions 
-    const auto& vecInteractions = ProteinWiki::GetProteinInteractions();
+    const auto& vecInteractions = MoleculeWiki::GetProteinInteractions();
     
     // First, apply direct protein interactions
     for (size_t uCell = 0; uCell < m_grid.size(); ++uCell)
@@ -183,5 +183,5 @@ Medium::Medium()
 {
     m_fVolumeMicroM = 23561.0;  // Initialize volume to 23561 micrometers
     // No need to initialize protein antagonisms here anymore
-    // They are now managed by ProteinWiki
+    // They are now managed by MoleculeWiki
 }

@@ -2,7 +2,7 @@
 #include "Centrosome.h"
 #include "Cell.h"
 #include "Medium.h"
-#include "chemistry/ProteinWiki.h"
+#include "chemistry/MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include "Y_TuRC.h"
 

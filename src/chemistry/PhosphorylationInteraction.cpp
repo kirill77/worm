@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PhosphorylationInteraction.h"
-#include "ProteinWiki.h"
+#include "MoleculeWiki.h"
 #include "ResourceDistributor.h"
 #include <algorithm>
 #include <cmath>
@@ -12,7 +12,7 @@ PhosphorylationInteraction::PhosphorylationInteraction(
     : ProteinInteraction(Mechanism::PHOSPHORYLATION, 0.5)  // Standard ATP cost for phosphorylation
     , m_kinaseName(kinase)
     , m_targetName(target)
-    , m_phosphorylatedName(ProteinWiki::GetPhosphorylatedName(target))
+    , m_phosphorylatedName(MoleculeWiki::GetPhosphorylatedName(target))
     , m_removalRate(params.removalRate)
     , m_saturationConstant(params.saturationConstant)
 {

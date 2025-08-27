@@ -57,7 +57,7 @@
     <ClInclude Include="ProteinInteractionLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProteinWiki.h">
+    <ClInclude Include="MoleculeWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ResourceDistributor.h">
@@ -101,7 +101,7 @@
     <ClCompile Include="ProteinInteractionLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProteinWiki.cpp">
+    <ClCompile Include="MoleculeWiki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResourceDistributor.cpp">
