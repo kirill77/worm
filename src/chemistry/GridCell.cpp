@@ -17,13 +17,24 @@ MPopulation& GridCell::getOrCreateMolecule(const std::string& sMoleculeName)
     return m_molecules.emplace(sMoleculeName, MPopulation(sMoleculeName, 0.0)).first->second;
 }
 
+MRNA& GridCell::getOrCreateMRNA(const std::string& sName)
+{
+    auto it = m_pMRNAs.find(sName);
+    if (it != m_pMRNAs.end()) {
+        return it->second;
+    }
+    
+    // Create new mRNA with default parameters (will need to be set properly)
+    return m_pMRNAs.emplace(sName, MRNA(sName, 0.0, 2.0, 1.0)).first->second;
+}
+
 void GridCell::updateMRNAs(double dt)
 {
     // Handle mRNA degradation and cleanup
     auto it = m_pMRNAs.begin();
     while (it != m_pMRNAs.end()) {
-        (*it)->degrade(dt); // Handle mRNA degradation via half-life
-        if ((*it)->getNumber() <= 0.01) { // Remove degraded mRNAs
+        it->second.degrade(dt); // Handle mRNA degradation via half-life
+        if (it->second.getNumber() <= 0.01) { // Remove degraded mRNAs
             it = m_pMRNAs.erase(it);
         } else {
             ++it;

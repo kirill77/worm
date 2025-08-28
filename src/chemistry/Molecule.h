@@ -7,19 +7,13 @@
 // Forward declaration
 class BindingSurface;
 
-struct Molecule
+struct MPopulation
 {
     std::string m_sName;  // Name/type of the protein
-    
-    Molecule(const std::string& name) : m_sName(name) {}
-};
-
-struct MPopulation : public Molecule
-{
-    double m_fNumber; // Number of molecules in this population
+    double m_fNumber;     // Number of molecules in this population
     
     MPopulation(const std::string& sName, double fNumber)
-        : Molecule(sName), m_fNumber(fNumber) {}
+        : m_sName(sName), m_fNumber(fNumber) {}
     
     // Check if this protein population is bound to any surface
     bool isBound() const

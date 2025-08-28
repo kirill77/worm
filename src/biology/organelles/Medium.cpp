@@ -21,7 +21,15 @@ void Medium::addProtein(const MPopulation& protein, const float3& position)
 
 void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
 {
-    m_grid.findCell(position).m_pMRNAs.push_back(pMRNA);
+    MRNA& existingMRNA = m_grid.findCell(position).getOrCreateMRNA(pMRNA->getName());
+    
+    // If this is a newly created mRNA (with default values), copy the properties
+    if (existingMRNA.getNumber() == 0.0) {
+        existingMRNA = *pMRNA;
+    } else {
+        // Add to existing mRNA count (accumulate molecules of same type)
+        existingMRNA.addNumber(pMRNA->getNumber());
+    }
 }
 
 void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
@@ -106,7 +114,7 @@ void Medium::translateMRNAs(double fDt)
         GridCell& cell = m_grid[i];
         
         // Skip cells with no mRNAs
-        if (cell.m_pMRNAs.empty()) continue;
+        if (!cell.hasMRNAs()) continue;
         
         // Collect available tRNAs from this cell
         std::vector<std::shared_ptr<TRNA>> availableTRNAs;
@@ -120,9 +128,10 @@ void Medium::translateMRNAs(double fDt)
         if (availableTRNAs.empty()) continue;
         
         // Attempt translation for each mRNA
-        auto it = cell.m_pMRNAs.begin();
-        while (it != cell.m_pMRNAs.end()) {
-            auto& pMRNA = *it;
+        auto& mrnas = cell.getMRNAs();
+        auto it = mrnas.begin();
+        while (it != mrnas.end()) {
+            auto& mrna = it->second;
             
             // Check if we have enough ATP for translation
             // (approximate cost - in reality would depend on protein length)
@@ -133,7 +142,7 @@ void Medium::translateMRNAs(double fDt)
             }
             
             // Attempt translation
-            auto pProtein = pMRNA->translate(fDt, availableTRNAs);
+            auto pProtein = mrna.translate(fDt, availableTRNAs);
             
             if (pProtein && pProtein->m_fNumber > 0.0) {
                 // Translation successful - add protein to cell

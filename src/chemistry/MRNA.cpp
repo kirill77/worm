@@ -14,7 +14,7 @@ std::shared_ptr<MPopulation> MRNA::translate(double dt, const std::vector<std::s
     double fProteinAmount = m_fTranslationRate * dt * m_fNumber;
 
     // Get sequence from GeneWiki
-    const std::string& sequence = GeneWiki::getInstance().getSequence(m_sGeneName);
+    const std::string& sequence = GeneWiki::getInstance().getSequence(m_sName);
 
     // Check for required tRNAs (simplified - in reality would check entire sequence)
     bool hasRequiredTRNAs = true;
@@ -47,7 +47,7 @@ std::shared_ptr<MPopulation> MRNA::translate(double dt, const std::vector<std::s
     }
 
     // Create new protein
-    auto pProtein = std::make_shared<MPopulation>(m_sProteinName, fProteinAmount);
+    auto pProtein = std::make_shared<MPopulation>(m_sName, fProteinAmount);
 
     // Discharge used tRNAs (simplified)
     for (const auto& tRNA : availableTRNAs)

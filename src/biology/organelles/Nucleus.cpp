@@ -62,17 +62,29 @@ void Nucleus::update(double fDt, Cell& cell)
     {
         // Transcribe genes using nuclear compartment and add to nuclear pool
         auto newMRNAs = transcribeAll(fDt);
-        m_nuclearCompartment.m_pMRNAs.insert(m_nuclearCompartment.m_pMRNAs.end(), newMRNAs.begin(), newMRNAs.end());
+        for (auto& mrna : newMRNAs) {
+            MRNA& existingMRNA = m_nuclearCompartment.getOrCreateMRNA(mrna->getName());
+            
+            // If this is a newly created mRNA (with default values), copy the properties
+            if (existingMRNA.getNumber() == 0.0) {
+                existingMRNA = *mrna;
+            } else {
+                // Add to existing mRNA count (accumulate transcribed mRNAs)
+                existingMRNA.addNumber(mrna->getNumber());
+            }
+        }
     }
     
     // 4. Try to export existing mRNAs from nuclear pool (if we have ATP and envelope is intact)
     if (m_fEnvelopeIntegrity > 0.5)
     {
-        auto it = m_nuclearCompartment.m_pMRNAs.begin();
-        while (it != m_nuclearCompartment.m_pMRNAs.end()) {
+        auto& mrnas = m_nuclearCompartment.getMRNAs();
+        auto it = mrnas.begin();
+        while (it != mrnas.end()) {
             if (cell.consumeATP(ATPCosts::fMRNA_SYNTHESIS)) {
-                exportMRNA(*it);
-                it = m_nuclearCompartment.m_pMRNAs.erase(it); // Remove exported mRNA
+                auto mrnaPtr = std::make_shared<MRNA>(it->second);
+                exportMRNA(mrnaPtr);
+                it = mrnas.erase(it); // Remove exported mRNA
             } else {
                 ++it; // Keep in nucleus, try again next timestep
             }

@@ -8,26 +8,29 @@
 class MRNA
 {
 private:
-    std::string m_sGeneName;     // Gene that produced this mRNA
-    std::string m_sProteinName;  // Molecule it produces
+    std::string m_sName;         // Name of gene/protein (same for mRNA)
     double m_fNumber;            // Amount of this mRNA in the cell
     double m_fHalfLife;          // How quickly it degrades (in time units)
     double m_fTranslationRate;   // Rate of protein production
 
 public:
-    MRNA(const std::string& geneName, double number, double halfLife, double translationRate = 1.0)
-        : m_sGeneName(geneName),
+    MRNA(const std::string& name, double number, double halfLife, double translationRate = 1.0)
+        : m_sName(name),
           m_fNumber(number), m_fHalfLife(halfLife),
           m_fTranslationRate(translationRate)
     {
-        // Use gene name directly as protein name for consistency
-        m_sProteinName = geneName;
+        // Name represents both the gene name and the protein it produces
     }
 
     // Getters
-    std::string getGeneName() const { return m_sGeneName; }
-    std::string getProteinName() const { return m_sProteinName; }
+    std::string getName() const { return m_sName; }
+    std::string getGeneName() const { return m_sName; }    // For backward compatibility
+    std::string getProteinName() const { return m_sName; } // For backward compatibility
     double getNumber() const { return m_fNumber; }
+    
+    // Setters
+    void setNumber(double number) { m_fNumber = number; }
+    void addNumber(double amount) { m_fNumber += amount; }
     
     // RNA degradation
     void degrade(double dt)

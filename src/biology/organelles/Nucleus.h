@@ -49,7 +49,7 @@ public:
     double getEnvelopeIntegrity() const { return m_fEnvelopeIntegrity; }
     size_t getChromosomeCount() const { return m_chromosomes.size(); }
     const std::vector<Chromosome>& getChromosomes() const { return m_chromosomes; }
-    const std::vector<std::shared_ptr<MRNA>>& getNuclearMRNAs() const { return m_nuclearCompartment.m_pMRNAs; }
-    size_t getNuclearMRNACount() const { return m_nuclearCompartment.m_pMRNAs.size(); }
+    const std::unordered_map<std::string, MRNA>& getNuclearMRNAs() const { return m_nuclearCompartment.getMRNAs(); }
+    size_t getNuclearMRNACount() const { return m_nuclearCompartment.getMRNACount(); }
 };
 
