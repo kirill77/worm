@@ -98,7 +98,7 @@ void ResourceDistributor::updateAvailableResources(const GridCell &cell)
     {
         // Update the available amount for this molecule
         auto& resource = m_resources[moleculeName];
-        resource.m_fAvailable = moleculePop.m_fNumber;
+        resource.m_fAvailable = moleculePop.m_population.m_fNumber;
         resource.m_dryRunId = m_curDryRunId;
     }
 }

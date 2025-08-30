@@ -35,7 +35,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     
     // Also check for dissociation of existing complexes
     auto complexIt = cell.m_molecules.find(m_complexName);
-    double complexAmount = (complexIt != cell.m_molecules.end()) ? complexIt->second.m_fNumber : 0.0;
+    double complexAmount = (complexIt != cell.m_molecules.end()) ? complexIt->second.m_population.m_fNumber : 0.0;
     
     // Calculate dissociation (simpler first-order kinetics)
     double dissociatedAmount = complexAmount * m_dissociationRate * dt;
@@ -60,19 +60,19 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     if (boundAmount > 0) {
         // Update ATP consumption
         auto& atpMolecule = cell.getOrCreateMolecule("ATP");
-        atpMolecule.m_fNumber -= requiredATP;
-        assert(atpMolecule.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
+        atpMolecule.m_population.m_fNumber -= requiredATP;
+        assert(atpMolecule.m_population.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from free populations
-        firstProteinIt->second.m_fNumber -= boundAmount;
-        assert(firstProteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
+        firstProteinIt->second.m_population.m_fNumber -= boundAmount;
+        assert(firstProteinIt->second.m_population.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
-        secondProteinIt->second.m_fNumber -= boundAmount;
-        assert(secondProteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
+        secondProteinIt->second.m_population.m_fNumber -= boundAmount;
+        assert(secondProteinIt->second.m_population.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to complex population
         auto& complexPop = cell.getOrCreateMolecule(m_complexName);
-        complexPop.m_fNumber += boundAmount;
+        complexPop.m_population.m_fNumber += boundAmount;
 
         // update binding surface
         assert(!firstProteinIt->second.isBound());
@@ -85,12 +85,12 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     // Apply dissociation if any occurs
     if (dissociatedAmount > 0 && complexIt != cell.m_molecules.end()) {
         // Remove from complex population
-        complexIt->second.m_fNumber -= dissociatedAmount;
-        assert(complexIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
+        complexIt->second.m_population.m_fNumber -= dissociatedAmount;
+        assert(complexIt->second.m_population.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Return to free protein populations
-        firstProteinIt->second.m_fNumber += dissociatedAmount;
-        secondProteinIt->second.m_fNumber += dissociatedAmount;
+        firstProteinIt->second.m_population.m_fNumber += dissociatedAmount;
+        secondProteinIt->second.m_population.m_fNumber += dissociatedAmount;
     }
     
     return (boundAmount > 0 || dissociatedAmount > 0);

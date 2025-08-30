@@ -166,7 +166,7 @@ void Nucleus::importProtein(const std::string& proteinName, double amount)
     // Import protein into nuclear compartment (only if envelope is intact)
     if (m_fEnvelopeIntegrity > 0.5 && amount > 0.0) {
         auto& nuclearProtein = m_nuclearCompartment.getOrCreateMolecule(proteinName);
-        nuclearProtein.m_fNumber += amount;
+        nuclearProtein.m_population.m_fNumber += amount;
     }
 }
 

@@ -47,17 +47,17 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     if (phosphorylatedAmount > 0) {
         // Update ATP consumption
         auto& atpMolecule = cell.getOrCreateMolecule("ATP");
-        atpMolecule.m_fNumber -= requiredATP;
-        assert(atpMolecule.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
+        atpMolecule.m_population.m_fNumber -= requiredATP;
+        assert(atpMolecule.m_population.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from unphosphorylated population
         auto targetIt = cell.m_molecules.find(m_targetName);
-        targetIt->second.m_fNumber -= phosphorylatedAmount;
-        assert(targetIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
+        targetIt->second.m_population.m_fNumber -= phosphorylatedAmount;
+        assert(targetIt->second.m_population.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to phosphorylated population
         auto& phosphorylatedPop = cell.getOrCreateMolecule(m_phosphorylatedName);
-        phosphorylatedPop.m_fNumber += phosphorylatedAmount;
+        phosphorylatedPop.m_population.m_fNumber += phosphorylatedAmount;
         
         return true;
     }

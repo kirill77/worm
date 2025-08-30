@@ -27,7 +27,7 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
             for (auto itSourcePop = sourcePops.begin(); itSourcePop != sourcePops.end(); )
             {
                 MPopulation& sourcePop = itSourcePop->second;
-                if (sourcePop.m_fNumber == 0)
+                if (sourcePop.m_population.m_fNumber == 0)
                 {
                     itSourcePop = sourcePops.erase(itSourcePop);
                     continue;
@@ -82,7 +82,7 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
                     if (uPass == 1)
                     {
                         // Second pass: compute and store diffusion amounts
-                        double fDiffusionAmount = computeDiffusionAmount(pSourcePop->m_fNumber, vecNeighbors.size(), dt);
+                        double fDiffusionAmount = computeDiffusionAmount(pSourcePop->m_population.m_fNumber, vecNeighbors.size(), dt);
 
                         // Store diffusion amounts for each neighbor
                         for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
@@ -96,9 +96,9 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
                         // Apply diffusion to each neighbor
                         for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
                         {
-                            auto& destMPop = grid[vecNeighbors[uN]].getOrCreateMolecule(pSourcePop->m_sName);
-                            pSourcePop->m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
-                            destMPop.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
+                            auto& destMPop = grid[vecNeighbors[uN]].getOrCreateMolecule(pSourcePop->getName());
+                            pSourcePop->m_population.m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
+                            destMPop.m_population.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
                         }
                     }
                     uDiffusionIndex += (uint32_t)vecNeighbors.size();
