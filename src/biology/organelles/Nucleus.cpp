@@ -165,7 +165,7 @@ void Nucleus::importProtein(const std::string& proteinName, double amount)
 {
     // Import protein into nuclear compartment (only if envelope is intact)
     if (m_fEnvelopeIntegrity > 0.5 && amount > 0.0) {
-        auto& nuclearProteinPop = m_nuclearCompartment.getOrCreateMolPop(proteinName);
+        auto& nuclearProteinPop = m_nuclearCompartment.getOrCreateMolPop(Molecule(proteinName, ChemicalType::PROTEIN));
         nuclearProteinPop.m_fNumber += amount;
     }
 }

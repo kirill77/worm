@@ -47,13 +47,13 @@ void DNA::updateTranscriptionalRegulation(double dt, const GridCell& nuclearComp
     {
         // Only do expensive protein lookups if gene exists
         double cdk2Level = 0.0;
-        auto cdk2It = nuclearCompartment.m_molecules.find(Molecule(StringDict::idToString(StringDict::ID::CDK_2)));
+        auto cdk2It = nuclearCompartment.m_molecules.find(Molecule(StringDict::idToString(StringDict::ID::CDK_2), ChemicalType::PROTEIN));
         if (cdk2It != nuclearCompartment.m_molecules.end()) {
             cdk2Level = cdk2It->second.m_fNumber;
         }
         
         double cyclinELevel = 0.0;
-        auto cyclinEIt = nuclearCompartment.m_molecules.find(Molecule(StringDict::idToString(StringDict::ID::CCE_1)));
+        auto cyclinEIt = nuclearCompartment.m_molecules.find(Molecule(StringDict::idToString(StringDict::ID::CCE_1), ChemicalType::PROTEIN));
         if (cyclinEIt != nuclearCompartment.m_molecules.end()) {
             cyclinELevel = cyclinEIt->second.m_fNumber;
         }

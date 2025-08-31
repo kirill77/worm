@@ -36,16 +36,16 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     }
 
     // Remove from phosphorylated population
-    auto phosphorylatedIt = cell.m_molecules.find(Molecule(m_phosphorylatedName));
+    auto phosphorylatedIt = cell.m_molecules.find(Molecule(m_phosphorylatedName, ChemicalType::PROTEIN));
     phosphorylatedIt->second.m_fNumber -= recoveredAmount;
     assert(phosphorylatedIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
     
     // Add back to original unphosphorylated population
-    auto& unphosphorylatedPop = cell.getOrCreateMolPop(m_targetName);
+    auto& unphosphorylatedPop = cell.getOrCreateMolPop(Molecule(m_targetName, ChemicalType::PROTEIN));
     unphosphorylatedPop.m_fNumber += recoveredAmount;
     
     // Update ATP consumption
-    auto& atpPop = cell.getOrCreateMolPop("ATP");
+    auto& atpPop = cell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
     atpPop.m_fNumber -= requiredATP;
     assert(atpPop.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
     

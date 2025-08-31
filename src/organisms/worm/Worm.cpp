@@ -200,20 +200,20 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
 
     // Create and add anterior proteins at the anterior cortex
     MPopulation par3(StringDict::idToString(StringDict::ID::PAR_3), 3.9e5);
-    pInternalMedium->addProtein(par3, float3(0, 1.f, 0));
+    pInternalMedium->addMolecule(par3, float3(0, 1.f, 0));
 
     MPopulation par6(StringDict::idToString(StringDict::ID::PAR_6), 3.9e5);
-    pInternalMedium->addProtein(par6, float3(0, 1.f, 0));
+    pInternalMedium->addMolecule(par6, float3(0, 1.f, 0));
 
     MPopulation pkc3(StringDict::idToString(StringDict::ID::PKC_3), 3.9e5);
-    pInternalMedium->addProtein(pkc3, float3(0, 1.f, 0));
+    pInternalMedium->addMolecule(pkc3, float3(0, 1.f, 0));
 
     // Create and add posterior proteins at the posterior cortex
     MPopulation par1(StringDict::idToString(StringDict::ID::PAR_1), 3.9e5);
-    pInternalMedium->addProtein(par1, float3(0, -1.f, 0));
+    pInternalMedium->addMolecule(par1, float3(0, -1.f, 0));
 
     MPopulation par2(StringDict::idToString(StringDict::ID::PAR_2), 3.9e5);
-    pInternalMedium->addProtein(par2, float3(0, -1.f, 0));
+    pInternalMedium->addMolecule(par2, float3(0, -1.f, 0));
 
     // Initialize maternal proteins at cell center
     float3 center(0.0f, 0.0f, 0.0f);
@@ -221,14 +221,14 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
     // Add maternal CDK-1 and CYB-1 (Cyclin B)
     MPopulation cdk1(StringDict::idToString(StringDict::ID::CDK_1), 1500.0);  // Initial amount above threshold (1000)
     MPopulation cyb1(StringDict::idToString(StringDict::ID::CYB_1), 1500.0);  // Initial amount above threshold (1000)
-    pInternalMedium->addProtein(cdk1, center);
-    pInternalMedium->addProtein(cyb1, center);
+    pInternalMedium->addMolecule(cdk1, center);
+    pInternalMedium->addMolecule(cyb1, center);
 
     // Add centrosome-related proteins for proper centrosome function
     MPopulation cdk2(StringDict::idToString(StringDict::ID::CDK_2), 800.0);  // For centrosome duplication
     MPopulation cce1(StringDict::idToString(StringDict::ID::CCE_1), 800.0);  // Cyclin E for centrosome duplication
-    pInternalMedium->addProtein(cdk2, center);
-    pInternalMedium->addProtein(cce1, center);
+    pInternalMedium->addMolecule(cdk2, center);
+    pInternalMedium->addMolecule(cce1, center);
     
     // Add maternal ATP for translation
     pInternalMedium->addATP(50000.0, center);  // Sufficient ATP for early translation

@@ -10,13 +10,13 @@
 // Global random number generator for consistent randomness
 static std::mt19937 g_rng(std::random_device{}());
 
-void Medium::addProtein(const MPopulation& protein, const float3& position)
+void Medium::addMolecule(const MPopulation& population, const float3& position)
 {
     GridCell& gridCell = m_grid.findCell(position);
-    Population& cellProteinPop = gridCell.getOrCreateMolPop(protein.getName());
+    Population& moleculePop = gridCell.getOrCreateMolPop(population.m_molecule);
 
-    cellProteinPop.bindTo(protein.getBindingSurface());
-    cellProteinPop.m_fNumber += protein.m_population.m_fNumber;
+    moleculePop.bindTo(population.getBindingSurface());
+    moleculePop.m_fNumber += population.m_population.m_fNumber;
 }
 
 void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
@@ -40,7 +40,7 @@ void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
 double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itProtein = gridCell.m_molecules.find(Molecule(proteinName));
+    auto itProtein = gridCell.m_molecules.find(Molecule(proteinName, ChemicalType::PROTEIN));
     return (itProtein != gridCell.m_molecules.end()) ? itProtein->second.m_fNumber : 0.0;
 }
 
@@ -70,7 +70,7 @@ void Medium::updateProteinInteraction(double fDt)
         }
 
         // Ensure ATP doesn't go below zero
-        auto& atpPop = m_grid[uCell].getOrCreateMolPop("ATP");
+        auto& atpPop = m_grid[uCell].getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
         atpPop.m_fNumber = std::max(0.0, atpPop.m_fNumber);
     }
 }
@@ -81,7 +81,7 @@ double Medium::getTotalProteinNumber(const std::string& proteinName) const
     for (uint32_t uCell = 0; uCell < m_grid.size(); ++uCell)
     {
         const GridCell& gridCell = m_grid[uCell];
-        auto itProtein = gridCell.m_molecules.find(Molecule(proteinName));
+        auto itProtein = gridCell.m_molecules.find(Molecule(proteinName, ChemicalType::PROTEIN));
         if (itProtein != gridCell.m_molecules.end()) {
             fTotal += itProtein->second.m_fNumber;
         }
@@ -146,7 +146,7 @@ void Medium::translateMRNAs(double fDt)
             
             if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
                 // Translation successful - add protein to cell
-                Population& cellProteinPop = cell.getOrCreateMolPop(pProtein->getName());
+                Population& cellProteinPop = cell.getOrCreateMolPop(Molecule(pProtein->getName(), ChemicalType::PROTEIN));
                 cellProteinPop.m_fNumber += pProtein->m_population.m_fNumber;
                 
                 // Consume ATP (simplified - should be proportional to protein length)
@@ -165,14 +165,14 @@ void Medium::translateMRNAs(double fDt)
 void Medium::addATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpPop = gridCell.getOrCreateMolPop("ATP");
+    auto& atpPop = gridCell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
     atpPop.m_fNumber = std::min<double>(atpPop.m_fNumber + fAmount, MAX_ATP_PER_CELL);
 }
 
 bool Medium::consumeATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpPop = gridCell.getOrCreateMolPop("ATP");
+    auto& atpPop = gridCell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
     if (atpPop.m_fNumber >= fAmount)
     {
         atpPop.m_fNumber -= fAmount;
@@ -184,7 +184,7 @@ bool Medium::consumeATP(double fAmount, const float3& position)
 double Medium::getAvailableATP(const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itMolecule = gridCell.m_molecules.find(Molecule("ATP"));
+    auto itMolecule = gridCell.m_molecules.find(Molecule("ATP", ChemicalType::NUCLEOTIDE));
     return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_fNumber : 0.0;
 }
 

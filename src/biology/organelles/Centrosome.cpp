@@ -27,10 +27,10 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
         
         // Add other centrosome proteins
         MPopulation pericentrin(StringDict::idToString(StringDict::ID::PERICENTRIN), 500.0);
-        internalMedium.addProtein(pericentrin, m_mToParent.m_translation);
+        internalMedium.addMolecule(pericentrin, m_mToParent.m_translation);
         
         MPopulation ninein(StringDict::idToString(StringDict::ID::NINEIN), 300.0);
-        internalMedium.addProtein(ninein, m_mToParent.m_translation);
+        internalMedium.addMolecule(ninein, m_mToParent.m_translation);
     }
     
     // Note: Ring complexes will be created in the update method
@@ -127,11 +127,11 @@ void Centrosome::duplicate()
             
             // Add additional γ-tubulin for the duplicated centrosome
             MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 500.0);
-            internalMedium.addProtein(gammaTubulin, m_mToParent.m_translation);
+            internalMedium.addMolecule(gammaTubulin, m_mToParent.m_translation);
             
             // Add other duplication-related proteins
             MPopulation plk4(StringDict::idToString(StringDict::ID::PLK_4), 200.0);  // Polo-like kinase 4 for centriole duplication
-            internalMedium.addProtein(plk4, m_mToParent.m_translation);
+            internalMedium.addMolecule(plk4, m_mToParent.m_translation);
             
             // Add additional ring complexes for the duplicated centrosome
             int additionalRingComplexes = static_cast<int>(m_pRingComplexes.size() * 0.5); // 50% more

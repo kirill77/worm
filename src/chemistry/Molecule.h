@@ -4,24 +4,43 @@
 #include <memory>
 #include <assert.h>
 #include <functional>
+#include <cstdint>
 
 // Forward declaration
 class BindingSurface;
+
+// Chemical type classification for molecules
+enum class ChemicalType : uint8_t {
+    PROTEIN,        // Any amino acid chain
+    AMINO_ACID,     // Single amino acid
+    DNA,           // DNA polymers
+    RNA,           // RNA polymers  
+    NUCLEOTIDE,    // Single nucleotides (ATP, GTP, dATP, etc.)
+    LIPID,         // Fatty acids, phospholipids, steroids
+    ION,           // Charged atoms/molecules (Na+, Cl-, etc.)
+    OTHER          // Catch-all for everything else
+};
 
 // Simple molecule class with just name
 class Molecule
 {
 public:
     // Default constructor
-    Molecule() = default;
+    Molecule() : m_sName(), m_type(ChemicalType::OTHER) {}
     
     // Constructor with name
-    Molecule(const std::string& name) : m_sName(name) {}
+    Molecule(const std::string& name) : m_sName(name), m_type(ChemicalType::OTHER) {}
+    
+    // Constructor with name and type
+    Molecule(const std::string& name, ChemicalType type) : m_sName(name), m_type(type) {}
     
     // Get name
     const std::string& getName() const { return m_sName; }
     
-    // Equality operator for unordered_map
+    // Get chemical type
+    ChemicalType getType() const { return m_type; }
+    
+    // Equality operator for unordered_map (based on name only for compatibility)
     bool operator==(const Molecule& other) const {
         return m_sName == other.m_sName;
     }
@@ -32,6 +51,7 @@ public:
 
 private:
     std::string m_sName;  // Name/type of the molecule
+    ChemicalType m_type;  // Chemical classification of the molecule
 };
 
 // Population class - handles population properties without molecule identity

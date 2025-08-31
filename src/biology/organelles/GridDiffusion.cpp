@@ -108,7 +108,7 @@ void GridDiffusion::updateDiffusion(Grid& grid, double dt)
                         // Apply diffusion to each neighbor
                         for (uint32_t uN = 0; uN < vecNeighbors.size(); ++uN)
                         {
-                            auto& destPop = grid[vecNeighbors[uN]].getOrCreateMolPop(sourceEntry.molecule->getName());
+                            auto& destPop = grid[vecNeighbors[uN]].getOrCreateMolPop(*sourceEntry.molecule);
                             sourceEntry.population->m_fNumber -= diffusionAmounts[uDiffusionIndex + uN];
                             destPop.m_fNumber += diffusionAmounts[uDiffusionIndex + uN];
                         }

@@ -31,8 +31,8 @@ public:
 
     Medium();
 
-    // Add protein population to specific location
-    void addProtein(const MPopulation& protein, const float3& position);
+    // Add molecule population to specific location
+    void addMolecule(const MPopulation& population, const float3& position);
     
     // Add mRNA to specific location
     void addMRNA(std::shared_ptr<MRNA> mRNA, const float3& position);

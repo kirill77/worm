@@ -55,11 +55,11 @@ bool Cortex::transportProteinInward(Medium& externalMedium,
     // the protein count directly in the external medium.
     float3 externalPos = position;
     MPopulation externalProtein(proteinName, -amount); // Negative amount for removal
-    externalMedium.addProtein(externalProtein, externalPos);
+    externalMedium.addMolecule(externalProtein, externalPos);
     
     // Add to internal medium
     float3 internalPos = position; // Same position in internal medium
-    internalMedium.addProtein(protein, internalPos);
+    internalMedium.addMolecule(protein, internalPos);
     
     return true;
 }
@@ -89,11 +89,11 @@ bool Cortex::transportProteinOutward(Medium& externalMedium,
     // Remove from internal medium
     float3 internalPos = position;
     MPopulation internalProtein(proteinName, -amount); // Negative amount for removal
-    internalMedium.addProtein(internalProtein, internalPos);
+    internalMedium.addMolecule(internalProtein, internalPos);
     
     // Add to external medium
     float3 externalPos = position; // Same position in external medium
-    externalMedium.addProtein(protein, externalPos);
+    externalMedium.addMolecule(protein, externalPos);
     
     return true;
 }
@@ -190,7 +190,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 // Create binding site protein and add to the medium
                 MPopulation bindingSites(StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
-                internalMedium.addProtein(bindingSites, normalizedPos);
+                internalMedium.addMolecule(bindingSites, normalizedPos);
             }
         }
     }

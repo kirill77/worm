@@ -7,9 +7,8 @@ GridCell::GridCell()
     // Default constructor
 }
 
-Population& GridCell::getOrCreateMolPop(const std::string& sMoleculeName)
+Population& GridCell::getOrCreateMolPop(const Molecule& molecule)
 {
-    Molecule molecule(sMoleculeName);
     auto it = m_molecules.find(molecule);
     if (it != m_molecules.end()) {
         return it->second;

@@ -22,7 +22,7 @@ public:
     GridCell();
     
     // Helper to get or create molecule population
-    Population& getOrCreateMolPop(const std::string& sMoleculeName);
+    Population& getOrCreateMolPop(const Molecule& molecule);
     
     // Helper to get or create mRNA
     MRNA& getOrCreateMRNA(const std::string& sName);
