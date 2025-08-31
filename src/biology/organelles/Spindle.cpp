@@ -125,9 +125,9 @@ float3 Spindle::calculatePARBasedForces(const Medium& medium) const
         
         // Sample anterior cortex
         float3 anteriorPoint(cos(angle), 0.95f, sin(angle));
-        double anteriorPARs = medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_3), anteriorPoint) +
-                              medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_6), anteriorPoint) +
-                              medium.getProteinNumber(StringDict::idToString(StringDict::ID::PKC_3), anteriorPoint);
+        double anteriorPARs = medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_3), ChemicalType::PROTEIN), anteriorPoint) +
+                              medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_6), ChemicalType::PROTEIN), anteriorPoint) +
+                              medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PKC_3), ChemicalType::PROTEIN), anteriorPoint);
 
         // Force on minus pole from anterior
         float3 toMinusPole = minusPole - anteriorPoint;
@@ -137,8 +137,8 @@ float3 Spindle::calculatePARBasedForces(const Medium& medium) const
         
         // Sample posterior cortex
         float3 posteriorPoint(cos(angle), -0.95f, sin(angle));
-        double posteriorPARs = medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_1), posteriorPoint) +
-                               medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_2), posteriorPoint);
+        double posteriorPARs = medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_1), ChemicalType::PROTEIN), posteriorPoint) +
+                               medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_2), ChemicalType::PROTEIN), posteriorPoint);
 
         // Force on plus pole from posterior (stronger in P lineage)
         float3 toPlusPole = plusPole - posteriorPoint;
@@ -203,12 +203,12 @@ float3 Spindle::calculatePreferredOrientation(const Medium& medium) const
             float3 anterior(0.0f, 0.95f, 0.0f);
             float3 posterior(0.0f, -0.95f, 0.0f);
             
-            double anteriorPARs = medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_3), anterior) +
-                                  medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_6), anterior) +
-                                  medium.getProteinNumber(StringDict::idToString(StringDict::ID::PKC_3), anterior);
+            double anteriorPARs = medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_3), ChemicalType::PROTEIN), anterior) +
+                                  medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_6), ChemicalType::PROTEIN), anterior) +
+                                  medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PKC_3), ChemicalType::PROTEIN), anterior);
             
-            double posteriorPARs = medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_1), posterior) +
-                                   medium.getProteinNumber(StringDict::idToString(StringDict::ID::PAR_2), posterior);
+            double posteriorPARs = medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_1), ChemicalType::PROTEIN), posterior) +
+                                   medium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PAR_2), ChemicalType::PROTEIN), posterior);
             
             float3 direction = normalize(posterior - anterior);
             return direction * (posteriorPARs > anteriorPARs ? 1.0f : -1.0f);

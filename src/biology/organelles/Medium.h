@@ -45,8 +45,8 @@ public:
     bool consumeATP(double amount, const float3& position);
     double getAvailableATP(const float3& position) const;
     
-    // Get number of proteins at a specific location
-    double getProteinNumber(const std::string& proteinName, const float3& position) const;
+    // Get molecule number at a specific location
+    double getMoleculeNumber(const Molecule& molecule, const float3& position) const;
     
     // Get total number of proteins across all cells
     double getTotalProteinNumber(const std::string& proteinName) const;

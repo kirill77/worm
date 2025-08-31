@@ -37,11 +37,11 @@ void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
     m_grid.findCell(position).m_pTRNAs.push_back(pTRNA);
 }
 
-double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
+double Medium::getMoleculeNumber(const Molecule& molecule, const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itProtein = gridCell.m_molecules.find(Molecule(proteinName, ChemicalType::PROTEIN));
-    return (itProtein != gridCell.m_molecules.end()) ? itProtein->second.m_fNumber : 0.0;
+    auto itMolecule = gridCell.m_molecules.find(molecule);
+    return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_fNumber : 0.0;
 }
 
 void Medium::updateProteinInteraction(double fDt)

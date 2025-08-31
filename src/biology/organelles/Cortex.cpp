@@ -43,7 +43,7 @@ bool Cortex::transportProteinInward(Medium& externalMedium,
     Medium& internalMedium = pCell->getInternalMedium();
 
     // Check if the external medium has enough of the protein
-    if (externalMedium.getProteinNumber(proteinName, position) < amount) {
+    if (externalMedium.getMoleculeNumber(Molecule(proteinName, ChemicalType::PROTEIN), position) < amount) {
         return false; // Not enough protein available
     }
     
@@ -79,7 +79,7 @@ bool Cortex::transportProteinOutward(Medium& externalMedium,
     Medium& internalMedium = pCell->getInternalMedium();
 
     // Check if the internal medium has enough of the protein
-    if (internalMedium.getProteinNumber(proteinName, position) < amount) {
+    if (internalMedium.getMoleculeNumber(Molecule(proteinName, ChemicalType::PROTEIN), position) < amount) {
         return false; // Not enough protein available
     }
     

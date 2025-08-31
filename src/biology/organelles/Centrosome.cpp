@@ -44,8 +44,8 @@ void Centrosome::update(double dt, Cell& cell)
     // Check for centrosome duplication during S phase
     if (!m_isDuplicated) {
         // Check if we're in S phase (high CDK-2 and Cyclin E levels)
-        double cdk2 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_2), m_mToParent.m_translation);
-        double cyclinE = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CCE_1), m_mToParent.m_translation);
+        double cdk2 = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CDK_2), ChemicalType::PROTEIN), m_mToParent.m_translation);
+        double cyclinE = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CCE_1), ChemicalType::PROTEIN), m_mToParent.m_translation);
         
         // Trigger duplication when CDK-2 and Cyclin E are high enough
         if (cdk2 > 800.0 && cyclinE > 800.0) {
@@ -93,7 +93,7 @@ void Centrosome::update(double dt, Cell& cell)
     // γ-tubulin is now regulated through transcription, not constant addition
     
     // Manage ring complexes based on gamma-tubulin levels
-    double gammaTubulinCount = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), m_mToParent.m_translation);
+    double gammaTubulinCount = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), ChemicalType::PROTEIN), m_mToParent.m_translation);
     
     // Target: ~1 ring complex per 50 gamma-tubulin proteins
     int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);

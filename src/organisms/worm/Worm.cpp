@@ -333,10 +333,10 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
     
     // Check membrane-bound proteins
-    double anteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, anteriorPos);
-    double posteriorPAR3 = internalMedium.getProteinNumber(par3Membrane, posteriorPos);
-    double anteriorPAR2 = internalMedium.getProteinNumber(par2Membrane, anteriorPos);
-    double posteriorPAR2 = internalMedium.getProteinNumber(par2Membrane, posteriorPos);
+    double anteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(par3Membrane, ChemicalType::PROTEIN), anteriorPos);
+    double posteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(par3Membrane, ChemicalType::PROTEIN), posteriorPos);
+    double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(par2Membrane, ChemicalType::PROTEIN), anteriorPos);
+    double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(par2Membrane, ChemicalType::PROTEIN), posteriorPos);
     
     // Check during polarity establishment (0-6 minutes)
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
@@ -358,7 +358,7 @@ bool Worm::validateCellCycle(float fTimeSec) const
 {
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     float3 nuclearPos(0.0f, 0.0f, 0.0f);
-    double cdk1Level = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_1), nuclearPos);
+    double cdk1Level = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CDK_1), ChemicalType::PROTEIN), nuclearPos);
 
     // Before nuclear envelope breakdown (0-12.5 minutes): CDK-1 should be relatively low
     if (fTimeSec < NUCLEAR_ENVELOPE_BREAKDOWN_SEC && cdk1Level > 1000) {

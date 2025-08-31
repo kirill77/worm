@@ -85,9 +85,9 @@ void Cell::checkCellCycleTransitions()
     // Get key protein concentrations from internal medium
     float3 center(0, 0, 0);
     Medium& internalMedium = *m_pInternalMedium;
-    double fCdk1 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CDK_1), center);
-    double fCyclinB = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::CYB_1), center);
-    double fPlk1 = internalMedium.getProteinNumber(StringDict::idToString(StringDict::ID::PLK_1), center);
+    double fCdk1 = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CDK_1), ChemicalType::PROTEIN), center);
+    double fCyclinB = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CYB_1), ChemicalType::PROTEIN), center);
+    double fPlk1 = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::PLK_1), ChemicalType::PROTEIN), center);
     
     // Check conditions for each transition
     switch (m_cellCycleState)
