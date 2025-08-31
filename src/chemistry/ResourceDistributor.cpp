@@ -94,11 +94,11 @@ void ResourceDistributor::notifyNewRealRun()
 void ResourceDistributor::updateAvailableResources(const GridCell &cell)
 {
     // Then update the available amounts
-    for (const auto& [moleculeName, moleculePop] : cell.m_molecules)
+    for (const auto& [molecule, population] : cell.m_molecules)
     {
         // Update the available amount for this molecule
-        auto& resource = m_resources[moleculeName];
-        resource.m_fAvailable = moleculePop.m_population.m_fNumber;
+        auto& resource = m_resources[molecule.getName()];
+        resource.m_fAvailable = population.m_fNumber;
         resource.m_dryRunId = m_curDryRunId;
     }
 }

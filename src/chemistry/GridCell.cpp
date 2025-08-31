@@ -1,20 +1,22 @@
 #include "pch.h"
 #include "GridCell.h"
+#include "Molecule.h"
 
 GridCell::GridCell()
 {
     // Default constructor
 }
 
-MPopulation& GridCell::getOrCreateMolecule(const std::string& sMoleculeName)
+Population& GridCell::getOrCreateMolPop(const std::string& sMoleculeName)
 {
-    auto it = m_molecules.find(sMoleculeName);
+    Molecule molecule(sMoleculeName);
+    auto it = m_molecules.find(molecule);
     if (it != m_molecules.end()) {
         return it->second;
     }
     
     // Create new population with zero initial amount
-    return m_molecules.emplace(sMoleculeName, MPopulation(sMoleculeName, 0.0)).first->second;
+    return m_molecules.emplace(molecule, Population(0.0)).first->second;
 }
 
 MRNA& GridCell::getOrCreateMRNA(const std::string& sName)

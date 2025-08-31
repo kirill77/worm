@@ -47,15 +47,15 @@ void DNA::updateTranscriptionalRegulation(double dt, const GridCell& nuclearComp
     {
         // Only do expensive protein lookups if gene exists
         double cdk2Level = 0.0;
-        auto cdk2It = nuclearCompartment.m_molecules.find(StringDict::idToString(StringDict::ID::CDK_2));
+        auto cdk2It = nuclearCompartment.m_molecules.find(Molecule(StringDict::idToString(StringDict::ID::CDK_2)));
         if (cdk2It != nuclearCompartment.m_molecules.end()) {
-            cdk2Level = cdk2It->second.m_population.m_fNumber;
+            cdk2Level = cdk2It->second.m_fNumber;
         }
         
         double cyclinELevel = 0.0;
-        auto cyclinEIt = nuclearCompartment.m_molecules.find(StringDict::idToString(StringDict::ID::CCE_1));
+        auto cyclinEIt = nuclearCompartment.m_molecules.find(Molecule(StringDict::idToString(StringDict::ID::CCE_1)));
         if (cyclinEIt != nuclearCompartment.m_molecules.end()) {
-            cyclinELevel = cyclinEIt->second.m_population.m_fNumber;
+            cyclinELevel = cyclinEIt->second.m_fNumber;
         }
         
         // Calculate transcriptional activation using Hill kinetics

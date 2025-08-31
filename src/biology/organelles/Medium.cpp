@@ -13,10 +13,10 @@ static std::mt19937 g_rng(std::random_device{}());
 void Medium::addProtein(const MPopulation& protein, const float3& position)
 {
     GridCell& gridCell = m_grid.findCell(position);
-    MPopulation& cellProtein = gridCell.getOrCreateMolecule(protein.getName());
+    Population& cellProteinPop = gridCell.getOrCreateMolPop(protein.getName());
 
-    cellProtein.bindTo(protein.getBindingSurface());
-    cellProtein.m_population.m_fNumber += protein.m_population.m_fNumber;
+    cellProteinPop.bindTo(protein.getBindingSurface());
+    cellProteinPop.m_fNumber += protein.m_population.m_fNumber;
 }
 
 void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
@@ -40,8 +40,8 @@ void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
 double Medium::getProteinNumber(const std::string& proteinName, const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itProtein = gridCell.m_molecules.find(proteinName);
-    return (itProtein != gridCell.m_molecules.end()) ? itProtein->second.m_population.m_fNumber : 0.0;
+    auto itProtein = gridCell.m_molecules.find(Molecule(proteinName));
+    return (itProtein != gridCell.m_molecules.end()) ? itProtein->second.m_fNumber : 0.0;
 }
 
 void Medium::updateProteinInteraction(double fDt)
@@ -70,8 +70,8 @@ void Medium::updateProteinInteraction(double fDt)
         }
 
         // Ensure ATP doesn't go below zero
-        auto& atpMolecule = m_grid[uCell].getOrCreateMolecule("ATP");
-        atpMolecule.m_population.m_fNumber = std::max(0.0, atpMolecule.m_population.m_fNumber);
+        auto& atpPop = m_grid[uCell].getOrCreateMolPop("ATP");
+        atpPop.m_fNumber = std::max(0.0, atpPop.m_fNumber);
     }
 }
 
@@ -81,9 +81,9 @@ double Medium::getTotalProteinNumber(const std::string& proteinName) const
     for (uint32_t uCell = 0; uCell < m_grid.size(); ++uCell)
     {
         const GridCell& gridCell = m_grid[uCell];
-        auto itProtein = gridCell.m_molecules.find(proteinName);
+        auto itProtein = gridCell.m_molecules.find(Molecule(proteinName));
         if (itProtein != gridCell.m_molecules.end()) {
-            fTotal += itProtein->second.m_population.m_fNumber;
+            fTotal += itProtein->second.m_fNumber;
         }
     }
     return fTotal;
@@ -146,8 +146,8 @@ void Medium::translateMRNAs(double fDt)
             
             if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
                 // Translation successful - add protein to cell
-                MPopulation& cellProtein = cell.getOrCreateMolecule(pProtein->getName());
-                cellProtein.m_population.m_fNumber += pProtein->m_population.m_fNumber;
+                Population& cellProteinPop = cell.getOrCreateMolPop(pProtein->getName());
+                cellProteinPop.m_fNumber += pProtein->m_population.m_fNumber;
                 
                 // Consume ATP (simplified - should be proportional to protein length)
                 double atpCost = ATP_PER_TRANSLATION * pProtein->m_population.m_fNumber;
@@ -165,17 +165,17 @@ void Medium::translateMRNAs(double fDt)
 void Medium::addATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpMolecule = gridCell.getOrCreateMolecule("ATP");
-    atpMolecule.m_population.m_fNumber = std::min<double>(atpMolecule.m_population.m_fNumber + fAmount, MAX_ATP_PER_CELL);
+    auto& atpPop = gridCell.getOrCreateMolPop("ATP");
+    atpPop.m_fNumber = std::min<double>(atpPop.m_fNumber + fAmount, MAX_ATP_PER_CELL);
 }
 
 bool Medium::consumeATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpMolecule = gridCell.getOrCreateMolecule("ATP");
-    if (atpMolecule.m_population.m_fNumber >= fAmount)
+    auto& atpPop = gridCell.getOrCreateMolPop("ATP");
+    if (atpPop.m_fNumber >= fAmount)
     {
-        atpMolecule.m_population.m_fNumber -= fAmount;
+        atpPop.m_fNumber -= fAmount;
         return true;
     }
     return false;
@@ -184,8 +184,8 @@ bool Medium::consumeATP(double fAmount, const float3& position)
 double Medium::getAvailableATP(const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itMolecule = gridCell.m_molecules.find("ATP");
-    return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_population.m_fNumber : 0.0;
+    auto itMolecule = gridCell.m_molecules.find(Molecule("ATP"));
+    return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_fNumber : 0.0;
 }
 
 Medium::Medium()
