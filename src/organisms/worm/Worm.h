@@ -4,7 +4,7 @@
 #include "biology/simulation/TimeContext.h"
 #include "chemistry/DNA.h"
 #include "biology/organelles/Chromosome.h"
-#include "utils/dataCollector/DataCollector.h"
+#include "biology/dataCollector/DataCollector.h"
 #include <memory>
 
 class Worm : public Organism
