@@ -48,13 +48,13 @@ bool Cortex::transportProteinInward(Medium& externalMedium,
     }
     
     // Create a protein population for the amount we want to transport
-    MPopulation protein(proteinName, amount);
+    MPopulation protein(Molecule(proteinName, ChemicalType::PROTEIN), amount);
     
     // Remove from external medium
     // Note: This is a simplification. In reality, we would need to modify
     // the protein count directly in the external medium.
     float3 externalPos = position;
-    MPopulation externalProtein(proteinName, -amount); // Negative amount for removal
+    MPopulation externalProtein(Molecule(proteinName, ChemicalType::PROTEIN), -amount); // Negative amount for removal
     externalMedium.addMolecule(externalProtein, externalPos);
     
     // Add to internal medium
@@ -84,11 +84,11 @@ bool Cortex::transportProteinOutward(Medium& externalMedium,
     }
     
     // Create a protein population for the amount we want to transport
-    MPopulation protein(proteinName, amount);
+    MPopulation protein(Molecule(proteinName, ChemicalType::PROTEIN), amount);
     
     // Remove from internal medium
     float3 internalPos = position;
-    MPopulation internalProtein(proteinName, -amount); // Negative amount for removal
+    MPopulation internalProtein(Molecule(proteinName, ChemicalType::PROTEIN), -amount); // Negative amount for removal
     internalMedium.addMolecule(internalProtein, internalPos);
     
     // Add to external medium
@@ -188,7 +188,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
                 );
                 
                 // Create binding site protein and add to the medium
-                MPopulation bindingSites(StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX), amountPerPosition);
+                MPopulation bindingSites(Molecule(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 internalMedium.addMolecule(bindingSites, normalizedPos);
             }

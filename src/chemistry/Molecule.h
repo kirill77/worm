@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <functional>
 #include <cstdint>
+#include "StringDict.h"
 
 // Forward declaration
 class BindingSurface;
@@ -21,28 +22,33 @@ enum class ChemicalType : uint8_t {
     OTHER          // Catch-all for everything else
 };
 
-// Simple molecule class with just name
+// Simple molecule class with optimized storage
 class Molecule
 {
 public:
     // Default constructor
-    Molecule() : m_sName(), m_type(ChemicalType::OTHER) {}
+    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_sName(), m_type(ChemicalType::OTHER) {}
     
-    // Constructor with name
-    Molecule(const std::string& name) : m_sName(name), m_type(ChemicalType::OTHER) {}
+    // Constructor with name and type (auto-optimizes to ID storage if possible)
+    Molecule(const std::string& name, ChemicalType type = ChemicalType::OTHER);
     
-    // Constructor with name and type
-    Molecule(const std::string& name, ChemicalType type) : m_sName(name), m_type(type) {}
+    // Constructor with StringDict ID and type (uses ID storage, empty string)
+    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_sName(), m_type(type) {}
     
-    // Get name
-    const std::string& getName() const { return m_sName; }
+    // Get name (from StringDict if ID is known, otherwise from stored string)
+    const std::string& getName() const {
+        return (m_id != StringDict::ID::eUNKNOWN) ? StringDict::idToString(m_id) : m_sName;
+    }
     
     // Get chemical type
     ChemicalType getType() const { return m_type; }
     
-    // Equality operator for unordered_map (based on name only for compatibility)
+    // Get StringDict ID (for optimization purposes)
+    StringDict::ID getID() const { return m_id; }
+    
+    // Equality operator for unordered_map
     bool operator==(const Molecule& other) const {
-        return m_sName == other.m_sName;
+        return m_id == other.m_id && m_type == other.m_type && m_sName == other.m_sName;
     }
     
     bool operator!=(const Molecule& other) const {
@@ -50,8 +56,9 @@ public:
     }
 
 private:
-    std::string m_sName;  // Name/type of the molecule
-    ChemicalType m_type;  // Chemical classification of the molecule
+    StringDict::ID m_id;   // StringDict ID if known (eUNKNOWN if not)
+    std::string m_sName;   // Name/type of the molecule (empty if m_id is used)
+    ChemicalType m_type;   // Chemical classification of the molecule
 };
 
 // Population class - handles population properties without molecule identity
@@ -101,10 +108,7 @@ public:
     Molecule m_molecule;     // What molecule this is
     Population m_population; // Population properties (count, binding, etc.)
     
-    // Constructors
-    MPopulation(const std::string& sName, double fNumber)
-        : m_molecule(sName), m_population(fNumber) {}
-        
+    // Constructor - requires explicit Molecule object
     MPopulation(const Molecule& molecule, double fNumber)
         : m_molecule(molecule), m_population(fNumber) {}
     
@@ -123,6 +127,11 @@ namespace std {
     template<>
     struct hash<Molecule> {
         size_t operator()(const Molecule& molecule) const {
+            // Hash based on ID if available for better performance
+            if (molecule.getID() != StringDict::ID::eUNKNOWN) {
+                return hash<int>()(static_cast<int>(molecule.getID()));
+            }
+            // Otherwise hash the string name
             return hash<string>()(molecule.getName());
         }
     };

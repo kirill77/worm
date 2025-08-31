@@ -47,7 +47,7 @@ std::shared_ptr<MPopulation> MRNA::translate(double dt, const std::vector<std::s
     }
 
     // Create new protein
-    auto pProtein = std::make_shared<MPopulation>(m_sName, fProteinAmount);
+    auto pProtein = std::make_shared<MPopulation>(Molecule(m_sName, ChemicalType::PROTEIN), fProteinAmount);
 
     // Discharge used tRNAs (simplified)
     for (const auto& tRNA : availableTRNAs)

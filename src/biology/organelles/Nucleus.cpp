@@ -24,7 +24,7 @@ void Nucleus::update(double fDt, Cell& cell)
         double importRate = 0.1;  // 10% per time step
         
         for (const auto& proteinID : transcriptionFactors) {
-            double cytoplasmicLevel = medium.getMoleculeNumber(Molecule(StringDict::idToString(proteinID), ChemicalType::PROTEIN), nucleusCenter);
+            double cytoplasmicLevel = medium.getMoleculeNumber(Molecule(proteinID, ChemicalType::PROTEIN), nucleusCenter);
             double importAmount = cytoplasmicLevel * importRate * fDt;
             
             if (importAmount > 0.0) {

@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="MRNA.cpp" />
     <ClCompile Include="MoleculeWiki.cpp" />
+    <ClCompile Include="Molecule.cpp" />
     <ClCompile Include="ComplexFormationInteraction.cpp" />
     <ClCompile Include="DephosphorylationInteraction.cpp" />
     <ClCompile Include="DNA.cpp" />

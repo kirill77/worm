@@ -110,5 +110,8 @@
     <ClCompile Include="TRNA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Molecule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

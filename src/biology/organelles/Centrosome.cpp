@@ -26,10 +26,10 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
         // γ-tubulin is now produced through gene expression, not constant addition
         
         // Add other centrosome proteins
-        MPopulation pericentrin(StringDict::idToString(StringDict::ID::PERICENTRIN), 500.0);
+        MPopulation pericentrin(Molecule(StringDict::ID::PERICENTRIN, ChemicalType::PROTEIN), 500.0);
         internalMedium.addMolecule(pericentrin, m_mToParent.m_translation);
         
-        MPopulation ninein(StringDict::idToString(StringDict::ID::NINEIN), 300.0);
+        MPopulation ninein(Molecule(StringDict::ID::NINEIN, ChemicalType::PROTEIN), 300.0);
         internalMedium.addMolecule(ninein, m_mToParent.m_translation);
     }
     
@@ -44,8 +44,8 @@ void Centrosome::update(double dt, Cell& cell)
     // Check for centrosome duplication during S phase
     if (!m_isDuplicated) {
         // Check if we're in S phase (high CDK-2 and Cyclin E levels)
-        double cdk2 = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CDK_2), ChemicalType::PROTEIN), m_mToParent.m_translation);
-        double cyclinE = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::CCE_1), ChemicalType::PROTEIN), m_mToParent.m_translation);
+        double cdk2 = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN), m_mToParent.m_translation);
+        double cyclinE = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN), m_mToParent.m_translation);
         
         // Trigger duplication when CDK-2 and Cyclin E are high enough
         if (cdk2 > 800.0 && cyclinE > 800.0) {
@@ -93,7 +93,7 @@ void Centrosome::update(double dt, Cell& cell)
     // γ-tubulin is now regulated through transcription, not constant addition
     
     // Manage ring complexes based on gamma-tubulin levels
-    double gammaTubulinCount = internalMedium.getMoleculeNumber(Molecule(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), ChemicalType::PROTEIN), m_mToParent.m_translation);
+    double gammaTubulinCount = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN), m_mToParent.m_translation);
     
     // Target: ~1 ring complex per 50 gamma-tubulin proteins
     int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);
@@ -126,11 +126,11 @@ void Centrosome::duplicate()
             auto& internalMedium = pCellPtr->getInternalMedium();
             
             // Add additional γ-tubulin for the duplicated centrosome
-            MPopulation gammaTubulin(StringDict::idToString(StringDict::ID::GAMMA_TUBULIN), 500.0);
+            MPopulation gammaTubulin(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN), 500.0);
             internalMedium.addMolecule(gammaTubulin, m_mToParent.m_translation);
             
             // Add other duplication-related proteins
-            MPopulation plk4(StringDict::idToString(StringDict::ID::PLK_4), 200.0);  // Polo-like kinase 4 for centriole duplication
+            MPopulation plk4(Molecule(StringDict::ID::PLK_4, ChemicalType::PROTEIN), 200.0);  // Polo-like kinase 4 for centriole duplication
             internalMedium.addMolecule(plk4, m_mToParent.m_translation);
             
             // Add additional ring complexes for the duplicated centrosome
