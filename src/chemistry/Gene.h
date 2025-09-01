@@ -2,7 +2,7 @@
 
 #include <string>
 #include <memory>
-#include "MRNA.h"
+#include "Molecule.h"
 #include "StringDict.h"
 
 class Gene
@@ -26,6 +26,6 @@ public:
     void setExpressionRate(double rate) { m_fExpressionRate = rate; }
 
     // Transcription
-    std::shared_ptr<MRNA> transcribe(double dt) const;
+    std::shared_ptr<MPopulation> transcribe(double dt) const;
 };
 

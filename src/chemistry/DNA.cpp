@@ -16,9 +16,9 @@ std::shared_ptr<Gene> DNA::getGene(StringDict::ID id) const
     return (it != m_geneMap.end()) ? it->second : nullptr;
 }
 
-std::vector<std::shared_ptr<MRNA>> DNA::transcribeAll(double dt) const
+std::vector<std::shared_ptr<MPopulation>> DNA::transcribeAll(double dt) const
 {
-    std::vector<std::shared_ptr<MRNA>> transcribedRNA;
+    std::vector<std::shared_ptr<MPopulation>> transcribedRNA;
     
     for (const auto& gene : m_pGenes)
     {

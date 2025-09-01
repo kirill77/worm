@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include "Gene.h"
-#include "MRNA.h"
+
 #include "StringDict.h"
 
 // Forward declarations  
@@ -25,7 +25,7 @@ public:
     std::shared_ptr<Gene> getGene(StringDict::ID id) const;
 
     // Transcribe all genes
-    std::vector<std::shared_ptr<MRNA>> transcribeAll(double dt) const;
+    std::vector<std::shared_ptr<MPopulation>> transcribeAll(double dt) const;
 
     // Regulate gene expression
     void regulateGene(StringDict::ID id, double newExpressionRate);

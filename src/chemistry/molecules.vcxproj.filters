@@ -45,9 +45,7 @@
     <ClInclude Include="Molecule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MRNA.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+
     <ClInclude Include="PhosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -89,9 +87,7 @@
     <ClCompile Include="GridCell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MRNA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+
     <ClCompile Include="PhosphorylationInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

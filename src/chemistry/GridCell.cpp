@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GridCell.h"
 #include "Molecule.h"
+#include "MoleculeWiki.h"
+#include <cmath>
 
 GridCell::GridCell()
 {
@@ -18,28 +20,25 @@ Population& GridCell::getOrCreateMolPop(const Molecule& molecule)
     return m_molecules.emplace(molecule, Population(0.0)).first->second;
 }
 
-MRNA& GridCell::getOrCreateMRNA(const std::string& sName)
+void GridCell::updateRNAs(double dt)
 {
-    auto it = m_pMRNAs.find(sName);
-    if (it != m_pMRNAs.end()) {
-        return it->second;
-    }
-    
-    // Create new mRNA with default parameters (will need to be set properly)
-    return m_pMRNAs.emplace(sName, MRNA(sName, 0.0, 2.0, 1.0)).first->second;
-}
-
-void GridCell::updateMRNAs(double dt)
-{
-    // Handle mRNA degradation and cleanup
-    auto it = m_pMRNAs.begin();
-    while (it != m_pMRNAs.end()) {
-        it->second.degrade(dt); // Handle mRNA degradation via half-life
-        if (it->second.getNumber() <= 0.01) { // Remove degraded mRNAs
-            it = m_pMRNAs.erase(it);
-        } else {
-            ++it;
+    // Handle RNA degradation and cleanup
+    auto it = m_molecules.begin();
+    while (it != m_molecules.end()) {
+        if (it->first.getType() == ChemicalType::RNA) {
+            // Get half-life from MoleculeWiki
+            const auto& info = MoleculeWiki::getInfo(it->first);
+            double halfLife = info.m_fHalfLife;
+            if (halfLife > 0.0) {
+                // Simple exponential decay model for RNA degradation
+                it->second.m_fNumber *= exp(-dt / halfLife);
+            }
+            if (it->second.m_fNumber <= 0.01) { // Remove degraded RNAs
+                it = m_molecules.erase(it);
+                continue;
+            }
         }
+        ++it;
     }
 }
 
@@ -52,4 +51,14 @@ void GridCell::updateTRNAs(double dt)
     
     // Note: tRNAs don't degrade like mRNAs, so we don't remove them
     // They get recycled after being used in translation
-} 
+}
+
+bool GridCell::hasRNAs() const
+{
+    for (const auto& mol : m_molecules) {
+        if (mol.first.getType() == ChemicalType::RNA) {
+            return true;
+        }
+    }
+    return false;
+}

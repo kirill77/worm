@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Nucleus.h"
-#include "chemistry/MRNA.h"
+
 #include "Medium.h"
 #include "Cell.h"
 #include <algorithm>
@@ -61,38 +61,38 @@ void Nucleus::update(double fDt, Cell& cell)
     if (cell.getCellCycleState() == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
     {
         // Transcribe genes using nuclear compartment and add to nuclear pool
-        auto newMRNAs = transcribeAll(fDt);
-        for (auto& mrna : newMRNAs) {
-            MRNA& existingMRNA = m_nuclearCompartment.getOrCreateMRNA(mrna->getName());
+        auto newRNAs = transcribeAll(fDt);
+        for (auto& rna : newRNAs) {
+            Population& existingRNA = m_nuclearCompartment.getOrCreateMolPop(rna->m_molecule);
             
-            // If this is a newly created mRNA (with default values), copy the properties
-            if (existingMRNA.getNumber() == 0.0) {
-                existingMRNA = *mrna;
-            } else {
-                // Add to existing mRNA count (accumulate transcribed mRNAs)
-                existingMRNA.addNumber(mrna->getNumber());
-            }
+            // Add to existing RNA population (accumulate transcribed RNAs)
+            existingRNA.m_fNumber += rna->m_population.m_fNumber;
         }
     }
     
-    // 4. Try to export existing mRNAs from nuclear pool (if we have ATP and envelope is intact)
+    // 4. Try to export existing RNAs from nuclear pool (if we have ATP and envelope is intact)
     if (m_fEnvelopeIntegrity > 0.5)
     {
-        auto& mrnas = m_nuclearCompartment.getMRNAs();
-        auto it = mrnas.begin();
-        while (it != mrnas.end()) {
-            if (cell.consumeATP(ATPCosts::fMRNA_SYNTHESIS)) {
-                auto mrnaPtr = std::make_shared<MRNA>(it->second);
-                exportMRNA(mrnaPtr);
-                it = mrnas.erase(it); // Remove exported mRNA
+        // Find RNA molecules in the nuclear compartment
+        auto& molecules = m_nuclearCompartment.m_molecules;
+        auto it = molecules.begin();
+        while (it != molecules.end()) {
+            if (it->first.getType() == ChemicalType::RNA && it->second.m_fNumber > 0.1) {
+                if (cell.consumeATP(ATPCosts::fRNA_SYNTHESIS)) {
+                    auto rnaPtr = std::make_shared<MPopulation>(it->first, it->second.m_fNumber);
+                    exportRNA(rnaPtr);
+                    it = molecules.erase(it); // Remove exported RNA
+                } else {
+                    ++it; // Keep in nucleus, try again next timestep
+                }
             } else {
-                ++it; // Keep in nucleus, try again next timestep
+                ++it;
             }
         }
     }
     
-    // 5. Handle mRNA degradation in nuclear pool
-    m_nuclearCompartment.updateMRNAs(fDt);
+    // 5. Handle RNA degradation in nuclear pool
+    m_nuclearCompartment.updateRNAs(fDt);
 }
 
 bool Nucleus::areChromosomesCondensed() const
@@ -143,9 +143,9 @@ bool Nucleus::areChromosomesDecondensed() const
     return true;
 }
 
-std::vector<std::shared_ptr<MRNA>> Nucleus::transcribeAll(double fDt) const
+std::vector<std::shared_ptr<MPopulation>> Nucleus::transcribeAll(double fDt) const
 {
-    std::vector<std::shared_ptr<MRNA>> allTranscripts;
+    std::vector<std::shared_ptr<MPopulation>> allTranscripts;
     
     // Only transcribe if nuclear envelope is mostly intact
     if (m_fEnvelopeIntegrity > 0.8)
@@ -170,12 +170,12 @@ void Nucleus::importProtein(const std::string& proteinName, double amount)
     }
 }
 
-void Nucleus::exportMRNA(std::shared_ptr<MRNA> mRNA)
+void Nucleus::exportRNA(std::shared_ptr<MPopulation> rna)
 {
-    // Export mRNA to cytoplasm near nucleus (only if envelope is intact)
+    // Export RNA to cytoplasm near nucleus (only if envelope is intact)
     if (m_fEnvelopeIntegrity > 0.5) {
         if (auto pCell = getCell()) {
-            // Add mRNAs slightly offset from center to simulate nuclear pores
+            // Add RNAs slightly offset from center to simulate nuclear pores
             float angle = static_cast<float>(rand()) / RAND_MAX * 6.28318f;  // Random angle
             float radius = 0.2f;  // Distance from center
             float3 position(
@@ -183,7 +183,7 @@ void Nucleus::exportMRNA(std::shared_ptr<MRNA> mRNA)
                 radius * sin(angle),
                 0.0f
             );
-            pCell->getInternalMedium().addMRNA(mRNA, position);
+            pCell->getInternalMedium().addMolecule(*rna, position);
         }
     }
 }

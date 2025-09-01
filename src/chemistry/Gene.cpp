@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Gene.h"
-#include "MRNA.h"
+#include "MoleculeWiki.h"
 #include "GeneWiki.h"
 #include "StringDict.h"
 #include <random>
 
-std::shared_ptr<MRNA> Gene::transcribe(double dt) const
+std::shared_ptr<MPopulation> Gene::transcribe(double dt) const
 {
     // Calculate amount of mRNA produced based on expression rate and time step
     double mRNAAmount = m_fExpressionRate * dt + m_fBasalLevel;
@@ -16,11 +16,7 @@ std::shared_ptr<MRNA> Gene::transcribe(double dt) const
     std::normal_distribution<> noise(1.0, 0.1); // 10% noise
     mRNAAmount *= noise(gen);
 
-    // Create new mRNA with typical half-life of 2.0 time units
-    return std::make_shared<MRNA>(
-        StringDict::idToString(m_id),
-        mRNAAmount,
-        2.0,  // half-life
-        1.0   // translation rate
-    );
+    // Create new RNA molecule population
+    Molecule rnaMolecule(StringDict::idToString(m_id), ChemicalType::RNA);
+    return std::make_shared<MPopulation>(rnaMolecule, mRNAAmount);
 } 

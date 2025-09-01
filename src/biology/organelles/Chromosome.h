@@ -43,7 +43,7 @@ public:
     // DNA-related functions
     void setDNA(std::shared_ptr<DNA> pDNA) { m_pDNA = pDNA; }
     std::shared_ptr<DNA> getDNA() const { return m_pDNA; }
-    std::vector<std::shared_ptr<MRNA>> transcribe(double fDt, const class GridCell& nuclearCompartment) const;
+    std::vector<std::shared_ptr<MPopulation>> transcribe(double fDt, const class GridCell& nuclearCompartment) const;
     
     // Getters
     float getCondensation() const { return m_fCondensation; }

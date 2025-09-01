@@ -7,8 +7,10 @@
 #include <cstdint>
 #include "StringDict.h"
 
-// Forward declaration
+// Forward declarations
 class BindingSurface;
+struct MPopulation;
+class TRNA;
 
 // Chemical type classification for molecules
 enum class ChemicalType : uint8_t {
@@ -54,6 +56,10 @@ public:
     bool operator!=(const Molecule& other) const {
         return !(*this == other);
     }
+    
+    // Translation function (for RNA molecules)
+    std::shared_ptr<MPopulation> translate(double dt, double moleculeAmount, double translationRate, 
+                                         const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
 
 private:
     StringDict::ID m_id;   // StringDict ID if known (eUNKNOWN if not)

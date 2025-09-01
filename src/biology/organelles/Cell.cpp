@@ -6,7 +6,7 @@
 #include "EReticulum.h"
 #include "Centrosome.h"
 #include "Cortex.h"
-#include "chemistry/MRNA.h"
+
 #include "utils/log/ILog.h"
 
 std::shared_ptr<Cell> Cell::createCell(std::shared_ptr<Medium> pInternalMedium,

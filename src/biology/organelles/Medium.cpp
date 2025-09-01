@@ -19,19 +19,6 @@ void Medium::addMolecule(const MPopulation& population, const float3& position)
     moleculePop.m_fNumber += population.m_population.m_fNumber;
 }
 
-void Medium::addMRNA(std::shared_ptr<MRNA> pMRNA, const float3& position)
-{
-    MRNA& existingMRNA = m_grid.findCell(position).getOrCreateMRNA(pMRNA->getName());
-    
-    // If this is a newly created mRNA (with default values), copy the properties
-    if (existingMRNA.getNumber() == 0.0) {
-        existingMRNA = *pMRNA;
-    } else {
-        // Add to existing mRNA count (accumulate molecules of same type)
-        existingMRNA.addNumber(pMRNA->getNumber());
-    }
-}
-
 void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
 {
     m_grid.findCell(position).m_pTRNAs.push_back(pTRNA);
@@ -101,11 +88,11 @@ void Medium::update(double fDt)
     // Interaction of proteins between each other
     updateProteinInteraction(fDt);
     
-    // Update mRNA positions
-    translateMRNAs(fDt);
+    // Update RNA positions
+    translateRNAs(fDt);
 }
 
-void Medium::translateMRNAs(double fDt)
+void Medium::translateRNAs(double fDt)
 {
     static constexpr double ATP_PER_TRANSLATION = 4.0;  // ATP cost per amino acid (approximate)
     
@@ -113,8 +100,8 @@ void Medium::translateMRNAs(double fDt)
     for (size_t i = 0; i < m_grid.size(); ++i) {
         GridCell& cell = m_grid[i];
         
-        // Skip cells with no mRNAs
-        if (!cell.hasMRNAs()) continue;
+        // Skip cells with no RNAs
+        if (!cell.hasRNAs()) continue;
         
         // Collect available tRNAs from this cell
         std::vector<std::shared_ptr<TRNA>> availableTRNAs;
@@ -127,36 +114,38 @@ void Medium::translateMRNAs(double fDt)
         // Skip if no charged tRNAs available
         if (availableTRNAs.empty()) continue;
         
-        // Attempt translation for each mRNA
-        auto& mrnas = cell.getMRNAs();
-        auto it = mrnas.begin();
-        while (it != mrnas.end()) {
-            auto& mrna = it->second;
-            
-            // Check if we have enough ATP for translation
-            // (approximate cost - in reality would depend on protein length)
-            float3 cellPosition = m_grid.indexToPosition(i);
-            if (getAvailableATP(cellPosition) < ATP_PER_TRANSLATION * 10) {
-                ++it;
-                continue;
-            }
-            
-            // Attempt translation
-            auto pProtein = mrna.translate(fDt, availableTRNAs);
-            
-            if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
-                // Translation successful - add protein to cell
-                Population& cellProteinPop = cell.getOrCreateMolPop(Molecule(pProtein->getName(), ChemicalType::PROTEIN));
-                cellProteinPop.m_fNumber += pProtein->m_population.m_fNumber;
+        // Attempt translation for each RNA molecule
+        auto& molecules = cell.m_molecules;
+        auto it = molecules.begin();
+        while (it != molecules.end()) {
+            if (it->first.getType() == ChemicalType::RNA && it->second.m_fNumber > 0.1) {
+                // Check if we have enough ATP for translation
+                float3 cellPosition = m_grid.indexToPosition(i);
+                if (getAvailableATP(cellPosition) < ATP_PER_TRANSLATION * 10) {
+                    ++it;
+                    continue;
+                }
                 
-                // Consume ATP (simplified - should be proportional to protein length)
-                double atpCost = ATP_PER_TRANSLATION * pProtein->m_population.m_fNumber;
-                consumeATP(atpCost, cellPosition);
+                // Get translation rate from MoleculeWiki
+                const auto& info = MoleculeWiki::getInfo(it->first);
+                double translationRate = info.m_fTranslationRate;
                 
-                // Reduce mRNA amount (simplified degradation from translation)
-                // In reality, ribosomes can translate the same mRNA multiple times
+                // Attempt translation
+                auto pProtein = it->first.translate(fDt, it->second.m_fNumber, translationRate, availableTRNAs);
+                
+                if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
+                    // Translation successful - add protein to cell
+                    Population& cellProteinPop = cell.getOrCreateMolPop(Molecule(pProtein->getName(), ChemicalType::PROTEIN));
+                    cellProteinPop.m_fNumber += pProtein->m_population.m_fNumber;
+                    
+                    // Consume ATP (simplified - should be proportional to protein length)
+                    double atpCost = ATP_PER_TRANSLATION * pProtein->m_population.m_fNumber;
+                    consumeATP(atpCost, cellPosition);
+                    
+                    // Reduce RNA amount (simplified degradation from translation)
+                    // In reality, ribosomes can translate the same mRNA multiple times
+                }
             }
-            
             ++it;
         }
     }

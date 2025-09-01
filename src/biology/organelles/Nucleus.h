@@ -7,8 +7,7 @@
 #include <memory>
 #include <vector>
 
-// Forward declarations
-class MRNA;
+
 
 class Nucleus : public Organelle
 {
@@ -35,11 +34,11 @@ public:
     bool areChromosomesAttached() const;
     bool areChromosomesSeparated() const;
     bool areChromosomesDecondensed() const;
-    std::vector<std::shared_ptr<MRNA>> transcribeAll(double fDt) const;
+    std::vector<std::shared_ptr<MPopulation>> transcribeAll(double fDt) const;
 
     // Nuclear transport
     void importProtein(const std::string& proteinName, double amount);
-    void exportMRNA(std::shared_ptr<MRNA> mRNA);
+    void exportRNA(std::shared_ptr<MPopulation> rna);
     
     // Nuclear compartment access
     const GridCell& getNuclearCompartment() const { return m_nuclearCompartment; }
@@ -49,7 +48,6 @@ public:
     double getEnvelopeIntegrity() const { return m_fEnvelopeIntegrity; }
     size_t getChromosomeCount() const { return m_chromosomes.size(); }
     const std::vector<Chromosome>& getChromosomes() const { return m_chromosomes; }
-    const std::unordered_map<std::string, MRNA>& getNuclearMRNAs() const { return m_nuclearCompartment.getMRNAs(); }
-    size_t getNuclearMRNACount() const { return m_nuclearCompartment.getMRNACount(); }
+    bool hasNuclearRNAs() const { return m_nuclearCompartment.hasRNAs(); }
 };
 

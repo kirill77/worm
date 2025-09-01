@@ -154,7 +154,7 @@
     <ClInclude Include="GeneWiki.h" />
     <ClInclude Include="GridCell.h" />
     <ClInclude Include="Molecule.h" />
-    <ClInclude Include="MRNA.h" />
+
     <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="ProteinInteraction.h" />
     <ClInclude Include="ProteinInteractionLoader.h" />
@@ -163,7 +163,7 @@
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MRNA.cpp" />
+
     <ClCompile Include="MoleculeWiki.cpp" />
     <ClCompile Include="Molecule.cpp" />
     <ClCompile Include="ComplexFormationInteraction.cpp" />
