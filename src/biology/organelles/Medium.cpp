@@ -88,11 +88,11 @@ void Medium::update(double fDt)
     // Interaction of proteins between each other
     updateProteinInteraction(fDt);
     
-    // Update RNA positions
-    translateRNAs(fDt);
+    // Update mRNA translation
+    translateMRNAs(fDt);
 }
 
-void Medium::translateRNAs(double fDt)
+void Medium::translateMRNAs(double fDt)
 {
     static constexpr double ATP_PER_TRANSLATION = 4.0;  // ATP cost per amino acid (approximate)
     
@@ -100,8 +100,8 @@ void Medium::translateRNAs(double fDt)
     for (size_t i = 0; i < m_grid.size(); ++i) {
         GridCell& cell = m_grid[i];
         
-        // Skip cells with no RNAs
-        if (!cell.hasRNAs()) continue;
+        // Skip cells with no mRNAs
+        if (!cell.hasMRNAs()) continue;
         
         // Collect available tRNAs from this cell
         std::vector<std::shared_ptr<TRNA>> availableTRNAs;
@@ -114,11 +114,11 @@ void Medium::translateRNAs(double fDt)
         // Skip if no charged tRNAs available
         if (availableTRNAs.empty()) continue;
         
-        // Attempt translation for each RNA molecule
+        // Attempt translation for each mRNA molecule
         auto& molecules = cell.m_molecules;
         auto it = molecules.begin();
         while (it != molecules.end()) {
-            if (it->first.getType() == ChemicalType::RNA && it->second.m_fNumber > 0.1) {
+            if (it->first.getType() == ChemicalType::MRNA && it->second.m_fNumber > 0.1) {
                 // Check if we have enough ATP for translation
                 float3 cellPosition = m_grid.indexToPosition(i);
                 if (getAvailableATP(cellPosition) < ATP_PER_TRANSLATION * 10) {
@@ -142,7 +142,7 @@ void Medium::translateRNAs(double fDt)
                     double atpCost = ATP_PER_TRANSLATION * pProtein->m_population.m_fNumber;
                     consumeATP(atpCost, cellPosition);
                     
-                    // Reduce RNA amount (simplified degradation from translation)
+                    // Reduce mRNA amount (simplified degradation from translation)
                     // In reality, ribosomes can translate the same mRNA multiple times
                 }
             }

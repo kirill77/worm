@@ -20,20 +20,20 @@ Population& GridCell::getOrCreateMolPop(const Molecule& molecule)
     return m_molecules.emplace(molecule, Population(0.0)).first->second;
 }
 
-void GridCell::updateRNAs(double dt)
+void GridCell::updateMRNAs(double dt)
 {
-    // Handle RNA degradation and cleanup
+    // Handle mRNA degradation and cleanup
     auto it = m_molecules.begin();
     while (it != m_molecules.end()) {
-        if (it->first.getType() == ChemicalType::RNA) {
+        if (it->first.getType() == ChemicalType::MRNA) {
             // Get half-life from MoleculeWiki
             const auto& info = MoleculeWiki::getInfo(it->first);
             double halfLife = info.m_fHalfLife;
             if (halfLife > 0.0) {
-                // Simple exponential decay model for RNA degradation
+                // Simple exponential decay model for mRNA degradation
                 it->second.m_fNumber *= exp(-dt / halfLife);
             }
-            if (it->second.m_fNumber <= 0.01) { // Remove degraded RNAs
+            if (it->second.m_fNumber <= 0.01) { // Remove degraded mRNAs
                 it = m_molecules.erase(it);
                 continue;
             }
@@ -53,10 +53,10 @@ void GridCell::updateTRNAs(double dt)
     // They get recycled after being used in translation
 }
 
-bool GridCell::hasRNAs() const
+bool GridCell::hasMRNAs() const
 {
     for (const auto& mol : m_molecules) {
-        if (mol.first.getType() == ChemicalType::RNA) {
+        if (mol.first.getType() == ChemicalType::MRNA) {
             return true;
         }
     }

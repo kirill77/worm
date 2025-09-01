@@ -25,7 +25,7 @@ struct ATPCosts
     static constexpr double fSPINDLE_FORMATION = 15.0;     // Cost for mitotic spindle
     static constexpr double fCHROMOSOME_MOVEMENT = 5.0;    // Cost per chromosome per second during anaphase
     static constexpr double fMEMBRANE_FUSION = 8.0;        // Cost for membrane fusion events
-    static constexpr double fRNA_SYNTHESIS = 2.0;          // Cost per RNA molecule
+    static constexpr double fMRNA_EXPORT = 2.0;            // Cost per mRNA export from nucleus
 };
 
 class BVHMesh;

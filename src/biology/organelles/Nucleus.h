@@ -48,6 +48,6 @@ public:
     double getEnvelopeIntegrity() const { return m_fEnvelopeIntegrity; }
     size_t getChromosomeCount() const { return m_chromosomes.size(); }
     const std::vector<Chromosome>& getChromosomes() const { return m_chromosomes; }
-    bool hasNuclearRNAs() const { return m_nuclearCompartment.hasRNAs(); }
+    bool hasNuclearMRNAs() const { return m_nuclearCompartment.hasMRNAs(); }
 };
 

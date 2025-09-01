@@ -59,6 +59,6 @@ private:
 
     // Update functions
     void updateProteinInteraction(double dt);
-    void translateRNAs(double dt);
+    void translateMRNAs(double dt);
 };
 

@@ -77,8 +77,8 @@ void Nucleus::update(double fDt, Cell& cell)
         auto& molecules = m_nuclearCompartment.m_molecules;
         auto it = molecules.begin();
         while (it != molecules.end()) {
-            if (it->first.getType() == ChemicalType::RNA && it->second.m_fNumber > 0.1) {
-                if (cell.consumeATP(ATPCosts::fRNA_SYNTHESIS)) {
+            if (it->first.getType() == ChemicalType::MRNA && it->second.m_fNumber > 0.1) {
+                if (cell.consumeATP(ATPCosts::fMRNA_EXPORT)) {
                     auto rnaPtr = std::make_shared<MPopulation>(it->first, it->second.m_fNumber);
                     exportRNA(rnaPtr);
                     it = molecules.erase(it); // Remove exported RNA
@@ -92,7 +92,7 @@ void Nucleus::update(double fDt, Cell& cell)
     }
     
     // 5. Handle RNA degradation in nuclear pool
-    m_nuclearCompartment.updateRNAs(fDt);
+    m_nuclearCompartment.updateMRNAs(fDt);
 }
 
 bool Nucleus::areChromosomesCondensed() const

@@ -17,7 +17,9 @@ enum class ChemicalType : uint8_t {
     PROTEIN,        // Any amino acid chain
     AMINO_ACID,     // Single amino acid
     DNA,           // DNA polymers
-    RNA,           // RNA polymers  
+    MRNA,          // Messenger RNA - carries genetic information for translation
+    TRNA,          // Transfer RNA - carries amino acids during translation  
+    RRNA,          // Ribosomal RNA - structural component of ribosomes
     NUCLEOTIDE,    // Single nucleotides (ATP, GTP, dATP, etc.)
     LIPID,         // Fatty acids, phospholipids, steroids
     ION,           // Charged atoms/molecules (Na+, Cl-, etc.)

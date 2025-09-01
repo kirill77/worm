@@ -26,7 +26,7 @@ std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmoun
                                                const std::vector<std::shared_ptr<TRNA>>& availableTRNAs) const
 {
     // Assert that this method is only called on RNA molecules
-    assert(m_type == ChemicalType::RNA && "translate() can only be called on RNA molecules");
+    assert(m_type == ChemicalType::MRNA && "translate() can only be called on mRNA molecules");
     
     // Check if we have enough RNA to produce protein
     if (moleculeAmount < 0.1) return nullptr;  // Threshold for translation

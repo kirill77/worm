@@ -24,15 +24,15 @@ public:
     // Helper to get or create molecule population
     Population& getOrCreateMolPop(const Molecule& molecule);
     
-    // Check if RNA molecules exist
-    bool hasRNAs() const;
+    // Check if mRNA molecules exist
+    bool hasMRNAs() const;
     
-    // RNA management
-    void updateRNAs(double dt);  // Handle RNA degradation and cleanup
+    // mRNA management
+    void updateMRNAs(double dt);  // Handle mRNA degradation and cleanup
     
     // tRNA management  
     void updateTRNAs(double dt);  // Handle tRNA charging and cleanup
 
 private:
-    // No longer need separate RNA storage - use m_molecules with RNA type
+    // No longer need separate RNA storage - use m_molecules with MRNA type
 }; 
