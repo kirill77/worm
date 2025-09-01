@@ -13,6 +13,7 @@
 
 // Initialize static members
 std::vector<std::shared_ptr<ProteinInteraction>> MoleculeWiki::s_proteinInteractions;
+std::unordered_map<Molecule, MolInfo> MoleculeWiki::m_moleculesInfo;
 
 void MoleculeWiki::Initialize()
 {
@@ -90,4 +91,16 @@ std::string MoleculeWiki::GetPhosphorylatedName(const std::string& proteinName)
 std::string MoleculeWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {
     return proteinName + ":" + StringDict::idToString(surface);
+}
+
+const MolInfo& MoleculeWiki::getInfo(const Molecule& molecule)
+{
+    auto it = m_moleculesInfo.find(molecule);
+    if (it != m_moleculesInfo.end()) {
+        return it->second;
+    }
+    
+    // If not found, return a default empty MolInfo object
+    static const MolInfo defaultInfo("No information available", "", 0.0, "", 0.0, 0.0);
+    return defaultInfo;
 }
