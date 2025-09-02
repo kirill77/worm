@@ -17,6 +17,6 @@ std::shared_ptr<MPopulation> Gene::transcribe(double dt) const
     mRNAAmount *= noise(gen);
 
     // Create new RNA molecule population
-    Molecule rnaMolecule(StringDict::idToString(m_id), ChemicalType::MRNA);
+    Molecule rnaMolecule(m_id, ChemicalType::MRNA);
     return std::make_shared<MPopulation>(rnaMolecule, mRNAAmount);
 } 

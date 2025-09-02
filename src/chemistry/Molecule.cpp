@@ -5,23 +5,6 @@
 #include <algorithm>
 #include <cmath>
 
-// Constructor with name and type - automatically tries to use ID optimization
-Molecule::Molecule(const std::string& name, ChemicalType type) : m_type(type)
-{
-    // Try to convert string to StringDict ID first for optimization
-    m_id = StringDict::stringToId(name);
-
-    assert(m_type != ChemicalType::OTHER);
-
-    if (m_id != StringDict::ID::eUNKNOWN) {
-        // Found matching ID - use optimized storage (empty string)
-        m_sName.clear();  // Explicitly clear for safety
-    } else {
-        // Unknown molecule - store the string
-        m_sName = name;
-    }
-}
-
 std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmount, double translationRate, 
                                                const std::vector<std::shared_ptr<TRNA>>& availableTRNAs) const
 {
@@ -68,7 +51,7 @@ std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmoun
     }
 
     // Create new protein
-    auto pProtein = std::make_shared<MPopulation>(Molecule(getName(), ChemicalType::PROTEIN), fProteinAmount);
+    auto pProtein = std::make_shared<MPopulation>(Molecule(m_id, ChemicalType::PROTEIN), fProteinAmount);
 
     // Discharge used tRNAs (simplified)
     for (const auto& tRNA : availableTRNAs)

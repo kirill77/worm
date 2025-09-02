@@ -12,7 +12,7 @@ void StringDict::initialize()
     // Resize vector to accommodate all enum values
     m_idToString.resize(static_cast<size_t>(ID::ORGANELLE_END) + 1);
     
-    // Binding surface types
+    // Special types
     m_idToString[static_cast<size_t>(ID::eUNKNOWN)] = "UNKNOWN";
     
     // PAR proteins (polarity establishment)
@@ -75,6 +75,22 @@ void StringDict::initialize()
     m_idToString[static_cast<size_t>(ID::SKN_1)] = "skn-1";
     m_idToString[static_cast<size_t>(ID::PAL_1)] = "pal-1";
     m_idToString[static_cast<size_t>(ID::PIE_1)] = "pie-1";
+    
+    // Endoplasmic reticulum molecules
+    m_idToString[static_cast<size_t>(ID::ER_PROTEIN)] = "ER-Protein";
+    m_idToString[static_cast<size_t>(ID::ER_LIPID)] = "ER-Lipid";
+    
+    // Phosphorylated PAR proteins
+    m_idToString[static_cast<size_t>(ID::PAR_1_P)] = "PAR-1-P";
+    m_idToString[static_cast<size_t>(ID::PAR_2_P)] = "PAR-2-P";
+    m_idToString[static_cast<size_t>(ID::PAR_3_P)] = "PAR-3-P";
+    
+    // Protein complexes
+    m_idToString[static_cast<size_t>(ID::PAR_3_PAR_6)] = "PAR-3:PAR-6";
+    m_idToString[static_cast<size_t>(ID::PAR_6_PKC_3)] = "PAR-6:PKC-3";
+    m_idToString[static_cast<size_t>(ID::PAR_1_CORTEX)] = "PAR-1:CORTEX";
+    m_idToString[static_cast<size_t>(ID::PAR_2_CORTEX)] = "PAR-2:CORTEX";
+    m_idToString[static_cast<size_t>(ID::PAR_3_CORTEX)] = "PAR-3:CORTEX";
     
     // Organelle types
     m_idToString[static_cast<size_t>(ID::ORGANELLE_NUCLEUS)] = "NUCLEUS";

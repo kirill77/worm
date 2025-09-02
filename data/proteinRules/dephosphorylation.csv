@@ -1,5 +1,5 @@
-target,recovery_rate
+target,phosphorylated_form,recovery_rate
 # Dephosphorylation recovery rates for PAR proteins
-PAR-1,0.07
-PAR-2,0.07
-PAR-3,0.07 
+PAR-1,PAR-1-P,0.07
+PAR-2,PAR-2-P,0.07
+PAR-3,PAR-3-P,0.07 

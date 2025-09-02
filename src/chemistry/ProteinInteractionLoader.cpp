@@ -147,7 +147,7 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
         }
         
         // Ensure we have enough values
-        if (values.size() < 4) {
+        if (values.size() < 5) {
             LOG_WARN("Skipping malformed phosphorylation entry: %s", line.c_str());
             continue;
         }
@@ -156,12 +156,14 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
             // Extract values
             std::string kinaseName = values[0]; // Already trimmed
             std::string targetName = values[1]; // Already trimmed
-            double removalRate = std::stod(values[2]);
-            double saturationConstant = std::stod(values[3]);
+            std::string phosphorylatedName = values[2]; // Already trimmed
+            double removalRate = std::stod(values[3]);
+            double saturationConstant = std::stod(values[4]);
             
             // Validate protein names
             ValidateProteinName(kinaseName, "phosphorylation kinase");
             ValidateProteinName(targetName, "phosphorylation target");
+            ValidateProteinName(phosphorylatedName, "phosphorylated form");
             
             // Create interaction parameters
             PhosphorylationInteraction::Parameters params{
@@ -169,9 +171,14 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
                 saturationConstant
             };
             
+            // Convert string names to StringDict IDs
+            StringDict::ID kinaseId = StringDict::stringToId(kinaseName);
+            StringDict::ID targetId = StringDict::stringToId(targetName);
+            StringDict::ID phosphorylatedId = StringDict::stringToId(phosphorylatedName);
+            
             // Create and add interaction
             interactions.push_back(std::make_shared<PhosphorylationInteraction>(
-                kinaseName, targetName, params));
+                kinaseId, targetId, phosphorylatedId, params));
         }
         catch (const std::exception& e) {
             LOG_ERROR("Error parsing phosphorylation interaction: %s - %s", line.c_str(), e.what());
@@ -213,7 +220,7 @@ std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoa
         }
         
         // Ensure we have enough values
-        if (values.size() < 2) {
+        if (values.size() < 3) {
             LOG_WARN("Skipping malformed dephosphorylation entry: %s", line.c_str());
             continue;
         }
@@ -221,19 +228,25 @@ std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoa
         try {
             // Extract values
             std::string targetName = values[0]; // Already trimmed
-            double recoveryRate = std::stod(values[1]);
+            std::string phosphorylatedName = values[1]; // Already trimmed
+            double recoveryRate = std::stod(values[2]);
             
-            // Validate protein name
+            // Validate protein names
             ValidateProteinName(targetName, "dephosphorylation target");
+            ValidateProteinName(phosphorylatedName, "phosphorylated form");
             
             // Create interaction parameters
             DephosphorylationInteraction::Parameters params{
                 recoveryRate
             };
             
+            // Convert string names to StringDict IDs
+            StringDict::ID targetId = StringDict::stringToId(targetName);
+            StringDict::ID phosphorylatedId = StringDict::stringToId(phosphorylatedName);
+            
             // Create and add interaction
             interactions.push_back(std::make_shared<DephosphorylationInteraction>(
-                targetName, params));
+                targetId, phosphorylatedId, params));
         }
         catch (const std::exception& e) {
             LOG_ERROR("Error parsing dephosphorylation interaction: %s - %s", line.c_str(), e.what());
@@ -299,12 +312,13 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> ProteinInteractionLoad
                 bindingRate,
                 dissociationRate,
                 saturationConstant,
-                complexName
+                StringDict::stringToId(complexName)
             };
             
-            // Create and add interaction
+            // Create and add interaction (create Molecule objects for proteins)
             interactions.push_back(std::make_shared<ComplexFormationInteraction>(
-                firstProtein, secondProtein, params));
+                Molecule(StringDict::stringToId(firstProtein), ChemicalType::PROTEIN), 
+                Molecule(StringDict::stringToId(secondProtein), ChemicalType::PROTEIN), params));
         }
         catch (const std::exception& e) {
             LOG_ERROR("Error parsing complex formation interaction: %s - %s", line.c_str(), e.what());

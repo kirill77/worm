@@ -45,8 +45,8 @@ public:
     // Get molecule number at a specific location
     double getMoleculeNumber(const Molecule& molecule, const float3& position) const;
     
-    // Get total number of proteins across all cells
-    double getTotalProteinNumber(const std::string& proteinName) const;
+    // Get total number of molecules across all cells
+    double getTotalMoleculeNumber(const Molecule& molecule) const;
     
     // Get volume in micrometers
     double getVolumeMicroM() const { return m_fVolumeMicroM; }

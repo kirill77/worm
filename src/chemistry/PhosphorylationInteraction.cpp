@@ -6,13 +6,14 @@
 #include <cmath>
 
 PhosphorylationInteraction::PhosphorylationInteraction(
-    const std::string& kinase, 
-    const std::string& target, 
+    StringDict::ID kinaseId, 
+    StringDict::ID targetId, 
+    StringDict::ID phosphorylatedId,
     const Parameters& params)
     : ProteinInteraction(Mechanism::PHOSPHORYLATION, 0.5)  // Standard ATP cost for phosphorylation
-    , m_kinaseName(kinase)
-    , m_targetName(target)
-    , m_phosphorylatedName(MoleculeWiki::GetPhosphorylatedName(target))
+    , m_kinaseId(kinaseId)
+    , m_targetId(targetId)
+    , m_phosphorylatedId(phosphorylatedId)
     , m_removalRate(params.removalRate)
     , m_saturationConstant(params.saturationConstant)
 {
@@ -20,8 +21,8 @@ PhosphorylationInteraction::PhosphorylationInteraction(
 
 bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
-    double kinaseAmount = resDistributor.getAvailableResource(m_kinaseName);
-    double targetAmount = resDistributor.getAvailableResource(m_targetName);
+    double kinaseAmount = resDistributor.getAvailableResource(Molecule(m_kinaseId, ChemicalType::PROTEIN));
+    double targetAmount = resDistributor.getAvailableResource(Molecule(m_targetId, ChemicalType::PROTEIN));
     
     // Calculate phosphorylation using Hill-like kinetics
     double removalRate = m_removalRate * kinaseAmount / (m_saturationConstant + kinaseAmount);
@@ -36,8 +37,8 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     if (resDistributor.isDryRun()) {
         if (phosphorylatedAmount > 0) {
             // Register our requirements with the resource distributor
-            resDistributor.notifyResourceWanted(StringDict::idToString(StringDict::ID::ATP), requiredATP);
-            resDistributor.notifyResourceWanted(m_targetName, phosphorylatedAmount);
+            resDistributor.notifyResourceWanted(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE), requiredATP);
+            resDistributor.notifyResourceWanted(Molecule(m_targetId, ChemicalType::PROTEIN), phosphorylatedAmount);
             return true; // We're reporting resource needs
         }
         return false;
@@ -51,12 +52,12 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
         assert(atpPop.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         
         // Remove proteins from unphosphorylated population
-        auto targetIt = cell.m_molecules.find(Molecule(m_targetName, ChemicalType::PROTEIN));
+        auto targetIt = cell.m_molecules.find(Molecule(m_targetId, ChemicalType::PROTEIN));
         targetIt->second.m_fNumber -= phosphorylatedAmount;
         assert(targetIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to phosphorylated population
-        auto& phosphorylatedPop = cell.getOrCreateMolPop(Molecule(m_phosphorylatedName, ChemicalType::PROTEIN));
+        auto& phosphorylatedPop = cell.getOrCreateMolPop(Molecule(m_phosphorylatedId, ChemicalType::PROTEIN));
         phosphorylatedPop.m_fNumber += phosphorylatedAmount;
         
         return true;

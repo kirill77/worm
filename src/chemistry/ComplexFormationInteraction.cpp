@@ -5,23 +5,23 @@
 #include <cmath>
 
 ComplexFormationInteraction::ComplexFormationInteraction(
-    const std::string& firstProtein, 
-    const std::string& secondProtein, 
+    const Molecule& firstProtein, 
+    const Molecule& secondProtein, 
     const Parameters& params)
     : ProteinInteraction(Mechanism::BINDING, 0.2)  // Lower ATP cost for binding
-    , m_firstProteinName(firstProtein)
-    , m_secondProteinName(secondProtein)
+    , m_firstProtein(firstProtein)
+    , m_secondProtein(secondProtein)
     , m_bindingRate(params.bindingRate)
     , m_dissociationRate(params.dissociationRate)
     , m_saturationConstant(params.saturationConstant)
-    , m_complexName(params.complexName)
+    , m_complexId(params.complexId)
 {
 }
 
 bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const
 {
-    double firstProteinAmount = resDistributor.getAvailableResource(m_firstProteinName);
-    double secondProteinAmount = resDistributor.getAvailableResource(m_secondProteinName);
+    double firstProteinAmount = resDistributor.getAvailableResource(m_firstProtein);
+    double secondProteinAmount = resDistributor.getAvailableResource(m_secondProtein);
     
     // Calculate binding using mass action kinetics
     double bindingPotential = m_bindingRate * firstProteinAmount * secondProteinAmount / 
@@ -34,7 +34,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     double requiredATP = boundAmount * m_atpCost;
     
     // Also check for dissociation of existing complexes
-    auto complexIt = cell.m_molecules.find(Molecule(m_complexName, ChemicalType::PROTEIN));
+    auto complexIt = cell.m_molecules.find(Molecule(m_complexId, ChemicalType::PROTEIN));
     double complexAmount = (complexIt != cell.m_molecules.end()) ? complexIt->second.m_fNumber : 0.0;
     
     // Calculate dissociation (simpler first-order kinetics)
@@ -44,17 +44,17 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     if (resDistributor.isDryRun()) {
         if (boundAmount > 0) {
             // Register our requirements with the resource distributor
-            resDistributor.notifyResourceWanted(StringDict::idToString(StringDict::ID::ATP), requiredATP);
-            resDistributor.notifyResourceWanted(m_firstProteinName, boundAmount);
-            resDistributor.notifyResourceWanted(m_secondProteinName, boundAmount);
+            resDistributor.notifyResourceWanted(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE), requiredATP);
+            resDistributor.notifyResourceWanted(m_firstProtein, boundAmount);
+            resDistributor.notifyResourceWanted(m_secondProtein, boundAmount);
             return true; // We're reporting resource needs
         }
         // Dissociation doesn't consume resources, but still return true if it occurs
         return dissociatedAmount > 0;
     }
 
-    auto firstProteinIt = cell.m_molecules.find(Molecule(m_firstProteinName, ChemicalType::PROTEIN));
-    auto secondProteinIt = cell.m_molecules.find(Molecule(m_secondProteinName, ChemicalType::PROTEIN));
+    auto firstProteinIt = cell.m_molecules.find(m_firstProtein);
+    auto secondProteinIt = cell.m_molecules.find(m_secondProtein);
 
     // Apply binding if any occurs
     if (boundAmount > 0) {
@@ -71,7 +71,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         assert(secondProteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to complex population
-        auto& complexPop = cell.getOrCreateMolPop(Molecule(m_complexName, ChemicalType::PROTEIN));
+        auto& complexPop = cell.getOrCreateMolPop(Molecule(m_complexId, ChemicalType::PROTEIN));
         complexPop.m_fNumber += boundAmount;
 
         // update binding surface

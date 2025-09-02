@@ -2,6 +2,7 @@
 
 #include "ProteinInteraction.h"
 #include "GridCell.h"
+#include "StringDict.h"
 
 /**
  * Represents a phosphorylation interaction where one protein
@@ -16,17 +17,18 @@ public:
     };
     
     // Constructor
-    PhosphorylationInteraction(const std::string& kinaseName, 
-                              const std::string& targetName,
+    PhosphorylationInteraction(StringDict::ID kinaseId, 
+                              StringDict::ID targetId,
+                              StringDict::ID phosphorylatedId,
                               const Parameters& params);
     
     // Apply phosphorylation to proteins in the cell
     bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const override;
     
 private:
-    std::string m_kinaseName;    // Name of the kinase protein
-    std::string m_targetName;    // Name of the target protein
-    std::string m_phosphorylatedName; // Cached name of phosphorylated protein
+    StringDict::ID m_kinaseId;         // ID of the kinase protein
+    StringDict::ID m_targetId;         // ID of the target protein
+    StringDict::ID m_phosphorylatedId; // ID of the phosphorylated protein
     double m_removalRate;
     double m_saturationConstant;
 }; 

@@ -31,7 +31,7 @@ bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
     if (isDryRun())
     {
         m_pCurInteraction->m_fScalingFactor = 1;
-        m_pCurInteraction->m_requestedResourceNames.resize(0);
+        m_pCurInteraction->m_requestedMolecules.resize(0);
         return true;
     }
     // previously we had real run - it had to have scaling factor of 1
@@ -42,9 +42,9 @@ bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
         return false;
     }
     // update the scaling factor
-    for (const auto &resourceName : m_pCurInteraction->m_requestedResourceNames)
+    for (const auto &molecule : m_pCurInteraction->m_requestedMolecules)
     {
-        auto it = m_resources.find(resourceName);
+        auto it = m_resources.find(molecule);
         // if the interaction needs a resource that's not available - it can't run
         if (it == m_resources.end() || it->second.m_dryRunId != m_curDryRunId)
         {
@@ -58,20 +58,20 @@ bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction&
     return true;
 }
 
-double ResourceDistributor::getAvailableResource(const std::string& resourceName)
+double ResourceDistributor::getAvailableResource(const Molecule& molecule)
 {
-    auto it = m_resources.find(resourceName);
+    auto it = m_resources.find(molecule);
     // if we don't have such resource, or the data is stale
     if (it == m_resources.end() || it->second.m_dryRunId != m_curDryRunId)
         return 0;
     return it->second.m_fAvailable * m_pCurInteraction->m_fScalingFactor;
 }
 
-void ResourceDistributor::notifyResourceWanted(const std::string& resourceName, double amount)
+void ResourceDistributor::notifyResourceWanted(const Molecule& molecule, double amount)
 {
     assert(amount > 0); // seems sub-optimal - this interaction must have bailed out earlier
 
-    auto it = m_resources.find(resourceName);
+    auto it = m_resources.find(molecule);
     
     // if we don't have such resource - can't distribute it
     if (it == m_resources.end())
@@ -81,7 +81,7 @@ void ResourceDistributor::notifyResourceWanted(const std::string& resourceName, 
     }
 
     it->second.m_fRequested += amount;
-    m_pCurInteraction->m_requestedResourceNames.push_back(resourceName);
+    m_pCurInteraction->m_requestedMolecules.push_back(molecule);
     m_pCurInteraction->m_lastValidDryRunId = m_curDryRunId;
 }
 
@@ -97,7 +97,7 @@ void ResourceDistributor::updateAvailableResources(const GridCell &cell)
     for (const auto& [molecule, population] : cell.m_molecules)
     {
         // Update the available amount for this molecule
-        auto& resource = m_resources[molecule.getName()];
+        auto& resource = m_resources[molecule];
         resource.m_fAvailable = population.m_fNumber;
         resource.m_dryRunId = m_curDryRunId;
     }

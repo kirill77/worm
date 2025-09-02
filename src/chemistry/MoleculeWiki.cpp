@@ -83,11 +83,6 @@ std::vector<std::shared_ptr<ProteinInteraction>> MoleculeWiki::GetInteractionsBy
     return result;
 }
 
-std::string MoleculeWiki::GetPhosphorylatedName(const std::string& proteinName)
-{
-    return proteinName + "-P";
-}
-
 std::string MoleculeWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {
     return proteinName + ":" + StringDict::idToString(surface);

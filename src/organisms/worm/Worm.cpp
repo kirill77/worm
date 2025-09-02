@@ -333,10 +333,10 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
     
     // Check membrane-bound proteins
-    double anteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(par3Membrane, ChemicalType::PROTEIN), anteriorPos);
-    double posteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(par3Membrane, ChemicalType::PROTEIN), posteriorPos);
-    double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(par2Membrane, ChemicalType::PROTEIN), anteriorPos);
-    double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(par2Membrane, ChemicalType::PROTEIN), posteriorPos);
+    double anteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN), anteriorPos);
+    double posteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN), posteriorPos);
+    double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN), anteriorPos);
+    double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN), posteriorPos);
     
     // Check during polarity establishment (0-6 minutes)
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {

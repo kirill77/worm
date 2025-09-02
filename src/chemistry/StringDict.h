@@ -71,6 +71,22 @@ struct StringDict
         PAL_1,
         PIE_1,
         
+        // Endoplasmic reticulum molecules
+        ER_PROTEIN,        // ER-synthesized proteins
+        ER_LIPID,          // ER-synthesized lipids
+        
+        // Phosphorylated PAR proteins
+        PAR_1_P,          // Phosphorylated PAR-1
+        PAR_2_P,          // Phosphorylated PAR-2
+        PAR_3_P,          // Phosphorylated PAR-3
+        
+        // Protein complexes
+        PAR_3_PAR_6,      // PAR-3:PAR-6 complex
+        PAR_6_PKC_3,      // PAR-6:PKC-3 complex
+        PAR_1_CORTEX,     // PAR-1:CORTEX complex
+        PAR_2_CORTEX,     // PAR-2:CORTEX complex
+        PAR_3_CORTEX,     // PAR-3:CORTEX complex
+        
         // Organelle types (must be contiguous for vector indexing)
         ORGANELLE_START,
         ORGANELLE_NUCLEUS = ORGANELLE_START,

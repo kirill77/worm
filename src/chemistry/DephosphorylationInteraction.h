@@ -2,6 +2,7 @@
 
 #include "ProteinInteraction.h"
 #include "GridCell.h"
+#include "StringDict.h"
 
 /**
  * Represents a dephosphorylation interaction where phosphorylated proteins
@@ -14,15 +15,16 @@ public:
         double recoveryRate;        // Rate at which phosphorylated proteins recover
     };
     
-    // Constructor - target is the base protein name (e.g. "PAR-2")
-    DephosphorylationInteraction(const std::string& targetName, 
+    // Constructor - target is the base protein ID
+    DephosphorylationInteraction(StringDict::ID targetId, 
+                                StringDict::ID phosphorylatedId,
                                 const Parameters& params);
     
     // Apply dephosphorylation to proteins in the cell
     bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const override;
     
 private:
-    std::string m_targetName;    // Name of the target protein
-    std::string m_phosphorylatedName; // Cached name of phosphorylated protein
+    StringDict::ID m_targetId;         // ID of the target protein
+    StringDict::ID m_phosphorylatedId; // ID of the phosphorylated protein
     double m_recoveryRate;
 }; 

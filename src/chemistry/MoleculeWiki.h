@@ -51,9 +51,6 @@ public:
     // Get interactions by mechanism
     static std::vector<std::shared_ptr<ProteinInteraction>> GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism);
     
-    // Utility function to get the name of a phosphorylated protein/molecule
-    static std::string GetPhosphorylatedName(const std::string& proteinName);
-    
     // Get the bound molecule name for a molecule on a specific surface
     static std::string GetBoundProteinName(const std::string& proteinName, StringDict::ID surface);
     

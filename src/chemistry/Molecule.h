@@ -31,17 +31,14 @@ class Molecule
 {
 public:
     // Default constructor
-    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_sName(), m_type(ChemicalType::OTHER) {}
+    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER) {}
     
-    // Constructor with name and type (auto-optimizes to ID storage if possible)
-    Molecule(const std::string& name, ChemicalType type = ChemicalType::OTHER);
+    // Constructor with StringDict ID and type  
+    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type) {}
     
-    // Constructor with StringDict ID and type (uses ID storage, empty string)
-    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_sName(), m_type(type) {}
-    
-    // Get name (from StringDict if ID is known, otherwise from stored string)
+    // Get name from StringDict
     const std::string& getName() const {
-        return (m_id != StringDict::ID::eUNKNOWN) ? StringDict::idToString(m_id) : m_sName;
+        return StringDict::idToString(m_id);
     }
     
     // Get chemical type
@@ -52,7 +49,7 @@ public:
     
     // Equality operator for unordered_map
     bool operator==(const Molecule& other) const {
-        return m_id == other.m_id && m_type == other.m_type && m_sName == other.m_sName;
+        return m_id == other.m_id && m_type == other.m_type;
     }
     
     bool operator!=(const Molecule& other) const {
@@ -64,8 +61,7 @@ public:
                                          const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
 
 private:
-    StringDict::ID m_id;   // StringDict ID if known (eUNKNOWN if not)
-    std::string m_sName;   // Name/type of the molecule (empty if m_id is used)
+    StringDict::ID m_id;   // StringDict ID  
     ChemicalType m_type;   // Chemical classification of the molecule
 };
 
@@ -135,12 +131,10 @@ namespace std {
     template<>
     struct hash<Molecule> {
         size_t operator()(const Molecule& molecule) const {
-            // Hash based on ID if available for better performance
-            if (molecule.getID() != StringDict::ID::eUNKNOWN) {
-                return hash<int>()(static_cast<int>(molecule.getID()));
-            }
-            // Otherwise hash the string name
-            return hash<string>()(molecule.getName());
+            // Hash based on ID and type
+            size_t h1 = hash<int>()(static_cast<int>(molecule.getID()));
+            size_t h2 = hash<int>()(static_cast<int>(molecule.getType()));
+            return h1 ^ (h2 << 1);
         }
     };
 }

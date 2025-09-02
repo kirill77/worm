@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <assert.h>
+#include "Molecule.h"
 
 // There is a list of resources and a list of interactions that use those resources. If
 // we simply apply the interactions - the interactions that are being applied first will have
@@ -22,9 +23,9 @@ public:
     // if this returns false - you can skip this interaction
     bool notifyNewInteractionStarting(const class ProteinInteraction &interaction);
 
-    double getAvailableResource(const std::string& resourceName);
+    double getAvailableResource(const Molecule& molecule);
 
-    void notifyResourceWanted(const std::string& resourceName, double m_fNumber);
+    void notifyResourceWanted(const Molecule& molecule, double m_fNumber);
 
     void notifyNewRealRun();
 
@@ -45,13 +46,13 @@ private:
             return m_fAvailable >= m_fRequested ? 1 : m_fAvailable / m_fRequested;
         }
     };
-    std::unordered_map<std::string, ResourceData> m_resources;
+    std::unordered_map<Molecule, ResourceData> m_resources;
 
     struct InteractionData
     {
         uint64_t m_lastValidDryRunId = 0;
         double m_fScalingFactor = 1.0;
-        std::vector<std::string> m_requestedResourceNames;
+        std::vector<Molecule> m_requestedMolecules;
     };
     std::unordered_map<const ProteinInteraction*, InteractionData> m_interactions;
 

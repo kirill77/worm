@@ -2,6 +2,8 @@
 
 #include "ProteinInteraction.h"
 #include "GridCell.h"
+#include "Molecule.h"
+#include "StringDict.h"
 
 /**
  * Represents a complex formation interaction where two proteins
@@ -14,22 +16,22 @@ public:
         double bindingRate;        // Rate at which proteins form complexes
         double dissociationRate;   // Rate at which complexes break apart
         double saturationConstant; // Saturation constant for binding kinetics
-        std::string complexName;   // Name of the resulting complex
+        StringDict::ID complexId;  // ID of the resulting complex
     };
     
     // Constructor
-    ComplexFormationInteraction(const std::string& firstProtein, 
-                              const std::string& secondProtein, 
+    ComplexFormationInteraction(const Molecule& firstProtein, 
+                              const Molecule& secondProtein, 
                               const Parameters& params);
     
     // Apply complex formation to proteins in the cell
     bool apply(GridCell& cell, double dt, ResourceDistributor& resDistributor) const override;
     
 private:
-    std::string m_firstProteinName;     // Name of first protein in complex
-    std::string m_secondProteinName;    // Name of second protein in complex
+    Molecule m_firstProtein;    // First protein in complex
+    Molecule m_secondProtein;   // Second protein in complex
     double m_bindingRate;
     double m_dissociationRate;
     double m_saturationConstant;
-    std::string m_complexName;
+    StringDict::ID m_complexId;
 }; 

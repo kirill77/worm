@@ -37,7 +37,7 @@ public:
     std::vector<std::shared_ptr<MPopulation>> transcribeAll(double fDt) const;
 
     // Nuclear transport
-    void importProtein(const std::string& proteinName, double amount);
+    void importMolecule(const Molecule& molecule, double amount);
     void exportRNA(std::shared_ptr<MPopulation> rna);
     
     // Nuclear compartment access

@@ -62,15 +62,15 @@ void Medium::updateProteinInteraction(double fDt)
     }
 }
 
-double Medium::getTotalProteinNumber(const std::string& proteinName) const
+double Medium::getTotalMoleculeNumber(const Molecule& molecule) const
 {
     double fTotal = 0.0;
     for (uint32_t uCell = 0; uCell < m_grid.size(); ++uCell)
     {
         const GridCell& gridCell = m_grid[uCell];
-        auto itProtein = gridCell.m_molecules.find(Molecule(proteinName, ChemicalType::PROTEIN));
-        if (itProtein != gridCell.m_molecules.end()) {
-            fTotal += itProtein->second.m_fNumber;
+        auto itMolecule = gridCell.m_molecules.find(molecule);
+        if (itMolecule != gridCell.m_molecules.end()) {
+            fTotal += itMolecule->second.m_fNumber;
         }
     }
     return fTotal;
@@ -135,7 +135,7 @@ void Medium::translateMRNAs(double fDt)
                 
                 if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
                     // Translation successful - add protein to cell
-                    Population& cellProteinPop = cell.getOrCreateMolPop(Molecule(pProtein->getName(), ChemicalType::PROTEIN));
+                    Population& cellProteinPop = cell.getOrCreateMolPop(pProtein->m_molecule);
                     cellProteinPop.m_fNumber += pProtein->m_population.m_fNumber;
                     
                     // Consume ATP (simplified - should be proportional to protein length)

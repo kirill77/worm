@@ -17,7 +17,7 @@ void EReticulum::synthesizeProteins(Medium& medium)
 {
     // Add proteins to random positions in the cell
     float3 position = generateRandomPosition();
-    MPopulation proteins(Molecule("ER-Protein", ChemicalType::PROTEIN), PROTEIN_SYNTHESIS_RATE);
+    MPopulation proteins(Molecule(StringDict::ID::ER_PROTEIN, ChemicalType::PROTEIN), PROTEIN_SYNTHESIS_RATE);
     medium.addMolecule(proteins, position);
 }
 
@@ -25,7 +25,7 @@ void EReticulum::synthesizeLipids(Medium& medium)
 {
     // Add lipids to random positions in the cell
     float3 position = generateRandomPosition();
-    MPopulation lipids(Molecule("ER-Lipid", ChemicalType::LIPID), LIPID_SYNTHESIS_RATE);
+    MPopulation lipids(Molecule(StringDict::ID::ER_LIPID, ChemicalType::LIPID), LIPID_SYNTHESIS_RATE);
     medium.addMolecule(lipids, position);
 }
 

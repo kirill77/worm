@@ -28,7 +28,7 @@ void Nucleus::update(double fDt, Cell& cell)
             double importAmount = cytoplasmicLevel * importRate * fDt;
             
             if (importAmount > 0.0) {
-                importProtein(StringDict::idToString(proteinID), importAmount);
+                importMolecule(Molecule(proteinID, ChemicalType::PROTEIN), importAmount);
             }
         }
     }
@@ -161,12 +161,12 @@ std::vector<std::shared_ptr<MPopulation>> Nucleus::transcribeAll(double fDt) con
     return allTranscripts;
 }
 
-void Nucleus::importProtein(const std::string& proteinName, double amount)
+void Nucleus::importMolecule(const Molecule& molecule, double amount)
 {
-    // Import protein into nuclear compartment (only if envelope is intact)
+    // Import molecule into nuclear compartment (only if envelope is intact)
     if (m_fEnvelopeIntegrity > 0.5 && amount > 0.0) {
-        auto& nuclearProteinPop = m_nuclearCompartment.getOrCreateMolPop(Molecule(proteinName, ChemicalType::PROTEIN));
-        nuclearProteinPop.m_fNumber += amount;
+        auto& nuclearMoleculePop = m_nuclearCompartment.getOrCreateMolPop(molecule);
+        nuclearMoleculePop.m_fNumber += amount;
     }
 }
 

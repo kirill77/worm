@@ -44,58 +44,6 @@ public:
      */
     bool initializeBindingSites(double totalAmount = 1000.0);
 
-    /**
-     * Transport proteins from external to internal medium.
-     * 
-     * @param externalMedium Reference to the external medium
-     * @param proteinName Name of the protein to transport
-     * @param amount Amount of protein to transport
-     * @param position Position where transport occurs
-     * @return True if transport was successful
-     */
-    bool transportProteinInward(Medium& externalMedium, 
-                               const std::string& proteinName, 
-                               double amount, 
-                               const float3& position);
-
-    /**
-     * Transport proteins from internal to external medium.
-     * 
-     * @param externalMedium Reference to the external medium
-     * @param proteinName Name of the protein to transport
-     * @param amount Amount of protein to transport
-     * @param position Position where transport occurs
-     * @return True if transport was successful
-     */
-    bool transportProteinOutward(Medium& externalMedium,
-                                const std::string& proteinName,
-                                double amount,
-                                const float3& position);
-
-    /**
-     * Transport ATP from external to internal medium.
-     * 
-     * @param externalMedium Reference to the external medium
-     * @param amount Amount of ATP to transport
-     * @param position Position where transport occurs
-     * @return True if transport was successful
-     */
-    bool transportATPInward(Medium& externalMedium,
-                           double amount,
-                           const float3& position);
-
-    /**
-     * Transport ATP from internal to external medium.
-     * 
-     * @param externalMedium Reference to the external medium
-     * @param amount Amount of ATP to transport
-     * @param position Position where transport occurs
-     * @return True if transport was successful
-     */
-    bool transportATPOutward(Medium& externalMedium,
-                            double amount,
-                            const float3& position);
-
     // Getters and setters
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
