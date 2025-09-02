@@ -114,75 +114,75 @@ void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
     // These represent tRNAs inherited from the mother egg
     
     // START CODON - absolutely essential for translation initiation
-    auto pMet = std::make_shared<TRNA>("Met", "CAU", 500.0, 0.8);  // High abundance for start codon
+    auto pMet = std::make_shared<TRNA>(StringDict::ID::TRNA_MET_ATG, 500.0, 0.8);  // High abundance for start codon
     pMet->charge(1.0);  // Start fully charged
     medium.addTRNA(pMet, position);
     
     // MOST COMMON AMINO ACIDS - needed for early protein synthesis
     // Glycine (highly abundant in C. elegans)
-    auto pGlyGGA = std::make_shared<TRNA>("Gly", "CCU", 300.0, 0.9);
+    auto pGlyGGA = std::make_shared<TRNA>(StringDict::ID::TRNA_GLY_GGA, 300.0, 0.9);
     pGlyGGA->charge(1.0);
     medium.addTRNA(pGlyGGA, position);
     
-    auto pGlyGGT = std::make_shared<TRNA>("Gly", "CCA", 200.0, 0.8);
+    auto pGlyGGT = std::make_shared<TRNA>(StringDict::ID::TRNA_GLY_GGT, 200.0, 0.8);
     pGlyGGT->charge(1.0);
     medium.addTRNA(pGlyGGT, position);
     
     // Alanine (very common)
-    auto pAlaGCA = std::make_shared<TRNA>("Ala", "CGU", 250.0, 0.9);
+    auto pAlaGCA = std::make_shared<TRNA>(StringDict::ID::TRNA_ALA_GCA, 250.0, 0.9);
     pAlaGCA->charge(1.0);
     medium.addTRNA(pAlaGCA, position);
     
-    auto pAlaGCC = std::make_shared<TRNA>("Ala", "CGG", 150.0, 0.8);
+    auto pAlaGCC = std::make_shared<TRNA>(StringDict::ID::TRNA_ALA_GCC, 150.0, 0.8);
     pAlaGCC->charge(1.0);
     medium.addTRNA(pAlaGCC, position);
     
     // Leucine (highly preferred in C. elegans)
-    auto pLeuCTG = std::make_shared<TRNA>("Leu", "GAC", 350.0, 0.9);
+    auto pLeuCTG = std::make_shared<TRNA>(StringDict::ID::TRNA_LEU_CTG, 350.0, 0.9);
     pLeuCTG->charge(1.0);
     medium.addTRNA(pLeuCTG, position);
     
-    auto pLeuCTC = std::make_shared<TRNA>("Leu", "GAG", 200.0, 0.8);
+    auto pLeuCTC = std::make_shared<TRNA>(StringDict::ID::TRNA_LEU_CTC, 200.0, 0.8);
     pLeuCTC->charge(1.0);
     medium.addTRNA(pLeuCTC, position);
     
     // Serine (common)
-    auto pSerTCA = std::make_shared<TRNA>("Ser", "AGA", 220.0, 0.8);
+    auto pSerTCA = std::make_shared<TRNA>(StringDict::ID::TRNA_SER_TCA, 220.0, 0.8);
     pSerTCA->charge(1.0);
     medium.addTRNA(pSerTCA, position);
     
-    auto pSerTCG = std::make_shared<TRNA>("Ser", "AGC", 150.0, 0.7);
+    auto pSerTCG = std::make_shared<TRNA>(StringDict::ID::TRNA_SER_TCG, 150.0, 0.7);
     pSerTCG->charge(1.0);
     medium.addTRNA(pSerTCG, position);
     
     // Valine
-    auto pValGTG = std::make_shared<TRNA>("Val", "GAC", 200.0, 0.8);
+    auto pValGTG = std::make_shared<TRNA>(StringDict::ID::TRNA_VAL_GTG, 200.0, 0.8);
     pValGTG->charge(1.0);
     medium.addTRNA(pValGTG, position);
     
     // ESSENTIAL AMINO ACIDS - lower abundance but necessary
     // Lysine (positively charged, important for proteins)
-    auto pLysAAG = std::make_shared<TRNA>("Lys", "UUC", 180.0, 0.8);
+    auto pLysAAG = std::make_shared<TRNA>(StringDict::ID::TRNA_LYS_AAG, 180.0, 0.8);
     pLysAAG->charge(1.0);
     medium.addTRNA(pLysAAG, position);
     
     // Aspartic acid (negatively charged)
-    auto pAspGAC = std::make_shared<TRNA>("Asp", "CUG", 160.0, 0.8);
+    auto pAspGAC = std::make_shared<TRNA>(StringDict::ID::TRNA_ASP_GAC, 160.0, 0.8);
     pAspGAC->charge(1.0);
     medium.addTRNA(pAspGAC, position);
     
     // Glutamic acid (negatively charged)
-    auto pGluGAG = std::make_shared<TRNA>("Glu", "CUC", 170.0, 0.8);
+    auto pGluGAG = std::make_shared<TRNA>(StringDict::ID::TRNA_GLU_GAG, 170.0, 0.8);
     pGluGAG->charge(1.0);
     medium.addTRNA(pGluGAG, position);
     
     // Proline (structure-forming)
-    auto pProCCA = std::make_shared<TRNA>("Pro", "GGU", 140.0, 0.7);
+    auto pProCCA = std::make_shared<TRNA>(StringDict::ID::TRNA_PRO_CCA, 140.0, 0.7);
     pProCCA->charge(1.0);
     medium.addTRNA(pProCCA, position);
     
     // Threonine
-    auto pThrACA = std::make_shared<TRNA>("Thr", "GGU", 140.0, 0.7);
+    auto pThrACA = std::make_shared<TRNA>(StringDict::ID::TRNA_THR_ACA, 140.0, 0.7);
     pThrACA->charge(1.0);
     medium.addTRNA(pThrACA, position);
     

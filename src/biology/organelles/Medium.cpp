@@ -57,7 +57,7 @@ void Medium::updateProteinInteraction(double fDt)
         }
 
         // Ensure ATP doesn't go below zero
-        auto& atpPop = m_grid[uCell].getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+        auto& atpPop = m_grid[uCell].getOrCreateMolPop(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
         atpPop.m_fNumber = std::max(0.0, atpPop.m_fNumber);
     }
 }
@@ -154,14 +154,14 @@ void Medium::translateMRNAs(double fDt)
 void Medium::addATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpPop = gridCell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+    auto& atpPop = gridCell.getOrCreateMolPop(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
     atpPop.m_fNumber = std::min<double>(atpPop.m_fNumber + fAmount, MAX_ATP_PER_CELL);
 }
 
 bool Medium::consumeATP(double fAmount, const float3& position)
 {
     auto& gridCell = m_grid.findCell(position);
-    auto& atpPop = gridCell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+    auto& atpPop = gridCell.getOrCreateMolPop(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
     if (atpPop.m_fNumber >= fAmount)
     {
         atpPop.m_fNumber -= fAmount;
@@ -173,7 +173,7 @@ bool Medium::consumeATP(double fAmount, const float3& position)
 double Medium::getAvailableATP(const float3& position) const
 {
     const auto& gridCell = m_grid.findCell(position);
-    auto itMolecule = gridCell.m_molecules.find(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+    auto itMolecule = gridCell.m_molecules.find(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
     return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_fNumber : 0.0;
 }
 

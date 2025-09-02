@@ -44,7 +44,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     if (resDistributor.isDryRun()) {
         if (boundAmount > 0) {
             // Register our requirements with the resource distributor
-            resDistributor.notifyResourceWanted("ATP", requiredATP);
+            resDistributor.notifyResourceWanted(StringDict::idToString(StringDict::ID::ATP), requiredATP);
             resDistributor.notifyResourceWanted(m_firstProteinName, boundAmount);
             resDistributor.notifyResourceWanted(m_secondProteinName, boundAmount);
             return true; // We're reporting resource needs
@@ -59,7 +59,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     // Apply binding if any occurs
     if (boundAmount > 0) {
         // Update ATP consumption
-        auto& atpPop = cell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+        auto& atpPop = cell.getOrCreateMolPop(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
         atpPop.m_fNumber -= requiredATP;
         assert(atpPop.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         

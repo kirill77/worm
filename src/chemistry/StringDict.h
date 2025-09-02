@@ -30,6 +30,9 @@ struct StringDict
         PERICENTRIN,
         NINEIN,
         
+        // Nucleotides
+        ATP,
+        
         // tRNA genes (essential set for translation)
         // Start codon
         TRNA_MET_ATG,        // Methionine initiator tRNA
@@ -87,12 +90,7 @@ struct StringDict
         assert(m_idToString.size() > 0);
         return m_idToString[static_cast<size_t>(id)];
     }
-    static ID stringToId(const std::string& s)
-    {
-        assert(m_stringToId.size() > 0);
-        auto it = m_stringToId.find(s);
-        return (it == m_stringToId.end()) ? ID::eUNKNOWN : it->second;
-    }
+    static ID stringToId(const std::string& s);
 
 private:
     static std::vector<std::string> m_idToString;

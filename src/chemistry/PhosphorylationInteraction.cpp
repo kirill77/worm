@@ -36,7 +36,7 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     if (resDistributor.isDryRun()) {
         if (phosphorylatedAmount > 0) {
             // Register our requirements with the resource distributor
-            resDistributor.notifyResourceWanted("ATP", requiredATP);
+            resDistributor.notifyResourceWanted(StringDict::idToString(StringDict::ID::ATP), requiredATP);
             resDistributor.notifyResourceWanted(m_targetName, phosphorylatedAmount);
             return true; // We're reporting resource needs
         }
@@ -46,7 +46,7 @@ bool PhosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDistri
     // Apply the effect if any phosphorylation occurs
     if (phosphorylatedAmount > 0) {
         // Update ATP consumption
-        auto& atpPop = cell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+        auto& atpPop = cell.getOrCreateMolPop(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
         atpPop.m_fNumber -= requiredATP;
         assert(atpPop.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
         

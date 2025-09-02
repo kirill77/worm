@@ -35,6 +35,9 @@ void StringDict::initialize()
     m_idToString[static_cast<size_t>(ID::PERICENTRIN)] = "PERICENTRIN";
     m_idToString[static_cast<size_t>(ID::NINEIN)] = "NINEIN";
     
+    // Nucleotides
+    m_idToString[static_cast<size_t>(ID::ATP)] = "ATP";
+    
     // tRNA genes (essential set for translation)
     // Start codon
     m_idToString[static_cast<size_t>(ID::TRNA_MET_ATG)] = "tRNA-Met-ATG";
@@ -88,4 +91,12 @@ void StringDict::initialize()
             m_stringToId[m_idToString[i]] = static_cast<ID>(i);
         }
     }
+}
+
+StringDict::ID StringDict::stringToId(const std::string& s)
+{
+    assert(m_stringToId.size() > 0);
+    auto it = m_stringToId.find(s);
+    assert(it != m_stringToId.end() && "String not found in StringDict - make sure to call initialize() and add the string");
+    return (it == m_stringToId.end()) ? ID::eUNKNOWN : it->second;
 }

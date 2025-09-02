@@ -30,7 +30,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     // If we're in a dry run, just report resource requirements and return
     if (resDistributor.isDryRun()) {
         // Register our requirements with the resource distributor
-        resDistributor.notifyResourceWanted("ATP", requiredATP);
+        resDistributor.notifyResourceWanted(StringDict::idToString(StringDict::ID::ATP), requiredATP);
         resDistributor.notifyResourceWanted(m_phosphorylatedName, recoveredAmount);
         return true; // We're reporting resource needs
     }
@@ -45,7 +45,7 @@ bool DephosphorylationInteraction::apply(GridCell& cell, double dt, ResourceDist
     unphosphorylatedPop.m_fNumber += recoveredAmount;
     
     // Update ATP consumption
-    auto& atpPop = cell.getOrCreateMolPop(Molecule("ATP", ChemicalType::NUCLEOTIDE));
+            auto& atpPop = cell.getOrCreateMolPop(Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
     atpPop.m_fNumber -= requiredATP;
     assert(atpPop.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert ATP doesn't go below minimum
     
