@@ -60,4 +60,7 @@ public:
     
     // Initialize tRNA molecule information with charging rates
     static void initializeTRNAInfo();
+    
+    // Initialize mRNA molecule information with translation rates
+    static void initializeMRNAInfo();
 };
