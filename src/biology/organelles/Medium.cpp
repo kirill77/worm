@@ -104,7 +104,7 @@ void Medium::translateMRNAs(double fDt)
         auto& molecules = cell.m_molecules;
         auto it = molecules.begin();
         while (it != molecules.end()) {
-            if (it->first.getType() == ChemicalType::MRNA && it->second.m_fNumber > 0.1) {
+            if (it->first.getType() == ChemicalType::MRNA && it->second.m_fNumber > 0.01) {
                 // Check if we have enough ATP for translation
                 float3 cellPosition = m_grid.indexToPosition(i);
                 if (getAvailableATP(cellPosition) < ATP_PER_TRANSLATION * 10) {

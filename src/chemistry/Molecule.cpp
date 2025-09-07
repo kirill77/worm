@@ -12,12 +12,14 @@ std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmoun
     // Assert that this method is only called on RNA molecules
     assert(m_type == ChemicalType::MRNA && "translate() can only be called on mRNA molecules");
     
-    // Check if we have enough RNA to produce protein
-    if (moleculeAmount < 0.1) return nullptr;  // Threshold for translation
+    // Check if we have enough RNA to produce protein  
+    if (moleculeAmount < 0.01) {
+        return nullptr;  // Threshold for translation (lowered for low-abundance proteins)
+    }
 
     // Calculate protein production based on translation rate and available RNA
     double fProteinAmount = translationRate * dt * moleculeAmount;
-
+    
     // Get sequence from GeneWiki
     const std::string& sequence = GeneWiki::getInstance().getSequence(getName());
 
@@ -37,12 +39,14 @@ std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmoun
         if (!anticodon.empty()) {
             // Get charged tRNA IDs that have this anticodon
             auto matchingTRNAIds = TRNA::getChargedTRNAsWithAnticodon(anticodon);
+            
             for (StringDict::ID tRNAId : matchingTRNAIds) {
                 Molecule tRNAMolecule(tRNAId, ChemicalType::TRNA);
                 auto it = availableMolecules.find(tRNAMolecule);
-                if (it != availableMolecules.end() && it->second.m_fNumber > 0.1) {
+                if (it != availableMolecules.end() && it->second.m_fNumber > 0.01) {
                     codonMatched = true;
                     usedTRNAs.emplace_back(&it->first, const_cast<Population*>(&it->second));
+                    
                     break;
                 }
             }
@@ -60,6 +64,7 @@ std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmoun
         return nullptr;
     }
 
+
     // Create new protein
     auto pProtein = std::make_shared<MPopulation>(Molecule(m_id, ChemicalType::PROTEIN), fProteinAmount);
 
@@ -68,11 +73,12 @@ std::shared_ptr<MPopulation> Molecule::translate(double dt, double moleculeAmoun
     // For now, we just reduce the charged tRNA population
     for (const auto& usedTRNA : usedTRNAs)
     {
-        if (usedTRNA.second->m_fNumber > 0.1)
+        if (usedTRNA.second->m_fNumber > 0.01)
         {
-            usedTRNA.second->m_fNumber -= 0.1; // Consume small amount for translation
+            usedTRNA.second->m_fNumber -= 0.01; // Consume small amount for translation
         }
     }
+
 
     return pProtein;
 }

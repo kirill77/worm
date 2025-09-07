@@ -52,6 +52,21 @@ StringDict::ID TRNA::getChargedVariant(StringDict::ID unchargedID)
     }
 }
 
+// Returns the anticodon sequence for a given tRNA molecule
+// 
+// BIOLOGICAL BACKGROUND:
+// Each tRNA molecule has a specific 3-nucleotide anticodon sequence in its anticodon loop
+// that determines which codon it can bind to during protein synthesis. The anticodon
+// forms Watson-Crick base pairs with the codon in an antiparallel fashion:
+//   - Codon runs 5' → 3' on mRNA
+//   - Anticodon runs 3' → 5' on tRNA (antiparallel binding)
+//
+// The anticodons returned here are stored in their conventional 5' → 3' reading direction
+// as they appear in the tRNA structure. For example:
+//   - Codon ATG (5'-ATG-3') pairs with anticodon CAU (5'-CAU-3')
+//   - When aligned: 5'-ATG-3' (codon)
+//                   3'-GUA-5' (anticodon, antiparallel)
+//                   5'-CAU-3' (same anticodon, conventional notation)
 std::string TRNA::getAnticodon(StringDict::ID tRNAId)
 {
     switch (tRNAId)
@@ -62,45 +77,45 @@ std::string TRNA::getAnticodon(StringDict::ID tRNAId)
         
         // Common amino acids  
         case StringDict::ID::TRNA_GLY_GGA:
-        case StringDict::ID::TRNA_GLY_GGA_CHARGED:        return "CCU";
+        case StringDict::ID::TRNA_GLY_GGA_CHARGED:        return "UCC";
         case StringDict::ID::TRNA_GLY_GGT:
-        case StringDict::ID::TRNA_GLY_GGT_CHARGED:        return "CCA";
+        case StringDict::ID::TRNA_GLY_GGT_CHARGED:        return "ACC";
         case StringDict::ID::TRNA_ALA_GCA:
-        case StringDict::ID::TRNA_ALA_GCA_CHARGED:        return "CGU";
+        case StringDict::ID::TRNA_ALA_GCA_CHARGED:        return "UGC";
         case StringDict::ID::TRNA_ALA_GCC:
-        case StringDict::ID::TRNA_ALA_GCC_CHARGED:        return "CGG";
+        case StringDict::ID::TRNA_ALA_GCC_CHARGED:        return "GGC";
         case StringDict::ID::TRNA_LEU_CTG:
-        case StringDict::ID::TRNA_LEU_CTG_CHARGED:        return "GAC";
+        case StringDict::ID::TRNA_LEU_CTG_CHARGED:        return "CAG";
         case StringDict::ID::TRNA_LEU_CTC:
         case StringDict::ID::TRNA_LEU_CTC_CHARGED:        return "GAG";
         case StringDict::ID::TRNA_SER_TCA:
-        case StringDict::ID::TRNA_SER_TCA_CHARGED:        return "AGA";
+        case StringDict::ID::TRNA_SER_TCA_CHARGED:        return "UGA";
         case StringDict::ID::TRNA_SER_TCG:
-        case StringDict::ID::TRNA_SER_TCG_CHARGED:        return "AGC";
+        case StringDict::ID::TRNA_SER_TCG_CHARGED:        return "CGA";
         case StringDict::ID::TRNA_VAL_GTG:
-        case StringDict::ID::TRNA_VAL_GTG_CHARGED:        return "GAC";
+        case StringDict::ID::TRNA_VAL_GTG_CHARGED:        return "CAC";
         case StringDict::ID::TRNA_VAL_GTC:
-        case StringDict::ID::TRNA_VAL_GTC_CHARGED:        return "GAG";
+        case StringDict::ID::TRNA_VAL_GTC_CHARGED:        return "GAC";
         
         // Less common but essential amino acids
         case StringDict::ID::TRNA_PRO_CCA:
-        case StringDict::ID::TRNA_PRO_CCA_CHARGED:        return "GGU";
+        case StringDict::ID::TRNA_PRO_CCA_CHARGED:        return "UGG";
         case StringDict::ID::TRNA_THR_ACA:
         case StringDict::ID::TRNA_THR_ACA_CHARGED:        return "GGU";
         case StringDict::ID::TRNA_ASP_GAC:
-        case StringDict::ID::TRNA_ASP_GAC_CHARGED:        return "CUG";
+        case StringDict::ID::TRNA_ASP_GAC_CHARGED:        return "GUC";
         case StringDict::ID::TRNA_GLU_GAG:
         case StringDict::ID::TRNA_GLU_GAG_CHARGED:        return "CUC";
         case StringDict::ID::TRNA_LYS_AAG:
-        case StringDict::ID::TRNA_LYS_AAG_CHARGED:        return "UUC";
+        case StringDict::ID::TRNA_LYS_AAG_CHARGED:        return "CUU";
         case StringDict::ID::TRNA_ARG_CGA:
-        case StringDict::ID::TRNA_ARG_CGA_CHARGED:        return "GCU";
+        case StringDict::ID::TRNA_ARG_CGA_CHARGED:        return "UCG";
         case StringDict::ID::TRNA_HIS_CAC:
         case StringDict::ID::TRNA_HIS_CAC_CHARGED:        return "GUG";
         case StringDict::ID::TRNA_PHE_TTC:
-        case StringDict::ID::TRNA_PHE_TTC_CHARGED:        return "AAG";
+        case StringDict::ID::TRNA_PHE_TTC_CHARGED:        return "GAA";
         case StringDict::ID::TRNA_TYR_TAC:
-        case StringDict::ID::TRNA_TYR_TAC_CHARGED:        return "AUG";
+        case StringDict::ID::TRNA_TYR_TAC_CHARGED:        return "GUA";
         case StringDict::ID::TRNA_CYS_TGC:
         case StringDict::ID::TRNA_CYS_TGC_CHARGED:        return "GCA";
         case StringDict::ID::TRNA_TRP_TGG:
@@ -108,7 +123,7 @@ std::string TRNA::getAnticodon(StringDict::ID tRNAId)
         case StringDict::ID::TRNA_ASN_AAC:
         case StringDict::ID::TRNA_ASN_AAC_CHARGED:        return "GUU";
         case StringDict::ID::TRNA_GLN_CAG:
-        case StringDict::ID::TRNA_GLN_CAG_CHARGED:        return "GUC";
+        case StringDict::ID::TRNA_GLN_CAG_CHARGED:        return "CUG";
         case StringDict::ID::TRNA_ILE_ATC:
         case StringDict::ID::TRNA_ILE_ATC_CHARGED:        return "GAU";
         
@@ -154,6 +169,31 @@ const std::array<StringDict::ID, 25>& TRNA::getUnchargedTRNAIds()
     return unchargedTRNAIds;
 }
 
+// Converts a codon sequence to its corresponding anticodon sequence
+//
+// BIOLOGICAL BACKGROUND:
+// During protein synthesis, tRNA anticodons bind to mRNA codons through Watson-Crick
+// base pairing in an antiparallel orientation. This function simulates that process:
+//
+// 1. BASE PAIRING RULES:
+//    - A (adenine) pairs with U (uracil) 
+//    - T (thymine, DNA only) pairs with A (adenine)
+//    - U (uracil, RNA) pairs with A (adenine)
+//    - G (guanine) pairs with C (cytosine)
+//    - C (cytosine) pairs with G (guanine)
+//
+// 2. ANTIPARALLEL BINDING:
+//    - Codon:     5'-ATG-3' (on mRNA, read left to right)
+//    - Anticodon: 3'-UAC-5' (on tRNA, binds antiparallel)
+//    - But conventionally written as: 5'-CAU-3' (reversed)
+//
+// 3. WHY REVERSE?
+//    The anticodon binds in the opposite direction to the codon. To get the
+//    conventional 5' → 3' notation of the anticodon, we must reverse the
+//    complementary sequence. This ensures compatibility with stored tRNA
+//    anticodon sequences in getAnticodon().
+//
+// EXAMPLE: ATG → complement UAC → reverse CAU (final anticodon)
 std::string TRNA::codonToAnticodon(const std::string& codon)
 {
     if (codon.length() != 3) return "";
@@ -171,6 +211,9 @@ std::string TRNA::codonToAnticodon(const std::string& codon)
             default: return ""; // Invalid nucleotide
         }
     }
+    
+    // Reverse the anticodon (anticodons read 3' to 5' opposite to codons)
+    std::reverse(anticodon.begin(), anticodon.end());
     return anticodon;
 }
 
@@ -278,18 +321,19 @@ void TRNA::runTests()
     }
     
     // Test codonToAnticodon function
-    // Test DNA codon (with T)
-    if (codonToAnticodon("ATG") != "UAC") {
-        LOG_ERROR("codonToAnticodon test failed: ATG (DNA) should convert to UAC");
+    // Test DNA codon (with T) - ATG complement is UAC, reversed is CAU
+    if (codonToAnticodon("ATG") != "CAU") {
+        LOG_ERROR("codonToAnticodon test failed: ATG (DNA) should convert to CAU");
         assert(false && "codonToAnticodon DNA conversion incorrect");
     }
-    // Test RNA codon (with U) 
-    if (codonToAnticodon("AUG") != "UAC") {
-        LOG_ERROR("codonToAnticodon test failed: AUG (RNA) should convert to UAC");
+    // Test RNA codon (with U) - AUG complement is UAC, reversed is CAU
+    if (codonToAnticodon("AUG") != "CAU") {
+        LOG_ERROR("codonToAnticodon test failed: AUG (RNA) should convert to CAU");
         assert(false && "codonToAnticodon RNA conversion incorrect");
     }
-    if (codonToAnticodon("GGA") != "CCU") {
-        LOG_ERROR("codonToAnticodon test failed: GGA should convert to CCU");
+    // Test GGA - complement is CCU, reversed is UCC
+    if (codonToAnticodon("GGA") != "UCC") {
+        LOG_ERROR("codonToAnticodon test failed: GGA should convert to UCC");
         assert(false && "codonToAnticodon conversion incorrect");
     }
     
@@ -298,5 +342,12 @@ void TRNA::runTests()
     if (std::find(metTRNAs.begin(), metTRNAs.end(), StringDict::ID::TRNA_MET_ATG_CHARGED) == metTRNAs.end()) {
         LOG_ERROR("getChargedTRNAsWithAnticodon test failed: CAU anticodon should match TRNA_MET_ATG_CHARGED");
         assert(false && "getChargedTRNAsWithAnticodon lookup incorrect");
+    }
+    
+    // Test that GGA codon converts to correct anticodon and finds matching tRNA
+    auto glycineTRNAs = getChargedTRNAsWithAnticodon("UCC");
+    if (std::find(glycineTRNAs.begin(), glycineTRNAs.end(), StringDict::ID::TRNA_GLY_GGA_CHARGED) == glycineTRNAs.end()) {
+        LOG_ERROR("getChargedTRNAsWithAnticodon test failed: UCC anticodon should match TRNA_GLY_GGA_CHARGED");
+        assert(false && "getChargedTRNAsWithAnticodon lookup for GGA incorrect");
     }
 }

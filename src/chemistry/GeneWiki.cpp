@@ -40,7 +40,7 @@ void GeneWiki::initializeDefaultSequences()
     m_sequences[StringDict::idToString(StringDict::ID::PLK_1)] = "ATGCCGTCGAATTCGAATCCG";  // Polo-like kinase
     
     // Centrosome proteins
-    m_sequences[StringDict::idToString(StringDict::ID::GAMMA_TUBULIN)] = "ATGGCCGTCGAATTCCTGACC";  // γ-tubulin
+    m_sequences[StringDict::idToString(StringDict::ID::GAMMA_TUBULIN)] = "ATGGCCGTCGAGTTCCTGACC";  // γ-tubulin (GAA->GAG for tRNA compatibility)
     
     // tRNA genes - these represent the tRNA molecules themselves
     // Start codon tRNA (essential for translation initiation)
