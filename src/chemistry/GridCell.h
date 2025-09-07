@@ -6,8 +6,6 @@
 #include <unordered_map>
 #include "Molecule.h"
 
-#include "TRNA.h"
-
 // A single cell in the 3D grid representing the simulation space
 class GridCell 
 {
@@ -16,7 +14,6 @@ public:
     static constexpr double MIN_RESOURCE_LEVEL = 0.0;
 
     std::unordered_map<Molecule, Population> m_molecules;
-    std::vector<std::shared_ptr<TRNA>> m_pTRNAs;
     
     // Constructor
     GridCell();
@@ -31,7 +28,7 @@ public:
     void updateMRNAs(double dt);  // Handle mRNA degradation and cleanup
     
     // tRNA management  
-    void updateTRNAs(double dt);  // Handle tRNA charging and cleanup
+    void updateTRNAs(double dt);  // Handle tRNA charging transitions (uncharged -> charged)
 
 private:
     // No longer need separate RNA storage - use m_molecules with MRNA type

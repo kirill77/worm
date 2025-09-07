@@ -2,6 +2,7 @@
 #include "Medium.h"
 #include "chemistry/MoleculeWiki.h"
 #include "chemistry/ResourceDistributor.h"
+#include "chemistry/TRNA.h"
 #include <random>
 #include <algorithm>
 #include <cassert>
@@ -19,10 +20,6 @@ void Medium::addMolecule(const MPopulation& population, const float3& position)
     moleculePop.m_fNumber += population.m_population.m_fNumber;
 }
 
-void Medium::addTRNA(std::shared_ptr<TRNA> pTRNA, const float3& position)
-{
-    m_grid.findCell(position).m_pTRNAs.push_back(pTRNA);
-}
 
 double Medium::getMoleculeNumber(const Molecule& molecule, const float3& position) const
 {
@@ -103,17 +100,6 @@ void Medium::translateMRNAs(double fDt)
         // Skip cells with no mRNAs
         if (!cell.hasMRNAs()) continue;
         
-        // Collect available tRNAs from this cell
-        std::vector<std::shared_ptr<TRNA>> availableTRNAs;
-        for (const auto& pTRNA : cell.m_pTRNAs) {
-            if (pTRNA->isCharged() && pTRNA->getNumber() > 0.1) {
-                availableTRNAs.push_back(pTRNA);
-            }
-        }
-        
-        // Skip if no charged tRNAs available
-        if (availableTRNAs.empty()) continue;
-        
         // Attempt translation for each mRNA molecule
         auto& molecules = cell.m_molecules;
         auto it = molecules.begin();
@@ -131,7 +117,7 @@ void Medium::translateMRNAs(double fDt)
                 double translationRate = info.m_fTranslationRate;
                 
                 // Attempt translation
-                auto pProtein = it->first.translate(fDt, it->second.m_fNumber, translationRate, availableTRNAs);
+                auto pProtein = it->first.translate(fDt, it->second.m_fNumber, translationRate, cell.m_molecules);
                 
                 if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
                     // Translation successful - add protein to cell

@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include "chemistry/Molecule.h"
 
-#include "chemistry/TRNA.h"
 #include "geometry/vectors/vector.h"
 #include "chemistry/MoleculeWiki.h"
 #include "chemistry/GridCell.h"
@@ -33,9 +32,6 @@ public:
 
     // Add molecule population to specific location
     void addMolecule(const MPopulation& population, const float3& position);
-    
-    // Add tRNA to specific location
-    void addTRNA(std::shared_ptr<TRNA> tRNA, const float3& position);
     
     // ATP-related methods
     void addATP(double amount, const float3& position);

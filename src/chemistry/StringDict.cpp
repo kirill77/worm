@@ -1,4 +1,6 @@
 #include "StringDict.h"
+#include "utils/log/ILog.h"
+#include "TRNA.h"
 
 // Define static members
 std::vector<std::string> StringDict::m_idToString;
@@ -70,6 +72,38 @@ void StringDict::initialize()
     m_idToString[static_cast<size_t>(ID::TRNA_GLN_CAG)] = "tRNA-Gln-CAG";
     m_idToString[static_cast<size_t>(ID::TRNA_ILE_ATC)] = "tRNA-Ile-ATC";
     
+    // Charged tRNA variants
+    // Start codon - charged
+    m_idToString[static_cast<size_t>(ID::TRNA_MET_ATG_CHARGED)] = "tRNA-Met-ATG-charged";
+    
+    // Common amino acids - charged
+    m_idToString[static_cast<size_t>(ID::TRNA_GLY_GGA_CHARGED)] = "tRNA-Gly-GGA-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_GLY_GGT_CHARGED)] = "tRNA-Gly-GGT-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_ALA_GCA_CHARGED)] = "tRNA-Ala-GCA-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_ALA_GCC_CHARGED)] = "tRNA-Ala-GCC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_LEU_CTG_CHARGED)] = "tRNA-Leu-CTG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_LEU_CTC_CHARGED)] = "tRNA-Leu-CTC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_SER_TCA_CHARGED)] = "tRNA-Ser-TCA-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_SER_TCG_CHARGED)] = "tRNA-Ser-TCG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_VAL_GTG_CHARGED)] = "tRNA-Val-GTG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_VAL_GTC_CHARGED)] = "tRNA-Val-GTC-charged";
+    
+    // Less common but essential amino acids - charged
+    m_idToString[static_cast<size_t>(ID::TRNA_PRO_CCA_CHARGED)] = "tRNA-Pro-CCA-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_THR_ACA_CHARGED)] = "tRNA-Thr-ACA-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_ASP_GAC_CHARGED)] = "tRNA-Asp-GAC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_GLU_GAG_CHARGED)] = "tRNA-Glu-GAG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_LYS_AAG_CHARGED)] = "tRNA-Lys-AAG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_ARG_CGA_CHARGED)] = "tRNA-Arg-CGA-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_HIS_CAC_CHARGED)] = "tRNA-His-CAC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_PHE_TTC_CHARGED)] = "tRNA-Phe-TTC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_TYR_TAC_CHARGED)] = "tRNA-Tyr-TAC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_CYS_TGC_CHARGED)] = "tRNA-Cys-TGC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_TRP_TGG_CHARGED)] = "tRNA-Trp-TGG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_ASN_AAC_CHARGED)] = "tRNA-Asn-AAC-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_GLN_CAG_CHARGED)] = "tRNA-Gln-CAG-charged";
+    m_idToString[static_cast<size_t>(ID::TRNA_ILE_ATC_CHARGED)] = "tRNA-Ile-ATC-charged";
+    
     // Cell fate specification genes
     m_idToString[static_cast<size_t>(ID::MEX_3)] = "mex-3";
     m_idToString[static_cast<size_t>(ID::SKN_1)] = "skn-1";
@@ -107,6 +141,9 @@ void StringDict::initialize()
             m_stringToId[m_idToString[i]] = static_cast<ID>(i);
         }
     }
+    
+    // Test TRNA functionality
+    TRNA::runTests();
 }
 
 StringDict::ID StringDict::stringToId(const std::string& s)

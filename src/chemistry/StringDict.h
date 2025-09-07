@@ -65,6 +65,38 @@ struct StringDict
         TRNA_GLN_CAG,        // Glutamine  
         TRNA_ILE_ATC,        // Isoleucine
         
+        // Charged tRNA variants (for distinguishing charged vs uncharged)
+        // Start codon - charged
+        TRNA_MET_ATG_CHARGED,
+        
+        // Common amino acids - charged
+        TRNA_GLY_GGA_CHARGED,
+        TRNA_GLY_GGT_CHARGED,
+        TRNA_ALA_GCA_CHARGED,
+        TRNA_ALA_GCC_CHARGED,
+        TRNA_LEU_CTG_CHARGED,
+        TRNA_LEU_CTC_CHARGED,
+        TRNA_SER_TCA_CHARGED,
+        TRNA_SER_TCG_CHARGED,
+        TRNA_VAL_GTG_CHARGED,
+        TRNA_VAL_GTC_CHARGED,
+        
+        // Less common but essential amino acids - charged
+        TRNA_PRO_CCA_CHARGED,
+        TRNA_THR_ACA_CHARGED,
+        TRNA_ASP_GAC_CHARGED,
+        TRNA_GLU_GAG_CHARGED,
+        TRNA_LYS_AAG_CHARGED,
+        TRNA_ARG_CGA_CHARGED,
+        TRNA_HIS_CAC_CHARGED,
+        TRNA_PHE_TTC_CHARGED,
+        TRNA_TYR_TAC_CHARGED,
+        TRNA_CYS_TGC_CHARGED,
+        TRNA_TRP_TGG_CHARGED,
+        TRNA_ASN_AAC_CHARGED,
+        TRNA_GLN_CAG_CHARGED,
+        TRNA_ILE_ATC_CHARGED,
+        
         // Cell fate specification genes
         MEX_3,
         SKN_1,
@@ -107,6 +139,7 @@ struct StringDict
         return m_idToString[static_cast<size_t>(id)];
     }
     static ID stringToId(const std::string& s);
+    
 
 private:
     static std::vector<std::string> m_idToString;

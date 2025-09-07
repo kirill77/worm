@@ -16,12 +16,13 @@ struct MolInfo {
     std::string classification;   // Additional classification info
     double m_fHalfLife;           // How quickly it degrades (in seconds)
     double m_fTranslationRate;    // Rate of protein production
+    double m_fChargingRate;       // Rate at which tRNA gets charged with amino acid (for tRNAs only)
     
-    MolInfo() : molecularWeight(0.0), m_fHalfLife(0.0), m_fTranslationRate(0.0) {}
+    MolInfo() : molecularWeight(0.0), m_fHalfLife(0.0), m_fTranslationRate(0.0), m_fChargingRate(0.0) {}
     MolInfo(const std::string& desc, const std::string& formula = "", double weight = 0.0, const std::string& classif = "",
-            double halfLife = 0.0, double translationRate = 0.0)
+            double halfLife = 0.0, double translationRate = 0.0, double chargingRate = 0.0)
         : description(desc), chemicalFormula(formula), molecularWeight(weight), classification(classif),
-          m_fHalfLife(halfLife), m_fTranslationRate(translationRate) {}
+          m_fHalfLife(halfLife), m_fTranslationRate(translationRate), m_fChargingRate(chargingRate) {}
 };
 
 // A static repository of molecule interaction data
@@ -56,4 +57,7 @@ public:
     
     // Get information about a specific molecule
     static const MolInfo& getInfo(const Molecule& molecule);
+    
+    // Initialize tRNA molecule information with charging rates
+    static void initializeTRNAInfo();
 };

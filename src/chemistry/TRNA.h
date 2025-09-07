@@ -1,34 +1,37 @@
 #pragma once
 
-#include <string>
-#include <memory>
 #include "StringDict.h"
+#include <string>
+#include <array>
+#include <vector>
 
+// Utility class for tRNA ID operations
+// This class contains only static methods for working with tRNA molecule IDs
 class TRNA
 {
-private:
-    StringDict::ID m_id;         // StringDict ID that determines tRNA type (amino acid + anticodon)
-    double m_fNumber;            // How much of this tRNA is available
-    bool m_bCharged;             // Whether tRNA is loaded with amino acid
-    double m_fChargingRate;      // Rate at which this tRNA gets charged with amino acid
-
 public:
-    TRNA(StringDict::ID id, double number, double chargingRate = 1.0)
-        : m_id(id), m_fNumber(number), m_bCharged(false),
-          m_fChargingRate(chargingRate) {}
+    // Check if an ID represents a charged tRNA
+    static bool isChargedTRNA(StringDict::ID id);
+    
+    // Convert an uncharged tRNA ID to its charged variant
+    static StringDict::ID getChargedVariant(StringDict::ID unchargedID);
+    
+    // Get the anticodon sequence for a tRNA based on its StringDict ID
+    static std::string getAnticodon(StringDict::ID tRNAId);
+    
+    // Get charged tRNA IDs that have a specific anticodon (for codon matching)
+    static std::vector<StringDict::ID> getChargedTRNAsWithAnticodon(const std::string& anticodon);
+    
+    // Helper to convert codon to anticodon
+    static std::string codonToAnticodon(const std::string& codon);
+    
+    // Get array of all uncharged tRNA IDs
+    static const std::array<StringDict::ID, 25>& getUnchargedTRNAIds();
+    
+    // Test all TRNA functionality (called during initialization)
+    static void runTests();
 
-    // Getters
-    StringDict::ID getID() const { return m_id; }
-    std::string getName() const { return StringDict::idToString(m_id); }
-    std::string getAnticodon() const;
-    double getNumber() const { return m_fNumber; }
-    bool isCharged() const { return m_bCharged; }
-
-    // tRNA charging
-    void charge(double dt);
-    void discharge();
-
-    // Check if this tRNA matches a codon
-    bool matchesCodon(const std::string& codon) const;
+private:
+    // Private constructor - this is a utility class with only static methods
+    TRNA() = delete;
 };
-

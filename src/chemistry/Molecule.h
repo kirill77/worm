@@ -10,7 +10,6 @@
 // Forward declarations
 class BindingSurface;
 struct MPopulation;
-class TRNA;
 
 // Chemical type classification for molecules
 enum class ChemicalType : uint8_t {
@@ -24,45 +23,6 @@ enum class ChemicalType : uint8_t {
     LIPID,         // Fatty acids, phospholipids, steroids
     ION,           // Charged atoms/molecules (Na+, Cl-, etc.)
     OTHER          // Catch-all for everything else
-};
-
-// Simple molecule class with optimized storage
-class Molecule
-{
-public:
-    // Default constructor
-    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER) {}
-    
-    // Constructor with StringDict ID and type  
-    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type) {}
-    
-    // Get name from StringDict
-    const std::string& getName() const {
-        return StringDict::idToString(m_id);
-    }
-    
-    // Get chemical type
-    ChemicalType getType() const { return m_type; }
-    
-    // Get StringDict ID (for optimization purposes)
-    StringDict::ID getID() const { return m_id; }
-    
-    // Equality operator for unordered_map
-    bool operator==(const Molecule& other) const {
-        return m_id == other.m_id && m_type == other.m_type;
-    }
-    
-    bool operator!=(const Molecule& other) const {
-        return !(*this == other);
-    }
-    
-    // Translation function (for RNA molecules)
-    std::shared_ptr<MPopulation> translate(double dt, double moleculeAmount, double translationRate, 
-                                         const std::vector<std::shared_ptr<class TRNA>>& availableTRNAs) const;
-
-private:
-    StringDict::ID m_id;   // StringDict ID  
-    ChemicalType m_type;   // Chemical classification of the molecule
 };
 
 // Population class - handles population properties without molecule identity
@@ -103,6 +63,45 @@ public:
 private:
     // Weak pointer to the surface this population is bound to (if any)
     std::weak_ptr<BindingSurface> m_pBindingSurface;
+};
+
+// Simple molecule class with optimized storage
+class Molecule
+{
+public:
+    // Default constructor
+    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER) {}
+    
+    // Constructor with StringDict ID and type  
+    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type) {}
+    
+    // Get name from StringDict
+    const std::string& getName() const {
+        return StringDict::idToString(m_id);
+    }
+    
+    // Get chemical type
+    ChemicalType getType() const { return m_type; }
+    
+    // Get StringDict ID (for optimization purposes)
+    StringDict::ID getID() const { return m_id; }
+    
+    // Equality operator for unordered_map
+    bool operator==(const Molecule& other) const {
+        return m_id == other.m_id && m_type == other.m_type;
+    }
+    
+    bool operator!=(const Molecule& other) const {
+        return !(*this == other);
+    }
+    
+    // Translation function (for RNA molecules)
+    std::shared_ptr<MPopulation> translate(double dt, double moleculeAmount, double translationRate, 
+                                         const std::unordered_map<Molecule, Population>& availableMolecules) const;
+
+private:
+    StringDict::ID m_id;   // StringDict ID  
+    ChemicalType m_type;   // Chemical classification of the molecule
 };
 
 // Molecule population - simple composition of Molecule + Population

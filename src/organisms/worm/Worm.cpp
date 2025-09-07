@@ -6,7 +6,6 @@
 #include "biology/organelles/Centrosome.h"
 #include "biology/organelles/CellTypes.h"
 #include "chemistry/Molecule.h"
-#include "chemistry/TRNA.h"
 #include "biology/organelles/Medium.h"
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Spindle.h"
@@ -112,82 +111,68 @@ void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
 {
     // Add essential maternal tRNAs to bootstrap translation
     // These represent tRNAs inherited from the mother egg
+    // We add charged tRNAs since they come from the mother in a charged state
     
-    // START CODON - absolutely essential for translation initiation
-    auto pMet = std::make_shared<TRNA>(StringDict::ID::TRNA_MET_ATG, 500.0, 0.8);  // High abundance for start codon
-    pMet->charge(1.0);  // Start fully charged
-    medium.addTRNA(pMet, position);
+    // START CODON - absolutely essential for translation initiation  
+    MPopulation metCharged(Molecule(StringDict::ID::TRNA_MET_ATG_CHARGED, ChemicalType::TRNA), 500.0);
+    medium.addMolecule(metCharged, position);
     
     // MOST COMMON AMINO ACIDS - needed for early protein synthesis
     // Glycine (highly abundant in C. elegans)
-    auto pGlyGGA = std::make_shared<TRNA>(StringDict::ID::TRNA_GLY_GGA, 300.0, 0.9);
-    pGlyGGA->charge(1.0);
-    medium.addTRNA(pGlyGGA, position);
+    MPopulation glyGGACharged(Molecule(StringDict::ID::TRNA_GLY_GGA_CHARGED, ChemicalType::TRNA), 300.0);
+    medium.addMolecule(glyGGACharged, position);
     
-    auto pGlyGGT = std::make_shared<TRNA>(StringDict::ID::TRNA_GLY_GGT, 200.0, 0.8);
-    pGlyGGT->charge(1.0);
-    medium.addTRNA(pGlyGGT, position);
+    MPopulation glyGGTCharged(Molecule(StringDict::ID::TRNA_GLY_GGT_CHARGED, ChemicalType::TRNA), 200.0);
+    medium.addMolecule(glyGGTCharged, position);
     
     // Alanine (very common)
-    auto pAlaGCA = std::make_shared<TRNA>(StringDict::ID::TRNA_ALA_GCA, 250.0, 0.9);
-    pAlaGCA->charge(1.0);
-    medium.addTRNA(pAlaGCA, position);
+    MPopulation alaGCACharged(Molecule(StringDict::ID::TRNA_ALA_GCA_CHARGED, ChemicalType::TRNA), 250.0);
+    medium.addMolecule(alaGCACharged, position);
     
-    auto pAlaGCC = std::make_shared<TRNA>(StringDict::ID::TRNA_ALA_GCC, 150.0, 0.8);
-    pAlaGCC->charge(1.0);
-    medium.addTRNA(pAlaGCC, position);
+    MPopulation alaGCCCharged(Molecule(StringDict::ID::TRNA_ALA_GCC_CHARGED, ChemicalType::TRNA), 150.0);
+    medium.addMolecule(alaGCCCharged, position);
     
     // Leucine (highly preferred in C. elegans)
-    auto pLeuCTG = std::make_shared<TRNA>(StringDict::ID::TRNA_LEU_CTG, 350.0, 0.9);
-    pLeuCTG->charge(1.0);
-    medium.addTRNA(pLeuCTG, position);
+    MPopulation leuCTGCharged(Molecule(StringDict::ID::TRNA_LEU_CTG_CHARGED, ChemicalType::TRNA), 350.0);
+    medium.addMolecule(leuCTGCharged, position);
     
-    auto pLeuCTC = std::make_shared<TRNA>(StringDict::ID::TRNA_LEU_CTC, 200.0, 0.8);
-    pLeuCTC->charge(1.0);
-    medium.addTRNA(pLeuCTC, position);
+    MPopulation leuCTCCharged(Molecule(StringDict::ID::TRNA_LEU_CTC_CHARGED, ChemicalType::TRNA), 200.0);
+    medium.addMolecule(leuCTCCharged, position);
     
     // Serine (common)
-    auto pSerTCA = std::make_shared<TRNA>(StringDict::ID::TRNA_SER_TCA, 220.0, 0.8);
-    pSerTCA->charge(1.0);
-    medium.addTRNA(pSerTCA, position);
+    MPopulation serTCACharged(Molecule(StringDict::ID::TRNA_SER_TCA_CHARGED, ChemicalType::TRNA), 220.0);
+    medium.addMolecule(serTCACharged, position);
     
-    auto pSerTCG = std::make_shared<TRNA>(StringDict::ID::TRNA_SER_TCG, 150.0, 0.7);
-    pSerTCG->charge(1.0);
-    medium.addTRNA(pSerTCG, position);
+    MPopulation serTCGCharged(Molecule(StringDict::ID::TRNA_SER_TCG_CHARGED, ChemicalType::TRNA), 150.0);
+    medium.addMolecule(serTCGCharged, position);
     
     // Valine
-    auto pValGTG = std::make_shared<TRNA>(StringDict::ID::TRNA_VAL_GTG, 200.0, 0.8);
-    pValGTG->charge(1.0);
-    medium.addTRNA(pValGTG, position);
+    MPopulation valGTGCharged(Molecule(StringDict::ID::TRNA_VAL_GTG_CHARGED, ChemicalType::TRNA), 200.0);
+    medium.addMolecule(valGTGCharged, position);
     
     // ESSENTIAL AMINO ACIDS - lower abundance but necessary
     // Lysine (positively charged, important for proteins)
-    auto pLysAAG = std::make_shared<TRNA>(StringDict::ID::TRNA_LYS_AAG, 180.0, 0.8);
-    pLysAAG->charge(1.0);
-    medium.addTRNA(pLysAAG, position);
+    MPopulation lysAAGCharged(Molecule(StringDict::ID::TRNA_LYS_AAG_CHARGED, ChemicalType::TRNA), 180.0);
+    medium.addMolecule(lysAAGCharged, position);
     
     // Aspartic acid (negatively charged)
-    auto pAspGAC = std::make_shared<TRNA>(StringDict::ID::TRNA_ASP_GAC, 160.0, 0.8);
-    pAspGAC->charge(1.0);
-    medium.addTRNA(pAspGAC, position);
+    MPopulation aspGACCharged(Molecule(StringDict::ID::TRNA_ASP_GAC_CHARGED, ChemicalType::TRNA), 160.0);
+    medium.addMolecule(aspGACCharged, position);
     
     // Glutamic acid (negatively charged)
-    auto pGluGAG = std::make_shared<TRNA>(StringDict::ID::TRNA_GLU_GAG, 170.0, 0.8);
-    pGluGAG->charge(1.0);
-    medium.addTRNA(pGluGAG, position);
+    MPopulation gluGAGCharged(Molecule(StringDict::ID::TRNA_GLU_GAG_CHARGED, ChemicalType::TRNA), 170.0);
+    medium.addMolecule(gluGAGCharged, position);
     
     // Proline (structure-forming)
-    auto pProCCA = std::make_shared<TRNA>(StringDict::ID::TRNA_PRO_CCA, 140.0, 0.7);
-    pProCCA->charge(1.0);
-    medium.addTRNA(pProCCA, position);
+    MPopulation proCCACharged(Molecule(StringDict::ID::TRNA_PRO_CCA_CHARGED, ChemicalType::TRNA), 140.0);
+    medium.addMolecule(proCCACharged, position);
     
     // Threonine
-    auto pThrACA = std::make_shared<TRNA>(StringDict::ID::TRNA_THR_ACA, 140.0, 0.7);
-    pThrACA->charge(1.0);
-    medium.addTRNA(pThrACA, position);
+    MPopulation thrACACharged(Molecule(StringDict::ID::TRNA_THR_ACA_CHARGED, ChemicalType::TRNA), 140.0);
+    medium.addMolecule(thrACACharged, position);
     
     // These maternal tRNAs will allow initial translation of:
-    // 1. More tRNAs (from transcribed tRNA mRNAs)
+    // 1. More tRNAs (from transcribed tRNA mRNAs) 
     // 2. tRNA synthetases (to charge more tRNAs)
     // 3. Ribosomal proteins (to make more ribosomes)
     // 4. Other essential proteins for cellular function
