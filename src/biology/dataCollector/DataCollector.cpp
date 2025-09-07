@@ -14,13 +14,13 @@ DataCollector::DataCollector(Medium& medium, const std::string& outputFile, doub
 }
 
 void DataCollector::addCollectionPoint(const float3& position, const std::string& name, 
-                                     const std::vector<std::string>& proteins)
+                                     const std::vector<Molecule>& molecules)
 {
     // Add new collection point
     CollectionPoint point;
     point.position = position;
     point.name = name;
-    point.proteins = proteins;
+    point.molecules = molecules;
     
     m_collectionPoints.push_back(point);
     
@@ -67,11 +67,11 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
     std::vector<double> dataRow;
     dataRow.push_back(currentTime); // First column is time
     
-    // For each collection point, get protein concentrations
+    // For each collection point, get molecule concentrations
     for (const auto& point : m_collectionPoints) {
-        // For each protein at this point
-        for (const auto& protein : point.proteins) {
-            double concentration = m_medium.getMoleculeNumber(Molecule(StringDict::stringToId(protein), ChemicalType::PROTEIN), point.position);
+        // For each molecule at this point
+        for (const auto& molecule : point.molecules) {
+            double concentration = m_medium.getMoleculeNumber(molecule, point.position);
             dataRow.push_back(concentration);
         }
     }
@@ -107,10 +107,19 @@ std::vector<std::string> DataCollector::generateHeaders() const
     // First column is time
     headers.push_back("Time(s)");
     
-    // For each collection point, add protein headers
+    // For each collection point, add molecule headers
     for (const auto& point : m_collectionPoints) {
-        for (const auto& protein : point.proteins) {
-            headers.push_back(protein + "_" + point.name);
+        for (const auto& molecule : point.molecules) {
+            std::string moleculeTypeStr;
+            switch (molecule.getType()) {
+                case ChemicalType::PROTEIN: moleculeTypeStr = "PROT"; break;
+                case ChemicalType::MRNA: moleculeTypeStr = "mRNA"; break;
+                case ChemicalType::TRNA: moleculeTypeStr = "tRNA"; break;
+                case ChemicalType::DNA: moleculeTypeStr = "DNA"; break;
+                case ChemicalType::NUCLEOTIDE: moleculeTypeStr = "NUC"; break;
+                default: moleculeTypeStr = "OTHER"; break;
+            }
+            headers.push_back(molecule.getName() + "(" + moleculeTypeStr + ")_" + point.name);
         }
     }
     

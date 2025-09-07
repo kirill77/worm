@@ -67,6 +67,8 @@ std::vector<Chromosome> Worm::initializeGenes()
     // Chromosome III - Cell cycle and tRNA genes
     pDNA3->addGene(StringDict::ID::PAL_1, 0.8, 0.1);  // Posterior fate
     pDNA3->addGene(StringDict::ID::CDK_1, 1.2, 0.2);  // Cell cycle control
+    pDNA3->addGene(StringDict::ID::CDK_2, 1.0, 0.15); // Transcriptional regulator for γ-tubulin
+    pDNA3->addGene(StringDict::ID::CCE_1, 1.1, 0.18); // Cyclin E transcriptional regulator
     
     // Additional tRNAs for abundant amino acids
     pDNA3->addGene(StringDict::ID::TRNA_SER_TCG, 0.8, 0.15); // Alternative Ser
@@ -146,9 +148,12 @@ void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
     MPopulation serTCGCharged(Molecule(StringDict::ID::TRNA_SER_TCG_CHARGED, ChemicalType::TRNA), 150.0);
     medium.addMolecule(serTCGCharged, position);
     
-    // Valine
+    // Valine (both codons needed for GAMMA_TUBULIN translation)
     MPopulation valGTGCharged(Molecule(StringDict::ID::TRNA_VAL_GTG_CHARGED, ChemicalType::TRNA), 200.0);
     medium.addMolecule(valGTGCharged, position);
+    
+    MPopulation valGTCCharged(Molecule(StringDict::ID::TRNA_VAL_GTC_CHARGED, ChemicalType::TRNA), 150.0);
+    medium.addMolecule(valGTCCharged, position);
     
     // ESSENTIAL AMINO ACIDS - lower abundance but necessary
     // Lysine (positively charged, important for proteins)
@@ -170,6 +175,10 @@ void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
     // Threonine
     MPopulation thrACACharged(Molecule(StringDict::ID::TRNA_THR_ACA_CHARGED, ChemicalType::TRNA), 140.0);
     medium.addMolecule(thrACACharged, position);
+    
+    // Phenylalanine (essential for GAMMA_TUBULIN translation)
+    MPopulation pheTTCCharged(Molecule(StringDict::ID::TRNA_PHE_TTC_CHARGED, ChemicalType::TRNA), 130.0);
+    medium.addMolecule(pheTTCCharged, position);
     
     // These maternal tRNAs will allow initial translation of:
     // 1. More tRNAs (from transcribed tRNA mRNAs) 
@@ -276,11 +285,36 @@ void Worm::setupDataCollector()
     std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
     std::string bindingSiteCortex = StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX);
 
-    // Add collection points with specific proteins to track
+    // Add collection points with specific molecules to track
     m_pDataCollector->addCollectionPoint(
         posteriorPos,
         "Posterior", 
-        { StringDict::idToString(StringDict::ID::GAMMA_TUBULIN) }
+        { 
+            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN),  // Target protein
+            Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN),          // Transcriptional regulator 1
+            Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN),          // Transcriptional regulator 2 (CyclinE)
+            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA)      // γ-tubulin mRNA (precursor)
+        }
+    );
+    
+    // Add a second collection point to track ALL tRNAs required for GAMMA_TUBULIN translation
+    // GAMMA_TUBULIN sequence: ATG-GCC-GTC-GAA-TTC-CTG-ACC
+    m_pDataCollector->addCollectionPoint(
+        centerPos,
+        "Center", 
+        { 
+            // GAMMA_TUBULIN required charged tRNAs (all 7 codons)
+            Molecule(StringDict::ID::TRNA_MET_ATG_CHARGED, ChemicalType::TRNA), // ATG codon
+            Molecule(StringDict::ID::TRNA_ALA_GCC_CHARGED, ChemicalType::TRNA), // GCC codon
+            Molecule(StringDict::ID::TRNA_VAL_GTC_CHARGED, ChemicalType::TRNA), // GTC codon
+            Molecule(StringDict::ID::TRNA_GLU_GAG_CHARGED, ChemicalType::TRNA), // GAA codon  
+            Molecule(StringDict::ID::TRNA_PHE_TTC_CHARGED, ChemicalType::TRNA), // TTC codon
+            Molecule(StringDict::ID::TRNA_LEU_CTG_CHARGED, ChemicalType::TRNA), // CTG codon
+            Molecule(StringDict::ID::TRNA_THR_ACA_CHARGED, ChemicalType::TRNA), // ACC codon
+            // Supporting mRNAs
+            Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA),              // CDK-2 mRNA
+            Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA)               // CCE-1 mRNA
+        }
     );
 }
 

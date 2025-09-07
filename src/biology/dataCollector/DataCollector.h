@@ -1,6 +1,7 @@
 #pragma once
 
 #include "biology/organelles/Medium.h"
+#include "chemistry/Molecule.h"
 #include "geometry/vectors/vector.h"
 #include <string>
 #include <vector>
@@ -22,7 +23,7 @@ public:
     struct CollectionPoint {
         float3 position;               // Position to collect data from
         std::string name;              // Name of this collection point (e.g., "Anterior")
-        std::vector<std::string> proteins; // Proteins to track at this position
+        std::vector<Molecule> molecules; // Molecules to track at this position (any type)
     };
     
     /**
@@ -37,10 +38,10 @@ public:
      * @brief Add a collection point
      * @param position Position in simulation space (-1 to 1)
      * @param name Name to identify this collection point
-     * @param proteins List of protein names to track at this position
+     * @param molecules List of molecules to track at this position (any ChemicalType)
      */
     void addCollectionPoint(const float3& position, const std::string& name, 
-                           const std::vector<std::string>& proteins);
+                           const std::vector<Molecule>& molecules);
     
     /**
      * @brief Update the collector - call this each simulation step

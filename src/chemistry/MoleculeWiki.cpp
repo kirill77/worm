@@ -267,8 +267,12 @@ void MoleculeWiki::initializeMRNAInfo()
     // Cell cycle mRNAs - essential for division timing
     m_moleculesInfo[Molecule(StringDict::ID::CDK_1, ChemicalType::MRNA)] = 
         MolInfo("CDK-1 mRNA", "mRNA", 40000.0, "Cyclin-dependent kinase mRNA", 2400.0, 3.0, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA)] = 
+        MolInfo("CDK-2 mRNA", "mRNA", 38000.0, "CDK-2 transcriptional regulator mRNA", 2400.0, 2.5, 0.0);
     m_moleculesInfo[Molecule(StringDict::ID::CYB_1, ChemicalType::MRNA)] = 
         MolInfo("CYB-1 mRNA", "mRNA", 42000.0, "Cyclin B mRNA", 1500.0, 2.5, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA)] = 
+        MolInfo("CCE-1 mRNA", "mRNA", 40000.0, "Cyclin E transcriptional regulator mRNA", 1800.0, 2.8, 0.0);
     m_moleculesInfo[Molecule(StringDict::ID::PLK_1, ChemicalType::MRNA)] = 
         MolInfo("PLK-1 mRNA", "mRNA", 38000.0, "Polo-like kinase mRNA", 2000.0, 2.8, 0.0);
     

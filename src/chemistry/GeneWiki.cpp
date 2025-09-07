@@ -34,7 +34,9 @@ void GeneWiki::initializeDefaultSequences()
     
     // Cell division and timing genes
     m_sequences[StringDict::idToString(StringDict::ID::CDK_1)] = "ATGCCGAATTCGTCGAATCCG";  // Cell cycle control
+    m_sequences[StringDict::idToString(StringDict::ID::CDK_2)] = "ATGCCGAAGTCGTCGAATCCG";  // CDK-2 transcriptional regulator
     m_sequences[StringDict::idToString(StringDict::ID::CYB_1)] = "ATGAATTCGCCGTCGAATCCG";  // Cyclin B
+    m_sequences[StringDict::idToString(StringDict::ID::CCE_1)] = "ATGAAGTTCGCCGAATCCGTC";  // Cyclin E transcriptional regulator
     m_sequences[StringDict::idToString(StringDict::ID::PLK_1)] = "ATGCCGTCGAATTCGAATCCG";  // Polo-like kinase
     
     // Centrosome proteins
