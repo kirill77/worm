@@ -24,6 +24,11 @@ const std::string& GeneWiki::getSequence(const std::string& geneName) const
     return it->second;
 }
 
+bool GeneWiki::hasSequence(const std::string& geneName) const
+{
+    return m_sequences.find(geneName) != m_sequences.end();
+}
+
 void GeneWiki::initializeDefaultSequences()
 {
     // Cell fate specification genes

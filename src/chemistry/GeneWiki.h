@@ -22,6 +22,9 @@ public:
 
     // Get sequence for a gene
     const std::string& getSequence(const std::string& geneName) const;
+    
+    // Check if a sequence exists for a gene
+    bool hasSequence(const std::string& geneName) const;
 
     // Initialize with default sequences
     void initializeDefaultSequences();

@@ -49,6 +49,9 @@
     <ClInclude Include="PhosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TranslationInteraction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="MoleculeInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -89,6 +92,9 @@
     </ClCompile>
 
     <ClCompile Include="PhosphorylationInteraction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TranslationInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProteinBindingSurface.cpp">

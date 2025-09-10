@@ -3,6 +3,7 @@
 #include "PhosphorylationInteraction.h"
 #include "DephosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
+#include "TranslationInteraction.h"
 #include "MoleculeWiki.h"
 #include <string>
 #include <vector>
@@ -51,6 +52,12 @@ private:
      */
     static std::vector<std::shared_ptr<ComplexFormationInteraction>> LoadComplexFormationInteractions(
         const std::string& filePath);
+    
+    /**
+     * @brief Load translation interactions for all mRNA molecules
+     * @return Vector of loaded translation interactions
+     */
+    static std::vector<std::shared_ptr<TranslationInteraction>> LoadTranslationInteractions();
     
     /**
      * @brief Check if the file exists

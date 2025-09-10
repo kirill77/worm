@@ -26,7 +26,8 @@ public:
         RECRUITMENT,        // Recruiting to location
         DEGRADATION,        // Molecule degradation
         ACTIVATION,         // Conformational change activation
-        INHIBITION          // Conformational change inhibition
+        INHIBITION,         // Conformational change inhibition
+        TRANSLATION         // mRNA to protein translation
     };
     
     // Basic constructor

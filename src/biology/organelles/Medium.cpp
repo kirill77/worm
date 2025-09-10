@@ -85,57 +85,9 @@ void Medium::update(double fDt)
     // Interaction of proteins between each other
     updateMoleculeInteraction(fDt);
     
-    // Update mRNA translation
-    translateMRNAs(fDt);
+    // Translation is now handled by MoleculeInteraction system
 }
 
-void Medium::translateMRNAs(double fDt)
-{
-    static constexpr double ATP_PER_TRANSLATION = 4.0;  // ATP cost per amino acid (approximate)
-    
-    // Process translation in each grid cell
-    for (size_t i = 0; i < m_grid.size(); ++i) {
-        GridCell& cell = m_grid[i];
-        
-        // Skip cells with no mRNAs
-        if (!cell.hasMRNAs()) continue;
-        
-        // Attempt translation for each mRNA molecule
-        auto& molecules = cell.m_molecules;
-        auto it = molecules.begin();
-        while (it != molecules.end()) {
-            if (it->first.getType() == ChemicalType::MRNA && it->second.m_fNumber > 0.01) {
-                // Check if we have enough ATP for translation
-                float3 cellPosition = m_grid.indexToPosition(i);
-                if (getAvailableATP(cellPosition) < ATP_PER_TRANSLATION * 10) {
-                    ++it;
-                    continue;
-                }
-                
-                // Get translation rate from MoleculeWiki
-                const auto& info = MoleculeWiki::getInfo(it->first);
-                double translationRate = info.m_fTranslationRate;
-                
-                // Attempt translation
-                auto pProtein = it->first.translate(fDt, it->second.m_fNumber, translationRate, cell.m_molecules);
-                
-                if (pProtein && pProtein->m_population.m_fNumber > 0.0) {
-                    // Translation successful - add protein to cell
-                    Population& cellProteinPop = cell.getOrCreateMolPop(pProtein->m_molecule);
-                    cellProteinPop.m_fNumber += pProtein->m_population.m_fNumber;
-                    
-                    // Consume ATP (simplified - should be proportional to protein length)
-                    double atpCost = ATP_PER_TRANSLATION * pProtein->m_population.m_fNumber;
-                    consumeATP(atpCost, cellPosition);
-                    
-                    // Reduce mRNA amount (simplified degradation from translation)
-                    // In reality, ribosomes can translate the same mRNA multiple times
-                }
-            }
-            ++it;
-        }
-    }
-}
 
 void Medium::addATP(double fAmount, const float3& position)
 {

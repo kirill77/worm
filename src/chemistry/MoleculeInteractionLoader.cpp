@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "MoleculeInteractionLoader.h"
 #include "StringDict.h"
+#include "GeneWiki.h"
+#include "MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <fstream>
@@ -111,6 +113,15 @@ std::vector<std::shared_ptr<MoleculeInteraction>> MoleculeInteractionLoader::Loa
                               complexInteractions.begin(), 
                               complexInteractions.end());
     }
+    
+    // Load translation interactions for all mRNA molecules
+    auto translationInteractions = LoadTranslationInteractions();
+    LOG_INFO("Created %zu translation interactions", translationInteractions.size());
+    
+    // Add to master list
+    allInteractions.insert(allInteractions.end(),
+                          translationInteractions.begin(),
+                          translationInteractions.end());
     
     return allInteractions;
 }
@@ -322,6 +333,40 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> MoleculeInteractionLoa
         }
         catch (const std::exception& e) {
             LOG_ERROR("Error parsing complex formation interaction: %s - %s", line.c_str(), e.what());
+        }
+    }
+    
+    return interactions;
+}
+
+std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::LoadTranslationInteractions()
+{
+    std::vector<std::shared_ptr<TranslationInteraction>> interactions;
+    
+    // Get all mRNA molecules by iterating through StringDict entries
+    // We'll create translation interactions for all molecules that have corresponding genes
+    for (int i = static_cast<int>(StringDict::ID::eUNKNOWN) + 1; 
+         i < static_cast<int>(StringDict::ID::ORGANELLE_END); 
+         ++i) {
+        
+        StringDict::ID id = static_cast<StringDict::ID>(i);
+        const std::string& name = StringDict::idToString(id);
+        
+        // Check if this molecule has a gene sequence (indicating it can be translated)
+        if (GeneWiki::getInstance().hasSequence(name)) {
+            // Create mRNA molecule
+            Molecule mRNA(id, ChemicalType::MRNA);
+            
+            // Get translation rate from MoleculeWiki
+            const auto& info = MoleculeWiki::getInfo(mRNA);
+            
+            // Create translation interaction parameters
+            TranslationInteraction::Parameters params{
+                info.m_fTranslationRate
+            };
+            
+            // Create and add translation interaction
+            interactions.push_back(std::make_shared<TranslationInteraction>(mRNA, params));
         }
     }
     

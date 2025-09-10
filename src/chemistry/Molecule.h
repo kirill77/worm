@@ -95,9 +95,6 @@ public:
         return !(*this == other);
     }
     
-    // Translation function (for RNA molecules)
-    std::shared_ptr<MPopulation> translate(double dt, double moleculeAmount, double translationRate, 
-                                         const std::unordered_map<Molecule, Population>& availableMolecules) const;
 
 private:
     StringDict::ID m_id;   // StringDict ID  
