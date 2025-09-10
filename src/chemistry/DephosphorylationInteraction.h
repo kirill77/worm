@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProteinInteraction.h"
+#include "MoleculeInteraction.h"
 #include "GridCell.h"
 #include "StringDict.h"
 
@@ -8,7 +8,7 @@
  * Represents a dephosphorylation interaction where phosphorylated proteins
  * lose their phosphate group and return to their original state.
  */
-class DephosphorylationInteraction : public ProteinInteraction
+class DephosphorylationInteraction : public MoleculeInteraction
 {
 public:
     struct Parameters {

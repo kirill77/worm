@@ -8,7 +8,7 @@ ComplexFormationInteraction::ComplexFormationInteraction(
     const Molecule& firstProtein, 
     const Molecule& secondProtein, 
     const Parameters& params)
-    : ProteinInteraction(Mechanism::BINDING, 0.2)  // Lower ATP cost for binding
+    : MoleculeInteraction(Mechanism::BINDING, 0.2)  // Lower ATP cost for binding
     , m_firstProtein(firstProtein)
     , m_secondProtein(secondProtein)
     , m_bindingRate(params.bindingRate)

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ResourceDistributor.h"
 #include "GridCell.h"
-#include "ProteinInteraction.h"
+#include "MoleculeInteraction.h"
 #include <cassert>
 #include <algorithm>
 
@@ -23,7 +23,7 @@ void ResourceDistributor::notifyNewDryRun(const class GridCell& cell)
     updateAvailableResources(cell);
 }
 
-bool ResourceDistributor::notifyNewInteractionStarting(const ProteinInteraction& interaction)
+bool ResourceDistributor::notifyNewInteractionStarting(const MoleculeInteraction& interaction)
 {
     // Look up or create an entry for this interaction
     auto& interactionData = m_interactions[&interaction];

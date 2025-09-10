@@ -49,10 +49,10 @@
     <ClInclude Include="PhosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProteinInteraction.h">
+    <ClInclude Include="MoleculeInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProteinInteractionLoader.h">
+    <ClInclude Include="MoleculeInteractionLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MoleculeWiki.h">
@@ -94,7 +94,7 @@
     <ClCompile Include="ProteinBindingSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProteinInteractionLoader.cpp">
+    <ClCompile Include="MoleculeInteractionLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MoleculeWiki.cpp">

@@ -21,7 +21,7 @@ public:
     void notifyNewDryRun(const class GridCell& cell);
 
     // if this returns false - you can skip this interaction
-    bool notifyNewInteractionStarting(const class ProteinInteraction &interaction);
+    bool notifyNewInteractionStarting(const class MoleculeInteraction &interaction);
 
     double getAvailableResource(const Molecule& molecule);
 
@@ -54,7 +54,7 @@ private:
         double m_fScalingFactor = 1.0;
         std::vector<Molecule> m_requestedMolecules;
     };
-    std::unordered_map<const ProteinInteraction*, InteractionData> m_interactions;
+    std::unordered_map<const MoleculeInteraction*, InteractionData> m_interactions;
 
     InteractionData* m_pCurInteraction = nullptr;
 }; 

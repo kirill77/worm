@@ -156,8 +156,8 @@
     <ClInclude Include="Molecule.h" />
 
     <ClInclude Include="PhosphorylationInteraction.h" />
-    <ClInclude Include="ProteinInteraction.h" />
-    <ClInclude Include="ProteinInteractionLoader.h" />
+    <ClInclude Include="MoleculeInteraction.h" />
+    <ClInclude Include="MoleculeInteractionLoader.h" />
     <ClInclude Include="MoleculeWiki.h" />
     <ClInclude Include="ResourceDistributor.h" />
     <ClInclude Include="framework.h" />
@@ -174,7 +174,7 @@
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="PhosphorylationInteraction.cpp" />
     <ClCompile Include="ProteinBindingSurface.cpp" />
-    <ClCompile Include="ProteinInteractionLoader.cpp" />
+    <ClCompile Include="MoleculeInteractionLoader.cpp" />
     <ClCompile Include="ResourceDistributor.cpp" />
     <ClCompile Include="StringDict.cpp" />
     <ClCompile Include="TRNA.cpp" />

@@ -10,7 +10,7 @@ PhosphorylationInteraction::PhosphorylationInteraction(
     StringDict::ID targetId, 
     StringDict::ID phosphorylatedId,
     const Parameters& params)
-    : ProteinInteraction(Mechanism::PHOSPHORYLATION, 0.5)  // Standard ATP cost for phosphorylation
+    : MoleculeInteraction(Mechanism::PHOSPHORYLATION, 0.5)  // Standard ATP cost for phosphorylation
     , m_kinaseId(kinaseId)
     , m_targetId(targetId)
     , m_phosphorylatedId(phosphorylatedId)

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ProteinInteractionLoader.h"
+#include "MoleculeInteractionLoader.h"
 #include "StringDict.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
@@ -59,9 +59,9 @@ static void ValidateProteinName(const std::string& proteinName, const std::strin
     }
 }
 
-std::vector<std::shared_ptr<ProteinInteraction>> ProteinInteractionLoader::LoadAllInteractions(const std::string& basePath)
+std::vector<std::shared_ptr<MoleculeInteraction>> MoleculeInteractionLoader::LoadAllInteractions(const std::string& basePath)
 {
-    std::vector<std::shared_ptr<ProteinInteraction>> allInteractions;
+    std::vector<std::shared_ptr<MoleculeInteraction>> allInteractions;
     
     // Verify that the base path exists
     std::filesystem::path path(basePath);
@@ -115,7 +115,7 @@ std::vector<std::shared_ptr<ProteinInteraction>> ProteinInteractionLoader::LoadA
     return allInteractions;
 }
 
-std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoader::LoadPhosphorylationInteractions(const std::string& filePath)
+std::vector<std::shared_ptr<PhosphorylationInteraction>> MoleculeInteractionLoader::LoadPhosphorylationInteractions(const std::string& filePath)
 {
     std::vector<std::shared_ptr<PhosphorylationInteraction>> interactions;
     
@@ -188,7 +188,7 @@ std::vector<std::shared_ptr<PhosphorylationInteraction>> ProteinInteractionLoade
     return interactions;
 }
 
-std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoader::LoadDephosphorylationInteractions(const std::string& filePath)
+std::vector<std::shared_ptr<DephosphorylationInteraction>> MoleculeInteractionLoader::LoadDephosphorylationInteractions(const std::string& filePath)
 {
     std::vector<std::shared_ptr<DephosphorylationInteraction>> interactions;
     
@@ -256,7 +256,7 @@ std::vector<std::shared_ptr<DephosphorylationInteraction>> ProteinInteractionLoa
     return interactions;
 }
 
-std::vector<std::shared_ptr<ComplexFormationInteraction>> ProteinInteractionLoader::LoadComplexFormationInteractions(const std::string& filePath)
+std::vector<std::shared_ptr<ComplexFormationInteraction>> MoleculeInteractionLoader::LoadComplexFormationInteractions(const std::string& filePath)
 {
     std::vector<std::shared_ptr<ComplexFormationInteraction>> interactions;
     
@@ -328,7 +328,7 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> ProteinInteractionLoad
     return interactions;
 }
 
-bool ProteinInteractionLoader::FileExists(const std::string& filePath)
+bool MoleculeInteractionLoader::FileExists(const std::string& filePath)
 {
     return std::filesystem::exists(filePath);
-} 
+}

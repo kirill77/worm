@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProteinInteraction.h"
+#include "MoleculeInteraction.h"
 #include "GridCell.h"
 #include "StringDict.h"
 
@@ -8,7 +8,7 @@
  * Represents a phosphorylation interaction where one protein
  * adds a phosphate group to another, typically inactivating it.
  */
-class PhosphorylationInteraction : public ProteinInteraction
+class PhosphorylationInteraction : public MoleculeInteraction
 {
 public:
     struct Parameters {

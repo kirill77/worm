@@ -4,7 +4,7 @@
 #include "ComplexFormationInteraction.h"
 #include "DephosphorylationInteraction.h"
 #include "BindingSurface.h"
-#include "ProteinInteractionLoader.h"
+#include "MoleculeInteractionLoader.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <algorithm>
@@ -12,13 +12,13 @@
 #include <filesystem>
 
 // Initialize static members
-std::vector<std::shared_ptr<ProteinInteraction>> MoleculeWiki::s_proteinInteractions;
+std::vector<std::shared_ptr<MoleculeInteraction>> MoleculeWiki::s_moleculeInteractions;
 std::unordered_map<Molecule, MolInfo> MoleculeWiki::m_moleculesInfo;
 
 void MoleculeWiki::Initialize()
 {
     // Clear any existing interactions
-    s_proteinInteractions.clear();
+    s_moleculeInteractions.clear();
     m_moleculesInfo.clear();
     
     // Initialize tRNA molecule information
@@ -63,8 +63,8 @@ void MoleculeWiki::Initialize()
     
     if (dataFolderFound) {
         LOG_INFO("Loading molecule interactions from %s", dataPath.string().c_str());
-        s_proteinInteractions = ProteinInteractionLoader::LoadAllInteractions(dataPath.string());
-        if (s_proteinInteractions.empty()) {
+        s_moleculeInteractions = MoleculeInteractionLoader::LoadAllInteractions(dataPath.string());
+        if (s_moleculeInteractions.empty()) {
             LOG_ERROR("No molecule interactions were loaded from CSV files.");
         }
     } else {
@@ -72,16 +72,16 @@ void MoleculeWiki::Initialize()
     }
 }
 
-const std::vector<std::shared_ptr<ProteinInteraction>>& MoleculeWiki::GetProteinInteractions()
+const std::vector<std::shared_ptr<MoleculeInteraction>>& MoleculeWiki::GetMoleculeInteractions()
 {
-    return s_proteinInteractions;
+    return s_moleculeInteractions;
 }
 
-std::vector<std::shared_ptr<ProteinInteraction>> MoleculeWiki::GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism)
+std::vector<std::shared_ptr<MoleculeInteraction>> MoleculeWiki::GetInteractionsByMechanism(MoleculeInteraction::Mechanism mechanism)
 {
-    std::vector<std::shared_ptr<ProteinInteraction>> result;
+    std::vector<std::shared_ptr<MoleculeInteraction>> result;
     
-    std::copy_if(s_proteinInteractions.begin(), s_proteinInteractions.end(), 
+    std::copy_if(s_moleculeInteractions.begin(), s_moleculeInteractions.end(), 
                  std::back_inserter(result),
                  [mechanism](const auto& interaction) {
                      return interaction->getMechanism() == mechanism;

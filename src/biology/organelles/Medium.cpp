@@ -28,10 +28,10 @@ double Medium::getMoleculeNumber(const Molecule& molecule, const float3& positio
     return (itMolecule != gridCell.m_molecules.end()) ? itMolecule->second.m_fNumber : 0.0;
 }
 
-void Medium::updateProteinInteraction(double fDt)
+void Medium::updateMoleculeInteraction(double fDt)
 {
     // Get all protein interactions 
-    const auto& vecInteractions = MoleculeWiki::GetProteinInteractions();
+    const auto& vecInteractions = MoleculeWiki::GetMoleculeInteractions();
     
     // First, apply direct protein interactions
     for (size_t uCell = 0; uCell < m_grid.size(); ++uCell)
@@ -83,7 +83,7 @@ void Medium::update(double fDt)
     }
     
     // Interaction of proteins between each other
-    updateProteinInteraction(fDt);
+    updateMoleculeInteraction(fDt);
     
     // Update mRNA translation
     translateMRNAs(fDt);

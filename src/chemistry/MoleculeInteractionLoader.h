@@ -10,21 +10,21 @@
 #include <filesystem>
 
 /**
- * @class ProteinInteractionLoader
- * @brief Loads protein interactions from CSV files
+ * @class MoleculeInteractionLoader
+ * @brief Loads molecule interactions from CSV files
  * 
- * This class is responsible for loading various types of protein interactions
+ * This class is responsible for loading various types of molecule interactions
  * from their respective CSV configuration files.
  */
-class ProteinInteractionLoader
+class MoleculeInteractionLoader
 {
 public:
     /**
-     * @brief Load all protein interactions from CSV files
+     * @brief Load all molecule interactions from CSV files
      * @param basePath Base directory containing the CSV files
-     * @return Vector of loaded protein interactions
+     * @return Vector of loaded molecule interactions
      */
-    static std::vector<std::shared_ptr<ProteinInteraction>> LoadAllInteractions(
+    static std::vector<std::shared_ptr<MoleculeInteraction>> LoadAllInteractions(
         const std::string& basePath = "data/interactions/");
 
 private:
@@ -58,4 +58,4 @@ private:
      * @return True if the file exists, false otherwise
      */
     static bool FileExists(const std::string& filePath);
-}; 
+};

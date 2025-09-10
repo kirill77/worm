@@ -8,7 +8,7 @@ DephosphorylationInteraction::DephosphorylationInteraction(
     StringDict::ID targetId,
     StringDict::ID phosphorylatedId,
     const Parameters& params)
-    : ProteinInteraction(Mechanism::DEPHOSPHORYLATION, 0.1)  // Lower ATP cost for dephosphorylation
+    : MoleculeInteraction(Mechanism::DEPHOSPHORYLATION, 0.1)  // Lower ATP cost for dephosphorylation
     , m_targetId(targetId)
     , m_phosphorylatedId(phosphorylatedId)
     , m_recoveryRate(params.recoveryRate)

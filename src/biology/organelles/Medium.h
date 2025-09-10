@@ -54,7 +54,7 @@ private:
     ResourceDistributor m_resDistributor;
 
     // Update functions
-    void updateProteinInteraction(double dt);
+    void updateMoleculeInteraction(double dt);
     void translateMRNAs(double dt);
 };
 

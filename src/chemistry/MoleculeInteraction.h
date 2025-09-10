@@ -10,11 +10,11 @@ class GridCell;
 class ResourceDistributor;
 
 /**
- * Base class for protein interactions.
- * Simply performs actions on protein populations without
+ * Base class for molecule interactions.
+ * Simply performs actions on molecule populations without
  * describing the nature of the interaction.
  */
-class ProteinInteraction
+class MoleculeInteraction
 {
 public:
     // Molecular mechanisms (for informational purposes only)
@@ -30,24 +30,21 @@ public:
     };
     
     // Basic constructor
-    ProteinInteraction(Mechanism mechanism, double atpCost) 
+    MoleculeInteraction(Mechanism mechanism, double atpCost) 
         : m_mechanism(mechanism)
         , m_atpCost(atpCost)
     {}
     
     // Virtual destructor for proper cleanup
-    virtual ~ProteinInteraction() = default;
+    virtual ~MoleculeInteraction() = default;
     
     // Get mechanism (informational only)
     Mechanism getMechanism() const { return m_mechanism; }
     
-    // Get ATP cost
-    double getATPCost() const { return m_atpCost; }
-    
     /**
-     * Apply the interaction directly to the proteins in the cell
+     * Apply the interaction directly to the molecules in the cell
      * 
-     * @param cell The grid cell containing proteins to act on
+     * @param cell The grid cell containing molecules to act on
      * @param dt Time step in seconds
      * @param resDistributor Object to handle resource distribution
      * @return true if any changes were made, false otherwise
@@ -57,4 +54,4 @@ public:
 protected:
     Mechanism m_mechanism;
     double m_atpCost;
-}; 
+};

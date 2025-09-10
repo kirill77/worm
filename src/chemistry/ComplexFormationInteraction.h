@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProteinInteraction.h"
+#include "MoleculeInteraction.h"
 #include "GridCell.h"
 #include "Molecule.h"
 #include "StringDict.h"
@@ -9,7 +9,7 @@
  * Represents a complex formation interaction where two proteins
  * bind together to form a functional complex.
  */
-class ComplexFormationInteraction : public ProteinInteraction
+class ComplexFormationInteraction : public MoleculeInteraction
 {
 public:
     struct Parameters {

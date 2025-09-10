@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "ProteinInteraction.h"
+#include "MoleculeInteraction.h"
 #include "StringDict.h"
 #include "Molecule.h"
 
@@ -34,7 +34,7 @@ public:
     
 private:
     // List of known protein interactions (molecules include proteins)
-    static std::vector<std::shared_ptr<ProteinInteraction>> s_proteinInteractions;
+    static std::vector<std::shared_ptr<MoleculeInteraction>> s_moleculeInteractions;
     
     // Information database for molecules
     static std::unordered_map<Molecule, MolInfo> m_moleculesInfo;
@@ -47,10 +47,10 @@ public:
     static void Initialize();
 
     // Get all known protein interactions
-    static const std::vector<std::shared_ptr<ProteinInteraction>>& GetProteinInteractions();
+    static const std::vector<std::shared_ptr<MoleculeInteraction>>& GetMoleculeInteractions();
 
     // Get interactions by mechanism
-    static std::vector<std::shared_ptr<ProteinInteraction>> GetInteractionsByMechanism(ProteinInteraction::Mechanism mechanism);
+    static std::vector<std::shared_ptr<MoleculeInteraction>> GetInteractionsByMechanism(MoleculeInteraction::Mechanism mechanism);
     
     // Get the bound molecule name for a molecule on a specific surface
     static std::string GetBoundProteinName(const std::string& proteinName, StringDict::ID surface);
