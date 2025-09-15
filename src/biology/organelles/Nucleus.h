@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Organelle.h"
-#include "chemistry/DNA.h"
+#include "chemistry/molecules/DNA.h"
 #include "Chromosome.h"
-#include "chemistry/GridCell.h"
+#include "chemistry/interactions/GridCell.h"
 #include <memory>
 #include <vector>
 

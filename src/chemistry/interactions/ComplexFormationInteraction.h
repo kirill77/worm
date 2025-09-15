@@ -2,8 +2,8 @@
 
 #include "MoleculeInteraction.h"
 #include "GridCell.h"
-#include "Molecule.h"
-#include "StringDict.h"
+#include "chemistry/molecules/Molecule.h"
+#include "chemistry/molecules/StringDict.h"
 
 /**
  * Represents a complex formation interaction where two proteins

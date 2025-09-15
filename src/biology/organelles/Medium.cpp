@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Medium.h"
-#include "chemistry/InteractionsWiki.h"
-#include "chemistry/ResourceDistributor.h"
-#include "chemistry/TRNA.h"
+#include "chemistry/interactions/InteractionsWiki.h"
+#include "chemistry/interactions/ResourceDistributor.h"
+#include "chemistry/molecules/TRNA.h"
 #include <random>
 #include <algorithm>
 #include <cassert>
-#include "chemistry/GridCell.h"
+#include "chemistry/interactions/GridCell.h"
 
 // Global random number generator for consistent randomness
 static std::mt19937 g_rng(std::random_device{}());

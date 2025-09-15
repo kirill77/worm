@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GeneWiki.h"
 #include "StringDict.h"
 #include <stdexcept>

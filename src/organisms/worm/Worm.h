@@ -2,7 +2,7 @@
 
 #include "biology/simulation/Organism.h"
 #include "biology/simulation/TimeContext.h"
-#include "chemistry/DNA.h"
+#include "chemistry/molecules/DNA.h"
 #include "biology/organelles/Chromosome.h"
 #include "biology/dataCollector/DataCollector.h"
 #include <memory>

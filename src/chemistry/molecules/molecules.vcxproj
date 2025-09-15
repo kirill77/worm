@@ -21,32 +21,33 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{239f659b-1e3b-49f1-b1b7-6713d4481f50}</ProjectGuid>
-    <RootNamespace>test1</RootNamespace>
+    <ProjectGuid>{01ebd2e9-ba4f-4da6-bd7d-6cfb05656e77}</ProjectGuid>
+    <RootNamespace>molecules</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>molecules</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -74,11 +75,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -88,11 +92,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -102,19 +109,18 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>python $(SolutionDir)/../scanIncludes.py</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -122,74 +128,42 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>visualization.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>python $(SolutionDir)/../scanIncludes.py</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="test1.cpp" />
+    <ClInclude Include="BindingSurface.h" />
+    <ClInclude Include="DNA.h" />
+    <ClInclude Include="Gene.h" />
+    <ClInclude Include="GeneWiki.h" />
+    <ClInclude Include="Molecule.h" />
+    <ClInclude Include="MoleculeWiki.h" />
+    <ClInclude Include="StringDict.h" />
+    <ClInclude Include="TRNA.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\biology\dataCollector\DataCollector.vcxproj">
-      <Project>{05a61ec7-4c44-4895-a25d-ff9c949dac28}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\biology\simulation\simulation.vcxproj">
-      <Project>{27b8e515-3ac4-4a7e-95ba-08d6692397b4}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\chemistry\interactions\interactions.vcxproj">
-      <Project>{01ebd2e9-ba4f-4da6-bd8d-6cfb05656e77}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\chemistry\molecules\molecules.vcxproj">
-      <Project>{01ebd2e9-ba4f-4da6-bd7d-6cfb05656e77}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\geometry\BVH\BVH.vcxproj">
-      <Project>{d4bf6a4f-ac08-4a25-bd7d-013551ee1c19}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\geometry\geomHelpers\geomHelpers.vcxproj">
-      <Project>{dcd230d7-b87b-4568-9a41-6140edaf7568}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\geometry\mesh\mesh.vcxproj">
-      <Project>{047f1162-df2e-4de4-a3df-5a904bf4659b}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\utils\csvFile\CSVFile.vcxproj">
-      <Project>{bb747f64-d1ff-4023-a588-c03a903af0ff}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\external\rngSobol\rngSobol.vcxproj">
-      <Project>{b6f0dd41-3bc3-4195-be1c-d3b0676927e1}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\utils\log\Log.vcxproj">
-      <Project>{e08b404e-79fe-4f0b-a796-a961900cd558}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\biology\organelles\organelles.vcxproj">
-      <Project>{627b77b9-319e-4bbd-b6a4-12c710d64840}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\physics\tensionSphere\tensionSphere.vcxproj">
-      <Project>{7cf8fae5-8ffb-4ce7-90ba-42b13931f4ed}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\utils\timeUtils\timeUtils.vcxproj">
-      <Project>{524acd5b-2a15-4b58-a2c7-621bb546865f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\visualization\helpers\visHelpers.vcxproj">
-      <Project>{16f70716-ba22-4002-95cc-1dafefd6c215}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\visualization\gpu\visualization.vcxproj">
-      <Project>{250ef3cc-b8d1-4814-8ae1-4a5ad649af73}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\organisms\worm\worm.vcxproj">
-      <Project>{ae833f6a-dab0-4155-9374-d5710023a461}</Project>
-    </ProjectReference>
+    <ClCompile Include="DNA.cpp" />
+    <ClCompile Include="Gene.cpp" />
+    <ClCompile Include="GeneWiki.cpp" />
+    <ClCompile Include="Molecule.cpp" />
+    <ClCompile Include="MoleculeWiki.cpp" />
+    <ClCompile Include="ProteinBindingSurface.cpp" />
+    <ClCompile Include="StringDict.cpp" />
+    <ClCompile Include="TRNA.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

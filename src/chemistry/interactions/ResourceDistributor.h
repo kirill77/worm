@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <assert.h>
-#include "Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 
 // There is a list of resources and a list of interactions that use those resources. If
 // we simply apply the interactions - the interactions that are being applied first will have

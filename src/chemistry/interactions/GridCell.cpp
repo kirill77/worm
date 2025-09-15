@@ -1,8 +1,7 @@
-#include "pch.h"
 #include "GridCell.h"
-#include "Molecule.h"
-#include "MoleculeWiki.h"
-#include "TRNA.h"
+#include "chemistry/molecules/Molecule.h"
+#include "chemistry/molecules/MoleculeWiki.h"
+#include "chemistry/molecules/TRNA.h"
 #include <cmath>
 
 GridCell::GridCell()

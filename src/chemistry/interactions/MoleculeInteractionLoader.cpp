@@ -1,8 +1,7 @@
-#include "pch.h"
 #include "MoleculeInteractionLoader.h"
-#include "StringDict.h"
-#include "GeneWiki.h"
-#include "MoleculeWiki.h"
+#include "chemistry/molecules/StringDict.h"
+#include "chemistry/molecules/GeneWiki.h"
+#include "chemistry/molecules/MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <fstream>

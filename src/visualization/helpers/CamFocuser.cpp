@@ -6,7 +6,7 @@
 #include "visualization/gpu/GPUCamera.h"
 #include "visualization/helpers/CameraTransition.h"
 #include "visualization/gpu/IVisObject.h"
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 #include "geometry/vectors/box.h"
 
 CamFocuser::CamFocuser()

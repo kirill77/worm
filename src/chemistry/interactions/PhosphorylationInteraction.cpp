@@ -1,6 +1,5 @@
-#include "pch.h"
 #include "PhosphorylationInteraction.h"
-#include "MoleculeWiki.h"
+#include "chemistry/molecules/MoleculeWiki.h"
 #include "ResourceDistributor.h"
 #include <algorithm>
 #include <cmath>

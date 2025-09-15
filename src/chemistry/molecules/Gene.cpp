@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Gene.h"
 #include "MoleculeWiki.h"
 #include "GeneWiki.h"

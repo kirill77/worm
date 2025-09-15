@@ -1,7 +1,7 @@
 #pragma once
 
 #include "biology/organelles/Medium.h"
-#include "chemistry/Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 #include "geometry/vectors/vector.h"
 #include <string>
 #include <vector>

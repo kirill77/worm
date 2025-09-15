@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MoleculeInteraction.h"
-#include "Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 
 /**
  * Handles translation of mRNA into proteins using tRNAs

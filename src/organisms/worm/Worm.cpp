@@ -1,15 +1,15 @@
 #include "pch.h"
 #include "Worm.h"
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 #include "biology/organelles/Cell.h"
 #include "biology/simulation/CellSim.h"
 #include "biology/organelles/Centrosome.h"
 #include "biology/organelles/CellTypes.h"
-#include "chemistry/Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 #include "biology/organelles/Medium.h"
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Spindle.h"
-#include "chemistry/MoleculeWiki.h"
+#include "chemistry/molecules/MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include <chrono> // For high_resolution_clock
 #include <cmath>  // For std::abs

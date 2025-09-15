@@ -1,6 +1,5 @@
-#include "pch.h"
 #include "InteractionsWiki.h"
-#include "MoleculeWiki.h"
+#include "chemistry/molecules/MoleculeWiki.h"
 #include "MoleculeInteractionLoader.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"

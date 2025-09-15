@@ -13,9 +13,9 @@
 #include "visualization/helpers/CameraUI.h"
 #include "visualization/helpers/CameraTransition.h"
 #include "VisObjectFactory.h"
-#include "chemistry/InteractionsWiki.h"
+#include "chemistry/interactions/InteractionsWiki.h"
 #include <windows.h>
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 #include "utils/log/ILog.h"
 #include "visualization/gpu/DirectXHelpers.h"
 #include "visualization/gpu/GPUCamera.h"

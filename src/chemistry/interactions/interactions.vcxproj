@@ -21,10 +21,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{01ebd2e9-ba4f-4da6-bd7d-6cfb05656e77}</ProjectGuid>
+    <ProjectGuid>{01ebd2e9-ba4f-4da6-bd8d-6cfb05656e77}</ProjectGuid>
     <RootNamespace>molecules</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>chemistry</ProjectName>
+    <ProjectName>interactions</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -144,42 +144,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BindingSurface.h" />
-    <ClInclude Include="InteractionsWiki.h" />
-    <ClInclude Include="StringDict.h" />
-    <ClInclude Include="TRNA.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />
     <ClInclude Include="DephosphorylationInteraction.h" />
-    <ClInclude Include="DNA.h" />
-    <ClInclude Include="Gene.h" />
-    <ClInclude Include="GeneWiki.h" />
     <ClInclude Include="GridCell.h" />
-    <ClInclude Include="Molecule.h" />
-    <ClInclude Include="PhosphorylationInteraction.h" />
-    <ClInclude Include="TranslationInteraction.h" />
+    <ClInclude Include="InteractionsWiki.h" />
     <ClInclude Include="MoleculeInteraction.h" />
     <ClInclude Include="MoleculeInteractionLoader.h" />
-    <ClInclude Include="MoleculeWiki.h" />
+    <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="ResourceDistributor.h" />
-    <ClInclude Include="framework.h" />
+    <ClInclude Include="TranslationInteraction.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="InteractionsWiki.cpp" />
-    <ClCompile Include="MoleculeWiki.cpp" />
-    <ClCompile Include="Molecule.cpp" />
     <ClCompile Include="ComplexFormationInteraction.cpp" />
     <ClCompile Include="DephosphorylationInteraction.cpp" />
-    <ClCompile Include="DNA.cpp" />
-    <ClCompile Include="Gene.cpp" />
-    <ClCompile Include="GeneWiki.cpp" />
     <ClCompile Include="GridCell.cpp" />
-    <ClCompile Include="PhosphorylationInteraction.cpp" />
-    <ClCompile Include="TranslationInteraction.cpp" />
-    <ClCompile Include="ProteinBindingSurface.cpp" />
+    <ClCompile Include="InteractionsWiki.cpp" />
     <ClCompile Include="MoleculeInteractionLoader.cpp" />
+    <ClCompile Include="PhosphorylationInteraction.cpp" />
     <ClCompile Include="ResourceDistributor.cpp" />
-    <ClCompile Include="StringDict.cpp" />
-    <ClCompile Include="TRNA.cpp" />
+    <ClCompile Include="TranslationInteraction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

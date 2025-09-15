@@ -5,14 +5,14 @@
 #include <string>
 #include <array>
 #include <unordered_map>
-#include "chemistry/Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 
 #include "geometry/vectors/vector.h"
-#include "chemistry/MoleculeWiki.h"
-#include "chemistry/GridCell.h"
+#include "chemistry/molecules/MoleculeWiki.h"
+#include "chemistry/interactions/GridCell.h"
 #include "Grid.h"
 #include "GridDiffusion.h"
-#include "chemistry/ResourceDistributor.h"
+#include "chemistry/interactions/ResourceDistributor.h"
 
 class Medium
 {

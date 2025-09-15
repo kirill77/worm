@@ -2,7 +2,7 @@
 
 #include "MoleculeInteraction.h"
 #include "GridCell.h"
-#include "StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 
 /**
  * Represents a phosphorylation interaction where one protein

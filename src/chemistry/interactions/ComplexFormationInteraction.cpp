@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ComplexFormationInteraction.h"
 #include "ResourceDistributor.h"
 #include <algorithm>

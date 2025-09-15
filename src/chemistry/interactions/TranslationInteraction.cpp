@@ -1,10 +1,9 @@
-#include "pch.h"
 #include "TranslationInteraction.h"
 #include "ResourceDistributor.h"
 #include "GridCell.h"
-#include "GeneWiki.h"
-#include "TRNA.h"
-#include "StringDict.h"
+#include "chemistry/molecules/GeneWiki.h"
+#include "chemistry/molecules/TRNA.h"
+#include "chemistry/molecules/StringDict.h"
 #include <algorithm>
 #include <cmath>
 #include <cassert>

@@ -2,7 +2,7 @@
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
 #include "geometry/geomHelpers/BVHMesh.h"
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 #include "physics/tensionSphere/TensionSphere.h"
 
 CellSim::CellSim(std::shared_ptr<Cell> pCell)

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ResourceDistributor.h"
 #include "GridCell.h"
 #include "MoleculeInteraction.h"

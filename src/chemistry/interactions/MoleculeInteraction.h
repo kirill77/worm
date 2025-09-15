@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 
 // Forward declarations
 class GridCell;

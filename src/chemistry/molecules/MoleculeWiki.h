@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "MoleculeInteraction.h"
+#include "chemistry/interactions/MoleculeInteraction.h"
 #include "StringDict.h"
 #include "Molecule.h"
 

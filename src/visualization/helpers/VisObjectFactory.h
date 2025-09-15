@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 
 // Forward declarations
 struct IVisObject;

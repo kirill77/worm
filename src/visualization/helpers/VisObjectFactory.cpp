@@ -6,7 +6,7 @@
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Centrosome.h"
 #include "visualization/gpu/GPUQueue.h"
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 
 static std::shared_ptr<CortexVis> createCortexVis(
     std::shared_ptr<Organelle> pOrganelle,

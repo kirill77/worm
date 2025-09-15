@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include "Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 
 // A single cell in the 3D grid representing the simulation space
 class GridCell 

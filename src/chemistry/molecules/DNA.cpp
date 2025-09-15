@@ -1,7 +1,6 @@
-#include "pch.h"
 #include "DNA.h"
 #include "StringDict.h"
-#include "GridCell.h"
+#include "chemistry/interactions/GridCell.h"
 
 void DNA::addGene(StringDict::ID id, double expressionRate, double basalLevel)
 {

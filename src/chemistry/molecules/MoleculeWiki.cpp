@@ -1,8 +1,7 @@
-#include "pch.h"
 #include "MoleculeWiki.h"
-#include "PhosphorylationInteraction.h"
-#include "ComplexFormationInteraction.h"
-#include "DephosphorylationInteraction.h"
+#include "chemistry/interactions/PhosphorylationInteraction.h"
+#include "chemistry/interactions/ComplexFormationInteraction.h"
+#include "chemistry/interactions/DephosphorylationInteraction.h"
 #include "BindingSurface.h"
 // Interactions are now managed in InteractionsWiki (separate project)
 #include "utils/log/ILog.h"

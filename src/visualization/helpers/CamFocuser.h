@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
-#include "chemistry/StringDict.h"
+#include "chemistry/molecules/StringDict.h"
 #include "geometry/vectors/box.h"
 
 // Forward declarations

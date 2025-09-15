@@ -4,7 +4,7 @@
 #include "DephosphorylationInteraction.h"
 #include "ComplexFormationInteraction.h"
 #include "TranslationInteraction.h"
-#include "MoleculeWiki.h"
+#include "chemistry/molecules/MoleculeWiki.h"
 #include <string>
 #include <vector>
 #include <memory>

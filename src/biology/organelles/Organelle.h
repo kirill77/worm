@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "chemistry/BindingSurface.h"
+#include "chemistry/molecules/BindingSurface.h"
 
 class Cell;
 class Medium;
