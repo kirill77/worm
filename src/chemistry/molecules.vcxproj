@@ -145,6 +145,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BindingSurface.h" />
+    <ClInclude Include="InteractionsWiki.h" />
     <ClInclude Include="StringDict.h" />
     <ClInclude Include="TRNA.h" />
     <ClInclude Include="ComplexFormationInteraction.h" />
@@ -154,7 +155,6 @@
     <ClInclude Include="GeneWiki.h" />
     <ClInclude Include="GridCell.h" />
     <ClInclude Include="Molecule.h" />
-
     <ClInclude Include="PhosphorylationInteraction.h" />
     <ClInclude Include="TranslationInteraction.h" />
     <ClInclude Include="MoleculeInteraction.h" />
@@ -164,7 +164,7 @@
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <ItemGroup>
-
+    <ClCompile Include="InteractionsWiki.cpp" />
     <ClCompile Include="MoleculeWiki.cpp" />
     <ClCompile Include="Molecule.cpp" />
     <ClCompile Include="ComplexFormationInteraction.cpp" />

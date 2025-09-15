@@ -25,7 +25,7 @@ struct MolInfo {
           m_fHalfLife(halfLife), m_fTranslationRate(translationRate), m_fChargingRate(chargingRate) {}
 };
 
-// A static repository of molecule interaction data
+// A static repository of molecule info (non-interaction metadata)
 class MoleculeWiki
 {
 public:
@@ -33,24 +33,14 @@ public:
     MoleculeWiki() = default;
     
 private:
-    // List of known protein interactions (molecules include proteins)
-    static std::vector<std::shared_ptr<MoleculeInteraction>> s_moleculeInteractions;
-    
     // Information database for molecules
     static std::unordered_map<Molecule, MolInfo> m_moleculesInfo;
-
-    // Helper method to load default hardcoded interactions
-    static void LoadDefaultInteractions();
 
 public:
     // Initialize all known molecule interactions
     static void Initialize();
 
-    // Get all known protein interactions
-    static const std::vector<std::shared_ptr<MoleculeInteraction>>& GetMoleculeInteractions();
-
-    // Get interactions by mechanism
-    static std::vector<std::shared_ptr<MoleculeInteraction>> GetInteractionsByMechanism(MoleculeInteraction::Mechanism mechanism);
+    // Interactions are managed by InteractionsWiki; call there directly from clients
     
     // Get the bound molecule name for a molecule on a specific surface
     static std::string GetBoundProteinName(const std::string& proteinName, StringDict::ID surface);

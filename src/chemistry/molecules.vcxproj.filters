@@ -45,7 +45,6 @@
     <ClInclude Include="Molecule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-
     <ClInclude Include="PhosphorylationInteraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -65,6 +64,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TRNA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractionsWiki.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -90,7 +92,6 @@
     <ClCompile Include="GridCell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-
     <ClCompile Include="PhosphorylationInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -113,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Molecule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractionsWiki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

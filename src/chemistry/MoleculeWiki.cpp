@@ -4,7 +4,7 @@
 #include "ComplexFormationInteraction.h"
 #include "DephosphorylationInteraction.h"
 #include "BindingSurface.h"
-#include "MoleculeInteractionLoader.h"
+// Interactions are now managed in InteractionsWiki (separate project)
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <algorithm>
@@ -12,13 +12,11 @@
 #include <filesystem>
 
 // Initialize static members
-std::vector<std::shared_ptr<MoleculeInteraction>> MoleculeWiki::s_moleculeInteractions;
 std::unordered_map<Molecule, MolInfo> MoleculeWiki::m_moleculesInfo;
 
 void MoleculeWiki::Initialize()
 {
-    // Clear any existing interactions
-    s_moleculeInteractions.clear();
+    // Initialize molecule info and interactions
     m_moleculesInfo.clear();
     
     // Initialize tRNA molecule information
@@ -27,68 +25,10 @@ void MoleculeWiki::Initialize()
     // Initialize mRNA molecule information
     initializeMRNAInfo();
     
-    // Try to find the data directory
-    std::filesystem::path dataPath;
-    bool dataFolderFound = false;
-    
-    // First try to find a "data" folder relative to the current directory
-    if (std::filesystem::exists("data/proteinRules")) {
-        dataPath = "data/proteinRules";
-        dataFolderFound = true;
-    } 
-    // Then try to use the fileUtils helper
-    else if (FileUtils::findTheFolder("data", dataPath)) {
-        dataPath /= "proteinRules";
-        if (std::filesystem::exists(dataPath)) {
-            dataFolderFound = true;
-        }
-    }
-    
-    // Try a few common paths relative to executable
-    if (!dataFolderFound) {
-        std::vector<std::string> commonPaths = {
-            "../data/proteinRules",
-            "../../data/proteinRules",
-            "../../../data/proteinRules"
-        };
-        
-        for (const auto& path : commonPaths) {
-            if (std::filesystem::exists(path)) {
-                dataPath = path;
-                dataFolderFound = true;
-                break;
-            }
-        }
-    }
-    
-    if (dataFolderFound) {
-        LOG_INFO("Loading molecule interactions from %s", dataPath.string().c_str());
-        s_moleculeInteractions = MoleculeInteractionLoader::LoadAllInteractions(dataPath.string());
-        if (s_moleculeInteractions.empty()) {
-            LOG_ERROR("No molecule interactions were loaded from CSV files.");
-        }
-    } else {
-        LOG_ERROR("Interaction data directory not found. Using default hardcoded interactions.");
-    }
+    // Interactions are initialized from InteractionsWiki
 }
 
-const std::vector<std::shared_ptr<MoleculeInteraction>>& MoleculeWiki::GetMoleculeInteractions()
-{
-    return s_moleculeInteractions;
-}
-
-std::vector<std::shared_ptr<MoleculeInteraction>> MoleculeWiki::GetInteractionsByMechanism(MoleculeInteraction::Mechanism mechanism)
-{
-    std::vector<std::shared_ptr<MoleculeInteraction>> result;
-    
-    std::copy_if(s_moleculeInteractions.begin(), s_moleculeInteractions.end(), 
-                 std::back_inserter(result),
-                 [mechanism](const auto& interaction) {
-                     return interaction->getMechanism() == mechanism;
-                 });
-                 
-    return result;
-}
+// Interactions accessors were removed; use InteractionsWiki directly
 
 std::string MoleculeWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {

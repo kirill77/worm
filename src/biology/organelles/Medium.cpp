@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Medium.h"
-#include "chemistry/MoleculeWiki.h"
+#include "chemistry/InteractionsWiki.h"
 #include "chemistry/ResourceDistributor.h"
 #include "chemistry/TRNA.h"
 #include <random>
@@ -31,7 +31,7 @@ double Medium::getMoleculeNumber(const Molecule& molecule, const float3& positio
 void Medium::updateMoleculeInteraction(double fDt)
 {
     // Get all protein interactions 
-    const auto& vecInteractions = MoleculeWiki::GetMoleculeInteractions();
+    const auto& vecInteractions = InteractionsWiki::GetMoleculeInteractions();
     
     // First, apply direct protein interactions
     for (size_t uCell = 0; uCell < m_grid.size(); ++uCell)

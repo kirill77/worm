@@ -13,7 +13,7 @@
 #include "visualization/helpers/CameraUI.h"
 #include "visualization/helpers/CameraTransition.h"
 #include "VisObjectFactory.h"
-#include "chemistry/MoleculeWiki.h"
+#include "chemistry/InteractionsWiki.h"
 #include <windows.h>
 #include "chemistry/StringDict.h"
 #include "utils/log/ILog.h"
@@ -32,7 +32,7 @@ bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
     m_pOrganism = pOrganism;
 
     // Initialize protein interaction data
-    MoleculeWiki::Initialize();
+    InteractionsWiki::Initialize();
 
     // Create visualization window
     m_pWindow = std::make_shared<Window>();
