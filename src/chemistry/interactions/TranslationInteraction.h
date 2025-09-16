@@ -2,6 +2,7 @@
 
 #include "MoleculeInteraction.h"
 #include "chemistry/molecules/Molecule.h"
+#include <vector>
 
 /**
  * Handles translation of mRNA into proteins using tRNAs
@@ -33,11 +34,7 @@ private:
     double m_translationRate;       // Translation rate parameter
     
     // Helper methods
-    bool checkRequiredTRNAs(const std::unordered_map<Molecule, Population>& availableMolecules, 
-                           const std::string& sequence,
-                           std::vector<std::pair<Molecule, double>>& requiredTRNAs) const;
-    
     void consumeTRNAs(GridCell& cell, 
-                     const std::vector<std::pair<Molecule, double>>& requiredTRNAs,
+                     const std::vector<std::pair<Molecule, uint32_t>>& requiredTRNAs,
                      double proteinAmount) const;
 };

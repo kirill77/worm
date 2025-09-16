@@ -1,10 +1,12 @@
 #include "GeneWiki.h"
 #include "StringDict.h"
+#include "Molecule.h"
 #include <stdexcept>
 
 GeneWiki::GeneWiki()
 {
     initializeDefaultSequences();
+    initializeDefaultGeneData();
 }
 
 GeneWiki& GeneWiki::getInstance()
@@ -26,6 +28,21 @@ const std::string& GeneWiki::getSequence(const std::string& geneName) const
 bool GeneWiki::hasSequence(const std::string& geneName) const
 {
     return m_sequences.find(geneName) != m_sequences.end();
+}
+
+const std::vector<std::pair<Molecule, uint32_t>>& GeneWiki::getGeneData(const std::string& geneName) const
+{
+    auto it = m_geneData.find(geneName);
+    if (it == m_geneData.end())
+    {
+        throw std::runtime_error("GeneData not found: " + geneName);
+    }
+    return it->second.m_trnaRequirements;
+}
+
+bool GeneWiki::hasGeneData(const std::string& geneName) const
+{
+    return m_geneData.find(geneName) != m_geneData.end();
 }
 
 void GeneWiki::initializeDefaultSequences()
@@ -82,3 +99,73 @@ void GeneWiki::initializeDefaultSequences()
     // In reality, tRNA genes have complex secondary structures and processing
     // The sequences here allow for codon matching during translation simulation
 } 
+
+void GeneWiki::initializeDefaultGeneData()
+{
+    // For each gene with a sequence, provide a small representative set of charged tRNA requirements
+    auto addGene = [this](StringDict::ID geneId, std::initializer_list<std::pair<StringDict::ID, uint32_t>> reqs)
+    {
+        const std::string& name = StringDict::idToString(geneId);
+        GeneData data;
+        data.m_trnaRequirements.reserve(reqs.size());
+        for (const auto& r : reqs)
+        {
+            // Store charged tRNA molecules as requirements
+            Molecule trna(r.first, ChemicalType::TRNA);
+            data.m_trnaRequirements.emplace_back(trna, r.second);
+        }
+        m_geneData[name] = std::move(data);
+    };
+
+    // Minimal placeholder requirements; tune as needed
+    addGene(StringDict::ID::PIE_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_GLY_GGA_CHARGED, 2 },
+        { StringDict::ID::TRNA_ALA_GCA_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::PAL_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_SER_TCA_CHARGED, 1 },
+        { StringDict::ID::TRNA_VAL_GTG_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::SKN_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_LEU_CTC_CHARGED, 1 },
+        { StringDict::ID::TRNA_THR_ACA_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::MEX_3, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_ASP_GAC_CHARGED, 1 },
+        { StringDict::ID::TRNA_GLY_GGT_CHARGED, 2 }
+    });
+    addGene(StringDict::ID::CDK_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_LYS_AAG_CHARGED, 1 },
+        { StringDict::ID::TRNA_GLU_GAG_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::CDK_2, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_LEU_CTG_CHARGED, 1 },
+        { StringDict::ID::TRNA_PRO_CCA_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::CYB_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_VAL_GTC_CHARGED, 1 },
+        { StringDict::ID::TRNA_SER_TCG_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::CCE_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_ALA_GCC_CHARGED, 1 },
+        { StringDict::ID::TRNA_ASN_AAC_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::PLK_1, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_GLN_CAG_CHARGED, 1 },
+        { StringDict::ID::TRNA_PHE_TTC_CHARGED, 1 }
+    });
+    addGene(StringDict::ID::GAMMA_TUBULIN, {
+        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
+        { StringDict::ID::TRNA_TRP_TGG_CHARGED, 1 },
+        { StringDict::ID::TRNA_CYS_TGC_CHARGED, 1 }
+    });
+}

@@ -351,8 +351,8 @@ std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::
         StringDict::ID id = static_cast<StringDict::ID>(i);
         const std::string& name = StringDict::idToString(id);
         
-        // Check if this molecule has a gene sequence (indicating it can be translated)
-        if (GeneWiki::getInstance().hasSequence(name)) {
+        // Check if this molecule has GeneData (indicating it can be translated)
+        if (GeneWiki::getInstance().hasGeneData(name)) {
             // Create mRNA molecule
             Molecule mRNA(id, ChemicalType::MRNA);
             
