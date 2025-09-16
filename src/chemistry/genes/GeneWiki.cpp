@@ -1,11 +1,15 @@
 #include "GeneWiki.h"
 #include "chemistry/molecules/StringDict.h"
 #include "chemistry/molecules/Molecule.h"
+#include "utils/fileUtils/fileUtils.h"
+#include "utils/log/ILog.h"
+#include "HttpClient.h"
 #include <stdexcept>
+#include <fstream>
+#include <sstream>
 
 GeneWiki::GeneWiki()
 {
-    initializeDefaultSequences();
     initializeDefaultGeneData();
 }
 
@@ -17,155 +21,264 @@ GeneWiki& GeneWiki::getInstance()
 
 const std::string& GeneWiki::getSequence(const std::string& geneName) const
 {
-    auto it = m_sequences.find(geneName);
-    if (it == m_sequences.end())
+    if (!ensureSequenceLoaded(geneName))
     {
-        throw std::runtime_error("Gene sequence not found: " + geneName);
+        throw std::runtime_error("Gene sequence not found and could not be loaded: " + geneName);
     }
-    return it->second;
+    return m_sequences[geneName];
 }
 
 bool GeneWiki::hasSequence(const std::string& geneName) const
 {
-    return m_sequences.find(geneName) != m_sequences.end();
+    if (m_sequences.find(geneName) != m_sequences.end())
+        return true;
+    // Try lazy load presence without storing
+    std::string seq;
+    const std::filesystem::path p = getGeneFilePath(geneName);
+    if (std::filesystem::exists(p))
+        return true;
+    return false;
 }
 
 const std::vector<std::pair<Molecule, uint32_t>>& GeneWiki::getGeneData(const std::string& geneName) const
 {
-    auto it = m_geneData.find(geneName);
-    if (it == m_geneData.end())
+    if (!ensureGeneDataComputed(geneName))
     {
-        throw std::runtime_error("GeneData not found: " + geneName);
+        throw std::runtime_error("GeneData could not be computed for: " + geneName);
     }
-    return it->second.m_trnaRequirements;
+    return m_geneData[geneName].m_trnaRequirements;
 }
 
 bool GeneWiki::hasGeneData(const std::string& geneName) const
 {
-    return m_geneData.find(geneName) != m_geneData.end();
+    if (m_geneData.find(geneName) != m_geneData.end())
+        return true;
+    return ensureGeneDataComputed(geneName);
 }
 
-void GeneWiki::initializeDefaultSequences()
-{
-    // Cell fate specification genes
-    m_sequences[StringDict::idToString(StringDict::ID::PIE_1)] = "ATGCCGAATTCGTCGAATCCG";  // Germline specification
-    m_sequences[StringDict::idToString(StringDict::ID::PAL_1)] = "ATGAATTCGCCGAATCCGTCG";  // Posterior fate
-    m_sequences[StringDict::idToString(StringDict::ID::SKN_1)] = "ATGCCGTCGAATTCGAATCCG";  // Endoderm specification
-    m_sequences[StringDict::idToString(StringDict::ID::MEX_3)] = "ATGTCGCCGAATTCGAATCCG";  // Anterior fate
-    
-    // Cell division and timing genes
-    m_sequences[StringDict::idToString(StringDict::ID::CDK_1)] = "ATGCCGAATTCGTCGAATCCG";  // Cell cycle control
-    m_sequences[StringDict::idToString(StringDict::ID::CDK_2)] = "ATGCCGAAGTCGTCGAATCCG";  // CDK-2 transcriptional regulator
-    m_sequences[StringDict::idToString(StringDict::ID::CYB_1)] = "ATGAATTCGCCGTCGAATCCG";  // Cyclin B
-    m_sequences[StringDict::idToString(StringDict::ID::CCE_1)] = "ATGAAGTTCGCCGAATCCGTC";  // Cyclin E transcriptional regulator
-    m_sequences[StringDict::idToString(StringDict::ID::PLK_1)] = "ATGCCGTCGAATTCGAATCCG";  // Polo-like kinase
-    
-    // Centrosome proteins
-    m_sequences[StringDict::idToString(StringDict::ID::GAMMA_TUBULIN)] = "ATGGCCGTCGAGTTCCTGACC";  // γ-tubulin (GAA->GAG for tRNA compatibility)
-    
-    // tRNA genes - these represent the tRNA molecules themselves
-    // Start codon tRNA (essential for translation initiation)
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_MET_ATG)] = "ATGGCCAAGCTGAAGTAG";  // Met-ATG initiator tRNA
-    
-    // Common amino acid tRNAs (high abundance)
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_GLY_GGA)] = "GGATCCAAGCTGGAGTAG";  // Gly-GGA
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_GLY_GGT)] = "GGTACCAAGCTGGAGTAG";  // Gly-GGT
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_ALA_GCA)] = "GCAAAGCTGAAGTAG";     // Ala-GCA
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_ALA_GCC)] = "GCCAAGCTGAAGTAG";     // Ala-GCC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_LEU_CTG)] = "CTGGCCAAGCTGAAGTAG";  // Leu-CTG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_LEU_CTC)] = "CTCGCCAAGCTGAAGTAG";  // Leu-CTC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_SER_TCA)] = "TCAAAGCTGAAGTAG";     // Ser-TCA
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_SER_TCG)] = "TCGAAGCTGAAGTAG";     // Ser-TCG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_VAL_GTG)] = "GTGGCCAAGCTGAAGTAG";  // Val-GTG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_VAL_GTC)] = "GTCGCCAAGCTGAAGTAG";  // Val-GTC
-    
-    // Additional essential amino acid tRNAs
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_PRO_CCA)] = "CCAAAGCTGAAGTAG";     // Pro-CCA
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_THR_ACA)] = "ACAAAGCTGAAGTAG";     // Thr-ACA
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_ASP_GAC)] = "GACAAGCTGAAGTAG";     // Asp-GAC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_GLU_GAG)] = "GAGGCCAAGCTGAAGTAG";  // Glu-GAG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_LYS_AAG)] = "AAGGCCAAGCTGAAGTAG";  // Lys-AAG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_ARG_CGA)] = "CGAAAGCTGAAGTAG";     // Arg-CGA
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_HIS_CAC)] = "CACAAGCTGAAGTAG";     // His-CAC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_PHE_TTC)] = "TTCAAGCTGAAGTAG";     // Phe-TTC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_TYR_TAC)] = "TACAAGCTGAAGTAG";     // Tyr-TAC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_CYS_TGC)] = "TGCAAGCTGAAGTAG";     // Cys-TGC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_TRP_TGG)] = "TGGAAGCTGAAGTAG";     // Trp-TGG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_ASN_AAC)] = "AACAAGCTGAAGTAG";     // Asn-AAC
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_GLN_CAG)] = "CAGAAGCTGAAGTAG";     // Gln-CAG
-    m_sequences[StringDict::idToString(StringDict::ID::TRNA_ILE_ATC)] = "ATCAAGCTGAAGTAG";     // Ile-ATC
-    
-    // Note: These are simplified representative sequences for tRNA genes
-    // In reality, tRNA genes have complex secondary structures and processing
-    // The sequences here allow for codon matching during translation simulation
-} 
+// Removed default sequences; sequences are loaded lazily from disk or fetched
 
 void GeneWiki::initializeDefaultGeneData()
 {
-    // For each gene with a sequence, provide a small representative set of charged tRNA requirements
-    auto addGene = [this](StringDict::ID geneId, std::initializer_list<std::pair<StringDict::ID, uint32_t>> reqs)
-    {
-        const std::string& name = StringDict::idToString(geneId);
-        GeneData data;
-        data.m_trnaRequirements.reserve(reqs.size());
-        for (const auto& r : reqs)
-        {
-            // Store charged tRNA molecules as requirements
-            Molecule trna(r.first, ChemicalType::TRNA);
-            data.m_trnaRequirements.emplace_back(trna, r.second);
-        }
-        m_geneData[name] = std::move(data);
-    };
+    // No static defaults; computed on demand from sequences
+}
 
-    // Minimal placeholder requirements; tune as needed
-    addGene(StringDict::ID::PIE_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_GLY_GGA_CHARGED, 2 },
-        { StringDict::ID::TRNA_ALA_GCA_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::PAL_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_SER_TCA_CHARGED, 1 },
-        { StringDict::ID::TRNA_VAL_GTG_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::SKN_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_LEU_CTC_CHARGED, 1 },
-        { StringDict::ID::TRNA_THR_ACA_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::MEX_3, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_ASP_GAC_CHARGED, 1 },
-        { StringDict::ID::TRNA_GLY_GGT_CHARGED, 2 }
-    });
-    addGene(StringDict::ID::CDK_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_LYS_AAG_CHARGED, 1 },
-        { StringDict::ID::TRNA_GLU_GAG_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::CDK_2, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_LEU_CTG_CHARGED, 1 },
-        { StringDict::ID::TRNA_PRO_CCA_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::CYB_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_VAL_GTC_CHARGED, 1 },
-        { StringDict::ID::TRNA_SER_TCG_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::CCE_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_ALA_GCC_CHARGED, 1 },
-        { StringDict::ID::TRNA_ASN_AAC_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::PLK_1, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_GLN_CAG_CHARGED, 1 },
-        { StringDict::ID::TRNA_PHE_TTC_CHARGED, 1 }
-    });
-    addGene(StringDict::ID::GAMMA_TUBULIN, {
-        { StringDict::ID::TRNA_MET_ATG_CHARGED, 1 },
-        { StringDict::ID::TRNA_TRP_TGG_CHARGED, 1 },
-        { StringDict::ID::TRNA_CYS_TGC_CHARGED, 1 }
-    });
+std::filesystem::path GeneWiki::getGenesFolder() const
+{
+    std::filesystem::path genesPath;
+    if (!FileUtils::findTheFolder("data/genes", genesPath))
+    {
+        // fallback to current working directory
+        genesPath = std::filesystem::current_path() / "data" / "genes";
+    }
+    if (!std::filesystem::exists(genesPath))
+    {
+        std::error_code ec;
+        std::filesystem::create_directories(genesPath, ec);
+        if (ec)
+        {
+            LOG_WARN("Failed to create genes folder: %s", genesPath.string().c_str());
+        }
+    }
+    return genesPath;
+}
+
+std::string GeneWiki::sanitizeGeneNameForFile(const std::string& geneName)
+{
+    std::string out;
+    out.reserve(geneName.size());
+    for (char c : geneName)
+    {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-')
+            out.push_back(c);
+        else
+            out.push_back('_');
+    }
+    return out;
+}
+
+std::filesystem::path GeneWiki::getGeneFilePath(const std::string& geneName) const
+{
+    const std::filesystem::path folder = getGenesFolder();
+    const std::string fileBase = sanitizeGeneNameForFile(geneName);
+    return folder / (std::string("g_") + fileBase + ".fa");
+}
+
+bool GeneWiki::loadSequenceFromFile(const std::filesystem::path& filePath, std::string& outSequence) const
+{
+    if (!std::filesystem::exists(filePath))
+        return false;
+    std::ifstream in(filePath, std::ios::in);
+    if (!in.is_open())
+        return false;
+    std::stringstream ss;
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (!line.empty() && line[0] == '>')
+            continue; // skip FASTA header
+        for (char c : line)
+        {
+            if (c != '\r' && c != '\n' && c != ' ' && c != '\t')
+                ss << (char)toupper(c);
+        }
+    }
+    outSequence = ss.str();
+    return !outSequence.empty();
+}
+
+bool GeneWiki::saveSequenceToFile(const std::filesystem::path& filePath, const std::string& sequence) const
+{
+    std::ofstream out(filePath, std::ios::out | std::ios::trunc);
+    if (!out.is_open())
+        return false;
+    out << "> autogenerated; DO NOT EDIT BY HAND\n";
+    // write as wrapped FASTA for readability
+    const size_t wrap = 80;
+    for (size_t i = 0; i < sequence.size(); i += wrap)
+    {
+        out << sequence.substr(i, std::min(wrap, sequence.size() - i)) << "\n";
+    }
+    return true;
+}
+
+bool GeneWiki::fetchSequenceFromPublicDb(const std::string& geneName, std::string& outSequence) const
+{
+    // Try Ensembl REST for C. elegans (caenorhabditis_elegans) by gene symbol
+    // 1) Lookup to get stable ID
+    std::wstring base = L"https://rest.ensembl.org";
+    std::wstring lookup = base + L"/xrefs/symbol/caenorhabditis_elegans/" + std::wstring(geneName.begin(), geneName.end()) + L"?content-type=application/json";
+    auto r1 = HttpClient::get(lookup, { {L"User-Agent", L"worm/1.0"} });
+    if (r1.statusCode != 200 || r1.body.empty())
+    {
+        LOG_WARN("Ensembl xrefs lookup failed (%d) for '%s'", r1.statusCode, geneName.c_str());
+    }
+    // Parse minimal: find first "id":"..."
+    std::string id;
+    size_t posId = r1.body.find("\"id\":\"");
+    if (posId != std::string::npos)
+    {
+        posId += 6;
+        size_t end = r1.body.find('"', posId);
+        if (end != std::string::npos)
+            id = r1.body.substr(posId, end - posId);
+    }
+    if (!id.empty())
+    {
+        // 2) Fetch sequence
+        std::wstring wid(id.begin(), id.end());
+        std::wstring seqUrl = base + L"/sequence/id/" + wid + L"?content-type=text/x-fasta";
+        auto r2 = HttpClient::get(seqUrl, { {L"User-Agent", L"worm/1.0"} });
+        if (r2.statusCode == 200 && !r2.body.empty())
+        {
+            // Parse FASTA body to raw sequence
+            std::stringstream ss(r2.body);
+            std::string line, seq;
+            while (std::getline(ss, line))
+            {
+                if (!line.empty() && line[0] == '>') continue;
+                for (char c : line) if (c!='\r'&&c!='\n'&&c!=' '&&c!='\t') seq.push_back((char)toupper(c));
+            }
+            if (!seq.empty())
+            {
+                outSequence = std::move(seq);
+                return true;
+            }
+        }
+        LOG_WARN("Ensembl sequence fetch failed (%d) for '%s' id '%s'", r2.statusCode, geneName.c_str(), id.c_str());
+    }
+
+    // Fallback minimal deterministic sequence (rarely used)
+    uint32_t hash = 2166136261u;
+    for (unsigned char c : geneName) { hash ^= c; hash *= 16777619u; }
+    static const char bases[4] = { 'A','C','G','T' };
+    std::string seq; seq.resize(300);
+    for (size_t i = 0; i < seq.size(); ++i) { hash ^= (uint32_t)i; hash *= 16777619u; seq[i] = bases[(hash >> ((i % 4) * 2)) & 3u]; }
+    outSequence = seq;
+    LOG_WARN("Using synthetic fallback sequence for gene '%s'", geneName.c_str());
+    return true;
+}
+
+bool GeneWiki::ensureSequenceLoaded(const std::string& geneName) const
+{
+    auto it = m_sequences.find(geneName);
+    if (it != m_sequences.end())
+        return true;
+
+    const std::filesystem::path p = getGeneFilePath(geneName);
+    std::string seq;
+    if (loadSequenceFromFile(p, seq))
+    {
+        m_sequences[geneName] = std::move(seq);
+        return true;
+    }
+    // Not on disk, attempt fetch then save
+    if (!fetchSequenceFromPublicDb(geneName, seq))
+        return false;
+    // ensure folder exists and save
+    std::filesystem::create_directories(p.parent_path());
+    if (!saveSequenceToFile(p, seq))
+    {
+        LOG_WARN("Failed to save gene file: %s", p.string().c_str());
+    }
+    m_sequences[geneName] = std::move(seq);
+    return true;
+}
+
+static inline StringDict::ID codonToChargedTrnaId(const std::string &codon)
+{
+    if (codon == "ATG") return StringDict::ID::TRNA_MET_ATG_CHARGED;
+    if (codon == "GGA") return StringDict::ID::TRNA_GLY_GGA_CHARGED;
+    if (codon == "GGT") return StringDict::ID::TRNA_GLY_GGT_CHARGED;
+    if (codon == "GCA") return StringDict::ID::TRNA_ALA_GCA_CHARGED;
+    if (codon == "GCC") return StringDict::ID::TRNA_ALA_GCC_CHARGED;
+    if (codon == "CTG") return StringDict::ID::TRNA_LEU_CTG_CHARGED;
+    if (codon == "CTC") return StringDict::ID::TRNA_LEU_CTC_CHARGED;
+    if (codon == "TCA") return StringDict::ID::TRNA_SER_TCA_CHARGED;
+    if (codon == "TCG") return StringDict::ID::TRNA_SER_TCG_CHARGED;
+    if (codon == "GTG") return StringDict::ID::TRNA_VAL_GTG_CHARGED;
+    if (codon == "GTC") return StringDict::ID::TRNA_VAL_GTC_CHARGED;
+    if (codon == "CCA") return StringDict::ID::TRNA_PRO_CCA_CHARGED;
+    if (codon == "ACA") return StringDict::ID::TRNA_THR_ACA_CHARGED;
+    if (codon == "GAC") return StringDict::ID::TRNA_ASP_GAC_CHARGED;
+    if (codon == "GAG") return StringDict::ID::TRNA_GLU_GAG_CHARGED;
+    if (codon == "AAG") return StringDict::ID::TRNA_LYS_AAG_CHARGED;
+    if (codon == "CGA") return StringDict::ID::TRNA_ARG_CGA_CHARGED;
+    if (codon == "CAC") return StringDict::ID::TRNA_HIS_CAC_CHARGED;
+    if (codon == "TTC") return StringDict::ID::TRNA_PHE_TTC_CHARGED;
+    if (codon == "TAC") return StringDict::ID::TRNA_TYR_TAC_CHARGED;
+    if (codon == "TGC") return StringDict::ID::TRNA_CYS_TGC_CHARGED;
+    if (codon == "TGG") return StringDict::ID::TRNA_TRP_TGG_CHARGED;
+    if (codon == "AAC") return StringDict::ID::TRNA_ASN_AAC_CHARGED;
+    if (codon == "CAG") return StringDict::ID::TRNA_GLN_CAG_CHARGED;
+    if (codon == "ATC") return StringDict::ID::TRNA_ILE_ATC_CHARGED;
+    return StringDict::ID::eUNKNOWN;
+}
+
+bool GeneWiki::ensureGeneDataComputed(const std::string& geneName) const
+{
+    if (m_geneData.find(geneName) != m_geneData.end())
+        return true;
+    if (!ensureSequenceLoaded(geneName))
+        return false;
+    const std::string &seq = m_sequences[geneName];
+    std::map<StringDict::ID, uint32_t> trnaCounts;
+    for (size_t i = 0; i + 2 < seq.size(); i += 3)
+    {
+        std::string codon = seq.substr(i, 3);
+        for (char &c : codon) c = (char)toupper(c);
+        StringDict::ID trnaId = codonToChargedTrnaId(codon);
+        if (trnaId == StringDict::ID::eUNKNOWN)
+            continue;
+        trnaCounts[trnaId] += 1u;
+    }
+    GeneData data;
+    data.m_trnaRequirements.reserve(trnaCounts.size());
+    for (const auto &kv : trnaCounts)
+    {
+        Molecule trna(kv.first, ChemicalType::TRNA);
+        data.m_trnaRequirements.emplace_back(trna, kv.second);
+    }
+    m_geneData[geneName] = std::move(data);
+    return true;
 }
