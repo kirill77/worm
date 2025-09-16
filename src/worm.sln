@@ -59,6 +59,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "chemistry", "chemistry", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interactions", "chemistry\interactions\interactions.vcxproj", "{01EBD2E9-BA4F-4DA6-BD8D-6CFB05656E77}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Genes", "chemistry\Genes\Genes.vcxproj", "{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -219,6 +221,14 @@ Global
 		{01EBD2E9-BA4F-4DA6-BD8D-6CFB05656E77}.Release|x64.Build.0 = Release|x64
 		{01EBD2E9-BA4F-4DA6-BD8D-6CFB05656E77}.Release|x86.ActiveCfg = Release|Win32
 		{01EBD2E9-BA4F-4DA6-BD8D-6CFB05656E77}.Release|x86.Build.0 = Release|Win32
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Debug|x64.ActiveCfg = Debug|x64
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Debug|x64.Build.0 = Debug|x64
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Debug|x86.ActiveCfg = Debug|Win32
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Debug|x86.Build.0 = Debug|Win32
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Release|x64.ActiveCfg = Release|x64
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Release|x64.Build.0 = Release|x64
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Release|x86.ActiveCfg = Release|Win32
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,6 +253,7 @@ Global
 		{DCD230D7-B87B-4568-9A41-6140EDAF7568} = {EF6A94C3-FE58-43D0-8057-3FFA6D90EB6E}
 		{05A61EC7-4C44-4895-A25D-FF9C949DAC28} = {F4341C4E-42D4-455A-8CAA-56E5E3F78716}
 		{01EBD2E9-BA4F-4DA6-BD8D-6CFB05656E77} = {0C2BD8C9-0521-411E-BA5D-5D8245206ED4}
+		{E26D41A3-A6D4-4B04-8CC9-6B38E4D3FA29} = {0C2BD8C9-0521-411E-BA5D-5D8245206ED4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {03D017DA-220B-45B1-A7FD-342A1562B553}

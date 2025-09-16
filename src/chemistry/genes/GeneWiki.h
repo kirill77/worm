@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include "Molecule.h"
+#include "chemistry/molecules/Molecule.h"
 
 class GeneWiki
 {

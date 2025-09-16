@@ -1,6 +1,5 @@
 #include "Gene.h"
 #include "MoleculeWiki.h"
-#include "GeneWiki.h"
 #include "StringDict.h"
 #include <random>
 

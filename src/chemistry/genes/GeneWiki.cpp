@@ -1,6 +1,6 @@
 #include "GeneWiki.h"
-#include "StringDict.h"
-#include "Molecule.h"
+#include "chemistry/molecules/StringDict.h"
+#include "chemistry/molecules/Molecule.h"
 #include <stdexcept>
 
 GeneWiki::GeneWiki()

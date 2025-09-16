@@ -1,6 +1,6 @@
 #include "MoleculeInteractionLoader.h"
 #include "chemistry/molecules/StringDict.h"
-#include "chemistry/molecules/GeneWiki.h"
+#include "chemistry/genes/GeneWiki.h"
 #include "chemistry/molecules/MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
