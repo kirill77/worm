@@ -193,34 +193,34 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
     std::shared_ptr<Medium> pInternalMedium = std::make_shared<Medium>();
 
     // Create and add anterior proteins at the anterior cortex
-    MPopulation par3(Molecule(StringDict::ID::PAR_3, ChemicalType::PROTEIN), 3.9e5);
+    MPopulation par3(Molecule(StringDict::ID::PAR_3, ChemicalType::PROTEIN, Species::C_ELEGANS), 3.9e5);
     pInternalMedium->addMolecule(par3, float3(0, 1.f, 0));
 
-    MPopulation par6(Molecule(StringDict::ID::PAR_6, ChemicalType::PROTEIN), 3.9e5);
+    MPopulation par6(Molecule(StringDict::ID::PAR_6, ChemicalType::PROTEIN, Species::C_ELEGANS), 3.9e5);
     pInternalMedium->addMolecule(par6, float3(0, 1.f, 0));
 
-    MPopulation pkc3(Molecule(StringDict::ID::PKC_3, ChemicalType::PROTEIN), 3.9e5);
+    MPopulation pkc3(Molecule(StringDict::ID::PKC_3, ChemicalType::PROTEIN, Species::C_ELEGANS), 3.9e5);
     pInternalMedium->addMolecule(pkc3, float3(0, 1.f, 0));
 
     // Create and add posterior proteins at the posterior cortex
-    MPopulation par1(Molecule(StringDict::ID::PAR_1, ChemicalType::PROTEIN), 3.9e5);
+    MPopulation par1(Molecule(StringDict::ID::PAR_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 3.9e5);
     pInternalMedium->addMolecule(par1, float3(0, -1.f, 0));
 
-    MPopulation par2(Molecule(StringDict::ID::PAR_2, ChemicalType::PROTEIN), 3.9e5);
+    MPopulation par2(Molecule(StringDict::ID::PAR_2, ChemicalType::PROTEIN, Species::C_ELEGANS), 3.9e5);
     pInternalMedium->addMolecule(par2, float3(0, -1.f, 0));
 
     // Initialize maternal proteins at cell center
     float3 center(0.0f, 0.0f, 0.0f);
 
     // Add maternal CDK-1 and CYB-1 (Cyclin B)
-    MPopulation cdk1(Molecule(StringDict::ID::CDK_1, ChemicalType::PROTEIN), 1500.0);  // Initial amount above threshold (1000)
-    MPopulation cyb1(Molecule(StringDict::ID::CYB_1, ChemicalType::PROTEIN), 1500.0);  // Initial amount above threshold (1000)
+    MPopulation cdk1(Molecule(StringDict::ID::CDK_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 1500.0);  // Initial amount above threshold (1000)
+    MPopulation cyb1(Molecule(StringDict::ID::CYB_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 1500.0);  // Initial amount above threshold (1000)
     pInternalMedium->addMolecule(cdk1, center);
     pInternalMedium->addMolecule(cyb1, center);
 
     // Add centrosome-related proteins for proper centrosome function
-    MPopulation cdk2(Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN), 800.0);  // For centrosome duplication
-    MPopulation cce1(Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN), 800.0);  // Cyclin E for centrosome duplication
+    MPopulation cdk2(Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN, Species::C_ELEGANS), 800.0);  // For centrosome duplication
+    MPopulation cce1(Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 800.0);  // Cyclin E for centrosome duplication
     pInternalMedium->addMolecule(cdk2, center);
     pInternalMedium->addMolecule(cce1, center);
     

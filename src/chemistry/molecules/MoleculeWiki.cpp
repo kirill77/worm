@@ -214,10 +214,28 @@ void MoleculeWiki::initializeMRNAInfo()
         MolInfo("CCE-1 mRNA", "mRNA", 40000.0, "Cyclin E transcriptional regulator mRNA", 1800.0, 2.8, 0.0);
     m_moleculesInfo[Molecule(StringDict::ID::PLK_1, ChemicalType::MRNA)] = 
         MolInfo("PLK-1 mRNA", "mRNA", 38000.0, "Polo-like kinase mRNA", 2000.0, 2.8, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::PLK_4, ChemicalType::MRNA)] = 
+        MolInfo("PLK-4 mRNA", "mRNA", 38000.0, "Polo-like kinase 4 mRNA", 2000.0, 2.2, 0.0);
+
+    // Polarity establishment mRNAs (PAR proteins and PKC-3)
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_1, ChemicalType::MRNA)] =
+        MolInfo("PAR-1 mRNA", "mRNA", 42000.0, "Polarity protein mRNA", 2400.0, 1.6, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_2, ChemicalType::MRNA)] =
+        MolInfo("PAR-2 mRNA", "mRNA", 42000.0, "Polarity protein mRNA", 2400.0, 1.5, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_3, ChemicalType::MRNA)] =
+        MolInfo("PAR-3 mRNA", "mRNA", 43000.0, "Polarity protein mRNA", 2400.0, 1.5, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_6, ChemicalType::MRNA)] =
+        MolInfo("PAR-6 mRNA", "mRNA", 41000.0, "Polarity protein mRNA", 2400.0, 1.4, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::PKC_3, ChemicalType::MRNA)] =
+        MolInfo("PKC-3 mRNA", "mRNA", 45000.0, "Atypical PKC mRNA", 2400.0, 1.3, 0.0);
     
     // Centrosome protein mRNAs - structural proteins, moderate translation
     m_moleculesInfo[Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA)] = 
         MolInfo("γ-TUBULIN mRNA", "mRNA", 44000.0, "γ-tubulin mRNA", 3600.0, 1.2, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA)] = 
+        MolInfo("PERICENTRIN mRNA", "mRNA", 52000.0, "Centrosome scaffold mRNA", 3600.0, 1.0, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::NINEIN, ChemicalType::MRNA)] = 
+        MolInfo("NINEIN mRNA", "mRNA", 50000.0, "Centrosome anchoring mRNA", 3600.0, 1.0, 0.0);
     
     // tRNA mRNAs - these encode the tRNA molecules themselves, low-moderate translation
     // Start codon tRNA

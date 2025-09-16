@@ -31,7 +31,7 @@ bool TranslationInteraction::apply(GridCell& cell, double dt, ResourceDistributo
     double potentialProteinAmount = m_translationRate * dt * mRNAAmount;
     
     // Query precomputed tRNA requirements for this gene
-    const auto& geneTRNAs = GeneWiki::getInstance().getGeneData(m_mRNA.getName());
+    const auto& geneTRNAs = GeneWiki::getInstance().getGeneData(m_mRNA);
     
     // Calculate actual protein amount we can produce based on available resources
     double actualProteinAmount = potentialProteinAmount;

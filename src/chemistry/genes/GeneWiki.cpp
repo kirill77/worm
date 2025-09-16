@@ -19,41 +19,26 @@ GeneWiki& GeneWiki::getInstance()
     return instance;
 }
 
-const std::string& GeneWiki::getSequence(const std::string& geneName) const
+const std::vector<std::pair<Molecule, uint32_t>>& GeneWiki::getGeneData(const Molecule& geneMolecule) const
 {
-    if (!ensureSequenceLoaded(geneName))
-    {
-        throw std::runtime_error("Gene sequence not found and could not be loaded: " + geneName);
-    }
-    return m_sequences[geneName];
-}
-
-bool GeneWiki::hasSequence(const std::string& geneName) const
-{
-    if (m_sequences.find(geneName) != m_sequences.end())
-        return true;
-    // Try lazy load presence without storing
-    std::string seq;
-    const std::filesystem::path p = getGeneFilePath(geneName);
-    if (std::filesystem::exists(p))
-        return true;
-    return false;
-}
-
-const std::vector<std::pair<Molecule, uint32_t>>& GeneWiki::getGeneData(const std::string& geneName) const
-{
-    if (!ensureGeneDataComputed(geneName))
+    const Species species = geneMolecule.getSpecies();
+    const std::string& geneName = geneMolecule.getName();
+    const std::string key = makeKey(species, geneName);
+    if (!ensureGeneDataComputed(species, geneName))
     {
         throw std::runtime_error("GeneData could not be computed for: " + geneName);
     }
-    return m_geneData[geneName].m_trnaRequirements;
+    return m_geneData[key].m_trnaRequirements;
 }
 
-bool GeneWiki::hasGeneData(const std::string& geneName) const
+bool GeneWiki::hasGeneData(const Molecule& geneMolecule) const
 {
-    if (m_geneData.find(geneName) != m_geneData.end())
+    const Species species = geneMolecule.getSpecies();
+    const std::string& geneName = geneMolecule.getName();
+    const std::string key = makeKey(species, geneName);
+    if (m_geneData.find(key) != m_geneData.end())
         return true;
-    return ensureGeneDataComputed(geneName);
+    return ensureGeneDataComputed(species, geneName);
 }
 
 // Removed default sequences; sequences are loaded lazily from disk or fetched
@@ -97,11 +82,13 @@ std::string GeneWiki::sanitizeGeneNameForFile(const std::string& geneName)
     return out;
 }
 
-std::filesystem::path GeneWiki::getGeneFilePath(const std::string& geneName) const
+std::filesystem::path GeneWiki::getGeneFilePath(Species species, const std::string& geneName) const
 {
     const std::filesystem::path folder = getGenesFolder();
     const std::string fileBase = sanitizeGeneNameForFile(geneName);
-    return folder / (std::string("g_") + fileBase + ".fa");
+    // Prefix by species to disambiguate
+    const char* speciesPrefix = (species == Species::C_ELEGANS) ? "cel_" : "human_";
+    return folder / (std::string("g_") + speciesPrefix + fileBase + ".fa");
 }
 
 bool GeneWiki::loadSequenceFromFile(const std::filesystem::path& filePath, std::string& outSequence) const
@@ -142,12 +129,16 @@ bool GeneWiki::saveSequenceToFile(const std::filesystem::path& filePath, const s
     return true;
 }
 
-bool GeneWiki::fetchSequenceFromPublicDb(const std::string& geneName, std::string& outSequence) const
+bool GeneWiki::fetchSequenceFromPublicDb(Species species, const std::string& geneName, std::string& outSequence) const
 {
-    // Try Ensembl REST for C. elegans (caenorhabditis_elegans) by gene symbol
+    // Try Ensembl REST; species-specific endpoint selection
+    // Currently implements C. elegans; fallback for Human can be added similarly
     // 1) Lookup to get stable ID
     std::wstring base = L"https://rest.ensembl.org";
-    std::wstring lookup = base + L"/xrefs/symbol/caenorhabditis_elegans/" + std::wstring(geneName.begin(), geneName.end()) + L"?content-type=application/json";
+    std::wstring speciesPath = (species == Species::C_ELEGANS)
+        ? L"caenorhabditis_elegans"
+        : L"homo_sapiens";
+    std::wstring lookup = base + L"/xrefs/symbol/" + speciesPath + L"/" + std::wstring(geneName.begin(), geneName.end()) + L"?content-type=application/json";
     auto r1 = HttpClient::get(lookup, { {L"User-Agent", L"worm/1.0"} });
     if (r1.statusCode != 200 || r1.body.empty())
     {
@@ -188,32 +179,28 @@ bool GeneWiki::fetchSequenceFromPublicDb(const std::string& geneName, std::strin
         LOG_WARN("Ensembl sequence fetch failed (%d) for '%s' id '%s'", r2.statusCode, geneName.c_str(), id.c_str());
     }
 
-    // Fallback minimal deterministic sequence (rarely used)
-    uint32_t hash = 2166136261u;
-    for (unsigned char c : geneName) { hash ^= c; hash *= 16777619u; }
-    static const char bases[4] = { 'A','C','G','T' };
-    std::string seq; seq.resize(300);
-    for (size_t i = 0; i < seq.size(); ++i) { hash ^= (uint32_t)i; hash *= 16777619u; seq[i] = bases[(hash >> ((i % 4) * 2)) & 3u]; }
-    outSequence = seq;
-    LOG_WARN("Using synthetic fallback sequence for gene '%s'", geneName.c_str());
-    return true;
+    // No synthetic fallback: report failure so callers can skip creating interactions
+    LOG_WARN("Sequence not found for %s gene '%s' in public DB; skipping.",
+        (species == Species::C_ELEGANS ? "C.elegans" : "human"), geneName.c_str());
+    return false;
 }
 
-bool GeneWiki::ensureSequenceLoaded(const std::string& geneName) const
+bool GeneWiki::ensureSequenceLoaded(Species species, const std::string& geneName) const
 {
-    auto it = m_sequences.find(geneName);
+    const std::string key = makeKey(species, geneName);
+    auto it = m_sequences.find(key);
     if (it != m_sequences.end())
         return true;
 
-    const std::filesystem::path p = getGeneFilePath(geneName);
+    const std::filesystem::path p = getGeneFilePath(species, geneName);
     std::string seq;
     if (loadSequenceFromFile(p, seq))
     {
-        m_sequences[geneName] = std::move(seq);
+        m_sequences[key] = std::move(seq);
         return true;
     }
     // Not on disk, attempt fetch then save
-    if (!fetchSequenceFromPublicDb(geneName, seq))
+    if (!fetchSequenceFromPublicDb(species, geneName, seq))
         return false;
     // ensure folder exists and save
     std::filesystem::create_directories(p.parent_path());
@@ -221,7 +208,7 @@ bool GeneWiki::ensureSequenceLoaded(const std::string& geneName) const
     {
         LOG_WARN("Failed to save gene file: %s", p.string().c_str());
     }
-    m_sequences[geneName] = std::move(seq);
+    m_sequences[key] = std::move(seq);
     return true;
 }
 
@@ -255,13 +242,14 @@ static inline StringDict::ID codonToChargedTrnaId(const std::string &codon)
     return StringDict::ID::eUNKNOWN;
 }
 
-bool GeneWiki::ensureGeneDataComputed(const std::string& geneName) const
+bool GeneWiki::ensureGeneDataComputed(Species species, const std::string& geneName) const
 {
-    if (m_geneData.find(geneName) != m_geneData.end())
+    const std::string key = makeKey(species, geneName);
+    if (m_geneData.find(key) != m_geneData.end())
         return true;
-    if (!ensureSequenceLoaded(geneName))
+    if (!ensureSequenceLoaded(species, geneName))
         return false;
-    const std::string &seq = m_sequences[geneName];
+    const std::string &seq = m_sequences[key];
     std::map<StringDict::ID, uint32_t> trnaCounts;
     for (size_t i = 0; i + 2 < seq.size(); i += 3)
     {
@@ -279,6 +267,11 @@ bool GeneWiki::ensureGeneDataComputed(const std::string& geneName) const
         Molecule trna(kv.first, ChemicalType::TRNA);
         data.m_trnaRequirements.emplace_back(trna, kv.second);
     }
-    m_geneData[geneName] = std::move(data);
+    m_geneData[key] = std::move(data);
     return true;
+}
+
+std::string GeneWiki::makeKey(Species species, const std::string& geneName)
+{
+    return (species == Species::C_ELEGANS ? std::string("cel::") : std::string("human::")) + geneName;
 }

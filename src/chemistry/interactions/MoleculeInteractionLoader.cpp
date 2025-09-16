@@ -351,8 +351,31 @@ std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::
         StringDict::ID id = static_cast<StringDict::ID>(i);
         const std::string& name = StringDict::idToString(id);
         
+        // Skip non-gene identifiers and placeholders
+        switch (id) {
+        // Nucleotides and ER placeholders
+        case StringDict::ID::ATP:
+        case StringDict::ID::ER_PROTEIN:
+        case StringDict::ID::ER_LIPID:
+            continue;
+        default: break;
+        }
+
+        // Skip phosphorylated forms
+        if (id == StringDict::ID::PAR_1_P || id == StringDict::ID::PAR_2_P || id == StringDict::ID::PAR_3_P)
+            continue;
+
+        // Skip complexes
+        if (id == StringDict::ID::PAR_3_PAR_6 || id == StringDict::ID::PAR_6_PKC_3 ||
+            id == StringDict::ID::PAR_1_CORTEX || id == StringDict::ID::PAR_2_CORTEX || id == StringDict::ID::PAR_3_CORTEX)
+            continue;
+
+        // Skip charged tRNAs; only base tRNA gene names should be considered for mRNA
+        if (name.find("-charged") != std::string::npos)
+            continue;
+
         // Check if this molecule has GeneData (indicating it can be translated)
-        if (GeneWiki::getInstance().hasGeneData(name)) {
+        if (GeneWiki::getInstance().hasGeneData(Molecule(id, ChemicalType::MRNA))) {
             // Create mRNA molecule
             Molecule mRNA(id, ChemicalType::MRNA);
             

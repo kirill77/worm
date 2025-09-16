@@ -25,6 +25,12 @@ enum class ChemicalType : uint8_t {
     OTHER          // Catch-all for everything else
 };
 
+// Biological species/organism the molecule belongs to
+enum class Species : uint8_t {
+    HUMAN = 0,
+    C_ELEGANS = 1
+};
+
 // Population class - handles population properties without molecule identity
 class Population
 {
@@ -70,10 +76,13 @@ class Molecule
 {
 public:
     // Default constructor
-    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER) {}
+    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER), m_species(Species::HUMAN) {}
     
     // Constructor with StringDict ID and type  
-    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type) {}
+    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type), m_species(Species::HUMAN) {}
+
+    // Constructor with explicit species
+    Molecule(StringDict::ID id, ChemicalType type, Species species) : m_id(id), m_type(type), m_species(species) {}
     
     // Get name from StringDict
     const std::string& getName() const {
@@ -82,6 +91,9 @@ public:
     
     // Get chemical type
     ChemicalType getType() const { return m_type; }
+    
+    // Get biological species
+    Species getSpecies() const { return m_species; }
     
     // Get StringDict ID (for optimization purposes)
     StringDict::ID getID() const { return m_id; }
@@ -99,6 +111,7 @@ public:
 private:
     StringDict::ID m_id;   // StringDict ID  
     ChemicalType m_type;   // Chemical classification of the molecule
+    Species m_species;     // Organism/species classification
 };
 
 // Molecule population - simple composition of Molecule + Population
