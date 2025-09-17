@@ -374,21 +374,24 @@ std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::
         if (name.find("-charged") != std::string::npos)
             continue;
 
-        // Check if this molecule has GeneData (indicating it can be translated)
-        if (GeneWiki::getInstance().hasGeneData(Molecule(id, ChemicalType::MRNA))) {
-            // Create mRNA molecule
-            Molecule mRNA(id, ChemicalType::MRNA);
-            
-            // Get translation rate from MoleculeWiki
-            const auto& info = MoleculeWiki::getInfo(mRNA);
-            
+        // For each species, check if this molecule has GeneData (indicating it can be translated)
+        for (int si = 0; si < static_cast<int>(Species::COUNT); ++si)
+        {
+            Species species = static_cast<Species>(si);
+            Molecule mRNACandidate(id, ChemicalType::MRNA, species);
+            if (!GeneWiki::getInstance().hasGeneData(mRNACandidate))
+                continue;
+
+            // Get translation rate from MoleculeWiki (species-independent for now)
+            const auto& info = MoleculeWiki::getInfo(Molecule(id, ChemicalType::MRNA));
+
             // Create translation interaction parameters
             TranslationInteraction::Parameters params{
                 info.m_fTranslationRate
             };
-            
-            // Create and add translation interaction
-            interactions.push_back(std::make_shared<TranslationInteraction>(mRNA, params));
+
+            // Create and add translation interaction for this species
+            interactions.push_back(std::make_shared<TranslationInteraction>(mRNACandidate, params));
         }
     }
     

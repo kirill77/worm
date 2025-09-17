@@ -15,9 +15,6 @@ public:
 	// Get all known interactions
 	static const std::vector<std::shared_ptr<MoleculeInteraction>>& GetMoleculeInteractions();
 
-	// Filter interactions by mechanism
-	static std::vector<std::shared_ptr<MoleculeInteraction>> GetInteractionsByMechanism(MoleculeInteraction::Mechanism mechanism);
-
 private:
 	// Stored interactions
 	static std::vector<std::shared_ptr<MoleculeInteraction>> s_moleculeInteractions;

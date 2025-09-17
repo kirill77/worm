@@ -4,13 +4,18 @@
 #include "utils/fileUtils/fileUtils.h"
 #include "utils/log/ILog.h"
 #include "HttpClient.h"
+#include "chemistry/molecules/SpeciesUtils.h"
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <assert.h>
 
 GeneWiki::GeneWiki()
 {
     initializeDefaultGeneData();
+    // Load caches for all known species
+    for (int si = 0; si < static_cast<int>(Species::COUNT); ++si)
+        loadMissingCache(static_cast<Species>(si));
 }
 
 GeneWiki& GeneWiki::getInstance()
@@ -23,20 +28,20 @@ const std::vector<std::pair<Molecule, uint32_t>>& GeneWiki::getGeneData(const Mo
 {
     const Species species = geneMolecule.getSpecies();
     const std::string& geneName = geneMolecule.getName();
-    const std::string key = makeKey(species, geneName);
+    assert(geneMolecule.getType() == ChemicalType::MRNA && "getGeneData expects an mRNA molecule");
     if (!ensureGeneDataComputed(species, geneName))
     {
         throw std::runtime_error("GeneData could not be computed for: " + geneName);
     }
-    return m_geneData[key].m_trnaRequirements;
+    return m_geneData.at(geneMolecule).m_trnaRequirements;
 }
 
 bool GeneWiki::hasGeneData(const Molecule& geneMolecule) const
 {
     const Species species = geneMolecule.getSpecies();
     const std::string& geneName = geneMolecule.getName();
-    const std::string key = makeKey(species, geneName);
-    if (m_geneData.find(key) != m_geneData.end())
+    assert(geneMolecule.getType() == ChemicalType::MRNA && "hasGeneData expects an mRNA molecule");
+    if (m_geneData.find(geneMolecule) != m_geneData.end())
         return true;
     return ensureGeneDataComputed(species, geneName);
 }
@@ -68,6 +73,23 @@ std::filesystem::path GeneWiki::getGenesFolder() const
     return genesPath;
 }
 
+std::filesystem::path GeneWiki::getSpeciesFolder(Species species) const
+{
+    const std::filesystem::path base = getGenesFolder();
+    // Use canonical species string for folder naming
+    std::filesystem::path sf = base / std::filesystem::path(speciesToWString(species));
+    if (!std::filesystem::exists(sf))
+    {
+        std::error_code ec;
+        std::filesystem::create_directories(sf, ec);
+        if (ec)
+        {
+            LOG_WARN("Failed to create species folder: %s", sf.string().c_str());
+        }
+    }
+    return sf;
+}
+
 std::string GeneWiki::sanitizeGeneNameForFile(const std::string& geneName)
 {
     std::string out;
@@ -84,11 +106,17 @@ std::string GeneWiki::sanitizeGeneNameForFile(const std::string& geneName)
 
 std::filesystem::path GeneWiki::getGeneFilePath(Species species, const std::string& geneName) const
 {
-    const std::filesystem::path folder = getGenesFolder();
+    const std::filesystem::path folder = getSpeciesFolder(species);
     const std::string fileBase = sanitizeGeneNameForFile(geneName);
-    // Prefix by species to disambiguate
-    const char* speciesPrefix = (species == Species::C_ELEGANS) ? "cel_" : "human_";
-    return folder / (std::string("g_") + speciesPrefix + fileBase + ".fa");
+    // Species is encoded in the parent folder; filename need not include species prefix
+    return folder / (std::string("g_") + fileBase + ".fa");
+}
+
+std::filesystem::path GeneWiki::getMissingCacheFilePath(Species species) const
+{
+    // store alongside genes in species folder
+    const std::filesystem::path folder = getSpeciesFolder(species);
+    return folder / "missing_genes.cache";
 }
 
 bool GeneWiki::loadSequenceFromFile(const std::filesystem::path& filePath, std::string& outSequence) const
@@ -135,9 +163,7 @@ bool GeneWiki::fetchSequenceFromPublicDb(Species species, const std::string& gen
     // Currently implements C. elegans; fallback for Human can be added similarly
     // 1) Lookup to get stable ID
     std::wstring base = L"https://rest.ensembl.org";
-    std::wstring speciesPath = (species == Species::C_ELEGANS)
-        ? L"caenorhabditis_elegans"
-        : L"homo_sapiens";
+    std::wstring speciesPath = speciesToWString(species);
     std::wstring lookup = base + L"/xrefs/symbol/" + speciesPath + L"/" + std::wstring(geneName.begin(), geneName.end()) + L"?content-type=application/json";
     auto r1 = HttpClient::get(lookup, { {L"User-Agent", L"worm/1.0"} });
     if (r1.statusCode != 200 || r1.body.empty())
@@ -187,28 +213,41 @@ bool GeneWiki::fetchSequenceFromPublicDb(Species species, const std::string& gen
 
 bool GeneWiki::ensureSequenceLoaded(Species species, const std::string& geneName) const
 {
-    const std::string key = makeKey(species, geneName);
-    auto it = m_sequences.find(key);
+    const std::string strKey = makeKey(species, geneName);
+    auto it = m_sequences.find(strKey);
     if (it != m_sequences.end())
         return true;
+
+    // If previously marked missing, skip fetch attempts
+    if (isMarkedMissing(species, geneName))
+    {
+        return false;
+    }
 
     const std::filesystem::path p = getGeneFilePath(species, geneName);
     std::string seq;
     if (loadSequenceFromFile(p, seq))
     {
-        m_sequences[key] = std::move(seq);
+        m_sequences[strKey] = std::move(seq);
+        // ensure not marked missing anymore
+        markFound(species, geneName);
         return true;
     }
     // Not on disk, attempt fetch then save
     if (!fetchSequenceFromPublicDb(species, geneName, seq))
+    {
+        // remember negative result
+        markMissing(species, geneName);
         return false;
+    }
     // ensure folder exists and save
     std::filesystem::create_directories(p.parent_path());
     if (!saveSequenceToFile(p, seq))
     {
         LOG_WARN("Failed to save gene file: %s", p.string().c_str());
     }
-    m_sequences[key] = std::move(seq);
+    m_sequences[strKey] = std::move(seq);
+    markFound(species, geneName);
     return true;
 }
 
@@ -244,12 +283,12 @@ static inline StringDict::ID codonToChargedTrnaId(const std::string &codon)
 
 bool GeneWiki::ensureGeneDataComputed(Species species, const std::string& geneName) const
 {
-    const std::string key = makeKey(species, geneName);
-    if (m_geneData.find(key) != m_geneData.end())
+    Molecule keyMol(StringDict::stringToId(geneName), ChemicalType::MRNA, species);
+    if (m_geneData.find(keyMol) != m_geneData.end())
         return true;
     if (!ensureSequenceLoaded(species, geneName))
         return false;
-    const std::string &seq = m_sequences[key];
+    const std::string &seq = m_sequences[makeKey(species, geneName)];
     std::map<StringDict::ID, uint32_t> trnaCounts;
     for (size_t i = 0; i + 2 < seq.size(); i += 3)
     {
@@ -267,11 +306,76 @@ bool GeneWiki::ensureGeneDataComputed(Species species, const std::string& geneNa
         Molecule trna(kv.first, ChemicalType::TRNA);
         data.m_trnaRequirements.emplace_back(trna, kv.second);
     }
-    m_geneData[key] = std::move(data);
+    m_geneData[keyMol] = std::move(data);
     return true;
 }
 
 std::string GeneWiki::makeKey(Species species, const std::string& geneName)
 {
     return (species == Species::C_ELEGANS ? std::string("cel::") : std::string("human::")) + geneName;
+}
+
+void GeneWiki::loadMissingCache(Species species) const
+{
+    // Load a per-species cache file; file contains plain gene names
+    const std::filesystem::path cachePath = getMissingCacheFilePath(species);
+    if (!std::filesystem::exists(cachePath))
+        return;
+    std::ifstream in(cachePath);
+    if (!in.is_open())
+        return;
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (line.empty())
+            continue;
+        // Convert gene name to Molecule key (MRNA for this species)
+        StringDict::ID id = StringDict::stringToId(line);
+        Molecule keyMol(id, ChemicalType::MRNA, species);
+        m_missingSequenceKeys.insert(keyMol);
+    }
+}
+
+void GeneWiki::saveMissingCache(Species species) const
+{
+    // Rewrite the species file from the unified set; write plain gene names (no species prefix)
+    const std::filesystem::path cachePath = getMissingCacheFilePath(species);
+    std::ofstream out(cachePath, std::ios::out | std::ios::trunc);
+    if (!out.is_open())
+        return;
+    for (const auto &keyMol : m_missingSequenceKeys)
+    {
+        if (keyMol.getSpecies() != species)
+            continue;
+        if (keyMol.getType() != ChemicalType::MRNA)
+            continue;
+        const std::string &gene = StringDict::idToString(keyMol.getID());
+        out << gene << '\n';
+    }
+}
+
+bool GeneWiki::isMarkedMissing(Species species, const std::string& geneName) const
+{
+    Molecule keyMol(StringDict::stringToId(geneName), ChemicalType::MRNA, species);
+    return m_missingSequenceKeys.find(keyMol) != m_missingSequenceKeys.end();
+}
+
+void GeneWiki::markMissing(Species species, const std::string& geneName) const
+{
+    Molecule keyMol(StringDict::stringToId(geneName), ChemicalType::MRNA, species);
+    if (m_missingSequenceKeys.insert(keyMol).second)
+    {
+        saveMissingCache(species);
+    }
+}
+
+void GeneWiki::markFound(Species species, const std::string& geneName) const
+{
+    Molecule keyMol(StringDict::stringToId(geneName), ChemicalType::MRNA, species);
+    auto it = m_missingSequenceKeys.find(keyMol);
+    if (it != m_missingSequenceKeys.end())
+    {
+        m_missingSequenceKeys.erase(it);
+        saveMissingCache(species);
+    }
 }

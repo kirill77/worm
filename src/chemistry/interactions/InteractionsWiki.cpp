@@ -63,16 +63,5 @@ const std::vector<std::shared_ptr<MoleculeInteraction>>& InteractionsWiki::GetMo
 	return s_moleculeInteractions;
 }
 
-std::vector<std::shared_ptr<MoleculeInteraction>> InteractionsWiki::GetInteractionsByMechanism(MoleculeInteraction::Mechanism mechanism)
-{
-	std::vector<std::shared_ptr<MoleculeInteraction>> result;
-	result.reserve(s_moleculeInteractions.size());
-	for (const auto& interaction : s_moleculeInteractions) {
-		if (interaction->getMechanism() == mechanism) {
-			result.push_back(interaction);
-		}
-	}
-	return result;
-}
 
 

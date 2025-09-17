@@ -28,7 +28,8 @@ enum class ChemicalType : uint8_t {
 // Biological species/organism the molecule belongs to
 enum class Species : uint8_t {
     HUMAN = 0,
-    C_ELEGANS = 1
+    C_ELEGANS = 1,
+    COUNT
 };
 
 // Population class - handles population properties without molecule identity
@@ -98,9 +99,9 @@ public:
     // Get StringDict ID (for optimization purposes)
     StringDict::ID getID() const { return m_id; }
     
-    // Equality operator for unordered_map
+    // Equality operator for unordered_map (species-aware)
     bool operator==(const Molecule& other) const {
-        return m_id == other.m_id && m_type == other.m_type;
+        return m_id == other.m_id && m_type == other.m_type && m_species == other.m_species;
     }
     
     bool operator!=(const Molecule& other) const {
@@ -140,10 +141,11 @@ namespace std {
     template<>
     struct hash<Molecule> {
         size_t operator()(const Molecule& molecule) const {
-            // Hash based on ID and type
+            // Hash based on ID, type, and species
             size_t h1 = hash<int>()(static_cast<int>(molecule.getID()));
             size_t h2 = hash<int>()(static_cast<int>(molecule.getType()));
-            return h1 ^ (h2 << 1);
+            size_t h3 = hash<int>()(static_cast<int>(molecule.getSpecies()));
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
         }
     };
 }
