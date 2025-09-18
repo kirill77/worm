@@ -76,21 +76,7 @@ GeneWiki::GeneWiki()
     // Default to spd-2 as a scaffold component for sequence retrieval
     m_lookupAliases[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "spd-2";
 
-    // Human aliases for generic names in missing cache
-    m_lookupAliases[Molecule(StringDict::ID::PLK_1,          ChemicalType::MRNA, Species::HUMAN)] = "PLK1";
-    m_lookupAliases[Molecule(StringDict::ID::PLK_4,          ChemicalType::MRNA, Species::HUMAN)] = "PLK4";
-    m_lookupAliases[Molecule(StringDict::ID::CDK_1,          ChemicalType::MRNA, Species::HUMAN)] = "CDK1";
-    m_lookupAliases[Molecule(StringDict::ID::CDK_2,          ChemicalType::MRNA, Species::HUMAN)] = "CDK2";
-    m_lookupAliases[Molecule(StringDict::ID::CYB_1,          ChemicalType::MRNA, Species::HUMAN)] = "CCNB1";
-    m_lookupAliases[Molecule(StringDict::ID::CCE_1,          ChemicalType::MRNA, Species::HUMAN)] = "CCNE1";
-    m_lookupAliases[Molecule(StringDict::ID::PAR_3,          ChemicalType::MRNA, Species::HUMAN)] = "PARD3";
-    m_lookupAliases[Molecule(StringDict::ID::PKC_3,          ChemicalType::MRNA, Species::HUMAN)] = "PRKCI";
-    m_lookupAliases[Molecule(StringDict::ID::MEX_3,          ChemicalType::MRNA, Species::HUMAN)] = "MEX3A";
-    m_lookupAliases[Molecule(StringDict::ID::SKN_1,          ChemicalType::MRNA, Species::HUMAN)] = "NFE2L2";
-    m_lookupAliases[Molecule(StringDict::ID::PAL_1,          ChemicalType::MRNA, Species::HUMAN)] = "CDX2";
-    m_lookupAliases[Molecule(StringDict::ID::GAMMA_TUBULIN,  ChemicalType::MRNA, Species::HUMAN)] = "TUBG1";
-    m_lookupAliases[Molecule(StringDict::ID::PERICENTRIN,    ChemicalType::MRNA, Species::HUMAN)] = "PCNT";
-    m_lookupAliases[Molecule(StringDict::ID::NINEIN,         ChemicalType::MRNA, Species::HUMAN)] = "NIN";
+    // Human-specific aliases removed; use GENERIC for cross-species where applicable
 }
 
 GeneWiki& GeneWiki::getInstance()
@@ -289,7 +275,7 @@ bool GeneWiki::fetchSequenceFromPublicDb(const Molecule& mrna, std::string& outS
 
     // No synthetic fallback: report failure so callers can skip creating interactions
     LOG_WARN("Sequence not found for %s gene '%s' in public DB; skipping.",
-        (species == Species::C_ELEGANS ? "C.elegans" : "human"), lookupName.c_str());
+        speciesToString(species), lookupName.c_str());
     return false;
 }
 

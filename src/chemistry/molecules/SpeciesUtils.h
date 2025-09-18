@@ -10,8 +10,8 @@ inline const char* speciesToString(Species species)
 {
     switch (species)
     {
+    case Species::GENERIC: return "generic";
     case Species::C_ELEGANS: return "caenorhabditis_elegans";
-    case Species::HUMAN: return "homo_sapiens";
     default:
         assert(false && "Unsupported species in speciesToString");
         return "unknown";

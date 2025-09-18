@@ -27,7 +27,7 @@ enum class ChemicalType : uint8_t {
 
 // Biological species/organism the molecule belongs to
 enum class Species : uint8_t {
-    HUMAN = 0,
+    GENERIC = 0,
     C_ELEGANS = 1,
     COUNT
 };
@@ -77,10 +77,10 @@ class Molecule
 {
 public:
     // Default constructor
-    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER), m_species(Species::HUMAN) {}
+    Molecule() : m_id(StringDict::ID::eUNKNOWN), m_type(ChemicalType::OTHER), m_species(Species::GENERIC) {}
     
     // Constructor with StringDict ID and type  
-    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type), m_species(Species::HUMAN) {}
+    Molecule(StringDict::ID id, ChemicalType type) : m_id(id), m_type(type), m_species(Species::GENERIC) {}
 
     // Constructor with explicit species
     Molecule(StringDict::ID id, ChemicalType type, Species species) : m_id(id), m_type(type), m_species(species) {}
