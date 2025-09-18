@@ -12,10 +12,11 @@
 class GeneWiki
 {
 private:
-    // Keyed by species+gene composite key
-    mutable std::map<std::string, std::string> m_sequences;  // Map of (species::gene) to sequence (mutable for lazy-loading)
+    // No separate sequence cache; sequences are stored within GeneData
     struct GeneData
     {
+        // Raw gene sequence (uppercase DNA letters; no FASTA headers)
+        std::string m_sequence;
         std::vector<std::pair<Molecule, uint32_t>> m_trnaRequirements;  // charged tRNA requirements per protein
     };
     mutable std::unordered_map<Molecule, GeneData> m_geneData;  // keyed by mRNA molecule (species-aware)
@@ -36,15 +37,14 @@ private:
     bool fetchSequenceFromPublicDb(const Molecule& mrna, std::string& outSequence) const;
     // Resolve species-specific lookup name; Molecule overload is the only variant
     std::string resolveLookupName(const Molecule& mrna) const;
-    bool ensureSequenceLoaded(const Molecule& mrna) const;
+    // Load sequence into out param; handles built-ins, file, and network. Updates missing cache.
+    bool loadSequence(const Molecule& mrna, std::string& outSequence) const;
     void loadMissingCache(Species species) const;
     void saveMissingCache(Species species) const;
     bool isMarkedMissing(const Molecule& mrna) const;
     void markMissing(const Molecule& mrna) const;
     void markFound(const Molecule& mrna) const;
     bool ensureGeneDataComputed(const Molecule& mrna) const;
-
-    static std::string makeKey(Species species, const std::string& geneName);
 
     // Helper: map codon (3 chars) to charged tRNA ID
     static StringDict::ID codonToChargedTrnaId(const std::string &codon);

@@ -75,6 +75,22 @@ GeneWiki::GeneWiki()
     // PERICENTRIN has no direct worm ortholog; prefer spd-2 or spd-5 depending on intent
     // Default to spd-2 as a scaffold component for sequence retrieval
     m_lookupAliases[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "spd-2";
+
+    // Human aliases for generic names in missing cache
+    m_lookupAliases[Molecule(StringDict::ID::PLK_1,          ChemicalType::MRNA, Species::HUMAN)] = "PLK1";
+    m_lookupAliases[Molecule(StringDict::ID::PLK_4,          ChemicalType::MRNA, Species::HUMAN)] = "PLK4";
+    m_lookupAliases[Molecule(StringDict::ID::CDK_1,          ChemicalType::MRNA, Species::HUMAN)] = "CDK1";
+    m_lookupAliases[Molecule(StringDict::ID::CDK_2,          ChemicalType::MRNA, Species::HUMAN)] = "CDK2";
+    m_lookupAliases[Molecule(StringDict::ID::CYB_1,          ChemicalType::MRNA, Species::HUMAN)] = "CCNB1";
+    m_lookupAliases[Molecule(StringDict::ID::CCE_1,          ChemicalType::MRNA, Species::HUMAN)] = "CCNE1";
+    m_lookupAliases[Molecule(StringDict::ID::PAR_3,          ChemicalType::MRNA, Species::HUMAN)] = "PARD3";
+    m_lookupAliases[Molecule(StringDict::ID::PKC_3,          ChemicalType::MRNA, Species::HUMAN)] = "PRKCI";
+    m_lookupAliases[Molecule(StringDict::ID::MEX_3,          ChemicalType::MRNA, Species::HUMAN)] = "MEX3A";
+    m_lookupAliases[Molecule(StringDict::ID::SKN_1,          ChemicalType::MRNA, Species::HUMAN)] = "NFE2L2";
+    m_lookupAliases[Molecule(StringDict::ID::PAL_1,          ChemicalType::MRNA, Species::HUMAN)] = "CDX2";
+    m_lookupAliases[Molecule(StringDict::ID::GAMMA_TUBULIN,  ChemicalType::MRNA, Species::HUMAN)] = "TUBG1";
+    m_lookupAliases[Molecule(StringDict::ID::PERICENTRIN,    ChemicalType::MRNA, Species::HUMAN)] = "PCNT";
+    m_lookupAliases[Molecule(StringDict::ID::NINEIN,         ChemicalType::MRNA, Species::HUMAN)] = "NIN";
 }
 
 GeneWiki& GeneWiki::getInstance()
@@ -277,16 +293,11 @@ bool GeneWiki::fetchSequenceFromPublicDb(const Molecule& mrna, std::string& outS
     return false;
 }
 
-bool GeneWiki::ensureSequenceLoaded(const Molecule& mrna) const
+bool GeneWiki::loadSequence(const Molecule& mrna, std::string& outSequence) const
 {
     assert(mrna.getType() == ChemicalType::MRNA);
     const Species species = mrna.getSpecies();
     const std::string& geneName = mrna.getName();
-
-    const std::string strKey = makeKey(species, geneName);
-    auto it = m_sequences.find(strKey);
-    if (it != m_sequences.end())
-        return true;
 
     // If previously marked missing, skip fetch attempts
     if (isMarkedMissing(mrna))
@@ -299,13 +310,13 @@ bool GeneWiki::ensureSequenceLoaded(const Molecule& mrna) const
     // Built-in tRNA sequences: short-circuit loading for tRNA genes
     if (getBuiltinTrnaSequence(mrna.getID(), seq))
     {
-        m_sequences[strKey] = std::move(seq);
+        outSequence = std::move(seq);
         markFound(mrna);
         return true;
     }
     if (loadSequenceFromFile(p, seq))
     {
-        m_sequences[strKey] = std::move(seq);
+        outSequence = std::move(seq);
         // ensure not marked missing anymore
         markFound(mrna);
         return true;
@@ -323,7 +334,7 @@ bool GeneWiki::ensureSequenceLoaded(const Molecule& mrna) const
     {
         LOG_WARN("Failed to save gene file: %s", p.string().c_str());
     }
-    m_sequences[strKey] = std::move(seq);
+    outSequence = std::move(seq);
     markFound(mrna);
     return true;
 }
@@ -364,9 +375,9 @@ bool GeneWiki::ensureGeneDataComputed(const Molecule& mrna) const
     const Molecule keyMol = mrna;
     if (m_geneData.find(keyMol) != m_geneData.end())
         return true;
-    if (!ensureSequenceLoaded(keyMol))
+    std::string seq;
+    if (!loadSequence(keyMol, seq))
         return false;
-    const std::string &seq = m_sequences[makeKey(mrna.getSpecies(), mrna.getName())];
     std::map<StringDict::ID, uint32_t> trnaCounts;
     for (size_t i = 0; i + 2 < seq.size(); i += 3)
     {
@@ -378,6 +389,7 @@ bool GeneWiki::ensureGeneDataComputed(const Molecule& mrna) const
         trnaCounts[trnaId] += 1u;
     }
     GeneData data;
+    data.m_sequence = seq;
     data.m_trnaRequirements.reserve(trnaCounts.size());
     for (const auto &kv : trnaCounts)
     {
@@ -388,10 +400,7 @@ bool GeneWiki::ensureGeneDataComputed(const Molecule& mrna) const
     return true;
 }
 
-std::string GeneWiki::makeKey(Species species, const std::string& geneName)
-{
-    return (species == Species::C_ELEGANS ? std::string("cel::") : std::string("human::")) + geneName;
-}
+// makeKey removed: sequences are keyed by Molecule
 
 void GeneWiki::loadMissingCache(Species species) const
 {
