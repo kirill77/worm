@@ -21,6 +21,8 @@ private:
     mutable std::unordered_map<Molecule, GeneData> m_geneData;  // keyed by mRNA molecule (species-aware)
     // Persistent negative cache of missing sequences (keyed by mRNA molecule, species-aware)
     mutable std::unordered_set<Molecule> m_missingSequenceKeys;
+    // Species-specific alias for public DB lookup: map mRNA molecule → canonical symbol/ID
+    mutable std::unordered_map<Molecule, std::string> m_lookupAliases;
 
     // IO helpers
     std::filesystem::path getGenesFolder() const;
@@ -30,32 +32,28 @@ private:
     static std::string sanitizeGeneNameForFile(const std::string& geneName);
     bool loadSequenceFromFile(const std::filesystem::path& filePath, std::string& outSequence) const;
     bool saveSequenceToFile(const std::filesystem::path& filePath, const std::string& sequence) const;
-    bool fetchSequenceFromPublicDb(Species species, const std::string& geneName, std::string& outSequence) const;
-    bool ensureSequenceLoaded(Species species, const std::string& geneName) const;
+    // Public DB fetch now takes Molecule for species-safe lookup
+    bool fetchSequenceFromPublicDb(const Molecule& mrna, std::string& outSequence) const;
+    // Resolve species-specific lookup name; Molecule overload is the only variant
+    std::string resolveLookupName(const Molecule& mrna) const;
+    bool ensureSequenceLoaded(const Molecule& mrna) const;
     void loadMissingCache(Species species) const;
     void saveMissingCache(Species species) const;
-    bool isMarkedMissing(Species species, const std::string& geneName) const;
-    void markMissing(Species species, const std::string& geneName) const;
-    void markFound(Species species, const std::string& geneName) const;
-    bool ensureGeneDataComputed(Species species, const std::string& geneName) const;
-    void initializeDefaultGeneData();
+    bool isMarkedMissing(const Molecule& mrna) const;
+    void markMissing(const Molecule& mrna) const;
+    void markFound(const Molecule& mrna) const;
+    bool ensureGeneDataComputed(const Molecule& mrna) const;
+
     static std::string makeKey(Species species, const std::string& geneName);
-    
-    // Private constructor for singleton pattern
-    GeneWiki();
+
+    // Helper: map codon (3 chars) to charged tRNA ID
+    static StringDict::ID codonToChargedTrnaId(const std::string &codon);
 
 public:
-    // Singleton access
+    GeneWiki();
     static GeneWiki& getInstance();
 
-    // Delete copy constructor and assignment operator
-    GeneWiki(const GeneWiki&) = delete;
-    GeneWiki& operator=(const GeneWiki&) = delete;
-
-    // Get precomputed GeneData for a gene (computed on-demand from sequence)
+    // Accessors for gene data (charged tRNA requirements per protein)
     const std::vector<std::pair<Molecule, uint32_t>>& getGeneData(const Molecule& geneMolecule) const;
-    
-    // Check if GeneData exists for a gene
     bool hasGeneData(const Molecule& geneMolecule) const;
-    
 }; 

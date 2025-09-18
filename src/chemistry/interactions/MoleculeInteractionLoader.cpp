@@ -342,37 +342,16 @@ std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::
 {
     std::vector<std::shared_ptr<TranslationInteraction>> interactions;
     
-    // Get all mRNA molecules by iterating through StringDict entries
+    // Get all mRNA molecules by iterating through gene IDs only
     // We'll create translation interactions for all molecules that have corresponding genes
-    for (int i = static_cast<int>(StringDict::ID::eUNKNOWN) + 1; 
-         i < static_cast<int>(StringDict::ID::ORGANELLE_END); 
+    for (int i = static_cast<int>(StringDict::ID::GENES_START); 
+         i < static_cast<int>(StringDict::ID::GENES_END); 
          ++i) {
         
         StringDict::ID id = static_cast<StringDict::ID>(i);
         const std::string& name = StringDict::idToString(id);
         
-        // Skip non-gene identifiers and placeholders
-        switch (id) {
-        // Nucleotides and ER placeholders
-        case StringDict::ID::ATP:
-        case StringDict::ID::ER_PROTEIN:
-        case StringDict::ID::ER_LIPID:
-            continue;
-        default: break;
-        }
-
-        // Skip phosphorylated forms
-        if (id == StringDict::ID::PAR_1_P || id == StringDict::ID::PAR_2_P || id == StringDict::ID::PAR_3_P)
-            continue;
-
-        // Skip complexes
-        if (id == StringDict::ID::PAR_3_PAR_6 || id == StringDict::ID::PAR_6_PKC_3 ||
-            id == StringDict::ID::PAR_1_CORTEX || id == StringDict::ID::PAR_2_CORTEX || id == StringDict::ID::PAR_3_CORTEX)
-            continue;
-
-        // Skip charged tRNAs; only base tRNA gene names should be considered for mRNA
-        if (name.find("-charged") != std::string::npos)
-            continue;
+        // No filtering needed: the iteration range includes only gene IDs
 
         // For each species, check if this molecule has GeneData (indicating it can be translated)
         for (int si = 0; si < static_cast<int>(Species::COUNT); ++si)

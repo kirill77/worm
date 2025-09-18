@@ -10,8 +10,11 @@ struct StringDict
     enum class ID {
         eUNKNOWN,
 
+        // Define contiguous gene range for scanning genes/mRNAs
+        GENES_START,
+
         // PAR proteins (polarity establishment)
-        PAR_1,
+        PAR_1 = GENES_START,
         PAR_2,
         PAR_3,
         PAR_6,
@@ -24,14 +27,6 @@ struct StringDict
         CCE_1,
         PLK_1,
         PLK_4,
-        
-        // Centrosome proteins
-        GAMMA_TUBULIN,
-        PERICENTRIN,
-        NINEIN,
-        
-        // Nucleotides
-        ATP,
         
         // tRNA genes (essential set for translation)
         // Start codon
@@ -65,6 +60,39 @@ struct StringDict
         TRNA_GLN_CAG,        // Glutamine  
         TRNA_ILE_ATC,        // Isoleucine
         
+        // Cell fate specification genes
+        MEX_3,
+        SKN_1,
+        PAL_1,
+        PIE_1,
+
+        // Centrosome structural proteins (genes)
+        GAMMA_TUBULIN,
+        PERICENTRIN,
+        NINEIN,
+
+        GENES_END,
+
+        // Non-gene molecules
+        // Nucleotides
+        ATP,
+
+        // Endoplasmic reticulum molecules
+        ER_PROTEIN,        // ER-synthesized proteins
+        ER_LIPID,          // ER-synthesized lipids
+
+        // Phosphorylated PAR proteins
+        PAR_1_P,          // Phosphorylated PAR-1
+        PAR_2_P,          // Phosphorylated PAR-2
+        PAR_3_P,          // Phosphorylated PAR-3
+
+        // Protein complexes
+        PAR_3_PAR_6,      // PAR-3:PAR-6 complex
+        PAR_6_PKC_3,      // PAR-6:PKC-3 complex
+        PAR_1_CORTEX,     // PAR-1:CORTEX complex
+        PAR_2_CORTEX,     // PAR-2:CORTEX complex
+        PAR_3_CORTEX,     // PAR-3:CORTEX complex
+
         // Charged tRNA variants (for distinguishing charged vs uncharged)
         // Start codon - charged
         TRNA_MET_ATG_CHARGED,
@@ -96,29 +124,7 @@ struct StringDict
         TRNA_ASN_AAC_CHARGED,
         TRNA_GLN_CAG_CHARGED,
         TRNA_ILE_ATC_CHARGED,
-        
-        // Cell fate specification genes
-        MEX_3,
-        SKN_1,
-        PAL_1,
-        PIE_1,
-        
-        // Endoplasmic reticulum molecules
-        ER_PROTEIN,        // ER-synthesized proteins
-        ER_LIPID,          // ER-synthesized lipids
-        
-        // Phosphorylated PAR proteins
-        PAR_1_P,          // Phosphorylated PAR-1
-        PAR_2_P,          // Phosphorylated PAR-2
-        PAR_3_P,          // Phosphorylated PAR-3
-        
-        // Protein complexes
-        PAR_3_PAR_6,      // PAR-3:PAR-6 complex
-        PAR_6_PKC_3,      // PAR-6:PKC-3 complex
-        PAR_1_CORTEX,     // PAR-1:CORTEX complex
-        PAR_2_CORTEX,     // PAR-2:CORTEX complex
-        PAR_3_CORTEX,     // PAR-3:CORTEX complex
-        
+
         // Organelle types (must be contiguous for vector indexing)
         ORGANELLE_START,
         ORGANELLE_NUCLEUS = ORGANELLE_START,
