@@ -10,6 +10,55 @@
 #include <sstream>
 #include <assert.h>
 
+namespace {
+    static std::string makeRepeatedCodonSequence(const char* codon, int repeats)
+    {
+        std::string s;
+        s.reserve(static_cast<size_t>(repeats) * 3u);
+        for (int i = 0; i < repeats; ++i)
+        {
+            s.push_back(codon[0]);
+            s.push_back(codon[1]);
+            s.push_back(codon[2]);
+        }
+        return s;
+    }
+
+    static bool getBuiltinTrnaSequence(StringDict::ID id, std::string& outSequence)
+    {
+        switch (id)
+        {
+        case StringDict::ID::TRNA_MET_ATG: outSequence = makeRepeatedCodonSequence("ATG", 25); return true;
+        case StringDict::ID::TRNA_GLY_GGA: outSequence = makeRepeatedCodonSequence("GGA", 25); return true;
+        case StringDict::ID::TRNA_GLY_GGT: outSequence = makeRepeatedCodonSequence("GGT", 25); return true;
+        case StringDict::ID::TRNA_ALA_GCA: outSequence = makeRepeatedCodonSequence("GCA", 25); return true;
+        case StringDict::ID::TRNA_ALA_GCC: outSequence = makeRepeatedCodonSequence("GCC", 25); return true;
+        case StringDict::ID::TRNA_LEU_CTG: outSequence = makeRepeatedCodonSequence("CTG", 25); return true;
+        case StringDict::ID::TRNA_LEU_CTC: outSequence = makeRepeatedCodonSequence("CTC", 25); return true;
+        case StringDict::ID::TRNA_SER_TCA: outSequence = makeRepeatedCodonSequence("TCA", 25); return true;
+        case StringDict::ID::TRNA_SER_TCG: outSequence = makeRepeatedCodonSequence("TCG", 25); return true;
+        case StringDict::ID::TRNA_VAL_GTG: outSequence = makeRepeatedCodonSequence("GTG", 25); return true;
+        case StringDict::ID::TRNA_VAL_GTC: outSequence = makeRepeatedCodonSequence("GTC", 25); return true;
+        case StringDict::ID::TRNA_PRO_CCA: outSequence = makeRepeatedCodonSequence("CCA", 25); return true;
+        case StringDict::ID::TRNA_THR_ACA: outSequence = makeRepeatedCodonSequence("ACA", 25); return true;
+        case StringDict::ID::TRNA_ASP_GAC: outSequence = makeRepeatedCodonSequence("GAC", 25); return true;
+        case StringDict::ID::TRNA_GLU_GAG: outSequence = makeRepeatedCodonSequence("GAG", 25); return true;
+        case StringDict::ID::TRNA_LYS_AAG: outSequence = makeRepeatedCodonSequence("AAG", 25); return true;
+        case StringDict::ID::TRNA_ARG_CGA: outSequence = makeRepeatedCodonSequence("CGA", 25); return true;
+        case StringDict::ID::TRNA_HIS_CAC: outSequence = makeRepeatedCodonSequence("CAC", 25); return true;
+        case StringDict::ID::TRNA_PHE_TTC: outSequence = makeRepeatedCodonSequence("TTC", 25); return true;
+        case StringDict::ID::TRNA_TYR_TAC: outSequence = makeRepeatedCodonSequence("TAC", 25); return true;
+        case StringDict::ID::TRNA_CYS_TGC: outSequence = makeRepeatedCodonSequence("TGC", 25); return true;
+        case StringDict::ID::TRNA_TRP_TGG: outSequence = makeRepeatedCodonSequence("TGG", 25); return true;
+        case StringDict::ID::TRNA_ASN_AAC: outSequence = makeRepeatedCodonSequence("AAC", 25); return true;
+        case StringDict::ID::TRNA_GLN_CAG: outSequence = makeRepeatedCodonSequence("CAG", 25); return true;
+        case StringDict::ID::TRNA_ILE_ATC: outSequence = makeRepeatedCodonSequence("ATC", 25); return true;
+        default: break;
+        }
+        return false;
+    }
+}
+
 GeneWiki::GeneWiki()
 {
     // Load caches for all known species
@@ -247,6 +296,13 @@ bool GeneWiki::ensureSequenceLoaded(const Molecule& mrna) const
 
     const std::filesystem::path p = getGeneFilePath(species, geneName);
     std::string seq;
+    // Built-in tRNA sequences: short-circuit loading for tRNA genes
+    if (getBuiltinTrnaSequence(mrna.getID(), seq))
+    {
+        m_sequences[strKey] = std::move(seq);
+        markFound(mrna);
+        return true;
+    }
     if (loadSequenceFromFile(p, seq))
     {
         m_sequences[strKey] = std::move(seq);
