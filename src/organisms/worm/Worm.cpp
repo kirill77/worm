@@ -268,7 +268,7 @@ Worm::Worm()
     
     auto chromosomes = initializeGenes();
     auto pInternalMedium = createZygoteMedium();
-    auto pCell = Cell::createCell(pInternalMedium, chromosomes);
+    auto pCell = Cell::createCell(pInternalMedium, chromosomes, CellType::Zygote, Species::C_ELEGANS);
     
     // Simulate fertilization by adding a centrosome from the sperm
     // In C. elegans, the egg lacks a centrosome and receives one from the sperm
@@ -303,8 +303,8 @@ void Worm::setupDataCollector()
     );
     
     // Add collection points for anterior and posterior positions
-    float3 anteriorPos(0.0f, 1.f, 0.0f);  // Anterior position
-    float3 posteriorPos(0.0f, -1.f, 0.0f); // Posterior position
+    float3 anteriorPos(0.0f, 0.9f, 0.0f);  // Align with cortex binding grid
+    float3 posteriorPos(0.0f, -0.9f, 0.0f); // Align with cortex binding grid
     float3 centerPos(0.0f, 0.0f, 0.0f);   // Center position for centrosome tracking
     
     // Get membrane-bound protein names using the utility function
@@ -312,35 +312,34 @@ void Worm::setupDataCollector()
     std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
     std::string bindingSiteCortex = StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX);
 
-    // Add collection points with specific molecules to track
+    // Collect only the data necessary to debug PAR polarization
+    // Anterior collection
     m_pDataCollector->addCollectionPoint(
-        posteriorPos,
-        "Posterior", 
-        { 
-            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS),  // Target protein
-            Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN, Species::C_ELEGANS),          // Transcriptional regulator 1
-            Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN, Species::C_ELEGANS),          // Transcriptional regulator 2 (CyclinE)
-            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)      // γ-tubulin mRNA (precursor)
+        anteriorPos,
+        "Anterior",
+        {
+            // Membrane-bound forms (generic keys as produced by interactions)
+            Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
+            // Cytosolic pools (species-specific as initialized/translated)
+            Molecule(StringDict::ID::PAR_3, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PAR_2, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PAR_6, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PKC_3, ChemicalType::PROTEIN, Species::C_ELEGANS)
         }
     );
-    
-    // Add a second collection point to track ALL tRNAs required for GAMMA_TUBULIN translation
-    // GAMMA_TUBULIN sequence: ATG-GCC-GTC-GAA-TTC-CTG-ACC
+
+    // Posterior collection
     m_pDataCollector->addCollectionPoint(
-        centerPos,
-        "Center", 
-        { 
-            // GAMMA_TUBULIN required charged tRNAs (all 7 codons)
-            Molecule(StringDict::ID::TRNA_MET_ATG_CHARGED, ChemicalType::TRNA), // ATG codon
-            Molecule(StringDict::ID::TRNA_ALA_GCC_CHARGED, ChemicalType::TRNA), // GCC codon
-            Molecule(StringDict::ID::TRNA_VAL_GTC_CHARGED, ChemicalType::TRNA), // GTC codon
-            Molecule(StringDict::ID::TRNA_GLU_GAG_CHARGED, ChemicalType::TRNA), // GAA codon  
-            Molecule(StringDict::ID::TRNA_PHE_TTC_CHARGED, ChemicalType::TRNA), // TTC codon
-            Molecule(StringDict::ID::TRNA_LEU_CTG_CHARGED, ChemicalType::TRNA), // CTG codon
-            Molecule(StringDict::ID::TRNA_THR_ACA_CHARGED, ChemicalType::TRNA), // ACC codon
-            // Supporting mRNAs
-            Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA, Species::C_ELEGANS),              // CDK-2 mRNA
-            Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA, Species::C_ELEGANS)               // CCE-1 mRNA
+        posteriorPos,
+        "Posterior",
+        {
+            Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PAR_3, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PAR_2, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PAR_6, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::PKC_3, ChemicalType::PROTEIN, Species::C_ELEGANS)
         }
     );
 }
@@ -379,10 +378,11 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
     
     // Check membrane-bound proteins
-    double anteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN), anteriorPos);
-    double posteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN), posteriorPos);
-    double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN), anteriorPos);
-    double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN), posteriorPos);
+    Species species = Species::C_ELEGANS;
+    double anteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, species), anteriorPos);
+    double posteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, species), posteriorPos);
+    double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), anteriorPos);
+    double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), posteriorPos);
     
     // Check during polarity establishment (0-6 minutes)
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {

@@ -32,8 +32,12 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
     // Binding requires ATP
     double requiredATP = boundAmount * m_atpCost;
     
-    // Also check for dissociation of existing complexes
-    auto complexIt = cell.m_molecules.find(Molecule(m_complexId, ChemicalType::PROTEIN));
+    // Also check for dissociation of existing complexes (species-aware)
+    Species species = m_firstProtein.getSpecies();
+    // Both participants should share species in our loader; keep a defensive check
+    assert(species == m_secondProtein.getSpecies());
+    Molecule complexKey(m_complexId, ChemicalType::PROTEIN, species);
+    auto complexIt = cell.m_molecules.find(complexKey);
     double complexAmount = (complexIt != cell.m_molecules.end()) ? complexIt->second.m_fNumber : 0.0;
     
     // Calculate dissociation (simpler first-order kinetics)
@@ -70,7 +74,7 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         assert(secondProteinIt->second.m_fNumber >= GridCell::MIN_RESOURCE_LEVEL); // Assert protein level doesn't go below minimum
         
         // Add to complex population
-        auto& complexPop = cell.getOrCreateMolPop(Molecule(m_complexId, ChemicalType::PROTEIN));
+        auto& complexPop = cell.getOrCreateMolPop(complexKey);
         complexPop.m_fNumber += boundAmount;
 
         // update binding surface

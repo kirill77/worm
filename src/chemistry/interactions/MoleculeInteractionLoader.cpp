@@ -324,11 +324,27 @@ std::vector<std::shared_ptr<ComplexFormationInteraction>> MoleculeInteractionLoa
                 saturationConstant,
                 StringDict::stringToId(complexName)
             };
-            
-            // Create and add interaction (create Molecule objects for proteins)
-            interactions.push_back(std::make_shared<ComplexFormationInteraction>(
-                Molecule(StringDict::stringToId(firstProtein), ChemicalType::PROTEIN), 
-                Molecule(StringDict::stringToId(secondProtein), ChemicalType::PROTEIN), params));
+
+            // Determine IDs for proteins
+            StringDict::ID firstId = StringDict::stringToId(firstProtein);
+            StringDict::ID secondId = StringDict::stringToId(secondProtein);
+
+            // Helper to check if an ID represents an organelle/binding site
+            auto isOrganelle = [](StringDict::ID id) {
+                return id >= StringDict::ID::ORGANELLE_START && id <= StringDict::ID::ORGANELLE_END;
+            };
+
+            // Create interactions species-aware: for each species except GENERIC
+            for (int si = 0; si < static_cast<int>(Species::COUNT); ++si)
+            {
+                Species species = static_cast<Species>(si);
+                if (species == Species::GENERIC)
+                    continue;
+
+                Molecule firstMol(firstId, ChemicalType::PROTEIN, species);
+                Molecule secondMol(secondId, ChemicalType::PROTEIN, species);
+                interactions.push_back(std::make_shared<ComplexFormationInteraction>(firstMol, secondMol, params));
+            }
         }
         catch (const std::exception& e) {
             LOG_ERROR("Error parsing complex formation interaction: %s - %s", line.c_str(), e.what());

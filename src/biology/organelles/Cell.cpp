@@ -11,19 +11,21 @@
 
 std::shared_ptr<Cell> Cell::createCell(std::shared_ptr<Medium> pInternalMedium,
                                      const std::vector<Chromosome>& chromosomes, 
-                                     CellType type)
+                                     CellType type,
+                                     Species species)
 {
-    auto cell = std::shared_ptr<Cell>(new Cell(pInternalMedium, chromosomes, type));
+    auto cell = std::shared_ptr<Cell>(new Cell(pInternalMedium, chromosomes, type, species));
     cell->initializeOrganelles();
     cell->initializeCortex();
     return cell;
 }
 
-Cell::Cell(std::shared_ptr<Medium> pInternalMedium, const std::vector<Chromosome>& chromosomes, CellType type)
+Cell::Cell(std::shared_ptr<Medium> pInternalMedium, const std::vector<Chromosome>& chromosomes, CellType type, Species species)
     : m_pInternalMedium(pInternalMedium)
     , m_cellCycleState(CellCycleState::INTERPHASE)
     , m_type(type)
     , m_chromosomes(chromosomes)
+    , m_species(species)
     , m_pOrganelles(static_cast<size_t>(StringDict::ID::ORGANELLE_END) - static_cast<size_t>(StringDict::ID::ORGANELLE_START))
 {
     // Organelles will be initialized in initializeOrganelles() and initializeCortex()

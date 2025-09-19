@@ -6,6 +6,7 @@
 #include "CellTypes.h"
 #include "Chromosome.h"
 #include "chemistry/molecules/StringDict.h"
+#include "chemistry/molecules/Molecule.h"
 
 enum class CellCycleState
 {
@@ -39,6 +40,7 @@ private:
     CellCycleState m_cellCycleState;
     CellType m_type;  // Store type just for spindle creation
     std::vector<Chromosome> m_chromosomes;  // Store chromosomes for delayed organelle creation
+    Species m_species = Species::GENERIC;   // Biological species of the cell
 
     // Helper functions
     void checkCellCycleTransitions();
@@ -54,16 +56,19 @@ private:
     }
 
     // Private constructor
-    Cell(std::shared_ptr<Medium> pInternalMedium, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote);
+    Cell(std::shared_ptr<Medium> pInternalMedium, const std::vector<Chromosome>& chromosomes, CellType type = CellType::Zygote, Species species = Species::GENERIC);
 
 public:
     // Static factory method to create a cell
     static std::shared_ptr<Cell> createCell(std::shared_ptr<Medium> pInternalMedium,
                                           const std::vector<Chromosome>& chromosomes, 
-                                          CellType type = CellType::Zygote);
+                                          CellType type = CellType::Zygote,
+                                          Species species = Species::GENERIC);
     
     void update(double fDt);
     CellCycleState getCellCycleState() const { return m_cellCycleState; }
+
+    Species getSpecies() const { return m_species; }
     
     // Access to internal medium
     Medium& getInternalMedium() const { return *m_pInternalMedium; }

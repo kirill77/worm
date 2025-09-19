@@ -59,8 +59,9 @@ bool Cortex::initializeBindingSites(double totalAmount)
                     (float)z / (sampleCount/2)
                 );
                 
-                // Create binding site protein and add to the medium
-                MPopulation bindingSites(Molecule(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN), amountPerPosition);
+                // Create species-specific binding site protein and add to the medium
+                Species species = pCell->getSpecies();
+                MPopulation bindingSites(Molecule(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN, species), amountPerPosition);
                 bindingSites.bindTo(shared_from_this());
                 internalMedium.addMolecule(bindingSites, normalizedPos);
             }
