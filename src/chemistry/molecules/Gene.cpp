@@ -14,7 +14,7 @@ std::shared_ptr<MPopulation> Gene::transcribe(double dt) const
     std::normal_distribution<> noise(1.0, 0.1); // 10% noise
     mRNAAmount *= noise(gen);
 
-    // Create new RNA molecule population
-    Molecule rnaMolecule(m_id, ChemicalType::MRNA);
+    // Create new RNA molecule population (species-aware)
+    Molecule rnaMolecule(m_id, ChemicalType::MRNA, m_species);
     return std::make_shared<MPopulation>(rnaMolecule, mRNAAmount);
 } 

@@ -11,11 +11,12 @@ private:
     StringDict::ID m_id;
     double m_fExpressionRate; // Rate of transcription
     double m_fBasalLevel;     // Basal expression level
+    Species m_species;        // Biological species for this gene
 
 public:
-    Gene(StringDict::ID id, double expressionRate = 1.0, double basalLevel = 0.1)
+    Gene(StringDict::ID id, double expressionRate = 1.0, double basalLevel = 0.1, Species species = Species::GENERIC)
         : m_id(id),
-          m_fExpressionRate(expressionRate), m_fBasalLevel(basalLevel) {}
+          m_fExpressionRate(expressionRate), m_fBasalLevel(basalLevel), m_species(species) {}
 
     // Getters
     std::string getName() const { return StringDict::idToString(m_id); }

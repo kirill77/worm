@@ -16,10 +16,16 @@ class DNA
 private:
     std::vector<std::shared_ptr<Gene>> m_pGenes;
     std::map<StringDict::ID, std::shared_ptr<Gene>> m_geneMap; // Quick lookup by ID
+    Species m_species = Species::GENERIC;
 
 public:
+    DNA() = default;
+    explicit DNA(Species species) : m_species(species) {}
+
     // Add a gene to the DNA
     void addGene(StringDict::ID id, double expressionRate = 1.0, double basalLevel = 0.1);
+
+    Species getSpecies() const { return m_species; }
 
     // Get a gene by ID
     std::shared_ptr<Gene> getGene(StringDict::ID id) const;

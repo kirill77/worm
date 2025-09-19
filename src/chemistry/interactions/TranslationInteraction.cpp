@@ -83,7 +83,7 @@ bool TranslationInteraction::apply(GridCell& cell, double dt, ResourceDistributo
     consumeTRNAs(cell, geneTRNAs, actualProteinAmount);
     
     // Create the protein
-    Molecule protein(m_mRNA.getID(), ChemicalType::PROTEIN);  // Same ID but different type
+    Molecule protein(m_mRNA.getID(), ChemicalType::PROTEIN, m_mRNA.getSpecies());  // Preserve species
     Population& proteinPop = cell.getOrCreateMolPop(protein);
     proteinPop.m_fNumber += actualProteinAmount;
     

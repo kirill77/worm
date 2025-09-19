@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iterator>
 #include <filesystem>
+#include <vector>
 
 // Initialize static members
 std::unordered_map<Molecule, MolInfo> MoleculeWiki::m_moleculesInfo;
@@ -190,107 +191,107 @@ void MoleculeWiki::initializeTRNAInfo()
 
 void MoleculeWiki::initializeMRNAInfo()
 {
-    // Initialize mRNA molecules with their translation rates
+    // Initialize mRNA molecules with their translation rates for specific species only
     // Translation rates are in proteins/second/mRNA - biological range is 0.1-10.0 proteins per mRNA per second
-    
+    // Species: C. elegans
     // Cell fate specification mRNAs - critical for early development, high translation rates
-    m_moleculesInfo[Molecule(StringDict::ID::PIE_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::PIE_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("PIE-1 mRNA", "mRNA", 50000.0, "Germline specification mRNA", 1800.0, 2.0, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PAL_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::PAL_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("PAL-1 mRNA", "mRNA", 45000.0, "Posterior fate specification mRNA", 1800.0, 1.8, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::SKN_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::SKN_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("SKN-1 mRNA", "mRNA", 48000.0, "Endoderm specification mRNA", 1800.0, 2.2, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::MEX_3, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::MEX_3, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("MEX-3 mRNA", "mRNA", 46000.0, "Anterior fate specification mRNA", 1800.0, 1.5, 0.0);
     
     // Cell cycle mRNAs - essential for division timing
-    m_moleculesInfo[Molecule(StringDict::ID::CDK_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::CDK_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("CDK-1 mRNA", "mRNA", 40000.0, "Cyclin-dependent kinase mRNA", 2400.0, 3.0, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("CDK-2 mRNA", "mRNA", 38000.0, "CDK-2 transcriptional regulator mRNA", 2400.0, 2.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::CYB_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::CYB_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("CYB-1 mRNA", "mRNA", 42000.0, "Cyclin B mRNA", 1500.0, 2.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("CCE-1 mRNA", "mRNA", 40000.0, "Cyclin E transcriptional regulator mRNA", 1800.0, 2.8, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PLK_1, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::PLK_1, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("PLK-1 mRNA", "mRNA", 38000.0, "Polo-like kinase mRNA", 2000.0, 2.8, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PLK_4, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::PLK_4, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("PLK-4 mRNA", "mRNA", 38000.0, "Polo-like kinase 4 mRNA", 2000.0, 2.2, 0.0);
 
     // Polarity establishment mRNAs (PAR proteins and PKC-3)
-    m_moleculesInfo[Molecule(StringDict::ID::PAR_1, ChemicalType::MRNA)] =
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_1, ChemicalType::MRNA, Species::C_ELEGANS)] =
         MolInfo("PAR-1 mRNA", "mRNA", 42000.0, "Polarity protein mRNA", 2400.0, 1.6, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PAR_2, ChemicalType::MRNA)] =
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_2, ChemicalType::MRNA, Species::C_ELEGANS)] =
         MolInfo("PAR-2 mRNA", "mRNA", 42000.0, "Polarity protein mRNA", 2400.0, 1.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PAR_3, ChemicalType::MRNA)] =
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_3, ChemicalType::MRNA, Species::C_ELEGANS)] =
         MolInfo("PAR-3 mRNA", "mRNA", 43000.0, "Polarity protein mRNA", 2400.0, 1.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PAR_6, ChemicalType::MRNA)] =
+    m_moleculesInfo[Molecule(StringDict::ID::PAR_6, ChemicalType::MRNA, Species::C_ELEGANS)] =
         MolInfo("PAR-6 mRNA", "mRNA", 41000.0, "Polarity protein mRNA", 2400.0, 1.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PKC_3, ChemicalType::MRNA)] =
+    m_moleculesInfo[Molecule(StringDict::ID::PKC_3, ChemicalType::MRNA, Species::C_ELEGANS)] =
         MolInfo("PKC-3 mRNA", "mRNA", 45000.0, "Atypical PKC mRNA", 2400.0, 1.3, 0.0);
     
     // Centrosome protein mRNAs - structural proteins, moderate translation
-    m_moleculesInfo[Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("γ-TUBULIN mRNA", "mRNA", 44000.0, "γ-tubulin mRNA", 3600.0, 1.2, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("PERICENTRIN mRNA", "mRNA", 52000.0, "Centrosome scaffold mRNA", 3600.0, 1.0, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::NINEIN, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::NINEIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("NINEIN mRNA", "mRNA", 50000.0, "Centrosome anchoring mRNA", 3600.0, 1.0, 0.0);
     
     // tRNA mRNAs - these encode the tRNA molecules themselves, low-moderate translation
     // Start codon tRNA
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_MET_ATG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_MET_ATG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Met-ATG mRNA", "mRNA", 25000.0, "Methionine tRNA gene mRNA", 7200.0, 0.8, 0.0);
     
     // Common amino acids tRNAs
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLY_GGA, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLY_GGA, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Gly-GGA mRNA", "mRNA", 25000.0, "Glycine tRNA gene mRNA", 7200.0, 0.6, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLY_GGT, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLY_GGT, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Gly-GGT mRNA", "mRNA", 25000.0, "Glycine tRNA gene mRNA", 7200.0, 0.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ALA_GCA, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ALA_GCA, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Ala-GCA mRNA", "mRNA", 25000.0, "Alanine tRNA gene mRNA", 7200.0, 0.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ALA_GCC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ALA_GCC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Ala-GCC mRNA", "mRNA", 25000.0, "Alanine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_LEU_CTG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_LEU_CTG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Leu-CTG mRNA", "mRNA", 25000.0, "Leucine tRNA gene mRNA", 7200.0, 0.7, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_LEU_CTC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_LEU_CTC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Leu-CTC mRNA", "mRNA", 25000.0, "Leucine tRNA gene mRNA", 7200.0, 0.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_SER_TCA, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_SER_TCA, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Ser-TCA mRNA", "mRNA", 25000.0, "Serine tRNA gene mRNA", 7200.0, 0.6, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_SER_TCG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_SER_TCG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Ser-TCG mRNA", "mRNA", 25000.0, "Serine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_VAL_GTG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_VAL_GTG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Val-GTG mRNA", "mRNA", 25000.0, "Valine tRNA gene mRNA", 7200.0, 0.6, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_VAL_GTC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_VAL_GTC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Val-GTC mRNA", "mRNA", 25000.0, "Valine tRNA gene mRNA", 7200.0, 0.4, 0.0);
     
     // Less common but essential amino acids tRNAs
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_PRO_CCA, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_PRO_CCA, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Pro-CCA mRNA", "mRNA", 25000.0, "Proline tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_THR_ACA, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_THR_ACA, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Thr-ACA mRNA", "mRNA", 25000.0, "Threonine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ASP_GAC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ASP_GAC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Asp-GAC mRNA", "mRNA", 25000.0, "Aspartic acid tRNA gene mRNA", 7200.0, 0.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLU_GAG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLU_GAG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Glu-GAG mRNA", "mRNA", 25000.0, "Glutamic acid tRNA gene mRNA", 7200.0, 0.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_LYS_AAG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_LYS_AAG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Lys-AAG mRNA", "mRNA", 25000.0, "Lysine tRNA gene mRNA", 7200.0, 0.5, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ARG_CGA, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ARG_CGA, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Arg-CGA mRNA", "mRNA", 25000.0, "Arginine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_HIS_CAC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_HIS_CAC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-His-CAC mRNA", "mRNA", 25000.0, "Histidine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_PHE_TTC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_PHE_TTC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Phe-TTC mRNA", "mRNA", 25000.0, "Phenylalanine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_TYR_TAC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_TYR_TAC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Tyr-TAC mRNA", "mRNA", 25000.0, "Tyrosine tRNA gene mRNA", 7200.0, 0.3, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_CYS_TGC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_CYS_TGC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Cys-TGC mRNA", "mRNA", 25000.0, "Cysteine tRNA gene mRNA", 7200.0, 0.3, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_TRP_TGG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_TRP_TGG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Trp-TGG mRNA", "mRNA", 25000.0, "Tryptophan tRNA gene mRNA", 7200.0, 0.3, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ASN_AAC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ASN_AAC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Asn-AAC mRNA", "mRNA", 25000.0, "Asparagine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLN_CAG, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_GLN_CAG, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Gln-CAG mRNA", "mRNA", 25000.0, "Glutamine tRNA gene mRNA", 7200.0, 0.4, 0.0);
-    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ILE_ATC, ChemicalType::MRNA)] = 
+    m_moleculesInfo[Molecule(StringDict::ID::TRNA_ILE_ATC, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("tRNA-Ile-ATC mRNA", "mRNA", 25000.0, "Isoleucine tRNA gene mRNA", 7200.0, 0.4, 0.0);
 }

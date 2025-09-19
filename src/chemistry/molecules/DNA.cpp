@@ -4,7 +4,7 @@
 
 void DNA::addGene(StringDict::ID id, double expressionRate, double basalLevel)
 {
-    auto gene = std::make_shared<Gene>(id, expressionRate, basalLevel);
+    auto gene = std::make_shared<Gene>(id, expressionRate, basalLevel, m_species);
     m_pGenes.push_back(gene);
     m_geneMap[id] = gene;
 }

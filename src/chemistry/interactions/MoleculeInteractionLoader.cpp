@@ -357,12 +357,15 @@ std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::
         for (int si = 0; si < static_cast<int>(Species::COUNT); ++si)
         {
             Species species = static_cast<Species>(si);
+            // Skip generic species: translation is species-specific only
+            if (species == Species::GENERIC)
+                continue;
             Molecule mRNACandidate(id, ChemicalType::MRNA, species);
             if (!GeneWiki::getInstance().hasGeneData(mRNACandidate))
                 continue;
 
-            // Get translation rate from MoleculeWiki (species-independent for now)
-            const auto& info = MoleculeWiki::getInfo(Molecule(id, ChemicalType::MRNA));
+            // Get translation rate from MoleculeWiki (species-aware)
+            const auto& info = MoleculeWiki::getInfo(mRNACandidate);
 
             // Create translation interaction parameters
             TranslationInteraction::Parameters params{

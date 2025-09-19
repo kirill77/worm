@@ -33,12 +33,12 @@ std::vector<Chromosome> Worm::initializeGenes()
     chromosomes.reserve(6);
 
     // Create DNA for each chromosome
-    auto pDNA1 = std::make_shared<DNA>();  // Chromosome I
-    auto pDNA2 = std::make_shared<DNA>();  // Chromosome II
-    auto pDNA3 = std::make_shared<DNA>();  // Chromosome III
-    auto pDNA4 = std::make_shared<DNA>();  // Chromosome IV
-    auto pDNA5 = std::make_shared<DNA>();  // Chromosome V
-    auto pDNA6 = std::make_shared<DNA>();  // Chromosome X
+    auto pDNA1 = std::make_shared<DNA>(Species::C_ELEGANS);  // Chromosome I
+    auto pDNA2 = std::make_shared<DNA>(Species::C_ELEGANS);  // Chromosome II
+    auto pDNA3 = std::make_shared<DNA>(Species::C_ELEGANS);  // Chromosome III
+    auto pDNA4 = std::make_shared<DNA>(Species::C_ELEGANS);  // Chromosome IV
+    auto pDNA5 = std::make_shared<DNA>(Species::C_ELEGANS);  // Chromosome V
+    auto pDNA6 = std::make_shared<DNA>(Species::C_ELEGANS);  // Chromosome X
 
     // Distribute genes across chromosomes (based on C. elegans genome)
     // Chromosome I - Cell fate and tRNA genes
@@ -290,10 +290,10 @@ void Worm::setupDataCollector()
         posteriorPos,
         "Posterior", 
         { 
-            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN),  // Target protein
-            Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN),          // Transcriptional regulator 1
-            Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN),          // Transcriptional regulator 2 (CyclinE)
-            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA)      // γ-tubulin mRNA (precursor)
+            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS),  // Target protein
+            Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN, Species::C_ELEGANS),          // Transcriptional regulator 1
+            Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN, Species::C_ELEGANS),          // Transcriptional regulator 2 (CyclinE)
+            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)      // γ-tubulin mRNA (precursor)
         }
     );
     
@@ -312,8 +312,8 @@ void Worm::setupDataCollector()
             Molecule(StringDict::ID::TRNA_LEU_CTG_CHARGED, ChemicalType::TRNA), // CTG codon
             Molecule(StringDict::ID::TRNA_THR_ACA_CHARGED, ChemicalType::TRNA), // ACC codon
             // Supporting mRNAs
-            Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA),              // CDK-2 mRNA
-            Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA)               // CCE-1 mRNA
+            Molecule(StringDict::ID::CDK_2, ChemicalType::MRNA, Species::C_ELEGANS),              // CDK-2 mRNA
+            Molecule(StringDict::ID::CCE_1, ChemicalType::MRNA, Species::C_ELEGANS)               // CCE-1 mRNA
         }
     );
 }
