@@ -160,6 +160,33 @@ void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
     MPopulation lysAAGCharged(Molecule(StringDict::ID::TRNA_LYS_AAG_CHARGED, ChemicalType::TRNA), 180.0);
     medium.addMolecule(lysAAGCharged, position);
     
+    // Arginine (required by γ-tubulin sequence in worm data)
+    MPopulation argCGACharged(Molecule(StringDict::ID::TRNA_ARG_CGA_CHARGED, ChemicalType::TRNA), 160.0);
+    medium.addMolecule(argCGACharged, position);
+
+    // Additional essentials observed in sequence requirements
+    // Histidine
+    MPopulation hisCACCharged(Molecule(StringDict::ID::TRNA_HIS_CAC_CHARGED, ChemicalType::TRNA), 140.0);
+    medium.addMolecule(hisCACCharged, position);
+    // Tyrosine
+    MPopulation tyrTACCharged(Molecule(StringDict::ID::TRNA_TYR_TAC_CHARGED, ChemicalType::TRNA), 120.0);
+    medium.addMolecule(tyrTACCharged, position);
+    // Cysteine
+    MPopulation cysTGCCharged(Molecule(StringDict::ID::TRNA_CYS_TGC_CHARGED, ChemicalType::TRNA), 120.0);
+    medium.addMolecule(cysTGCCharged, position);
+    // Tryptophan
+    MPopulation trpTGGCharged(Molecule(StringDict::ID::TRNA_TRP_TGG_CHARGED, ChemicalType::TRNA), 100.0);
+    medium.addMolecule(trpTGGCharged, position);
+    // Asparagine
+    MPopulation asnAACCharged(Molecule(StringDict::ID::TRNA_ASN_AAC_CHARGED, ChemicalType::TRNA), 140.0);
+    medium.addMolecule(asnAACCharged, position);
+    // Glutamine
+    MPopulation glnCAGCharged(Molecule(StringDict::ID::TRNA_GLN_CAG_CHARGED, ChemicalType::TRNA), 140.0);
+    medium.addMolecule(glnCAGCharged, position);
+    // Isoleucine
+    MPopulation ileATCCharged(Molecule(StringDict::ID::TRNA_ILE_ATC_CHARGED, ChemicalType::TRNA), 150.0);
+    medium.addMolecule(ileATCCharged, position);
+    
     // Aspartic acid (negatively charged)
     MPopulation aspGACCharged(Molecule(StringDict::ID::TRNA_ASP_GAC_CHARGED, ChemicalType::TRNA), 160.0);
     medium.addMolecule(aspGACCharged, position);
