@@ -1,0 +1,88 @@
+Goal
+- Implement cortex contractility and flows that drive PAR polarization using local interactions, matching early C. elegans zygote biology.
+
+Key biological stance (no secretion)
+- AIR-1 (Aurora A) is a kinase enriched at centrosomes/astral microtubules; it is not secreted.
+- The cortex “senses” nearby centrosome/MTs via local contact/proximity, which inhibits ECT-2 (RhoGEF) posteriorly → RHO-1↓ → contractility↓ → anterior cortical flows.
+
+Mechanisms to capture (minimal viable set first)
+- Cortex-local Rho module: ECT-2 (GEF) vs RhoGAP (CHIN-1 proxy) controls RHO-1 activity per cortex site
+- Contractility C derived from local RHO-1 activity; flows from ∇C
+- Lateral (2D) diffusion and advection of cortex-bound PARs
+- Mutual antagonism of PAR complexes (present): PAR-6:PKC-3 vs PAR-1/PAR-2, evaluated locally
+- MT-contact–dependent posterior reinforcement: boost PAR-2 binding and inhibit ECT-2 at contacted sites (phase 2)
+- CDC-42 module to recruit/activate PAR-6:PKC-3 anteriorly; posterior inhibition (phase 3)
+
+State variables
+- Cortex surface (2D over boundary cells or dedicated mesh):
+  - RHO-1 activity R(x) ∈ [0,1]
+  - ECT-2 activity E(x) and effective GAP activity G(x) (simple scalars per site)
+  - Contractility C(x) (dimensionless); Velocity v(x) tangential
+  - Bound densities: PAR-3:CORTEX, PAR-2:CORTEX, PAR-1:CORTEX, PAR-6:PKC-3
+  - Optional: CDC-42-GTP field A(x) (anterior high)
+- Cytosol (3D):
+  - Astral microtubules from the sperm centrosome; plus-end contact flags at cortex sites
+
+Local drivers (strictly local)
+- MT–cortex contact map M_contact(x): 1 if a plus-end contacts/nearby; else 0
+- Posterior inhibition at contact sites (examples):
+  - E_eff(x) = E_base · (1 − k_air1 · M_contact(x))
+  - or G_eff(x) = G_base + k_gap · M_contact(x)
+- Posterior reinforcement: increase PAR-2:CORTEX on-rate at contact sites
+
+Dynamics
+- Rho module at cortex (per surface site):
+  - dR/dt = k_gef · E_eff(x) · (1 − R) − k_gap_eff · R, with k_gap_eff ∝ G_eff(x)
+- Contractility and flows:
+  - C(x) = k_c · R(x) (clamp to [Cmin, Cmax])
+  - v(x) = −k_flow · ∇C(x) (flow from high to low contractility)
+- Bound PARs (surface advection–diffusion–reaction):
+  - ∂M/∂t = −∇·(M v) + D_s ∇²M + R_local(M; PKC-3, PAR-1, PAR-2)
+  - Local rate modifiers from M_contact (e.g., PAR-2 binding up at contact sites)
+
+Numerical scheme (explicit, stable)
+- Cortex representation: reuse boundary cells (e.g., |y|≈0.9) as surface layer initially; later switch to a proper spherical surface grid
+- Per time step:
+  1) Update MTs from centrosome; compute M_contact(x) on cortex
+  2) Update E_eff/G_eff from M_contact; integrate RHO-1: dR/dt
+  3) Compute C and v = −k_flow ∇C on the surface
+  4) Advect bound species (semi-Lagrangian or upwind)
+  5) Diffuse bound species laterally (Laplacian stencil)
+  6) Apply local reactions (phosphorylation/complexes) and cytosol↔surface binding/unbinding
+- CFL constraints: max(|v|)·dt/Δs < 0.5; D_s·dt/Δs² < 0.25
+
+Codebase integration points
+- New: CortexSurfaceGrid (surface fields: R, E, G, C, v, bound pools; API: updateRho(), computeContractilityAndFlow(), advect(), diffuse(), react(), exchange())
+- New: AstralMTs module (simple rays from centrosome with growth/shrink; contact queries against cortex surface cells)
+- Modify: Cortex.cpp to own/run CortexSurfaceGrid update sequence
+- Modify: Centrosome (spawn/manage MTs)
+- Keep GridDiffusion: unbound only; bound species move via surface mechanics
+- Optional: CDC42Module (surface field A(x) regulating PAR-6:PKC-3)
+
+Parameters (initial guesses; tune later)
+- Rho module: k_gef, k_gap, E_base, G_base, k_air1, k_gap (contact), R ∈ [0,1]
+- Contractility: k_c, Cmin, Cmax; Flow: k_flow
+- Surface diffusion D_s per species (PAR-3 > PAR-2 typical)
+- MTs: growth speed, catastrophe/rescue rates, max length, contact radius
+- PAR-2 reinforcement factor at contact
+
+Validation (DataCollector)
+- PAR-3:CORTEX and PAR-2:CORTEX at y=±0.9; compute A/P ratios
+- Fraction of cortex marked by M_contact; posterior domain size
+- Optional: mean |v| (flow speed) and RHO-1 posterior vs anterior
+
+Phased implementation
+- Phase 1: Rho + flows without explicit MTs (temporary seed)
+  1) Implement CortexSurfaceGrid and RHO-1 module (E_base/G_base only)
+  2) Compute C and v, add surface advection + diffusion for bound PARs
+  3) Use a small posterior seed region near centrosome to reduce E or increase G (no secretion)
+- Phase 2: Astral MTs and local contact coupling
+  4) Implement AstralMTs; compute M_contact(x) on cortex
+  5) Replace posterior seed with M_contact-driven E inhibition/G enhancement; add PAR-2 binding boost at contacts
+- Phase 3: CDC‑42/PKC‑3 anterior activation; refine antagonism localization
+  6) Add CDC-42 field A(x) with anterior-high pattern; couple to PAR-6:PKC-3 recruitment/activity
+  7) Tune parameters to literature A/P ratios, domain sizes, flow speeds (6–10 min)
+
+Notes
+- All effects are local by construction (MT–cortex contacts, cortex-only Rho module)
+- No secreted fields; AIR-1 acts via MT/centrosome proximity; contractility emerges from local RHO-1
