@@ -38,10 +38,11 @@ int main()
             bool cycleValid = pWorm->validateCellCycle(fCurrentTimeSec);
             bool divisionValid = pWorm->validateAsymmetricDivision(fCurrentTimeSec);
             bool centrosomeValid = pWorm->validateCentrosomeBehavior(fCurrentTimeSec);
+            bool gammaValid = pWorm->validateGammaTubulinLevels(fCurrentTimeSec);
             
             // Centrosome validation might fail initially before fertilization, so we'll be more lenient
             bool criticalValidationPassed = parValid && cycleValid && divisionValid;
-            bool allValidationPassed = criticalValidationPassed && centrosomeValid;
+            bool allValidationPassed = criticalValidationPassed && centrosomeValid && gammaValid;
             
             if (!criticalValidationPassed) {
                 allTestsPassed = false;
@@ -49,12 +50,13 @@ int main()
                 break;
             }
             
-            LOG_INFO("Validation at %.2f sec - PAR: %s, Cycle: %s, Division: %s, Centrosome: %s", 
+            LOG_INFO("Validation at %.2f sec - PAR: %s, Cycle: %s, Division: %s, Centrosome: %s, Gamma: %s", 
                      fCurrentTimeSec, 
                      parValid ? "PASS" : "FAIL",
                      cycleValid ? "PASS" : "FAIL", 
                      divisionValid ? "PASS" : "FAIL",
-                     centrosomeValid ? "PASS" : "FAIL");
+                     centrosomeValid ? "PASS" : "FAIL",
+                     gammaValid ? "PASS" : "FAIL");
         }
     }
 

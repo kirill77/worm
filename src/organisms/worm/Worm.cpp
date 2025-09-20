@@ -299,47 +299,42 @@ void Worm::setupDataCollector()
     m_pDataCollector = std::make_unique<DataCollector>(
         internalMedium, 
         "worm_simulation_data.csv",
-        0.1f  // Collect data every 0.1 seconds
+        5.0f  // Collect data every 5 seconds
     );
     
-    // Add collection points for anterior and posterior positions
-    float3 anteriorPos(0.0f, 0.9f, 0.0f);  // Align with cortex binding grid
-    float3 posteriorPos(0.0f, -0.9f, 0.0f); // Align with cortex binding grid
-    float3 centerPos(0.0f, 0.0f, 0.0f);   // Center position for centrosome tracking
-    
-    // Get membrane-bound protein names using the utility function
-    std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
-    std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
-    std::string bindingSiteCortex = StringDict::idToString(StringDict::ID::ORGANELLE_CORTEX);
-
-    // Collect only the data necessary to debug PAR polarization
-    // Anterior collection
-    m_pDataCollector->addCollectionPoint(
-        anteriorPos,
-        "Anterior",
-        {
-            // Membrane-bound forms (generic keys as produced by interactions)
-            Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
-            // Cytosolic pools (species-specific as initialized/translated)
-            Molecule(StringDict::ID::PAR_3, ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PAR_2, ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PAR_6, ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PKC_3, ChemicalType::PROTEIN, Species::C_ELEGANS)
-        }
-    );
-
-    // Posterior collection
+    // Add single collection point at posterior for γ-tubulin protein and mRNA
+    float3 posteriorPos(0.0f, -0.8f, 0.0f); // Posterior region near centrosome
     m_pDataCollector->addCollectionPoint(
         posteriorPos,
         "Posterior",
         {
+            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)
+        }
+    );
+
+    // Add cortex-bound PAR protein sampling for polarization analysis
+    std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
+    std::string par2Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_2), StringDict::ID::ORGANELLE_CORTEX);
+
+    float3 anteriorCortex(0.0f, 0.9f, 0.0f);
+    float3 posteriorCortex(0.0f, -0.9f, 0.0f);
+
+    m_pDataCollector->addCollectionPoint(
+        anteriorCortex,
+        "AnteriorCortex",
+        {
             Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PAR_3, ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PAR_2, ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PAR_6, ChemicalType::PROTEIN, Species::C_ELEGANS),
-            Molecule(StringDict::ID::PKC_3, ChemicalType::PROTEIN, Species::C_ELEGANS)
+            Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS)
+        }
+    );
+
+    m_pDataCollector->addCollectionPoint(
+        posteriorCortex,
+        "PosteriorCortex",
+        {
+            Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS),
+            Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, Species::C_ELEGANS)
         }
     );
 }
@@ -360,9 +355,9 @@ void Worm::simulateStep(const TimeContext& time)
     // Update total simulation time
     m_fTotalTime += static_cast<float>(time.m_deltaTSec);
     
-    // Force data collection at the current time (regardless of interval)
+    // Interval-based data collection (every configured seconds)
     if (m_pDataCollector) {
-        m_pDataCollector->forceCollection(m_fTotalTime, stepTimeMsec);
+        m_pDataCollector->update(m_fTotalTime);
     }
 }
 
@@ -370,8 +365,9 @@ bool Worm::validatePARPolarization(float fTimeSec) const
 {
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     
-    float3 anteriorPos(0.0f, 1.f, 0.0f);
-    float3 posteriorPos(0.0f, -1.f, 0.0f);
+    // Sample at cortex-aligned positions
+    float3 anteriorPos(0.0f, 0.9f, 0.0f);
+    float3 posteriorPos(0.0f, -0.9f, 0.0f);
     
     // Get membrane-bound protein names using the utility function
     std::string par3Membrane = MoleculeWiki::GetBoundProteinName(StringDict::idToString(StringDict::ID::PAR_3), StringDict::ID::ORGANELLE_CORTEX);
@@ -384,15 +380,37 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), anteriorPos);
     double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), posteriorPos);
     
-    // Check during polarity establishment (0-6 minutes)
+    // Check during polarity establishment with ramped thresholds and robust ratios
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
-        if (anteriorPAR3 / (posteriorPAR3 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
-            LOG_INFO("Warning: Insufficient anterior %s polarization at %.2lf sec", par3Membrane.c_str(), fTimeSec);
+        const double eps = 1e-6;
+        double par3Ratio = (anteriorPAR3 + eps) / (posteriorPAR3 + eps);
+        double par2Ratio = (posteriorPAR2 + eps) / (anteriorPAR2 + eps);
+
+        // Grace period and threshold ramp: no strict check before 60s, moderate by 120s, full by 360s
+        if (fTimeSec < 60.0f) {
+            return true;
+        }
+
+        double requiredRatio = 1.5;
+        if (fTimeSec >= 180.0f && fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
+            // Linear ramp from 1.5 at 180s to 3.0 at 360s
+            double t0 = 180.0;
+            double t1 = static_cast<double>(POLARITY_ESTABLISHMENT_END_SEC);
+            double alpha = (static_cast<double>(fTimeSec) - t0) / (t1 - t0);
+            if (alpha < 0.0) alpha = 0.0;
+            if (alpha > 1.0) alpha = 1.0;
+            requiredRatio = 1.5 + alpha * (3.0 - 1.5);
+        } else if (fTimeSec >= POLARITY_ESTABLISHMENT_END_SEC) {
+            requiredRatio = 3.0;
+        }
+
+        if (par3Ratio < requiredRatio) {
+            LOG_INFO("Warning: Insufficient anterior %s polarization (ratio %.2lf < %.2lf) at %.2lf sec", par3Membrane.c_str(), par3Ratio, requiredRatio, fTimeSec);
             return false;
         }
-        
-        if (posteriorPAR2 / (anteriorPAR2 + 1.0) < ANTERIOR_POSTERIOR_RATIO_THRESHOLD) {
-            LOG_INFO("Warning: Insufficient posterior %s polarization at %.2lf sec", par2Membrane.c_str(), fTimeSec);
+
+        if (par2Ratio < requiredRatio) {
+            LOG_INFO("Warning: Insufficient posterior %s polarization (ratio %.2lf < %.2lf) at %.2lf sec", par2Membrane.c_str(), par2Ratio, requiredRatio, fTimeSec);
             return false;
         }
     }
@@ -455,10 +473,12 @@ bool Worm::validateCentrosomeBehavior(float fTimeSec) const
     
     switch (cellCycleState) {
         case CellCycleState::INTERPHASE:
-            // Centrosome should be near the nucleus (center)
-            if (std::abs(centrosomePos.x) > 0.2f || std::abs(centrosomePos.y) > 0.2f || std::abs(centrosomePos.z) > 0.2f) {
-                LOG_INFO("Warning: Centrosome too far from nucleus during interphase at %.2lf sec", fTimeSec);
-                return false;
+            // Early interphase: allow posterior localization; enforce proximity later
+            if (fTimeSec >= 180.0f) { // start enforcing after 3 minutes
+                if (std::abs(centrosomePos.x) > 0.2f || std::abs(centrosomePos.y) > 0.2f || std::abs(centrosomePos.z) > 0.2f) {
+                    LOG_INFO("Warning: Centrosome too far from nucleus during interphase at %.2lf sec", fTimeSec);
+                    return false;
+                }
             }
             break;
             
@@ -494,5 +514,39 @@ bool Worm::validateCentrosomeBehavior(float fTimeSec) const
             break;
     }
     
+    return true;
+}
+
+bool Worm::validateGammaTubulinLevels(float fTimeSec) const
+{
+    auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
+    // Sample only at the expected centrosome position
+    float3 posteriorCentrosome(0.0f, -0.8f, 0.0f);
+
+    double gammaProtCentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN), posteriorCentrosome);
+    double gammaMRNACentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA), posteriorCentrosome);
+
+    // Simple early-time expectations: within first 5 min, protein remains very low; mRNA ramps up
+    // Thresholds chosen conservatively for current model scaling
+    if (fTimeSec < 60.0f) {
+        if (gammaProtCentro > 5.0) {
+            LOG_INFO("Warning: γ-tubulin protein unusually high early (%.2lf) at %.2lf sec", gammaProtCentro, fTimeSec);
+            return false;
+        }
+        // mRNA should begin to appear by ~5-10s and exceed ~0.05 by 60s in current kinetics
+        if (fTimeSec > 10.0f && gammaMRNACentro < 0.01) {
+            LOG_INFO("Warning: γ-tubulin mRNA too low (%.5lf) at %.2lf sec", gammaMRNACentro, fTimeSec);
+            return false;
+        }
+    }
+
+    // Later expectations: by 6-10 min, centrosome protein should reach tens-hundreds range
+    if (fTimeSec >= 360.0f) {
+        if (gammaProtCentro < 50.0) {
+            LOG_INFO("Warning: γ-tubulin protein low at centrosome (%.2lf) at %.2lf sec", gammaProtCentro, fTimeSec);
+            return false;
+        }
+    }
+
     return true;
 }

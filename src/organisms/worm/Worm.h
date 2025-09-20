@@ -29,5 +29,6 @@ public:
     bool validateCellCycle(float fTimeSec) const;
     bool validateAsymmetricDivision(float fTimeSec) const;
     bool validateCentrosomeBehavior(float fTimeSec) const;
+    bool validateGammaTubulinLevels(float fTimeSec) const;
 };
 

@@ -3,7 +3,7 @@
 #include "chemistry/molecules/Molecule.h"
 #include "utils/fileUtils/fileUtils.h"
 #include "utils/log/ILog.h"
-#include "HttpClient.h"
+#include "utils/HttpClient/HttpClient.h"
 #include "chemistry/molecules/SpeciesUtils.h"
 #include <stdexcept>
 #include <fstream>
