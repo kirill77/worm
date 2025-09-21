@@ -11,8 +11,6 @@ class CellSim
 {
 private:
     std::shared_ptr<Cell> m_pCell;
-    std::shared_ptr<BVHMesh> m_pCortexBVH;
-    std::shared_ptr<TensionSphere> m_pTensionSphere;
 
 public:
     // Constructor

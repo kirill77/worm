@@ -3,6 +3,8 @@
 #include "Medium.h"
 #include "Cell.h"
 #include "utils/log/ILog.h"
+#include "geometry/geomHelpers/BVHMesh.h"
+#include "physics/tensionSphere/TensionSphere.h"
 #include <algorithm>
 #include <cmath>
 
@@ -12,6 +14,14 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
 {
     // Set the binding surface type for cortex
     m_surfaceType = StringDict::ID::ORGANELLE_CORTEX;
+
+    // Initialize the tension sphere using the current cell volume
+    auto pOwnedCell = getCell();
+    if (pOwnedCell)
+    {
+        double volume = pOwnedCell->getInternalMedium().getVolumeMicroM();
+        m_pTensionSphere = std::make_shared<TensionSphere>(2, volume);
+    }
 }
 
 void Cortex::update(double fDtSec, Cell& cell)
@@ -19,7 +29,22 @@ void Cortex::update(double fDtSec, Cell& cell)
     // Update internal medium - its dynamics are independent of external medium
     cell.getInternalMedium().update(fDtSec);
     
-    // Note: TensionSphere physics is now handled by CellSim
+    // Maintain and advance tension sphere / BVH state for the cortex
+    // Assume tension sphere exists; update volume and advance simulation
+    double volume = cell.getInternalMedium().getVolumeMicroM();
+    m_pTensionSphere->setVolume(volume);
+    m_pTensionSphere->makeTimeStep(fDtSec);
+
+    if (!m_pCortexBVH)
+    {
+        auto pCortexMesh = m_pTensionSphere->getEdgeMesh();
+        if (pCortexMesh)
+        {
+            m_pCortexBVH = std::make_shared<BVHMesh>(pCortexMesh);
+            cell.setCortexBVH(m_pCortexBVH);
+        }
+    }
+
     // Note: In a more advanced implementation, this method could include:
     // - Membrane fluidity changes
     // - Lipid raft formation/movement

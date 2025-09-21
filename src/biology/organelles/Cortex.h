@@ -14,6 +14,8 @@ struct Cortex : public Organelle
 {
 private:
     double m_fThickness; // Membrane thickness in micrometers
+    std::shared_ptr<class BVHMesh> m_pCortexBVH;
+    std::shared_ptr<class TensionSphere> m_pTensionSphere;
 
 public:
     /**
@@ -47,4 +49,6 @@ public:
     // Getters and setters
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }
+
+    // No external accessors for simulation-owned resources; managed internally in update()
 }; 
