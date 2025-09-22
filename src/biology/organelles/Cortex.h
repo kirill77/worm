@@ -67,9 +67,9 @@ public:
 	// Map normalized coordinates [-1,1] to cortex surface world position via ray cast
 	float3 normalizedToWorld(const float3& normalizedPos);
 
-    // Getters and setters
-    double getThickness() const { return m_fThickness; }
-    void setThickness(double fThickness) { m_fThickness = fThickness; }
+private:
+    // Convert triangle index and barycentric coordinates to normalized [-1,1] coordinates
+    float3 baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const;
 
     // No external accessors for simulation-owned resources; managed internally in update()
 }; 

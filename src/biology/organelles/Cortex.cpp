@@ -144,6 +144,9 @@ bool Cortex::initializeBindingSites(double totalAmount)
         m_pBindingSites.push_back(site);
     }
 
+    // After creating binding sites, move their molecules into the simulation grid
+    transferBindingSiteMoleculesToMedium();
+
     return true;
 }
 
@@ -167,39 +170,27 @@ void Cortex::transferBindingSiteMoleculesToMedium()
 
     Medium& medium = pCell->getInternalMedium();
 
-    const uint32_t triangleCount = pMesh->getTriangleCount();
-    for (const auto& site : m_pBindingSites) {
+	const uint32_t triangleCount = pMesh->getTriangleCount();
+	for (auto& site : m_pBindingSites) {
         if (site.triangleIndex >= triangleCount)
             continue;
 
-        // Recover triangle vertex positions
-        uint3 tri = pMesh->getTriangleVertices(site.triangleIndex);
-        const float3 v0 = pMesh->getVertexPosition(tri.x);
-        const float3 v1 = pMesh->getVertexPosition(tri.y);
-        const float3 v2 = pMesh->getVertexPosition(tri.z);
+        // Compute normalized [-1,1] position on cortex from triangle + barycentric
+        const float3 pos = baryToNormalized(site.triangleIndex, site.barycentric);
 
-        // Compute world-space position via barycentric coordinates
-        const float3 pos = v0 * site.barycentric.x + v1 * site.barycentric.y + v2 * site.barycentric.z;
-
-        // Transfer each molecule population to the medium at this position
-        for (const auto& kv : site.m_bsMolecules) {
-            const Molecule& mol = kv.first;
-            const Population& pop = kv.second;
-            if (pop.m_fNumber <= 0.0)
-                continue;
-
-            MPopulation mpop(mol, pop.m_fNumber);
-            mpop.m_population.setBound(true);
-            medium.addMolecule(mpop, pos);
-        }
-    }
-
-    // Clear site molecules after transfer
-    for (auto& site : m_pBindingSites) {
-        for (auto& kv : site.m_bsMolecules) {
-            kv.second.m_fNumber = 0.0;
-            kv.second.setBound(false);
-        }
+		// Transfer each molecule population to the medium at this position and zero source immediately
+		for (auto& kv : site.m_bsMolecules) {
+			const Molecule& mol = kv.first;
+			Population& pop = kv.second;
+			if (pop.m_fNumber > 0.0) {
+				MPopulation mpop(mol, pop.m_fNumber);
+				mpop.m_population.setBound(true);
+				medium.addMolecule(mpop, pos);
+				// zero out source
+				pop.m_fNumber = 0.0;
+				pop.setBound(false);
+			}
+		}
     }
 }
 
@@ -267,4 +258,43 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
     float normalizedLength = length(normalizedPos);
     normalizedLength = std::min(1.0f, std::max(-1.0f, normalizedLength));
     return center + direction * (ray.m_closestDistance * normalizedLength);
+}
+
+float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const
+{
+    if (!m_pTensionSphere)
+        return float3(0,0,0);
+    auto pMesh = m_pTensionSphere->getEdgeMesh();
+    if (!pMesh)
+        return float3(0,0,0);
+    if (triangleIndex >= pMesh->getTriangleCount())
+        return float3(0,0,0);
+
+    const uint3 tri = pMesh->getTriangleVertices(triangleIndex);
+    const float3 v0 = pMesh->getVertexPosition(tri.x);
+    const float3 v1 = pMesh->getVertexPosition(tri.y);
+    const float3 v2 = pMesh->getVertexPosition(tri.z);
+
+    const float3 world = v0 * barycentric.x + v1 * barycentric.y + v2 * barycentric.z;
+
+    // Find the direction of the ray from the center of the cube to the point of interest
+    const box3 bbox = pMesh->getBox();
+    const float3 center = bbox.center();
+    const float3 half = (bbox.m_maxs - bbox.m_mins) * 0.5f;
+    float3 dirWorld = world - center;
+
+    // Convert to normalized cube space by scaling with half-extents
+    const float eps = 1e-8f;
+    float3 dN(
+        (half.x > eps) ? (dirWorld.x / half.x) : 0.0f,
+        (half.y > eps) ? (dirWorld.y / half.y) : 0.0f,
+        (half.z > eps) ? (dirWorld.z / half.z) : 0.0f
+    );
+
+    // For the intersection with the unit cube surface, scale so the max abs component is 1
+    float fMax = std::max(std::abs(dN.x), std::abs(dN.y));
+    fMax = std::max(fMax, std::abs(dN.z));
+    if (fMax < eps)
+        return float3(0,0,0);
+    return dN / fMax;
 }
