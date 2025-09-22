@@ -77,11 +77,11 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         auto& complexPop = cell.getOrCreateMolPop(complexKey);
         complexPop.m_fNumber += boundAmount;
 
-        // update binding surface
+        // update binding state
         assert(!firstProteinIt->second.isBound());
         if (secondProteinIt->second.isBound())
         {
-            complexPop.bindTo(secondProteinIt->second.getBindingSurface());
+            complexPop.setBound(true);
         }
     }
     

@@ -16,7 +16,7 @@ void Medium::addMolecule(const MPopulation& population, const float3& position)
     GridCell& gridCell = m_grid.findCell(position);
     Population& moleculePop = gridCell.getOrCreateMolPop(population.m_molecule);
 
-    moleculePop.bindTo(population.getBindingSurface());
+    moleculePop.setBound(population.isBound());
     moleculePop.m_fNumber += population.m_population.m_fNumber;
 }
 

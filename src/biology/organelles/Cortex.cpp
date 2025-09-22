@@ -136,7 +136,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
         site.barycentric = float3(static_cast<float>(b0), static_cast<float>(b1), static_cast<float>(b2));
         // Initialize population on this binding site
         Population pop(amountPerPosition);
-        pop.bindTo(shared_from_this());
+        pop.setBound(true);
         site.m_bsMolecules.emplace(cortexBindingMol, pop);
         m_pBindingSites.push_back(site);
     }

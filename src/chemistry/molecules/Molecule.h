@@ -37,39 +37,19 @@ class Population
 {
 public:
     double m_fNumber;     // Number of molecules in this population
+    bool m_isBound = false; // Whether this population is bound to some surface
     
     // Constructors
     Population() : m_fNumber(0.0) {}
     Population(double fNumber) : m_fNumber(fNumber) {}
     
     // Check if this population is bound to any surface
-    bool isBound() const
-    {
-        return !m_pBindingSurface.expired();
-    }
+    bool isBound() const { return m_isBound; }
 
-    // Get a shared_ptr to the binding surface (if bound)
-    std::shared_ptr<BindingSurface> getBindingSurface() const {
-        return m_pBindingSurface.lock();
-    }
-
-    // Bind this population to a surface
-    void bindTo(std::shared_ptr<BindingSurface> pSurface)
-    {
-        // if you want to bind to a different surface - have to unbind first
-        assert(m_pBindingSurface.expired() || m_pBindingSurface.lock() == pSurface);
-        m_pBindingSurface = pSurface;
-    }
-
-    // Unbind this population from its current surface
-    void unbind()
-    {
-        m_pBindingSurface.reset();
-    }
+    // Set binding state
+    void setBound(bool bound) { m_isBound = bound; }
 
 private:
-    // Weak pointer to the surface this population is bound to (if any)
-    std::weak_ptr<BindingSurface> m_pBindingSurface;
 };
 
 // Simple molecule class with optimized storage
@@ -131,9 +111,7 @@ public:
     
     // Delegate population methods for convenience
     bool isBound() const { return m_population.isBound(); }
-    std::shared_ptr<BindingSurface> getBindingSurface() const { return m_population.getBindingSurface(); }
-    void bindTo(std::shared_ptr<BindingSurface> pSurface) { m_population.bindTo(pSurface); }
-    void unbind() { m_population.unbind(); }
+    void setBound(bool bound) { m_population.setBound(bound); }
 };
 
 // Hash function specialization for std::unordered_map<Molecule, T>
