@@ -1,6 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+#include <cstdint>
+#include <unordered_map>
 #include "Medium.h"
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
@@ -12,10 +15,19 @@
  */
 struct Cortex : public Organelle
 {
+public:
+    struct BindingSite
+    {
+        uint32_t triangleIndex;
+        float3 barycentric;
+        std::unordered_map<Molecule, Population> m_bsMolecules;
+    };
+
 private:
     double m_fThickness; // Membrane thickness in micrometers
     std::shared_ptr<class BVHMesh> m_pCortexBVH;
     std::shared_ptr<class TensionSphere> m_pTensionSphere;
+    std::vector<BindingSite> m_pBindingSites;
 
 public:
     /**
