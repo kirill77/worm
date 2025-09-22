@@ -106,6 +106,10 @@ public:
     MPopulation(const Molecule& molecule, double fNumber)
         : m_molecule(molecule), m_population(fNumber) {}
     
+    // Constructor - initialize from an existing Population (preserves bound state)
+    MPopulation(const Molecule& molecule, const Population& population)
+        : m_molecule(molecule), m_population(population) {}
+    
     // Convenience methods that delegate to the appropriate member
     const std::string& getName() const { return m_molecule.getName(); }
     

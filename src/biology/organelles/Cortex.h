@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include "Medium.h"
+#include "BindingSite.h"
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
 
@@ -16,18 +17,14 @@
 struct Cortex : public Organelle
 {
 public:
-    struct BindingSite
-    {
-        uint32_t triangleIndex;
-        float3 barycentric;
-        std::unordered_map<Molecule, Population> m_bsMolecules;
-    };
+    
 
 private:
     double m_fThickness; // Membrane thickness in micrometers
     std::shared_ptr<class BVHMesh> m_pCortexBVH;
     std::shared_ptr<class TensionSphere> m_pTensionSphere;
     std::vector<BindingSite> m_pBindingSites;
+    std::vector<Molecule> m_bindableMolecules;
 
 public:
     /**
@@ -70,6 +67,9 @@ public:
 private:
     // Convert triangle index and barycentric coordinates to normalized [-1,1] coordinates
     float3 baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const;
+
+	// Pull molecules from grid cells at binding-site positions into binding sites
+	void pullBindingSiteMoleculesFromMedium();
 
     // No external accessors for simulation-owned resources; managed internally in update()
 }; 

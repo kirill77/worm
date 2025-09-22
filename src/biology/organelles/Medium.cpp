@@ -16,8 +16,62 @@ void Medium::addMolecule(const MPopulation& population, const float3& position)
     GridCell& gridCell = m_grid.findCell(position);
     Population& moleculePop = gridCell.getOrCreateMolPop(population.m_molecule);
 
+    // it's the same molecule - so they're either both bound, or both unbound
+    assert(moleculePop.m_fNumber == 0.0 || moleculePop.isBound() == population.isBound());
+
     moleculePop.setBound(population.isBound());
     moleculePop.m_fNumber += population.m_population.m_fNumber;
+}
+
+void Medium::toBindingSites(std::vector<BindingSite>& bindingSites, const std::vector<Molecule>& bindableMolecules)
+{
+    // Group binding sites by grid cell index
+    std::unordered_map<uint32_t, std::vector<size_t>> cellToSites;
+    cellToSites.reserve(bindingSites.size());
+    for (size_t i = 0; i < bindingSites.size(); ++i)
+    {
+        const float3& pos = bindingSites[i].m_normalized;
+        uint32_t cellIndex = m_grid.positionToIndex(pos);
+        cellToSites[cellIndex].push_back(i);
+    }
+
+    // For each cell, distribute bindable molecules uniformly across all binding sites in that cell
+    for (const auto& entry : cellToSites)
+    {
+        uint32_t cellIndex = entry.first;
+        const std::vector<size_t>& siteIndices = entry.second;
+        if (siteIndices.empty()) continue;
+
+        GridCell& gridCell = m_grid[cellIndex];
+        const size_t numSites = siteIndices.size();
+
+        for (const Molecule& mol : bindableMolecules)
+        {
+            auto it = gridCell.m_molecules.find(mol);
+            if (it == gridCell.m_molecules.end())
+                continue;
+
+            Population& cellPop = it->second;
+            if (cellPop.m_fNumber <= 0.0)
+                continue;
+            assert(cellPop.isBound()); // we're working with binding sites here
+
+            double totalAmount = cellPop.m_fNumber;
+            double share = totalAmount / static_cast<double>(numSites);
+
+            for (size_t idx : siteIndices)
+            {
+                BindingSite& site = bindingSites[idx];
+                auto& pop = site.m_bsMolecules[mol];
+                pop.m_fNumber += share;
+                pop.setBound(true); // we're working with binding sites here
+            }
+
+            // Remove from grid cell after distribution
+            cellPop.m_fNumber = 0.0;
+            gridCell.m_molecules.erase(it);
+        }
+    }
 }
 
 

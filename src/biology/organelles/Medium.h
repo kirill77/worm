@@ -6,6 +6,7 @@
 #include <array>
 #include <unordered_map>
 #include "chemistry/molecules/Molecule.h"
+#include "biology/organelles/BindingSite.h"
 
 #include "geometry/vectors/vector.h"
 #include "chemistry/molecules/MoleculeWiki.h"
@@ -32,6 +33,9 @@ public:
 
     // Add molecule population to specific location
     void addMolecule(const MPopulation& population, const float3& position);
+    // Move molecules from grid cells into the provided binding sites based on m_normalized
+    // Only molecules listed in bindableMolecules are transferred
+    void toBindingSites(std::vector<BindingSite>& bindingSites, const std::vector<Molecule>& bindableMolecules);
     
     // ATP-related methods
     void addATP(double amount, const float3& position);

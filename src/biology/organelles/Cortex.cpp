@@ -27,12 +27,20 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
         double volume = pOwnedCell->getInternalMedium().getVolumeMicroM();
         m_pTensionSphere = std::make_shared<TensionSphere>(2, volume);
     }
+
+    // Initialize list of molecules that can bind to cortex
+    // For now, include the cortex-binding protein key
+    Species species = pOwnedCell ? pOwnedCell->getSpecies() : Species::GENERIC;
+    m_bindableMolecules.emplace_back(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN, species);
 }
 
 void Cortex::update(double fDtSec, Cell& cell)
 {
     // Update internal medium - its dynamics are independent of external medium
     cell.getInternalMedium().update(fDtSec);
+
+    // Pull molecules from grid to binding sites prior to shape update
+    pullBindingSiteMoleculesFromMedium();
     
     // Maintain and advance tension sphere / BVH state for the cortex
     // Assume tension sphere exists; update volume and advance simulation
@@ -49,6 +57,9 @@ void Cortex::update(double fDtSec, Cell& cell)
             cell.setCortexBVH(m_pCortexBVH);
         }
     }
+
+    // Push molecules back into the grid at updated positions after shape update
+    transferBindingSiteMoleculesToMedium();
 
     // Note: In a more advanced implementation, this method could include:
     // - Membrane fluidity changes
@@ -135,8 +146,8 @@ bool Cortex::initializeBindingSites(double totalAmount)
         double b2 = sr1 * r2;
 
         BindingSite site;
-        site.triangleIndex = triIdx;
-        site.barycentric = float3(static_cast<float>(b0), static_cast<float>(b1), static_cast<float>(b2));
+        site.m_triangleIndex = triIdx;
+        site.m_barycentric = float3(static_cast<float>(b0), static_cast<float>(b1), static_cast<float>(b2));
         // Initialize population on this binding site
         Population pop(amountPerPosition);
         pop.setBound(true);
@@ -170,21 +181,22 @@ void Cortex::transferBindingSiteMoleculesToMedium()
 
     Medium& medium = pCell->getInternalMedium();
 
-	const uint32_t triangleCount = pMesh->getTriangleCount();
-	for (auto& site : m_pBindingSites) {
-        if (site.triangleIndex >= triangleCount)
+    const uint32_t triangleCount = pMesh->getTriangleCount();
+    for (auto& site : m_pBindingSites) {
+        if (site.m_triangleIndex >= triangleCount)
             continue;
 
-        // Compute normalized [-1,1] position on cortex from triangle + barycentric
-        const float3 pos = baryToNormalized(site.triangleIndex, site.barycentric);
+        // Update normalized [-1,1] position on cortex from triangle + barycentric
+        site.m_normalized = baryToNormalized(site.m_triangleIndex, site.m_barycentric);
+        const float3 pos = site.m_normalized;
 
 		// Transfer each molecule population to the medium at this position and zero source immediately
 		for (auto& kv : site.m_bsMolecules) {
 			const Molecule& mol = kv.first;
 			Population& pop = kv.second;
 			if (pop.m_fNumber > 0.0) {
-				MPopulation mpop(mol, pop.m_fNumber);
-				mpop.m_population.setBound(true);
+				MPopulation mpop(mol, pop);
+				assert(mpop.isBound()); // we're working with molecules bound to cortex here
 				medium.addMolecule(mpop, pos);
 				// zero out source
 				pop.m_fNumber = 0.0;
@@ -192,6 +204,20 @@ void Cortex::transferBindingSiteMoleculesToMedium()
 			}
 		}
     }
+}
+
+void Cortex::pullBindingSiteMoleculesFromMedium()
+{
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot pull binding site molecules: cell reference is invalid");
+        return;
+    }
+
+    // m_normalized should not change while molecules are in the medium.
+    // Simply delegate moving molecules from grid cells into binding sites.
+    Medium& medium = pCell->getInternalMedium();
+    medium.toBindingSites(m_pBindingSites, m_bindableMolecules);
 }
 
 namespace {

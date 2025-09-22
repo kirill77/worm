@@ -77,12 +77,9 @@ bool ComplexFormationInteraction::apply(GridCell& cell, double dt, ResourceDistr
         auto& complexPop = cell.getOrCreateMolPop(complexKey);
         complexPop.m_fNumber += boundAmount;
 
-        // update binding state
-        assert(!firstProteinIt->second.isBound());
-        if (secondProteinIt->second.isBound())
-        {
-            complexPop.setBound(true);
-        }
+        // update binding state: complex is bound if any reactant is bound
+        const bool complexIsBound = firstProteinIt->second.isBound() || secondProteinIt->second.isBound();
+        complexPop.setBound(complexIsBound);
     }
     
     // Apply dissociation if any occurs

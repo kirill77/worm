@@ -63,6 +63,9 @@
     <ClInclude Include="Y_TuRC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BindingSite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Organelle.cpp">
