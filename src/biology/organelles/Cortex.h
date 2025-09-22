@@ -58,6 +58,15 @@ public:
      */
     bool initializeBindingSites(double totalAmount = 1000.0);
 
+	/**
+	 * Transfer all molecules from cortex binding sites into the cell's internal medium grid
+	 * at the corresponding surface positions. After transfer, binding site populations are cleared.
+	 */
+	void transferBindingSiteMoleculesToMedium();
+
+	// Map normalized coordinates [-1,1] to cortex surface world position via ray cast
+	float3 normalizedToWorld(const float3& normalizedPos);
+
     // Getters and setters
     double getThickness() const { return m_fThickness; }
     void setThickness(double fThickness) { m_fThickness = fThickness; }

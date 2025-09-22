@@ -5,10 +5,13 @@
 #include "utils/log/ILog.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "physics/tensionSphere/TensionSphere.h"
+#include "geometry/BVH/BVH.h"
+#include "geometry/BVH/ITraceableObject.h"
 #include <algorithm>
 #include <cmath>
 #include <random>
 #include <numeric>
+#include <limits>
 
 Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     : Organelle(pCell)
@@ -142,4 +145,126 @@ bool Cortex::initializeBindingSites(double totalAmount)
     }
 
     return true;
+}
+
+void Cortex::transferBindingSiteMoleculesToMedium()
+{
+    auto pCell = getCell();
+    if (!pCell) {
+        LOG_ERROR("Cannot transfer binding site molecules: cell reference is invalid");
+        return;
+    }
+    if (!m_pTensionSphere) {
+        LOG_ERROR("Cannot transfer binding site molecules: tension sphere is not initialized");
+        return;
+    }
+
+    auto pMesh = m_pTensionSphere->getEdgeMesh();
+    if (!pMesh) {
+        LOG_ERROR("Cannot transfer binding site molecules: cortex mesh is not available");
+        return;
+    }
+
+    Medium& medium = pCell->getInternalMedium();
+
+    const uint32_t triangleCount = pMesh->getTriangleCount();
+    for (const auto& site : m_pBindingSites) {
+        if (site.triangleIndex >= triangleCount)
+            continue;
+
+        // Recover triangle vertex positions
+        uint3 tri = pMesh->getTriangleVertices(site.triangleIndex);
+        const float3 v0 = pMesh->getVertexPosition(tri.x);
+        const float3 v1 = pMesh->getVertexPosition(tri.y);
+        const float3 v2 = pMesh->getVertexPosition(tri.z);
+
+        // Compute world-space position via barycentric coordinates
+        const float3 pos = v0 * site.barycentric.x + v1 * site.barycentric.y + v2 * site.barycentric.z;
+
+        // Transfer each molecule population to the medium at this position
+        for (const auto& kv : site.m_bsMolecules) {
+            const Molecule& mol = kv.first;
+            const Population& pop = kv.second;
+            if (pop.m_fNumber <= 0.0)
+                continue;
+
+            MPopulation mpop(mol, pop.m_fNumber);
+            mpop.m_population.setBound(true);
+            medium.addMolecule(mpop, pos);
+        }
+    }
+
+    // Clear site molecules after transfer
+    for (auto& site : m_pBindingSites) {
+        for (auto& kv : site.m_bsMolecules) {
+            kv.second.m_fNumber = 0.0;
+            kv.second.setBound(false);
+        }
+    }
+}
+
+namespace {
+class CortexRay : public IRay
+{
+public:
+    float m_closestDistance;
+    bool m_hasIntersection;
+
+    CortexRay(const float3& pos, const float3& dir)
+        : m_closestDistance(std::numeric_limits<float>::max())
+        , m_hasIntersection(false)
+    {
+        m_vPos = pos;
+        m_vDir = normalize(dir);
+        m_fMin = 0.0f;
+        m_fMax = std::numeric_limits<float>::max();
+    }
+
+    void notifyIntersection(float fDist, const ITraceableObject* /*pObject*/, uint32_t /*uSubObj*/) override
+    {
+        if (fDist >= m_fMin && fDist <= m_fMax && fDist < m_closestDistance)
+        {
+            m_closestDistance = fDist;
+            m_hasIntersection = true;
+        }
+    }
+};
+}
+
+float3 Cortex::normalizedToWorld(const float3& normalizedPos)
+{
+    if (!m_pCortexBVH) {
+        // Build BVH if missing
+        auto pCortexMesh = m_pTensionSphere ? m_pTensionSphere->getEdgeMesh() : nullptr;
+        if (pCortexMesh) {
+            m_pCortexBVH = std::make_shared<BVHMesh>(pCortexMesh);
+        }
+    }
+    if (!m_pCortexBVH) {
+        return float3(0,0,0);
+    }
+
+    // Get bounding box center as ray origin
+    const box3 boundingBox = m_pCortexBVH->getBox();
+    const float3 center = boundingBox.center();
+
+    if (length(normalizedPos) < 1e-6f) {
+        return center;
+    }
+
+    const float3 direction = normalize(normalizedPos);
+
+    CortexRay ray(center, direction);
+    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
+    bvh.trace(ray, 0);
+
+    if (!ray.m_hasIntersection)
+    {
+        const float3 diagonal = boundingBox.diagonal();
+        return center + normalizedPos * (diagonal * 0.5f);
+    }
+
+    float normalizedLength = length(normalizedPos);
+    normalizedLength = std::min(1.0f, std::max(-1.0f, normalizedLength));
+    return center + direction * (ray.m_closestDistance * normalizedLength);
 }

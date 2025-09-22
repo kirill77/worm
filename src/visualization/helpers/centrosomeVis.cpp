@@ -4,6 +4,7 @@
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/organelles/Centrosome.h"
 #include "biology/organelles/Cell.h"
+#include "biology/organelles/Cortex.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/vectors/vector.h"
 #include "geometry/vectors/matrix.h"
@@ -34,15 +35,11 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
         return GPUMeshNode(affine3::identity());
     }
     
-    auto pCortexBVH = pCell->getCortexBVH();
-    if (!pCortexBVH)
-    {
-        return GPUMeshNode(affine3::identity());
-    }
-
     // Get the centrosome's transform and convert to world coordinates
     const float3& normalizedPosition = m_pCentrosome->getNormalizedPosition();
-    float3 position = pCortexBVH->normalizedToWorld(normalizedPosition);
+    // Use Cortex method for mapping normalized position to world
+    auto pCortex = std::dynamic_pointer_cast<Cortex>(pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
+    float3 position = pCortex ? pCortex->normalizedToWorld(normalizedPosition) : float3(0,0,0);
     
     // Get the full transform matrix from centrosome space to cell space
     const affine3& centrosomeToCell = m_pCentrosome->getToParentTransform();
