@@ -33,9 +33,10 @@ bool ResourceDistributor::notifyNewInteractionStarting(const MoleculeInteraction
         m_pCurInteraction->m_requestedMolecules.resize(0);
         return true;
     }
-    // previously we had real run - it had to have scaling factor of 1
-    assert(m_pCurInteraction->m_fScalingFactor == 1);
-    if (m_pCurInteraction->m_lastValidDryRunId != m_curDryRunId)
+    // previously we had real run - it had to have scaling factor of 1 or 0
+    assert(m_pCurInteraction->m_fScalingFactor == 1 || m_pCurInteraction->m_fScalingFactor == 0);
+    if (m_pCurInteraction->m_lastValidDryRunId != m_curDryRunId ||
+        m_pCurInteraction->m_fScalingFactor == 0)
     {
         // the interaction didn't request any resources - we can skip it
         return false;
@@ -75,7 +76,11 @@ void ResourceDistributor::notifyResourceWanted(const Molecule& molecule, double 
     // if we don't have such resource - can't distribute it
     if (it == m_resources.end())
     {
-        assert(false); // seems sub-optimal - this interaction must have bailed out earlier
+        // seems sub-optimal - this interaction must have bailed out earlier
+        // if it's ATP - it's fine because if it's unavailable - it's some rare corner case
+        assert(molecule == Molecule(StringDict::ID::ATP, ChemicalType::NUCLEOTIDE));
+        // mark this interaction as invalid
+        m_pCurInteraction->m_fScalingFactor = 0;
         return;
     }
 

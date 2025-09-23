@@ -36,9 +36,6 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
 
 void Cortex::update(double fDtSec, Cell& cell)
 {
-    // Update internal medium - its dynamics are independent of external medium
-    cell.getInternalMedium().update(fDtSec);
-
     // Pull molecules from grid to binding sites prior to shape update
     pullBindingSiteMoleculesFromMedium();
     

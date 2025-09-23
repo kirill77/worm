@@ -59,13 +59,16 @@ void Cell::initializeCortex()
 
 
 
-void Cell::update(double fDt)
+void Cell::update(double fDtSec)
 {
+    // Update internal medium - its dynamics are independent of external medium
+    m_pInternalMedium->update(fDtSec);
+
     // Update all organelles (including cortex)
     for (auto& pOrg : m_pOrganelles)
     {
         if (pOrg) {
-            pOrg->update(fDt, *this);
+            pOrg->update(fDtSec, *this);
         }
     }
     
