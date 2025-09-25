@@ -310,6 +310,16 @@ void Worm::seedCentrosomeAndMaternalGammaTubulin(std::shared_ptr<Cell> pCell, co
     auto& medium = pCell->getInternalMedium();
     MPopulation gammaTubulinSeed(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS), 1000.0);
     medium.addMolecule(gammaTubulinSeed, posteriorEntryPoint);
+
+    // Seed minimal PCM scaffold components to drive molecule-based maturation (biological placeholders)
+    MPopulation spd2(Molecule(StringDict::ID::SPD_2, ChemicalType::PROTEIN, Species::C_ELEGANS), 300.0);
+    MPopulation spd5(Molecule(StringDict::ID::SPD_5, ChemicalType::PROTEIN, Species::C_ELEGANS), 300.0);
+    MPopulation plk1(Molecule(StringDict::ID::PLK_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 150.0);
+    MPopulation air1(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 100.0);
+    medium.addMolecule(spd2, posteriorEntryPoint);
+    medium.addMolecule(spd5, posteriorEntryPoint);
+    medium.addMolecule(plk1, posteriorEntryPoint);
+    medium.addMolecule(air1, posteriorEntryPoint);
 }
 
 void Worm::setupDataCollector()

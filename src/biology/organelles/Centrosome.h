@@ -14,6 +14,8 @@ private:
     double m_duplicationTime;  // Time when duplication occurred
     float m_fPCMRadiusMicroM;  // PCM (Pericentriolar Material) radius in micrometers
     std::vector<std::shared_ptr<Y_TuRC>> m_pRingComplexes;
+    // Simple PCM maturation proxy in [0,1] to drive γ-tubulin recruitment capacity
+    double m_pcmMaturation = 0.1;
 
 public:
     /**
@@ -66,7 +68,17 @@ public:
      * @return True if duplicated, false otherwise
      */
     bool isDuplicated() const { return m_isDuplicated; }
-    
+
+    // Accessor for PCM maturation proxy (0..1)
+    double getPCMMaturation() const { return m_pcmMaturation; }
+
+private:
+    // Update PCM maturation based on local SPD-2/5 and kinase activity at the centrosome
+    void updatePCMMaturation(double dt, const Cell& cell, Medium& internalMedium);
+    // Update local gamma-tubulin enrichment and adjust Y_TuRC ring complex count
+    void updateGammaAndRingComplexes(double dt, const Cell& cell, Medium& internalMedium);
+
+public:
     /**
      * Get the PCM (Pericentriolar Material) radius
      * 

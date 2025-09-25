@@ -95,6 +95,13 @@ struct StringDict
         NMY_2,             // Non-muscle myosin II (contractility proxy)
         AIR_1,             // Aurora A kinase at centrosome/MTs
         MT_PLUS_END_CONTACT, // Marker for MT plus-end cortex contact (proxy species)
+        SPD_2,             // PCM scaffold CEP192 homolog
+        SPD_5,             // PCM scaffold
+        PCMD_1,            // Centriolar–PCM bridge protein
+        ZYG_1,             // Plk4-like duplication kinase
+        SAS_6,             // Cartwheel protein
+        SAS_5,             // STIL/Ana2-like
+        SAS_4,             // Centriole outer layer assembly
 
         // Phosphorylated PAR proteins
         PAR_1_P,          // Phosphorylated PAR-1

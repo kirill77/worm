@@ -128,6 +128,14 @@ void StringDict::initialize()
     m_idToString[static_cast<size_t>(ID::NMY_2)] = "NMY-2";
     m_idToString[static_cast<size_t>(ID::AIR_1)] = "AIR-1";
     m_idToString[static_cast<size_t>(ID::MT_PLUS_END_CONTACT)] = "MT-PLUS-END-CONTACT";
+    // PCM and duplication
+    m_idToString[static_cast<size_t>(ID::SPD_2)] = "SPD-2";
+    m_idToString[static_cast<size_t>(ID::SPD_5)] = "SPD-5";
+    m_idToString[static_cast<size_t>(ID::PCMD_1)] = "PCMD-1";
+    m_idToString[static_cast<size_t>(ID::ZYG_1)] = "ZYG-1";
+    m_idToString[static_cast<size_t>(ID::SAS_6)] = "SAS-6";
+    m_idToString[static_cast<size_t>(ID::SAS_5)] = "SAS-5";
+    m_idToString[static_cast<size_t>(ID::SAS_4)] = "SAS-4";
     
     // Phosphorylated PAR proteins
     m_idToString[static_cast<size_t>(ID::PAR_1_P)] = "PAR-1-P";

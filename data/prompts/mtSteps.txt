@@ -5,9 +5,10 @@ Purpose
 
 Context and current status
 - Nucleation site class exists: Y_TuRC (γ-tubulin ring complex), owned by `Centrosome`.
-- Y_TuRC target currently tied to γ-tubulin count (~ γ-tubulin / 50). With γ-tubulin ~ 0 at t=0, target Y_TuRC = 0.
-- DataCollector logs: Time(s), NucleationSites(Y_TuRC), selected molecules per point, StepTime(ms).
-- Added pathway molecules (StringDict): GTP, GDP, RHO_1, RHO_1_GTP, RHO_1_GDP, ECT_2, CHIN_1, CDC_42, CDC_42_GTP, CDC_42_GDP, NMY_2, AIR_1, MT_PLUS_END_CONTACT; maternal pools provisioned uniformly in cytosol.
+- Y_TuRC target now scales with PCM maturation × local γ-tubulin (γ/50 scaled by PCM), not pure γ/50.
+- DataCollector logs: Time(s), NucleationSites(Y_TuRC), selected molecules per point, StepTime(ms); outputs go to data/simOutput/sim.csv.
+- Added pathway molecules (StringDict): GTP, GDP, RHO_1, RHO_1_GTP, RHO_1_GDP, ECT_2, CHIN_1, CDC_42, CDC_42_GTP, CDC_42_GDP, NMY_2, AIR_1, MT_PLUS_END_CONTACT, SPD_2, SPD_5, PCMD_1, ZYG_1, SAS_6, SAS_5, SAS_4.
+- Maternal provisioning: γ-tubulin seed + SPD_2, SPD_5, PLK_1, AIR_1 near posterior centrosome; species-consistent lookups.
 - Uniform cytosolic pools alone do not produce asymmetry; we will add cortex-bound pools and AstralMTs.
 
 Literature highlights (from mtLiterature.txt)
@@ -26,14 +27,14 @@ Immediate next steps (code changes)
   - Model ZYG-1 dosage sensitivity (smooth dependence; no fixed numeric cutoffs).
 
 3) Model PCM maturation and γ-tubulin recruitment
-- Add a PCM size/state variable per centrosome depending on SPD-2, SPD-5, PLK-1/AIR-1.
-- Recruit γ-tubulin to PCM as a function of PCM size × cytosolic γ-tubulin availability.
-- Drive Y_TuRC target from PCM size × γ-tubulin recruitment, not a fixed /50 rule; tune to stage plateaus:
+- (Done) PCM maturation depends on SPD-2, SPD-5 and kinases (PLK-1/AIR-1) via on/off kinetics.
+- (Done) γ-tubulin enrichment near PCM; Y_TuRC target = β · PCM · γlocal.
+- (Pending) Parameter tuning to reach stage plateaus:
   - Early prophase: target nucleators ~1–3×10^3.
   - Metaphase: target ~6–8×10^3 (allow 3–12×10^3).
 
 4) Seed biologically faithful initial conditions
-- Provide maternal γ-tubulin (GAMMA_TUBULIN) and PCM scaffolds (SPD-2/5, PCMD-1) so early PCM growth and nucleation can occur before duplication ramps it further.
+- Provide maternal γ-tubulin (GAMMA_TUBULIN) and PCM scaffolds (SPD-2/5, PCMD_1) so early PCM growth and nucleation can occur before duplication ramps it further.
 - Keep amounts tunable to reach stage plateaus.
 
 5) Implement AstralMTs and cortex contact mapping (required for posterior cue)

@@ -19,6 +19,7 @@ This file gives a big-picture summary of the main interactions in this codebase.
 - Centrosome and microtubules (posterior cue; in progress/refinement):
   - The sperm centrosome nucleates microtubules that reach the posterior cortex.
   - Local MT(MicroTubules)-cortex proximity/contact reduces posterior RHO-1/ECT-2 activity (AIR-1/Aurora A pathway) and stabilizes PAR-2.
+  - PCM maturation (SPD-2/SPD-5; PLK-1/AIR-1) recruits γ-tubulin/γ-TuRC and sets MT nucleation capacity; MT number scales with PCM.
   - Lower local contractility at the posterior can drive anterior-directed cortical flows (planned/refined model).
 
 - CellSim and mechanics:

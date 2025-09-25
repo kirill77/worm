@@ -91,18 +91,36 @@ void Centrosome::update(double dt, Cell& cell)
     }
     
     // γ-tubulin is now regulated through transcription, not constant addition
-    
-    // Manage ring complexes based on gamma-tubulin levels
-    // Use the cell's species when querying for gamma-tubulin to match provisioning
+
+    updatePCMMaturation(dt, cell, internalMedium);
+
+    updateGammaAndRingComplexes(dt, cell, internalMedium);
+}
+
+void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium& internalMedium)
+{
     Species species = cell.getSpecies();
     double gammaTubulinCount = internalMedium.getMoleculeNumber(
         Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species),
         m_mToParent.m_translation);
-    
-    // Target: ~1 ring complex per 50 gamma-tubulin proteins
-    int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);
+
+    // γ-tubulin recruitment driven by PCM maturation and local cytosolic pool
+    const double gammaCyt = gammaTubulinCount; // proxy for local available pool; later separate bound/unbound
+    const double k_rec = 0.1;   // per second (tunable)
+    const double k_loss = 0.01; // per second (tunable)
+    const double dGamma = (k_rec * m_pcmMaturation * (gammaCyt) - k_loss * gammaTubulinCount) * dt;
+    if (dGamma > 0.0)
+    {
+        MPopulation gammaAdd(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species), dGamma);
+        internalMedium.addMolecule(gammaAdd, m_mToParent.m_translation);
+        gammaTubulinCount += dGamma;
+    }
+
+    // Target: proportional to γ-tubulin and PCM maturation
+    const double tuRCPerGamma = 1.0 / 50.0;
+    int targetRingComplexes = static_cast<int>(gammaTubulinCount * tuRCPerGamma * m_pcmMaturation);
     int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());
-    
+
     if (currentRingComplexes < targetRingComplexes) {
         // Create new ring complexes using shared_from_this() and cast to weak_ptr
         std::weak_ptr<Centrosome> thisWeakPtr = std::static_pointer_cast<Centrosome>(shared_from_this());
@@ -117,6 +135,29 @@ void Centrosome::update(double dt, Cell& cell)
             m_pRingComplexes.pop_back();
         }
     }
+}
+
+void Centrosome::updatePCMMaturation(double dt, const Cell& cell, Medium& internalMedium)
+{
+    Species species = cell.getSpecies();
+    auto localCount = [&](StringDict::ID id) {
+        return internalMedium.getMoleculeNumber(Molecule(id, ChemicalType::PROTEIN, species), m_mToParent.m_translation);
+    };
+    const double spd2 = localCount(StringDict::ID::SPD_2);
+    const double spd5 = localCount(StringDict::ID::SPD_5);
+    const double plk1 = localCount(StringDict::ID::PLK_1);
+    const double air1 = localCount(StringDict::ID::AIR_1);
+    // Hill-like saturations (tunable)
+    const double K2 = 200.0, K5 = 200.0, Kp = 100.0, Ka = 50.0;
+    const double fSPD2 = spd2 / (K2 + std::max(1.0, spd2));
+    const double fSPD5 = spd5 / (K5 + std::max(1.0, spd5));
+    const double fKin = 1.0 + 0.5 * (plk1 / (Kp + std::max(1.0, plk1))) + 0.3 * (air1 / (Ka + std::max(1.0, air1)));
+    // Kinetics (tunable)
+    const double k_on = 0.2;   // per second
+    const double k_off = 0.02; // per second
+    const double pcmProd = k_on * fSPD2 * fSPD5 * fKin * (1.0 - m_pcmMaturation);
+    const double pcmLoss = k_off * m_pcmMaturation;
+    m_pcmMaturation = std::clamp(m_pcmMaturation + (pcmProd - pcmLoss) * dt, 0.0, 1.0);
 }
 
 void Centrosome::duplicate()

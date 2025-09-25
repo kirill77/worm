@@ -3,6 +3,13 @@ Centrosome validation and Y_TuRC creation – next steps
 Goal
 - Align duplication validation and ring-complex (Y_TuRC) creation with in vivo biology while unblocking the current “0 rings” state.
 
+Status update (current implementation)
+- Done: maternal γ-tubulin seed at centrosome; species-consistent γ-tubulin lookup.
+- Done: molecule-driven PCM maturation from local SPD-2/SPD-5 and kinases (PLK-1/AIR-1) with on/off kinetics.
+- Done: γ-tubulin local enrichment driven by PCM maturation; Y_TuRC target ∝ PCM × γlocal (γ/50 scaled by PCM).
+- Pending: replace conservative 6-min guard with S-phase + licensing markers (CYE-1/CDK-2 active, SPD-2 present, ZYG-1 localized; block after SAS-6).
+- Pending: parameter tuning (k_on, k_off, K2/K5/Kp/Ka, k_rec, k_loss) and validation metrics for PCM/γ dynamics.
+
 1) Replace time-based duplication guard with state-based gating
 - Remove fixed minute cutoff. Gate duplication on:
   - S phase is active, and
@@ -12,22 +19,24 @@ Goal
 - Add TODO hooks to read these markers as we implement molecule localization.
 
 2) Correct ring-complex creation inputs
-- Ensure γ-tubulin is available at the centrosome position at t=0 (maternal provisioning) so target Y_TuRC > 0 before duplication.
-- Confirm `Centrosome::update` queries γ-tubulin at exactly `m_mToParent.m_translation`; write provisioning at the same coordinates.
-- Add one-time logs: γ-tubulin@centrosome, targetYTuRC, currentYTuRC; duplication attempts.
+- (Done) Ensure γ-tubulin is available at the centrosome position at t=0 (maternal provisioning) so target Y_TuRC > 0 before duplication.
+- (Done) Confirm `Centrosome::update` queries γ-tubulin at exactly `m_mToParent.m_translation` with correct species.
+- (Optional) Add one-time logs: γ-tubulin@centrosome, targetYTuRC, currentYTuRC; duplication attempts.
 
 3) Add missing pathway molecules and (later) localization
-- Add StringDict IDs/strings: ZYG_1, SPD_2, SPD_5, PCMD_1, SAS_6, SAS_5, SAS_4.
-- Provision maternal pools (center or posterior centrosome). Later, add localization dynamics (centriolar/PCM enrichment) used by the state gate.
+- (Done) Add StringDict IDs/strings: ZYG_1, SPD_2, SPD_5, PCMD_1, SAS_6, SAS_5, SAS_4.
+- (Partial) Provision maternal pools near posterior centrosome: SPD_2, SPD_5, PLK_1, AIR_1.
+- (Pending) Provision PCMD_1, ZYG_1/SAS factors and implement localization dynamics used by the state gate.
 
 4) PCM maturation model for γ-tubulin recruitment
-- Introduce a PCM size/state variable per centrosome that grows with SPD-2/5 and kinases (PLK-1/AIR-1).
-- Compute γ-tubulin recruitment as a function of PCM size × cytosolic γ-tubulin.
-- Drive Y_TuRC target from this recruitment rather than a fixed `/50` rule; tune to stage plateaus from literature (~10^3 early → ~10^4 at metaphase).
+- (Done) Introduce PCM maturation from SPD-2/5 and kinases (PLK-1/AIR-1) via on/off kinetics.
+- (Done) Compute γ-tubulin local enrichment as a function of PCM maturation.
+- (Done) Drive Y_TuRC target from PCM × γlocal (instead of fixed `/50`).
+- (Pending) Tune parameters to reach stage plateaus (~10^3 early → ~10^4 at metaphase).
 
 5) Validation additions
 - Keep DataCollector’s `NucleationSites(Y_TuRC)` column.
-- Add reporting of first duplication time and γ-tubulin@centrosome to help diagnose early/late duplication and ring counts.
+- Add reporting of first duplication time and γ-tubulin@centrosome (and PCM proxy if exposed) to diagnose maturation and ring counts.
 
 6) Future coupling to MTs and cortex (after validation passes)
 - Implement AstralMT dynamic instability and cortex contact mapping.
