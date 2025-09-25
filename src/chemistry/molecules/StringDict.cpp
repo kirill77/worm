@@ -39,6 +39,8 @@ void StringDict::initialize()
     
     // Nucleotides
     m_idToString[static_cast<size_t>(ID::ATP)] = "ATP";
+    m_idToString[static_cast<size_t>(ID::GTP)] = "GTP";
+    m_idToString[static_cast<size_t>(ID::GDP)] = "GDP";
     
     // tRNA genes (essential set for translation)
     // Start codon
@@ -113,6 +115,19 @@ void StringDict::initialize()
     // Endoplasmic reticulum molecules
     m_idToString[static_cast<size_t>(ID::ER_PROTEIN)] = "ER-Protein";
     m_idToString[static_cast<size_t>(ID::ER_LIPID)] = "ER-Lipid";
+
+    // Rho/CDC42 pathway and mechanics
+    m_idToString[static_cast<size_t>(ID::RHO_1)] = "RHO-1";
+    m_idToString[static_cast<size_t>(ID::RHO_1_GTP)] = "RHO-1-GTP";
+    m_idToString[static_cast<size_t>(ID::RHO_1_GDP)] = "RHO-1-GDP";
+    m_idToString[static_cast<size_t>(ID::ECT_2)] = "ECT-2";
+    m_idToString[static_cast<size_t>(ID::CHIN_1)] = "CHIN-1";
+    m_idToString[static_cast<size_t>(ID::CDC_42)] = "CDC-42";
+    m_idToString[static_cast<size_t>(ID::CDC_42_GTP)] = "CDC-42-GTP";
+    m_idToString[static_cast<size_t>(ID::CDC_42_GDP)] = "CDC-42-GDP";
+    m_idToString[static_cast<size_t>(ID::NMY_2)] = "NMY-2";
+    m_idToString[static_cast<size_t>(ID::AIR_1)] = "AIR-1";
+    m_idToString[static_cast<size_t>(ID::MT_PLUS_END_CONTACT)] = "MT-PLUS-END-CONTACT";
     
     // Phosphorylated PAR proteins
     m_idToString[static_cast<size_t>(ID::PAR_1_P)] = "PAR-1-P";

@@ -76,10 +76,25 @@ struct StringDict
         // Non-gene molecules
         // Nucleotides
         ATP,
+        GTP,
+        GDP,
 
         // Endoplasmic reticulum molecules
         ER_PROTEIN,        // ER-synthesized proteins
         ER_LIPID,          // ER-synthesized lipids
+
+        // Rho/CDC42 pathway and cortex mechanics (proteins and proxies)
+        RHO_1,             // Total RHO-1
+        RHO_1_GTP,         // Active RHO-1
+        RHO_1_GDP,         // Inactive RHO-1
+        ECT_2,             // RhoGEF ECT-2
+        CHIN_1,            // RhoGAP (CHIN-1 proxy)
+        CDC_42,            // Total CDC-42
+        CDC_42_GTP,        // Active CDC-42
+        CDC_42_GDP,        // Inactive CDC-42
+        NMY_2,             // Non-muscle myosin II (contractility proxy)
+        AIR_1,             // Aurora A kinase at centrosome/MTs
+        MT_PLUS_END_CONTACT, // Marker for MT plus-end cortex contact (proxy species)
 
         // Phosphorylated PAR proteins
         PAR_1_P,          // Phosphorylated PAR-1

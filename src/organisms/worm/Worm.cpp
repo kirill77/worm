@@ -253,10 +253,28 @@ std::shared_ptr<Medium> Worm::createZygoteMedium()
     
     // Add maternal ATP for translation
     pInternalMedium->addATP(50000.0, center);  // Sufficient ATP for early translation
+    // Add maternal GTP/GDP nucleotide pools (optional explicit bookkeeping for GTPases)
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::GTP, ChemicalType::NUCLEOTIDE, Species::C_ELEGANS), 200000.0), center);
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::GDP, ChemicalType::NUCLEOTIDE, Species::C_ELEGANS), 200000.0), center);
     
     // Add maternal tRNAs (essential for translation bootstrap)
     // Without these, mRNAs (including tRNA mRNAs) cannot be translated
     addMaternalTRNAs(*pInternalMedium, center);
+
+    // Maternal provisioning of polarity/contractility pathway components
+    // Rho module: start mostly GDP-bound; allow dynamics to convert to GTP via ECT-2
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::RHO_1_GDP, ChemicalType::PROTEIN, Species::C_ELEGANS), 800000.0), center);
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::RHO_1_GTP, ChemicalType::PROTEIN, Species::C_ELEGANS), 200000.0), center);
+    // ECT-2 (RhoGEF) and CHIN-1 (RhoGAP) as maternal proteins
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::ECT_2, ChemicalType::PROTEIN, Species::C_ELEGANS), 150000.0), center);
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::CHIN_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 120000.0), center);
+    // CDC-42 module (initially GDP-biased)
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::CDC_42_GDP, ChemicalType::PROTEIN, Species::C_ELEGANS), 250000.0), center);
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::CDC_42_GTP, ChemicalType::PROTEIN, Species::C_ELEGANS), 50000.0), center);
+    // Myosin II as contractility proxy (will be cortex-enriched by later mechanics)
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::NMY_2, ChemicalType::PROTEIN, Species::C_ELEGANS), 300000.0), center);
+    // AIR-1 (Aurora A) maternally supplied; will enrich at centrosomes/MTs
+    pInternalMedium->addMolecule(MPopulation(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, Species::C_ELEGANS), 50000.0), center);
 
     return pInternalMedium;
 }
