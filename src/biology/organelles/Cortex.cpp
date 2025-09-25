@@ -31,7 +31,11 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     // Initialize list of molecules that can bind to cortex
     // For now, include the cortex-binding protein key
     Species species = pOwnedCell ? pOwnedCell->getSpecies() : Species::GENERIC;
-    m_bindableMolecules.emplace_back(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN, species);
+	m_bindableMolecules.emplace_back(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN, species);
+	// Also include specific cortex-bound PAR complexes
+	m_bindableMolecules.emplace_back(StringDict::ID::PAR_1_CORTEX, ChemicalType::PROTEIN, species);
+	m_bindableMolecules.emplace_back(StringDict::ID::PAR_2_CORTEX, ChemicalType::PROTEIN, species);
+	m_bindableMolecules.emplace_back(StringDict::ID::PAR_3_CORTEX, ChemicalType::PROTEIN, species);
 }
 
 void Cortex::update(double fDtSec, Cell& cell)
