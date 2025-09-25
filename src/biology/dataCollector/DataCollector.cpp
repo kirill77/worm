@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "DataCollector.h"
 #include "utils/csvFile/CSVFileWriter.h"
+// Needed for nucleation site counting
+#include "biology/organelles/Cell.h"
+#include "biology/organelles/Centrosome.h"
+#include "chemistry/molecules/StringDict.h"
 
 DataCollector::DataCollector(Medium& medium, const std::string& outputFile, double collectionInterval)
     : m_medium(medium)
@@ -42,7 +46,17 @@ bool DataCollector::update(double currentTime)
 {
     // Check if it's time to collect data
     if (currentTime >= m_lastCollectionTime + m_collectionInterval) {
-        collectData(currentTime, 0.0); // No step time info for regular updates
+        // Compute wall-clock delta since last collection
+        double stepMs = 0.0;
+        auto now = std::chrono::high_resolution_clock::now();
+        if (m_hasLastWallTime) {
+            auto micros = std::chrono::duration_cast<std::chrono::microseconds>(now - m_lastWallTime).count();
+            stepMs = static_cast<double>(micros) / 1000.0;
+        }
+        m_lastWallTime = now;
+        m_hasLastWallTime = true;
+
+        collectData(currentTime, stepMs);
         return true;
     }
     return false;
@@ -66,6 +80,17 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
     // Prepare row of data
     std::vector<double> dataRow;
     dataRow.push_back(currentTime); // First column is time
+    if (m_trackNucleationSites) {
+        // Count Y_TuRC instances from cell's centrosome(s)
+        double ringCount = 0.0;
+        if (auto cellPtr = m_cell.lock()) {
+            auto pCentro = std::dynamic_pointer_cast<Centrosome>(cellPtr->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
+            if (pCentro) {
+                ringCount = static_cast<double>(pCentro->getRingComplexes().size());
+            }
+        }
+        dataRow.push_back(ringCount);
+    }
     
     // For each collection point, get molecule concentrations
     for (const auto& point : m_collectionPoints) {
@@ -76,7 +101,8 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
         }
     }
     
-    // Skip ATP and performance metrics per new requirements
+    // Append step time per row (ms)
+    dataRow.push_back(stepTimeMs);
     
     // Add the row to the CSV file
     m_csvFile->addRow(dataRow);
@@ -95,8 +121,11 @@ std::vector<std::string> DataCollector::generateHeaders() const
 {
     std::vector<std::string> headers;
     
-    // First column is time
+    // First columns: time and, optionally, nucleation site count
     headers.push_back("Time(s)");
+    if (m_trackNucleationSites) {
+        headers.push_back("NucleationSites(Y_TuRC)");
+    }
     
     // For each collection point, add molecule headers
     for (const auto& point : m_collectionPoints) {
@@ -114,7 +143,8 @@ std::vector<std::string> DataCollector::generateHeaders() const
         }
     }
     
-    // Skip ATP and performance metric headers
+    // Append per-row step time header
+    headers.push_back("StepTime(ms)");
     
     return headers;
 } 

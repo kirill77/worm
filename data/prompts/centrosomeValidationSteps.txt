@@ -1,0 +1,37 @@
+Centrosome validation and Y_TuRC creation – next steps
+
+Goal
+- Align duplication validation and ring-complex (Y_TuRC) creation with in vivo biology while unblocking the current “0 rings” state.
+
+1) Replace time-based duplication guard with state-based gating
+- Remove fixed minute cutoff. Gate duplication on:
+  - S phase is active, and
+  - Global kinase cue: CYE-1/CDK-2 activity present, and
+  - Centrosomal licensing markers: SPD-2 at centrioles and ZYG-1 localized.
+- Block re-duplication once SAS-6 (cartwheel) is present.
+- Add TODO hooks to read these markers as we implement molecule localization.
+
+2) Correct ring-complex creation inputs
+- Ensure γ-tubulin is available at the centrosome position at t=0 (maternal provisioning) so target Y_TuRC > 0 before duplication.
+- Confirm `Centrosome::update` queries γ-tubulin at exactly `m_mToParent.m_translation`; write provisioning at the same coordinates.
+- Add one-time logs: γ-tubulin@centrosome, targetYTuRC, currentYTuRC; duplication attempts.
+
+3) Add missing pathway molecules and (later) localization
+- Add StringDict IDs/strings: ZYG_1, SPD_2, SPD_5, PCMD_1, SAS_6, SAS_5, SAS_4.
+- Provision maternal pools (center or posterior centrosome). Later, add localization dynamics (centriolar/PCM enrichment) used by the state gate.
+
+4) PCM maturation model for γ-tubulin recruitment
+- Introduce a PCM size/state variable per centrosome that grows with SPD-2/5 and kinases (PLK-1/AIR-1).
+- Compute γ-tubulin recruitment as a function of PCM size × cytosolic γ-tubulin.
+- Drive Y_TuRC target from this recruitment rather than a fixed `/50` rule; tune to stage plateaus from literature (~10^3 early → ~10^4 at metaphase).
+
+5) Validation additions
+- Keep DataCollector’s `NucleationSites(Y_TuRC)` column.
+- Add reporting of first duplication time and γ-tubulin@centrosome to help diagnose early/late duplication and ring counts.
+
+6) Future coupling to MTs and cortex (after validation passes)
+- Implement AstralMT dynamic instability and cortex contact mapping.
+- Use contacts to modulate cortex-bound molecule kinetics for polarization; independent of duplication guard.
+
+References
+- See `data/prompts/centrosomeValidationLiterature.txt` for rationale and literature (Cowan & Hyman 2006; Kemp 2004; O’Connell 2001; Delattre 2006; Kitagawa 2009; Sonneville 2012; Baumgart 2019; Redemann 2017; Tollervey 2025; Begasse 2015).

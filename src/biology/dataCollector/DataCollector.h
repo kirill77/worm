@@ -7,8 +7,10 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <chrono>
 
 class CSVFileWriter;
+class Cell;
 
 /**
  * @class DataCollector
@@ -77,6 +79,10 @@ private:
     double m_collectionInterval;                // How often to collect data
     size_t m_dataPointCount = 0;                // Total data points collected
     std::unordered_map<std::string, double> m_performanceMetrics; // Performance metrics like step time
+    std::weak_ptr<Cell> m_cell;                 // Optional: access to cell for global metrics
+    bool m_trackNucleationSites = false;        // Whether to record nucleation site counts
+    std::chrono::high_resolution_clock::time_point m_lastWallTime; // wall-clock of last collection
+    bool m_hasLastWallTime = false;             // whether last wall time is valid
     
     /**
      * @brief Collect all data at current time
@@ -89,4 +95,15 @@ private:
      * @brief Generate headers for CSV file based on collection points and performance metrics
      */
     std::vector<std::string> generateHeaders() const;
+
+public:
+    /**
+     * @brief Provide Cell to enable global metrics (e.g., nucleation sites)
+     */
+    void setCell(std::shared_ptr<Cell> cell) { m_cell = cell; }
+
+    /**
+     * @brief Enable/disable nucleation site count column
+     */
+    void setTrackNucleationSites(bool enable) { m_trackNucleationSites = enable; }
 }; 

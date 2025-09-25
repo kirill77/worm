@@ -13,6 +13,7 @@ private:
     std::shared_ptr<class Medium> createZygoteMedium();
     std::vector<Chromosome> initializeGenes();
     void addMaternalTRNAs(Medium& medium, const float3& position);
+    void seedCentrosomeAndMaternalGammaTubulin(std::shared_ptr<class Cell> pCell, const float3& posteriorEntryPoint);
 
     void setupDataCollector();  // Method to set up the data collector
     std::unique_ptr<DataCollector> m_pDataCollector;  // Data collector for simulation data

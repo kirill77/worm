@@ -23,11 +23,23 @@
 #include "geometry/geomHelpers/BVHMesh.h"
 #include <cmath>
 #include <algorithm>
+#include <filesystem>
+#include "utils/fileUtils/fileUtils.h"
 
 VisEngine::~VisEngine() = default;
 
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 {
+    // Initialize logging to a file in data/simOutput (resolved via FileUtils)
+    {
+        std::filesystem::path dataPath;
+        if (FileUtils::findTheFolder("data/simOutput", dataPath)) {
+            std::filesystem::create_directories(dataPath);
+            const std::string logPath = (dataPath / "sim.log").string();
+            ILog::create(logPath);
+        }
+    }
+
     // Store the organism for later use
     m_pOrganism = pOrganism;
 

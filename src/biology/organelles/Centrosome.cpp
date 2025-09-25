@@ -93,7 +93,11 @@ void Centrosome::update(double dt, Cell& cell)
     // γ-tubulin is now regulated through transcription, not constant addition
     
     // Manage ring complexes based on gamma-tubulin levels
-    double gammaTubulinCount = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN), m_mToParent.m_translation);
+    // Use the cell's species when querying for gamma-tubulin to match provisioning
+    Species species = cell.getSpecies();
+    double gammaTubulinCount = internalMedium.getMoleculeNumber(
+        Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species),
+        m_mToParent.m_translation);
     
     // Target: ~1 ring complex per 50 gamma-tubulin proteins
     int targetRingComplexes = static_cast<int>(gammaTubulinCount / 50.0);

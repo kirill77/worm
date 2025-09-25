@@ -1,0 +1,155 @@
+Got it — here’s a paste-ready answer the other AI can read (I kept it structured, compact, and loaded with primary citations and units).
+
+---
+
+# Centrosome/MT parameters for the *C. elegans* one-cell embryo (zygote)
+
+**Scope & conditions.** Unless noted, values refer to the one-cell embryo at 20–23 °C and standard lab strains, with stage context indicated. I give ranges/units and put a primary PMID/DOI next to each quantitative or mechanistic claim.
+
+---
+
+## 1) Maternal γ-tubulin (TBG-1) provisioning
+
+**Absolute abundance (whole zygote):**
+
+* Direct **protein copy-number per zygote is not yet reported** for TBG-1. A microPublication combining smFISH (for *tbg-1* mRNA) and GFP::TBG-1 imaging shows **widespread cytoplasmic *tbg-1* transcripts** and **strong centrosomal TBG-1 protein** localization in the 1-cell embryo, but does **not** report absolute molecules/cell. (PMID: **32550353** / DOI: **10.17912/W2CW8H**)
+* γ-tubulin is **the sole γ-tubulin isotype (tbg-1)** in *C. elegans* embryos. (Frontiers review citing primary genetics; not quantitative but clarifies isoform: DOI: **10.3389/fcell.2022.860065**)
+
+**Recruitment to centrosomes over time (zygote, minutes post-fertilization):**
+
+* **PCM maturation and γ-tubulin recruitment require SPD-2 and SPD-5;** reducing SPD-2 yields “trace” γ-tubulin at centrosomes and **few astral MTs** (functional readout of reduced γ-tubulin/γ-TuRC). (PMID: **15068791**, Dev Cell 2004)
+* **Cyclin E/Cdk2** activity is required at **polarity establishment (~6–8 min post-fertilization)** to enable timely **centrosome protein recruitment** (including PCM that recruits γ-tubulin). (PMID: **17115027**)
+* **Aurora-A (AIR-1)** is also required for centrosome maturation (enables robust γ-tubulin–dependent nucleation). (JCB 2001; DOI: **10.1083/jcb.200108051**)
+
+**γ-TuRC particles per centrosome:**
+
+* **Direct counts in the zygote are not available.** Recent **cryo-ET** shows *C. elegans* PCM microtubules have **11 protofilaments** and reveals **atypical γ-TuRCs with ~11-fold symmetry at minus ends**, consistent with **γ-TuRC-like nucleators** operating in embryos. This is structural evidence for γ-TuRC presence, not a numerical count. (PMID: **39721584** / DOI: **10.1016/j.devcel.2024.12.002**)
+* As a **working estimate**, the **number of active nucleators** at metaphase must be **in the thousands** (see Section 2: >10,000 MTs/centrosome at metaphase), implying on the order of **10^3–10^4 γ-TuRC-like sites** if each nucleates ~1 MT minus end at peak. (Inference from PMID: **31636117**; see below)
+
+---
+
+## 2) Number of microtubule nucleation sites and aster size
+
+**Total MTs per centrosome (metaphase):**
+
+* **>10,000 microtubules per single centrosome** in the one-cell embryo at **metaphase**, with **~230 µM polymer** at the centrosome and **~470 µM soluble α/β-tubulin** locally concentrated (∼10× cytoplasm), for **~660 µM total** tubulin near the centrosome. (PMID: **31636117**; J Cell Biol 2019; also PMC: **PMC6891098**)
+
+**Breakdown by MT classes (half-spindle, 1-cell embryo):**
+
+* **Electron tomography (ET)** quantifies a **median 8,331 MTs per half spindle** (i.e., per centrosome side) at **metaphase/anaphase**, subdivided into KMTs (~227 at metaphase), non-KMT spindle MTs, and **astral MTs (AMTs)**; AMTs comprise the remainder outside the spindle cone. (DOI: **10.1038/ncomms15288**)
+
+  * This dataset indicates **thousands of non-KMT/astral MTs** per half spindle at peak. (DOI: **10.1038/ncomms15288**)
+
+**Stage dependence:**
+
+* **Before pronuclear meeting & prophase:** PCM is smaller; **nucleation increases with PCM growth** (scales with centrosome size set by limiting maternal components). (PMID: **21802300**; DOI: **10.1016/j.cub.2011.06.056**)
+* **Metaphase:** Peaks in MT number (**>10,000 per centrosome**) and tubulin concentration at centrosomes. (PMID: **31636117**)
+* **General principle:** Robust nucleation needs **AIR-1, SPD-2, SPD-5, γ-tubulin**; **centrosomes do not nucleate to saturation** under normal conditions (EB1 tracking in zygote). (PMID: **16054029**)
+
+**Methods note:** Numbers above come from **serial ET reconstructions** and **correlative LM/EM**, plus **plus-end tracking** (EB1::GFP) for nucleation/growth. (PMIDs: **31636117**, **16054029**; DOI: **10.1038/ncomms15288**)
+
+---
+
+## 3) Molecular trigger & timing of centriole duplication in the zygote
+
+**Core licensing/assembly pathway (conserved “Plk4-like” cascade):**
+
+* **CYE-1 (Cyclin E)/CDK-2** activity is **required to initiate centrosome protein recruitment** at polarity establishment and to set up duplication licensing during **S phase** of the first embryonic cell cycle. (PMID: **17115027**)
+* **SPD-2 (CEP192)** acts **upstream** at centrioles to recruit **ZYG-1 (Plk4-like kinase)**; **spd-2** is required for **duplication and PCM maturation**. (PMIDs: **15068791**, **15268886** / Dev Cell 2004; and review DOI: **10.1016/j.febslet.2014.06.030**)
+* **ZYG-1 (Plk4-like)** is **essential for daughter centriole formation**; localizes transiently to centrosomes. (Cell 2001; DOI: **10.1016/S0092-8674(01)00338-5**)
+
+  * **Quantitative regulation:** ZYG-1 **copy level is rate-limiting** and is **restrained by PP1 (GSP-1/2)**; elevating ZYG-1 increases centriole number (regulatory threshold behavior, not an absolute molecule count). (PMID: **28158104**)
+  * **Phospho-control of SAS-6 by ZYG-1** promotes **cartwheel assembly** (C. elegans in vivo biochemistry; recent EMBO Mol Med). (DOI: **10.1038/s44319-024-00157-y**)
+* **SAS-6 & SAS-5 (Ana2/STIL-like)**: recruited downstream of ZYG-1 to build the **cartwheel**; SAS-5 dosage influences centriole number. (e.g., G3 2016 review of pathway; DOI: **10.1534/g3.115.025478**)
+* **SAS-4** adds MT singlets to complete the centriole cylinder. (Classic *C. elegans* centriole genetics summarized in Nigg review; DOI: **10.1016/j.febslet.2014.06.030**)
+* **SPD-5** (pericentrin-like scaffold) and **PCMD-1** (centriolar–PCM bridge) are **not core for cartwheel** but are **essential for PCM scaffold assembly/maturation** that recruits γ-tubulin/γ-TuRC and boosts nucleation capacity. (PMIDs: **28575670**, **34545391**/**PMC10659035**; DOI: **10.1126/science.aaa3923**)
+
+**Numeric thresholds?**
+
+* No **absolute concentration/copy-number thresholds** for initiation are established in vivo in zygotes. The **control is primarily cell-cycle/kinase-driven (CYE-1/CDK-2 → SPD-2 → ZYG-1 → SAS-6/5/4)** with **dosage sensitivity** (e.g., ZYG-1 up/down shifts centriole number). (PMIDs: **17115027**, **28158104**, **15068791**, **39721584**)
+
+**Timeline (approx., minutes post-fertilization):**
+
+* **0–4 min**: Fertilization; paternal centrioles enter; early PCM growth begins. (WormBook timeline; PMID: **17059895**)
+* **~6–8 min**: **Polarity establishment**; **CYE-1/CDK-2–dependent PCM recruitment** ramps. (PMID: **17115027**)
+* **~8–12 min**: Pronuclear migration/meeting; centrosomes enlarge; **γ-tubulin recruitment increases** with PCM growth. (PMIDs: **17059895**, **15068791**)
+* **~12–15 min**: NEBD → **metaphase**; **peak PCM** and **peak nucleation** (>10^4 MTs/centrosome). (PMID: **31636117**; DOI: **10.1038/ncomms15288**)
+* **Centriole duplication** in early embryos occurs **during S phase of the first cycle**, following the conserved ZYG-1/SAS cascade; the **new procentrioles are evident for the next division**. (eLife **2017** SAS-7→SPD-2 upstream study supports early-cycle timing; DOI: **10.7554/eLife.20353**; plus pathway primaries above)
+
+---
+
+## 4) PCM composition & γ-tubulin/γ-TuRC recruitment
+
+**Scaffold levels/relationships (qualitative→semi-quantitative):**
+
+* **SPD-2 (CEP192)** and **SPD-5** are **core PCM scaffold proteins**; SPD-2 is required to seed PCM and recruit ZYG-1; **loss reduces centrosomal γ-tubulin and MT nucleation** (functional proxy for reduced γ-TuRC). (PMID: **15068791**)
+* **SPD-5 forms a selective condensate/scaffold**; **PLK-1 phosphorylation sites** in SPD-5 control scaffold assembly strength; **condensed PCM concentrates tubulin ~10×** and potentiates γ-tubulin-dependent nucleation. (PMIDs: **28575670**, **27799360**; DOI: **10.1126/science.aaa3923**)
+* **PCMD-1** bridges centrioles and PCM, **recruiting SPD-5/PLK-1** and stabilizing the PCM scaffold (thereby promoting γ-tubulin recruitment indirectly). (PMID: **34545391**/**PMC10659035**)
+* **Quantitative structural context:** **Cryo-ET** reveals **dense, porous PCM** with **short 11-pf microtubules nucleated by atypical 11-fold γ-TuRC-like structures**, consistent with **many nucleation-competent sites** embedded in PCM. (PMID: **39721584**)
+* **Scaling law:** In embryos, **centrosome size (hence nucleation capacity) scales with cell size** due to a **limiting maternal pool** of PCM components (implies “budgeted” γ-tubulin/TuRC recruitment per cell cycle). (PMID: **21802300**; DOI: **10.1016/j.cub.2011.06.056**)
+
+---
+
+## 5) Practical modeling guidance (initial values & rules of engagement)
+
+**Per-centrosome γ-TuRC / γ-tubulin pool:**
+
+* Use **γ-TuRC-like nucleators = 3,000–12,000 per centrosome at metaphase**, with a **broad prior centered ~6,000–8,000**.
+
+  * **Rationale:** >10,000 MTs per centrosome at metaphase (PMID: **31636117**) and one γ-TuRC typically templates **one minus end**; some minus ends may arise by branching or re-use, so pick **10^3–10^4** as the active site range.
+  * **Structure constraint:** γ-TuRC symmetry appears **~11-fold** in *C. elegans* PCM (cryo-ET), which can inform minus-end geometry in the model. (PMID: **39721584**)
+
+**MT nucleation rate / MT number per centrosome:**
+
+* Target **steady-state counts** by stage (per centrosome):
+
+  * **Pre-pronuclear migration (early prophase):** **~1–3×10^3** MTs (order-of-magnitude), rising with PCM growth. (Extrapolation from scaling + EB1 data; PMIDs: **16054029**, **21802300**)
+  * **Metaphase peak:** **~1×10^4 – 1.2×10^4** MTs. (PMID: **31636117**; DOI: **10.1038/ncomms15288**)
+* If you model **rates** rather than steady counts, tune nucleation to achieve the above **stage-specific plateaus** and enforce **non-saturation** under wild-type (i.e., capacity > demand), consistent with EB1-based nucleation not saturating PCM. (PMID: **16054029**)
+* Include **tubulin concentration effects**: impose a **10× local enrichment** of soluble tubulin at centrosomes (**~470 µM soluble**; **~230 µM polymer**; total **~660 µM** at metaphase). This boosts nucleation/growth probability near PCM. (PMID: **31636117**)
+
+**Centriole duplication condition (qualitative/quantitative rule):**
+
+* **Do not hard-code an absolute molecule threshold**; instead, **gate duplication on**:
+
+  1. **Cell-cycle state = S phase** of the first embryonic cycle;
+  2. **Active CYE-1/CDK-2** present;
+  3. **SPD-2 at the mother centriole** sufficient to **recruit/activate ZYG-1**;
+  4. **ZYG-1 activity** exceeding a **regulatory set-point** (dosage-sensitive, PP1-modulated);
+  5. **Successful recruitment of SAS-6/SAS-5 → cartwheel**, followed by **SAS-4** addition.
+     (PMIDs/DOIs: **17115027**, **15068791**, **28158104**, **10.1016/S0092-8674(01)00338-5**, **10.1038/s44319-024-00157-y**, **10.7554/eLife.20353**, **10.1016/j.febslet.2014.06.030**)
+* For timing, allow **licensing/early daughter assembly during S phase**, preceding the first division, with the **new procentrioles maturing for the next cycle**. (eLife **2017** SAS-7→SPD-2; DOI: **10.7554/eLife.20353**)
+
+**Uncertainty notes:**
+
+* **Absolute TBG-1 protein copies/zygote** are **unknown**; treat whole-cell γ-tubulin as a **large maternal pool** with **centrosomal recruitment limited by PCM scaffold availability (SPD-2/5, PCMD-1) and kinase activity**. (PMIDs: **15068791**, **28575670**, **34545391**)
+* **γ-TuRC counts** are **inferred** from **minus-end counts** and **structural symmetry**; adjust if your model distinguishes **nucleation vs. anchoring** sites. (PMIDs: **31636117**, **39721584**)
+* **Stage durations** vary with temperature/strain; use WormBook timing as a **template** and scale if needed. (PMID: **17059895**)
+
+---
+
+## Key primary sources (selection; each claim above already has an inline PMID/DOI)
+
+* **MT counts & tubulin concentrations (1-cell metaphase):** Baumgart et al., JCB 2019. **PMID: 31636117**; **PMC6891098**.
+* **Whole-spindle ET counts (8,331 MTs/half spindle):** Redemann et al., Nat Commun 2017. **DOI: 10.1038/ncomms15288**; **PMC5437269**.
+* **Nucleation not saturated; AIR-1/SPD-2/SPD-5/γ-tubulin required:** Srayko et al., Dev Cell 2005. **PMID: 16054029**.
+* **Centrosome size set by limiting PCM pool:** Decker et al., Curr Biol 2011. **PMID: 21802300** / **DOI: 10.1016/j.cub.2011.06.056**.
+* **CYE-1/CDK-2 timing for centrosome assembly:** Cowan & Hyman, Dev Cell 2006. **PMID: 17115027**.
+* **SPD-2 for duplication & PCM maturation:** Kemp et al., Dev Cell 2004. **PMID: 15068791**.
+* **ZYG-1 essential for daughter centriole formation:** O’Connell et al., Cell 2001. **DOI: 10.1016/S0092-8674(01)00338-5**.
+* **ZYG-1 dosage control by PP1:** Peel et al., PLoS Genet 2017. **PMID: 28158104**.
+* **γ-TuRC-like 11-fold symmetry & PCM architecture (cryo-ET):** Tollervey et al., Dev Cell 2025. **PMID: 39721584** / **DOI: 10.1016/j.devcel.2024.12.002**.
+* **PCM scaffold condensation & tubulin concentrating:** Woodruff et al., Cell 2017. **PMID: 28575670**; Woodruff et al., Science 2015. **DOI: 10.1126/science.aaa3923**.
+* **PCMD-1 bridging centrioles↔PCM (recruiting SPD-5/PLK-1):** Stenzel et al., Development 2021. **PMID: 34545391** / **PMC10659035**.
+* **TBG-1 mRNA/protein localization in early embryo:** DeMeyer & Song, microPublication 2017. **PMID: 32550353** / **DOI: 10.17912/W2CW8H**.
+
+---
+
+### TL;DR model seed values
+
+* **γ-TuRC-like nucleators per centrosome (metaphase):** **~6,000–8,000** (allow **3,000–12,000**). (From MT counts & one-TuRC-per-minus-end assumption; PMID **31636117**; structural support **39721584**)
+* **MTs per centrosome:** **Early prophase** ~10^3; **Metaphase** **~1×10^4 – 1.2×10^4**. (PMID **31636117**; DOI **10.1038/ncomms15288**)
+* **Local tubulin near PCM:** **~470 µM soluble**, **~230 µM polymer** (metaphase). (PMID **31636117**)
+* **Duplication rule:** **S-phase + active CYE-1/CDK-2**, **SPD-2-mediated ZYG-1 recruitment**, **ZYG-1→SAS-6/5/4** cartwheel/cylinder → duplication; **no fixed numeric thresholds**, but **dosage sensitivity** (ZYG-1/PP1 axis). (PMIDs **17115027**, **15068791**, **28158104**, **Cell 2001 DOI above**, **10.1038/s44319-024-00157-y**)
+
+If you want, I can convert this into a small JSON/YAML block for direct ingestion into your simulator.

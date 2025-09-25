@@ -11,6 +11,7 @@
 #include "biology/organelles/Spindle.h"
 #include "chemistry/molecules/MoleculeWiki.h"
 #include "utils/log/ILog.h"
+#include "utils/fileUtils/fileUtils.h"
 #include <chrono> // For high_resolution_clock
 #include <cmath>  // For std::abs
 
@@ -288,12 +289,8 @@ Worm::Worm()
     auto pInternalMedium = createZygoteMedium();
     auto pCell = Cell::createCell(pInternalMedium, chromosomes, CellType::Zygote, Species::C_ELEGANS);
     
-    // Simulate fertilization by adding a centrosome from the sperm
-    // In C. elegans, the egg lacks a centrosome and receives one from the sperm
-    // The sperm enters at the posterior end, so place centrosome near posterior boundary
-    float3 posteriorEntryPoint(0.0f, -0.8f, 0.0f);  // Near posterior boundary
-    auto pCentrosome = std::make_shared<Centrosome>(std::weak_ptr<Cell>(pCell), posteriorEntryPoint);
-    pCell->addOrganelle(StringDict::ID::ORGANELLE_CENTROSOME, pCentrosome);
+    // Simulate fertilization and seed maternal γ-tubulin near the posterior centrosome
+    seedCentrosomeAndMaternalGammaTubulin(pCell, float3(0.0f, -0.8f, 0.0f));
     
     // Create CellSim to wrap the Cell
     auto pCellSim = std::make_shared<CellSim>(pCell);
@@ -301,6 +298,18 @@ Worm::Worm()
     
     // Set up the data collector
     setupDataCollector();
+}
+
+void Worm::seedCentrosomeAndMaternalGammaTubulin(std::shared_ptr<Cell> pCell, const float3& posteriorEntryPoint)
+{
+    // Add centrosome at posterior entry point (sperm-derived centrioles)
+    auto pCentrosome = std::make_shared<Centrosome>(std::weak_ptr<Cell>(pCell), posteriorEntryPoint);
+    pCell->addOrganelle(StringDict::ID::ORGANELLE_CENTROSOME, pCentrosome);
+
+    // Seed maternal γ-tubulin at the centrosome location to enable initial Y_TuRC formation pre-duplication
+    auto& medium = pCell->getInternalMedium();
+    MPopulation gammaTubulinSeed(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS), 1000.0);
+    medium.addMolecule(gammaTubulinSeed, posteriorEntryPoint);
 }
 
 void Worm::setupDataCollector()
@@ -314,11 +323,21 @@ void Worm::setupDataCollector()
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     
     // Initialize the DataCollector with the cell's internal medium
+    // Resolve data/simOutput via FileUtils and write sim.csv there
+    std::filesystem::path simOutPath;
+    std::string simCsv = "sim.csv";
+    if (FileUtils::findTheFolder("data/simOutput", simOutPath)) {
+        std::filesystem::create_directories(simOutPath);
+        simCsv = (simOutPath / simCsv).string();
+    }
     m_pDataCollector = std::make_unique<DataCollector>(
         internalMedium, 
-        "worm_simulation_data.csv",
+        simCsv,
         5.0f  // Collect data every 5 seconds
     );
+    // Provide cell for global metrics and enable nucleation site tracking
+    m_pDataCollector->setCell(m_pCellSims[0]->getCell());
+    m_pDataCollector->setTrackNucleationSites(true);
     
     // Add single collection point at posterior for γ-tubulin protein and mRNA
     float3 posteriorPos(0.0f, -0.8f, 0.0f); // Posterior region near centrosome
@@ -484,6 +503,27 @@ bool Worm::validateCentrosomeBehavior(float fTimeSec) const
         LOG_INFO("Warning: No centrosome found in cell at %.2lf sec (after expected fertilization time)", fTimeSec);
         return false;
     }
+
+	// Biologically grounded guard: centriole duplication should not occur too early.
+	// This check is intentionally conservative: we prevent duplication before 6 minutes.
+	// Literature context (see data/prompts/mtLiterature.txt):
+	// - Duplication is S-phase–restricted and occurs well after meiotic exit; an earliest realistic
+	//   window at 20–22 °C is ≳10–12 min post-fertilization, with PCM/γ-tubulin maturation rising
+	//   toward NEBD (~12–15 min) and metaphase ~15 min.
+	//   (Sonneville et al. 2012, J Cell Biol; PMC3265957. Baumgart et al. 2019, J Cell Biol; PMID:31636117.)
+	// - Cyclin E/CDK-2 is required for centrosome assembly and couples duplication competence to
+	//   the cell cycle (Cowan & Hyman 2006, Nat Cell Biol; PMID:17115027).
+	// - SPD-2 (CEP192) functions upstream to enable duplication/PCM maturation and γ-tubulin recruitment
+	//   (Kemp et al. 2004, Dev Cell; PMID:15068791). Pathway: SPD-2 → ZYG-1 → SAS-6/5/4.
+	// - Centrosome size/nucleation capacity scales with a limiting maternal PCM pool (Decker et al. 2011,
+	//   Curr Biol; PMID:21802300), further arguing against fixed early-time duplication.
+	// Note: We keep the 6-minute guard as a conservative lower bound until an explicit S-phase + markers
+	// gate is implemented. Adjust with temperature if using time guards across conditions.
+	static constexpr float MIN_DUPLICATION_TIME_SEC = 360.0f; // 6 minutes (conservative lower bound)
+	if (fTimeSec < MIN_DUPLICATION_TIME_SEC && pCentrosome->isDuplicated()) {
+		LOG_INFO("Warning: Centrosome duplicated too early at %.2lf sec (before %.2f sec)", fTimeSec, (double)MIN_DUPLICATION_TIME_SEC);
+		return false;
+	}
     
     // Check centrosome position during different phases
     float3 centrosomePos = pCentrosome->getNormalizedPosition();
