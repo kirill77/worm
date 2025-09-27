@@ -30,10 +30,15 @@ VisEngine::~VisEngine() = default;
 
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 {
-    // Initialize logging to a file in data/simOutput (resolved via FileUtils)
+    // Initialize logging to a file in data/simOutDebug (Debug) or data/simOutRelease (Release)
     {
         std::filesystem::path dataPath;
-        if (FileUtils::findTheFolder("data/simOutput", dataPath)) {
+        #ifdef _DEBUG
+        const char* kSimOutFolder = "data/simOutDebug";
+        #else
+        const char* kSimOutFolder = "data/simOutRelease";
+        #endif
+        if (FileUtils::findTheFolder(kSimOutFolder, dataPath)) {
             std::filesystem::create_directories(dataPath);
             const std::string logPath = (dataPath / "sim.log").string();
             ILog::create(logPath);

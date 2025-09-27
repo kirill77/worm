@@ -333,10 +333,15 @@ void Worm::setupDataCollector()
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     
     // Initialize the DataCollector with the cell's internal medium
-    // Resolve data/simOutput via FileUtils and write sim.csv there
+    // Resolve data/simOutDebug (Debug) or data/simOutRelease (Release) via FileUtils and write sim.csv there
     std::filesystem::path simOutPath;
     std::string simCsv = "sim.csv";
-    if (FileUtils::findTheFolder("data/simOutput", simOutPath)) {
+    #ifdef _DEBUG
+    const char* kSimOutFolder = "data/simOutDebug";
+    #else
+    const char* kSimOutFolder = "data/simOutRelease";
+    #endif
+    if (FileUtils::findTheFolder(kSimOutFolder, simOutPath)) {
         std::filesystem::create_directories(simOutPath);
         simCsv = (simOutPath / simCsv).string();
     }
@@ -591,8 +596,8 @@ bool Worm::validateGammaTubulinLevels(float fTimeSec) const
     // Sample only at the expected centrosome position
     float3 posteriorCentrosome(0.0f, -0.8f, 0.0f);
 
-    double gammaProtCentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN), posteriorCentrosome);
-    double gammaMRNACentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA), posteriorCentrosome);
+    double gammaProtCentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS), posteriorCentrosome);
+    double gammaMRNACentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS), posteriorCentrosome);
 
     // Simple early-time expectations: within first 5 min, protein remains very low; mRNA ramps up
     // Thresholds chosen conservatively for current model scaling
