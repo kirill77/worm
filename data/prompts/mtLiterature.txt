@@ -152,4 +152,13 @@ Got it — here’s a paste-ready answer the other AI can read (I kept it struct
 * **Local tubulin near PCM:** **~470 µM soluble**, **~230 µM polymer** (metaphase). (PMID **31636117**)
 * **Duplication rule:** **S-phase + active CYE-1/CDK-2**, **SPD-2-mediated ZYG-1 recruitment**, **ZYG-1→SAS-6/5/4** cartwheel/cylinder → duplication; **no fixed numeric thresholds**, but **dosage sensitivity** (ZYG-1/PP1 axis). (PMIDs **17115027**, **15068791**, **28158104**, **Cell 2001 DOI above**, **10.1038/s44319-024-00157-y**)
 
+---
+
+## Quantitative bounds for γ-tubulin content (cross-species reference)
+
+- No calibrated absolute γ-tubulin (TBG-1) copy numbers per centrosome or per 1-cell embryo are reported for C. elegans.
+- Human mitotic centrosome (KE37/RPE-1): ~1,340 γ-tubulin copies/centrosome (Bauer et al., EMBO J 2016; PMID: 27539480; doi:10.15252/embj.201694462). Assuming ~13 γ-tubulin per γ-TuRC ⇒ ~100 γ-TuRCs/centrosome (upper-bound if all γ-tubulin is in TuRCs).
+- Interphase scaling: interphase centrosomes often carry ~5–20% of mitotic γ-tubulin (Haren 2023 review; J Cell Biol; PMID: 37695451; doi:10.1083/jcb.202212043) ⇒ ~70–270 copies by the same reference.
+- Caveats for C. elegans: >10,000 MTs/centrosome at metaphase (Baumgart 2019; PMID: 31636117) and 11‑pf MTs/γ‑TuRC‑like symmetry (Tollervey 2025; PMID: 39721584) imply many nucleation‑competent sites; worm embryos can nucleate partly γ‑tubulin‑independently, so human numbers are bounds, not targets.
+
 If you want, I can convert this into a small JSON/YAML block for direct ingestion into your simulator.
