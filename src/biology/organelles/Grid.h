@@ -23,6 +23,9 @@ struct Grid
     GridCell& operator[](size_t index) { return m_grid[index]; }
     const GridCell& operator[](size_t index) const { return m_grid[index]; }
 
+    // Expose grid resolution
+    static constexpr uint32_t resolution() { return GRID_RES; }
+
 private:
     static constexpr uint32_t GRID_RES = 3;  // 3x3x3 grid
     std::array<GridCell, GRID_RES* GRID_RES* GRID_RES> m_grid;

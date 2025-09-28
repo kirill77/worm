@@ -14,7 +14,7 @@
  * the internal cellular environment from the external environment.
  * It mediates interactions between internal and external media.
  */
-struct Cortex : public Organelle
+class Cortex : public Organelle
 {
 public:
     
@@ -61,8 +61,8 @@ public:
 	 */
 	void transferBindingSiteMoleculesToMedium();
 
-	// Map normalized coordinates [-1,1] to cortex surface world position via ray cast
-	float3 normalizedToWorld(const float3& normalizedPos);
+    // Map normalized coordinates [-1,1] to cortex surface world position via ray cast
+    float3 normalizedToWorld(const float3& normalizedPos);
 
 private:
     // Convert triangle index and barycentric coordinates to normalized [-1,1] coordinates

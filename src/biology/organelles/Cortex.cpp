@@ -62,6 +62,9 @@ void Cortex::update(double fDtSec, Cell& cell)
     // Push molecules back into the grid at updated positions after shape update
     transferBindingSiteMoleculesToMedium();
 
+    // After shape update, update per-cell volumes for concentration queries
+    cell.getInternalMedium().updateGridCellVolumes(*this);
+
     // Note: In a more advanced implementation, this method could include:
     // - Membrane fluidity changes
     // - Lipid raft formation/movement

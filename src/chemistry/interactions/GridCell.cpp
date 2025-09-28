@@ -7,6 +7,7 @@
 GridCell::GridCell()
 {
     // Default constructor
+    m_volumeMicroM3 = 0.0;
 }
 
 Population& GridCell::getOrCreateMolPop(const Molecule& molecule)

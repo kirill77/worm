@@ -6,7 +6,10 @@
 #include <random>
 #include <algorithm>
 #include <cassert>
+#include <vector>
 #include "chemistry/interactions/GridCell.h"
+// Use forward-declared Cortex; include header only where needed
+#include "Cortex.h"
 
 // Global random number generator for consistent randomness
 static std::mt19937 g_rng(std::random_device{}());
@@ -21,6 +24,97 @@ void Medium::addMolecule(const MPopulation& population, const float3& position)
 
     moleculePop.setBound(population.isBound());
     moleculePop.m_fNumber += population.m_population.m_fNumber;
+}
+
+double Medium::getMoleculeConcentration(const Molecule& molecule, const float3& position) const
+{
+    const auto& gridCell = m_grid.findCell(position);
+    auto it = gridCell.m_molecules.find(molecule);
+    double count = (it != gridCell.m_molecules.end()) ? it->second.m_fNumber : 0.0;
+    double vol = gridCell.getVolumeMicroM3();
+    if (vol <= 0.0)
+        return 0.0;
+    return count / vol; // molecules per µm^3
+}
+
+void Medium::updateGridCellVolumes(Cortex& cortex)
+{
+    // Precompute world positions of all grid vertices and reuse across cells
+    const uint32_t res = Grid::resolution();
+    const uint32_t vres = res + 1;
+
+    auto edgeCoord = [&](uint32_t i) { return -1.0 + 2.0 * (static_cast<double>(i) / static_cast<double>(res)); };
+
+    // Precompute normalized coordinates for vertices along each axis
+    std::vector<double> edges(vres);
+    for (uint32_t i = 0; i < vres; ++i) {
+        edges[i] = -1.0 + 2.0 * (static_cast<double>(i) / static_cast<double>(res));
+    }
+
+    // Precompute world positions for each vertex (ix,iy,iz) with ix,iy,iz in [0..res]
+    const uint32_t vertCount = vres * vres * vres;
+    std::vector<float3> worldVerts(vertCount);
+    auto vindex = [&](uint32_t ix, uint32_t iy, uint32_t iz) {
+        return ix * vres * vres + iy * vres + iz;
+    };
+    for (uint32_t ix = 0; ix < vres; ++ix)
+    for (uint32_t iy = 0; iy < vres; ++iy)
+    for (uint32_t iz = 0; iz < vres; ++iz)
+    {
+        float3 npos((float)edges[ix], (float)edges[iy], (float)edges[iz]);
+        worldVerts[vindex(ix,iy,iz)] = cortex.normalizedToWorld(npos);
+    }
+
+    // Helper to compute volume of a tetrahedron
+    auto tetVolume = [](const float3& a, const float3& b, const float3& c, const float3& d) {
+        float3 ab = b - a, ac = c - a, ad = d - a;
+        float v = dot(ab, cross(ac, ad));
+        return std::abs(v) / 6.0f;
+    };
+
+    // Now iterate over cells and use precomputed vertices
+    double totalGridVolume = 0.0;
+    for (uint32_t ix = 0; ix < res; ++ix)
+    for (uint32_t iy = 0; iy < res; ++iy)
+    for (uint32_t iz = 0; iz < res; ++iz)
+    {
+        const float3& c000 = worldVerts[vindex(ix,   iy,   iz  )];
+        const float3& c100 = worldVerts[vindex(ix+1, iy,   iz  )];
+        const float3& c010 = worldVerts[vindex(ix,   iy+1, iz  )];
+        const float3& c110 = worldVerts[vindex(ix+1, iy+1, iz  )];
+        const float3& c001 = worldVerts[vindex(ix,   iy,   iz+1)];
+        const float3& c101 = worldVerts[vindex(ix+1, iy,   iz+1)];
+        const float3& c011 = worldVerts[vindex(ix,   iy+1, iz+1)];
+        const float3& c111 = worldVerts[vindex(ix+1, iy+1, iz+1)];
+
+        double vol = 0.0;
+        vol += tetVolume(c000, c100, c010, c001);
+        vol += tetVolume(c100, c110, c010, c111);
+        vol += tetVolume(c100, c010, c001, c111);
+        vol += tetVolume(c010, c001, c011, c111);
+        vol += tetVolume(c100, c001, c101, c111);
+
+        // Store volume in corresponding GridCell (center at midpoints)
+        float x0 = (float)edges[ix], x1 = (float)edges[ix+1];
+        float y0 = (float)edges[iy], y1 = (float)edges[iy+1];
+        float z0 = (float)edges[iz], z1 = (float)edges[iz+1];
+        float3 centerNorm(
+            (x0 + x1) * 0.5f,
+            (y0 + y1) * 0.5f,
+            (z0 + z1) * 0.5f);
+        GridCell& gc = m_grid.findCell(centerNorm);
+        gc.setVolumeMicroM3(vol);
+
+        totalGridVolume += vol;
+    }
+
+    // Compare total grid volume to medium volume; assert they are reasonably close
+    if (m_fVolumeMicroM > 0.0)
+    {
+        double relError = std::abs(totalGridVolume - m_fVolumeMicroM) / m_fVolumeMicroM;
+        // Allow generous tolerance due to coarse hexahedron-to-tetrahedra approximation and mapping
+        assert(relError < 0.25);
+    }
 }
 
 void Medium::toBindingSites(std::vector<BindingSite>& bindingSites, const std::vector<Molecule>& bindableMolecules)

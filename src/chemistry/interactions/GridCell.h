@@ -30,6 +30,12 @@ public:
     // tRNA management  
     void updateTRNAs(double dt);  // Handle tRNA charging transitions (uncharged -> charged)
 
+    // Volume accessors
+    inline double getVolumeMicroM3() const { return m_volumeMicroM3; }
+    inline void setVolumeMicroM3(double volume) { m_volumeMicroM3 = volume; }
+
 private:
+    // Approximate physical volume of this grid cell in µm^3
+    double m_volumeMicroM3;
     // No longer need separate RNA storage - use m_molecules with MRNA type
 }; 

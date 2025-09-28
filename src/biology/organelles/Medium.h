@@ -15,6 +15,9 @@
 #include "GridDiffusion.h"
 #include "chemistry/interactions/ResourceDistributor.h"
 
+// Forward declaration to avoid circular include
+class Cortex;
+
 class Medium
 {
 private:
@@ -44,12 +47,17 @@ public:
     
     // Get molecule number at a specific location
     double getMoleculeNumber(const Molecule& molecule, const float3& position) const;
+    // Get molecule concentration (per µm^3) at a specific location
+    double getMoleculeConcentration(const Molecule& molecule, const float3& position) const;
     
     // Get total number of molecules across all cells
     double getTotalMoleculeNumber(const Molecule& molecule) const;
     
     // Get volume in micrometers
     double getVolumeMicroM() const { return m_fVolumeMicroM; }
+
+    // Update per-cell volumes based on cortex world mapping
+    void updateGridCellVolumes(Cortex& cortex);
     
     // Main update function
     void update(double dt);

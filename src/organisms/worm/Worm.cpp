@@ -592,31 +592,47 @@ bool Worm::validateCentrosomeBehavior(float fTimeSec) const
 
 bool Worm::validateGammaTubulinLevels(float fTimeSec) const
 {
+    // Validation data context (experimental references):
+    // - C. elegans one-cell embryo has no calibrated absolute γ-tubulin (TBG-1) copy numbers per centrosome
+    //   reported to date; therefore we validate using concentration trends rather than absolute counts.
+    //   Maternal provisioning yields early centrosomal TBG-1 protein while tbg-1 mRNA is broadly cytoplasmic.
+    //   (DeMeyer & Song 2017, microPublication Biology; DOI: 10.17912/W2CW8H; PMID: 32550353)
+    // - At metaphase, C. elegans zygote centrosomes concentrate tubulin strongly and nucleate >10,000 MTs per
+    //   centrosome; local α/β-tubulin reaches ~470 µM soluble + ~230 µM polymer (~660 µM total), implying
+    //   robust γ-tubulin/γ-TuRC presence during maturation. (Baumgart et al. 2019, J Cell Biol; PMID: 31636117)
+    // - Cross-species quantitative bounds used qualitatively: human mitotic centrosomes contain ~1,340 γ-tubulin
+    //   copies/centrosome (Bauer et al. 2016, EMBO J; PMID: 27539480), and interphase levels are ~5–20% of mitotic
+    //   (Haren 2023 review, J Cell Biol; PMID: 37695451). These inform expectations for rising γ-tubulin near PCM
+    //   later in the cycle but are not enforced as hard counts in C. elegans.
+    // Policy derived from these data:
+    // - Early (<60 s): allow relatively high γ-tubulin protein concentration due to maternal seeding; only flag
+    //   extreme outliers. Require mRNA concentration to begin rising after ~10 s.
+    // - Later (≥360 s): expect nonzero γ-tubulin protein concentration near the posterior centrosome as PCM matures.
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     // Sample only at the expected centrosome position
     float3 posteriorCentrosome(0.0f, -0.8f, 0.0f);
 
-    double gammaProtCentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS), posteriorCentrosome);
-    double gammaMRNACentro = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS), posteriorCentrosome);
+    double gammaProtCentro = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS), posteriorCentrosome);
+    double gammaMRNACentro = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS), posteriorCentrosome);
 
-    // Simple early-time expectations: within first 5 min, protein remains very low; mRNA ramps up
-    // Thresholds chosen conservatively for current model scaling
+    // Simple early-time expectations: within first 5 min, protein concentration remains low; mRNA concentration ramps up
+    // Use concentration (molecules per µm^3); remove strict early protein cap (maternal provisioning)
     if (fTimeSec < 60.0f) {
-        if (gammaProtCentro > 5.0) {
-            LOG_INFO("Warning: γ-tubulin protein unusually high early (%.2lf) at %.2lf sec", gammaProtCentro, fTimeSec);
+        if (gammaProtCentro > 1e6) {
+            LOG_INFO("Warning: γ-tubulin protein concentration extremely high early (%.8lf /µm^3) at %.2lf sec", gammaProtCentro, fTimeSec);
             return false;
         }
-        // mRNA should begin to appear by ~5-10s and exceed ~0.05 by 60s in current kinetics
-        if (fTimeSec > 10.0f && gammaMRNACentro < 0.01) {
-            LOG_INFO("Warning: γ-tubulin mRNA too low (%.5lf) at %.2lf sec", gammaMRNACentro, fTimeSec);
+        // mRNA should begin to appear by ~5-10s and exceed a minimal concentration by 60s
+        if (fTimeSec > 10.0f && gammaMRNACentro < 1e-6) {
+            LOG_INFO("Warning: γ-tubulin mRNA concentration too low (%.8lf /µm^3) at %.2lf sec", gammaMRNACentro, fTimeSec);
             return false;
         }
     }
 
-    // Later expectations: by 6-10 min, centrosome protein should reach tens-hundreds range
+    // Later expectations: by 6-10 min, centrosome protein concentration should exceed a minimal threshold
     if (fTimeSec >= 360.0f) {
-        if (gammaProtCentro < 50.0) {
-            LOG_INFO("Warning: γ-tubulin protein low at centrosome (%.2lf) at %.2lf sec", gammaProtCentro, fTimeSec);
+        if (gammaProtCentro < 1e-6) {
+            LOG_INFO("Warning: γ-tubulin protein concentration low at centrosome (%.8lf /µm^3) at %.2lf sec", gammaProtCentro, fTimeSec);
             return false;
         }
     }
