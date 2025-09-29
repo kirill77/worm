@@ -139,7 +139,7 @@ std::vector<std::string> DataCollector::generateHeaders() const
                 case ChemicalType::NUCLEOTIDE: moleculeTypeStr = "NUC"; break;
                 default: moleculeTypeStr = "OTHER"; break;
             }
-            headers.push_back(molecule.getName() + "(" + moleculeTypeStr + ")_" + point.name);
+            headers.push_back(molecule.getName() + "(" + moleculeTypeStr + ")_" + point.name + "[/µm^3]");
         }
     }
     

@@ -108,11 +108,12 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     gammaConc = std::max(0.0, gammaConc + dGammaConc);
 
     // Target: proportional to local γ-tubulin concentration and PCM maturation
-    // Keep target dimensionless by using a concentration-sensitivity factor instead of per-molecule scaling.
-    // Choose a tunable factor beta such that target TuRCs ≈ beta · gammaConc · m_pcmMaturation
-    // beta has units (complexes · µm^3)/molecule to cancel concentration; in practice, tune beta empirically.
-    const double beta = 0.02; // tunable sensitivity to concentration (choose to match desired TuRC counts)
-    int targetRingComplexes = static_cast<int>(std::max(0.0, gammaConc) * beta * m_pcmMaturation);
+    // Keep target dimensionless using a concentration sensitivity factor (empirical tuning)
+    // Provide a small basal count when PCM is present to ensure non-zero TuRCs pre-duplication
+    const double beta = 100.0; // tunable sensitivity to concentration
+    const int basal = (m_pcmMaturation > 0.05) ? 1 : 0; // minimal TuRCs when PCM emerges
+    int targetRingComplexes = static_cast<int>(std::round(std::max(0.0, gammaConc) * beta * m_pcmMaturation)) + basal;
+    if (targetRingComplexes < 0) targetRingComplexes = 0;
     if (targetRingComplexes < 0) targetRingComplexes = 0;
     int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());
 
