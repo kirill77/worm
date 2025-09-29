@@ -427,10 +427,10 @@ bool Worm::validatePARPolarization(float fTimeSec) const
     
     // Check membrane-bound proteins
     Species species = Species::C_ELEGANS;
-    double anteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, species), anteriorPos);
-    double posteriorPAR3 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, species), posteriorPos);
-    double anteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), anteriorPos);
-    double posteriorPAR2 = internalMedium.getMoleculeNumber(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), posteriorPos);
+    double anteriorPAR3 = internalMedium.getMoleculeConcentration(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, species), anteriorPos);
+    double posteriorPAR3 = internalMedium.getMoleculeConcentration(Molecule(StringDict::stringToId(par3Membrane), ChemicalType::PROTEIN, species), posteriorPos);
+    double anteriorPAR2 = internalMedium.getMoleculeConcentration(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), anteriorPos);
+    double posteriorPAR2 = internalMedium.getMoleculeConcentration(Molecule(StringDict::stringToId(par2Membrane), ChemicalType::PROTEIN, species), posteriorPos);
     
     // Check during polarity establishment with ramped thresholds and robust ratios
     if (fTimeSec < POLARITY_ESTABLISHMENT_END_SEC) {
@@ -474,17 +474,31 @@ bool Worm::validateCellCycle(float fTimeSec) const
 {
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     float3 nuclearPos(0.0f, 0.0f, 0.0f);
-    double cdk1Level = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::CDK_1, ChemicalType::PROTEIN), nuclearPos);
+    // Use concentration-based, relative validation: compare nuclear CDK-1 to a coarse cell-average
+    const double cdk1Nuclear = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::CDK_1, ChemicalType::PROTEIN), nuclearPos);
+    // Sample a few off-center points to approximate a cell-wide mean (grid-agnostic heuristic)
+    const float s = 0.5f;
+    const float3 samplePts[6] = { float3( s, 0, 0), float3(-s, 0, 0), float3(0,  s, 0), float3(0, -s, 0), float3(0, 0,  s), float3(0, 0, -s) };
+    double cdk1Sum = 0.0;
+    for (const auto& p : samplePts) {
+        cdk1Sum += internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::CDK_1, ChemicalType::PROTEIN), p);
+    }
+    const double cdk1Mean = cdk1Sum / 6.0;
+    const double epsConc = 1e-12;
+    const double cdk1Ratio = (cdk1Mean > epsConc) ? (cdk1Nuclear / cdk1Mean) : 0.0;
 
-    // Before nuclear envelope breakdown (0-12.5 minutes): CDK-1 should be relatively low
-    if (fTimeSec < NUCLEAR_ENVELOPE_BREAKDOWN_SEC && cdk1Level > 1000) {
-        LOG_INFO("Warning: CDK-1 levels too high before NEBD at %.2lf sec", fTimeSec);
+    // Before nuclear envelope breakdown (0-12.5 minutes): CDK-1 nuclear enrichment should be modest
+    // Use ratio thresholds (unitless) instead of absolute counts
+    static constexpr double PRE_NEBD_MAX_RATIO = 1.5;   // tuneable
+    static constexpr double ENTRY_MIN_RATIO   = 2.0;   // tuneable
+    if (fTimeSec < NUCLEAR_ENVELOPE_BREAKDOWN_SEC && cdk1Ratio > PRE_NEBD_MAX_RATIO) {
+        LOG_INFO("Warning: CDK-1 nuclear enrichment high before NEBD (ratio %.2lf > %.2lf) at %.2lf sec", cdk1Ratio, PRE_NEBD_MAX_RATIO, fTimeSec);
         return false;
     }
     
-    // During mitotic entry (12.5-15 minutes): CDK-1 should increase
-    if (fTimeSec >= NUCLEAR_ENVELOPE_BREAKDOWN_SEC && fTimeSec < SPINDLE_ASSEMBLY_START_SEC && cdk1Level < 1500) {
-        LOG_INFO("Warning: CDK-1 levels too low during mitotic entry at %.2lf sec", fTimeSec);
+    // During mitotic entry (12.5-15 minutes): CDK-1 should increase (higher nuclear enrichment)
+    if (fTimeSec >= NUCLEAR_ENVELOPE_BREAKDOWN_SEC && fTimeSec < SPINDLE_ASSEMBLY_START_SEC && cdk1Ratio < ENTRY_MIN_RATIO) {
+        LOG_INFO("Warning: CDK-1 nuclear enrichment low during mitotic entry (ratio %.2lf < %.2lf) at %.2lf sec", cdk1Ratio, ENTRY_MIN_RATIO, fTimeSec);
         return false;
     }
     

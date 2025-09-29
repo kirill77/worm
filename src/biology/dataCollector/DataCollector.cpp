@@ -92,11 +92,11 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
         dataRow.push_back(ringCount);
     }
     
-    // For each collection point, get molecule concentrations
+    // For each collection point, get molecule concentrations (molecules per µm^3)
     for (const auto& point : m_collectionPoints) {
         // For each molecule at this point
         for (const auto& molecule : point.molecules) {
-            double concentration = m_medium.getMoleculeNumber(molecule, point.position);
+            double concentration = m_medium.getMoleculeConcentration(molecule, point.position);
             dataRow.push_back(concentration);
         }
     }

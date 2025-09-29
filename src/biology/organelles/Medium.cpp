@@ -207,19 +207,7 @@ void Medium::updateMoleculeInteraction(double fDt)
     }
 }
 
-double Medium::getTotalMoleculeNumber(const Molecule& molecule) const
-{
-    double fTotal = 0.0;
-    for (uint32_t uCell = 0; uCell < m_grid.size(); ++uCell)
-    {
-        const GridCell& gridCell = m_grid[uCell];
-        auto itMolecule = gridCell.m_molecules.find(molecule);
-        if (itMolecule != gridCell.m_molecules.end()) {
-            fTotal += itMolecule->second.m_fNumber;
-        }
-    }
-    return fTotal;
-}
+// Removed getTotalMoleculeNumber to encourage concentration-based logic
 
 void Medium::update(double fDt)
 {

@@ -50,8 +50,6 @@ public:
     // Get molecule concentration (per µm^3) at a specific location
     double getMoleculeConcentration(const Molecule& molecule, const float3& position) const;
     
-    // Get total number of molecules across all cells
-    double getTotalMoleculeNumber(const Molecule& molecule) const;
     
     // Get volume in micrometers
     double getVolumeMicroM() const { return m_fVolumeMicroM; }

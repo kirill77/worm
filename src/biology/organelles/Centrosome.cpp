@@ -43,16 +43,9 @@ void Centrosome::update(double dt, Cell& cell)
     
     // Check for centrosome duplication during S phase
     if (!m_isDuplicated) {
-        // Check if we're in S phase (high CDK-2 and Cyclin E levels)
-        double cdk2 = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::CDK_2, ChemicalType::PROTEIN), m_mToParent.m_translation);
-        double cyclinE = internalMedium.getMoleculeNumber(Molecule(StringDict::ID::CCE_1, ChemicalType::PROTEIN), m_mToParent.m_translation);
-        
-        // Trigger duplication when CDK-2 and Cyclin E are high enough
-        if (cdk2 > 800.0 && cyclinE > 800.0) {
-            duplicate();
-            LOG_INFO("Centrosome duplication triggered at position (%.2f, %.2f, %.2f)", 
-                     m_mToParent.m_translation.x, m_mToParent.m_translation.y, m_mToParent.m_translation.z);
-        }
+        // TODO: Duplication gating will be implemented later.
+        // We currently focus on the first ~100 seconds, during which duplication should not occur.
+        // Leave this block intentionally inactive for now.
     }
     
     // Update centrosome position based on cell cycle state
@@ -100,25 +93,27 @@ void Centrosome::update(double dt, Cell& cell)
 void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium& internalMedium)
 {
     Species species = cell.getSpecies();
-    double gammaTubulinCount = internalMedium.getMoleculeNumber(
+    // Local γ-tubulin concentration (molecules per µm^3)
+    double gammaConc = internalMedium.getMoleculeConcentration(
         Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species),
         m_mToParent.m_translation);
-
-    // γ-tubulin recruitment driven by PCM maturation and local cytosolic pool
-    const double gammaCyt = gammaTubulinCount; // proxy for local available pool; later separate bound/unbound
+    
+    // γ-tubulin recruitment driven by PCM maturation and local pool
+    // Work purely with concentrations; additions to the medium remain count-based but should be derived from reaction models elsewhere.
+    const double gammaCytConc = gammaConc; // proxy for local available pool; later separate bound/unbound
     const double k_rec = 0.1;   // per second (tunable)
     const double k_loss = 0.01; // per second (tunable)
-    const double dGamma = (k_rec * m_pcmMaturation * (gammaCyt) - k_loss * gammaTubulinCount) * dt;
-    if (dGamma > 0.0)
-    {
-        MPopulation gammaAdd(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species), dGamma);
-        internalMedium.addMolecule(gammaAdd, m_mToParent.m_translation);
-        gammaTubulinCount += dGamma;
-    }
+    const double dGammaConc = (k_rec * m_pcmMaturation * gammaCytConc - k_loss * gammaConc) * dt; // concentration delta
+    // Note: We do not convert to molecule counts here to avoid grid-volume dependence; treat as a concentration state proxy.
+    gammaConc = std::max(0.0, gammaConc + dGammaConc);
 
-    // Target: proportional to γ-tubulin and PCM maturation
-    const double tuRCPerGamma = 1.0 / 50.0;
-    int targetRingComplexes = static_cast<int>(gammaTubulinCount * tuRCPerGamma * m_pcmMaturation);
+    // Target: proportional to local γ-tubulin concentration and PCM maturation
+    // Keep target dimensionless by using a concentration-sensitivity factor instead of per-molecule scaling.
+    // Choose a tunable factor beta such that target TuRCs ≈ beta · gammaConc · m_pcmMaturation
+    // beta has units (complexes · µm^3)/molecule to cancel concentration; in practice, tune beta empirically.
+    const double beta = 0.02; // tunable sensitivity to concentration (choose to match desired TuRC counts)
+    int targetRingComplexes = static_cast<int>(std::max(0.0, gammaConc) * beta * m_pcmMaturation);
+    if (targetRingComplexes < 0) targetRingComplexes = 0;
     int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());
 
     if (currentRingComplexes < targetRingComplexes) {
@@ -141,17 +136,29 @@ void Centrosome::updatePCMMaturation(double dt, const Cell& cell, Medium& intern
 {
     Species species = cell.getSpecies();
     auto localCount = [&](StringDict::ID id) {
-        return internalMedium.getMoleculeNumber(Molecule(id, ChemicalType::PROTEIN, species), m_mToParent.m_translation);
+        return internalMedium.getMoleculeConcentration(Molecule(id, ChemicalType::PROTEIN, species), m_mToParent.m_translation);
     };
     const double spd2 = localCount(StringDict::ID::SPD_2);
     const double spd5 = localCount(StringDict::ID::SPD_5);
     const double plk1 = localCount(StringDict::ID::PLK_1);
     const double air1 = localCount(StringDict::ID::AIR_1);
-    // Hill-like saturations (tunable)
-    const double K2 = 200.0, K5 = 200.0, Kp = 100.0, Ka = 50.0;
-    const double fSPD2 = spd2 / (K2 + std::max(1.0, spd2));
-    const double fSPD5 = spd5 / (K5 + std::max(1.0, spd5));
-    const double fKin = 1.0 + 0.5 * (plk1 / (Kp + std::max(1.0, plk1))) + 0.3 * (air1 / (Ka + std::max(1.0, air1)));
+    // Normalize by cell-average concentrations to make saturations unitless and grid-resolution-invariant
+    // Use concentration API at the cell center (approximate whole-cell average for now)
+    const float3 center(0.0f, 0.0f, 0.0f);
+    const double spd2Avg = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::SPD_2, ChemicalType::PROTEIN, species), center);
+    const double spd5Avg = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::SPD_5, ChemicalType::PROTEIN, species), center);
+    const double plk1Avg = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::PLK_1, ChemicalType::PROTEIN, species), center);
+    const double air1Avg = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, species), center);
+    const double eps = 1e-12;
+    const double nSPD2 = (spd2Avg > eps) ? (spd2 / spd2Avg) : 0.0;
+    const double nSPD5 = (spd5Avg > eps) ? (spd5 / spd5Avg) : 0.0;
+    const double nPLK1 = (plk1Avg > eps) ? (plk1 / plk1Avg) : 0.0;
+    const double nAIR1 = (air1Avg > eps) ? (air1 / air1Avg) : 0.0;
+
+    // Hill-like saturations on normalized signals (K=1 in normalized units)
+    const double fSPD2 = nSPD2 / (1.0 + nSPD2);
+    const double fSPD5 = nSPD5 / (1.0 + nSPD5);
+    const double fKin = 1.0 + 0.5 * (nPLK1 / (1.0 + nPLK1)) + 0.3 * (nAIR1 / (1.0 + nAIR1));
     // Kinetics (tunable)
     const double k_on = 0.2;   // per second
     const double k_off = 0.02; // per second
