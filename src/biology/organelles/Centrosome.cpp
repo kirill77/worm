@@ -100,19 +100,18 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     
     // γ-tubulin recruitment driven by PCM maturation and local pool
     // Work purely with concentrations; additions to the medium remain count-based but should be derived from reaction models elsewhere.
-    const double gammaCytConc = gammaConc; // proxy for local available pool; later separate bound/unbound
-    const double k_rec = 0.1;   // per second (tunable)
-    const double k_loss = 0.01; // per second (tunable)
-    const double dGammaConc = (k_rec * m_pcmMaturation * gammaCytConc - k_loss * gammaConc) * dt; // concentration delta
-    // Note: We do not convert to molecule counts here to avoid grid-volume dependence; treat as a concentration state proxy.
-    gammaConc = std::max(0.0, gammaConc + dGammaConc);
+    // Maintain a bound concentration proxy that accumulates with PCM maturation and decays slowly
+    const double k_rec = 0.15;   // per second (tunable)
+    const double k_loss = 0.005; // per second (tunable)
+    const double dGammaBound = (k_rec * m_pcmMaturation * gammaConc - k_loss * m_gammaBoundConc) * dt;
+    m_gammaBoundConc = std::max(0.0, m_gammaBoundConc + dGammaBound);
 
     // Target: proportional to local γ-tubulin concentration and PCM maturation
     // Keep target dimensionless using a concentration sensitivity factor (empirical tuning)
     // Provide a small basal count when PCM is present to ensure non-zero TuRCs pre-duplication
-    const double beta = 100.0; // tunable sensitivity to concentration
+    const double beta = 50.0; // tunable sensitivity to bound concentration
     const int basal = (m_pcmMaturation > 0.05) ? 1 : 0; // minimal TuRCs when PCM emerges
-    int targetRingComplexes = static_cast<int>(std::round(std::max(0.0, gammaConc) * beta * m_pcmMaturation)) + basal;
+    int targetRingComplexes = static_cast<int>(std::round(std::max(0.0, m_gammaBoundConc) * beta * m_pcmMaturation)) + basal;
     if (targetRingComplexes < 0) targetRingComplexes = 0;
     if (targetRingComplexes < 0) targetRingComplexes = 0;
     int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());

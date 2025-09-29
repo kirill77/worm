@@ -16,6 +16,8 @@ private:
     std::vector<std::shared_ptr<Y_TuRC>> m_pRingComplexes;
     // Simple PCM maturation proxy in [0,1] to drive γ-tubulin recruitment capacity
     double m_pcmMaturation = 0.1;
+    // Bound γ-tubulin concentration proxy at centrosome (molecules/µm^3), grid-agnostic
+    double m_gammaBoundConc = 0.0;
 
 public:
     /**
