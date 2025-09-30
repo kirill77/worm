@@ -29,15 +29,13 @@ public:
     const std::vector<std::shared_ptr<GPUMesh>>& getMeshes() const { return m_meshes; }
     void clearMeshes() { m_meshes.clear(); }
     
-    // Child node management
-    void addChild(const GPUMeshNode& child);
-    void addChild(GPUMeshNode&& child);
+    // Child node access
     const std::vector<GPUMeshNode>& getChildren() const { return m_children; }
-    void clearChildren() { m_children.clear(); }
+    std::vector<GPUMeshNode>& getChildren() { return m_children; }
     
     // Utility methods
     bool isEmpty() const { return m_meshes.empty() && m_children.empty(); }
-    void clear() { clearMeshes(); clearChildren(); }
+    void clear() { clearMeshes(); m_children.clear(); }
     
     // Compute combined bounding box of all meshes and children
     box3 getBoundingBox() const;

@@ -15,10 +15,24 @@
 CentrosomeVis::CentrosomeVis(std::shared_ptr<Centrosome> pCentrosome, GPUQueue* pQueue)
 {
     m_pCentrosome = pCentrosome;
-    m_pGPUMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
+    m_pUnitCylinderGpuMesh = std::make_shared<GPUMesh>(pQueue->getDevice());
     
     // Create the static centrosome geometry once
     createCentrosomeGeometry();
+    m_rootNode = GPUMeshNode(affine3::identity());
+    // Initialize cached nodes once
+    if (m_pUnitCylinderGpuMesh)
+    {
+        auto& children = m_rootNode.getChildren();
+        children.clear();
+        // child 0: X-axis node
+        children.emplace_back(GPUMeshNode(affine3::identity()));
+        children.back().addMesh(m_pUnitCylinderGpuMesh);
+        // child 1: Y-axis node
+        children.emplace_back(GPUMeshNode(affine3::identity()));
+        children.back().addMesh(m_pUnitCylinderGpuMesh);
+    }
+    // nodes are initialized in constructor; nothing else to do here
 }
 
 GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
@@ -48,42 +62,50 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
     affine3 centrosomeToWorld = affine3::identity();
     centrosomeToWorld.m_translation = position;
     
-    // Create root node with the centrosome's world position
-    GPUMeshNode rootNode(centrosomeToWorld);
-    
-    if (m_pGPUMesh)
+    // Update transforms only
+    m_rootNode.setTransform(centrosomeToWorld);
+
+    // Centriole physical dimensions (micrometers) from EM literature; used for visualization.
+    // Typical metazoan centriole: length ≈ 0.15 µm, radius ≈ 0.06 µm.
+    const float fLengthMicroM = 0.15f; // µm
+    const float fRadiusMicroM = 0.06f; // µm
+
+    affine3 rotateToX = affine3::identity();
+    // Cylinder along +X
+    rotateToX.m_linear = CentrosomeVis::buildScaledCylinderMatrix(float3(1,0,0), fLengthMicroM, fRadiusMicroM);
+    auto& children = m_rootNode.getChildren();
+    if (children.size() >= 2)
     {
-        // Get scale factor based on PCM radius
-        float scaleFactorBase = m_pCentrosome->getPCMRadius() * 0.8f;
-        
-        // Create first child node: cylinder along X-axis (rotate Z->X)
-        // Rotation: 90 degrees around Y-axis to align Z with X
-        affine3 rotateToX = affine3::identity();
-        rotateToX.m_linear = float3x3(
-            0, 0, scaleFactorBase,   // X = old Z * scale
-            0, scaleFactorBase, 0,   // Y = old Y * scale
-            -scaleFactorBase, 0, 0   // Z = -old X * scale
-        );
-        GPUMeshNode xAxisNode(rotateToX);
-        xAxisNode.addMesh(m_pGPUMesh);
-        
-        // Create second child node: cylinder along Y-axis (rotate Z->Y)  
-        // Rotation: -90 degrees around X-axis to align Z with Y
-        affine3 rotateToY = affine3::identity();
-        rotateToY.m_linear = float3x3(
-            scaleFactorBase, 0, 0,   // X = old X * scale
-            0, 0, scaleFactorBase,   // Y = old Z * scale
-            0, -scaleFactorBase, 0   // Z = -old Y * scale
-        );
-        GPUMeshNode yAxisNode(rotateToY);
-        yAxisNode.addMesh(m_pGPUMesh);
-        
-        // Add both child nodes to the root
-        rootNode.addChild(std::move(xAxisNode));
-        rootNode.addChild(std::move(yAxisNode));
+        children[0].setTransform(rotateToX);
     }
-    
-    return rootNode;
+
+    affine3 rotateToY = affine3::identity();
+    // Cylinder along +Y
+    rotateToY.m_linear = CentrosomeVis::buildScaledCylinderMatrix(float3(0,1,0), fLengthMicroM, fRadiusMicroM);
+    if (children.size() >= 2)
+    {
+        children[1].setTransform(rotateToY);
+    }
+
+    return m_rootNode;
+}
+
+// Helper to construct a scaled cylinder orientation matrix (row-vector convention)
+float3x3 CentrosomeVis::buildScaledCylinderMatrix(const float3& axisUnit, float length, float radius)
+{
+    float3 axis = normalize(axisUnit);
+    if (length <= 0.0f) length = 0.0f;
+    if (radius <= 0.0f) radius = 0.0f;
+
+    float3 helper = (std::abs(axis.x) < 0.9f) ? float3(1, 0, 0) : float3(0, 1, 0);
+    float3 radial1 = normalize(cross(axis, helper));
+    float3 radial2 = cross(axis, radial1);
+
+    return float3x3(
+        radial1.x * radius, radial1.y * radius, radial1.z * radius,
+        radial2.x * radius, radial2.y * radius, radial2.z * radius,
+        axis.x * length,    axis.y * length,    axis.z * length
+    );
 }
 
 void CentrosomeVis::createCentrosomeGeometry()
@@ -91,13 +113,13 @@ void CentrosomeVis::createCentrosomeGeometry()
     // Create static cylinder geometry (single cylinder along Z-axis)
     // This will be reused for both X and Y orientations via transforms
     
-    if (!m_pGPUMesh)
+    if (!m_pUnitCylinderGpuMesh)
     {
         assert(false);
         return;
     }
 
-    const float radius = 0.1f;        // Cylinder radius
+    const float radius = 1.0f;        // Cylinder radius
     const float length = 1.0f;        // Cylinder length
     const int segments = 8;           // Number of segments around cylinder
     
@@ -166,5 +188,5 @@ void CentrosomeVis::createCentrosomeGeometry()
     }
     
     // Update the GPU mesh geometry
-    m_pGPUMesh->setGeometry(gpuVertices, gpuTriangles);
+    m_pUnitCylinderGpuMesh->setGeometry(gpuVertices, gpuTriangles);
 }

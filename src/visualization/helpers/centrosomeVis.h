@@ -16,6 +16,13 @@ struct CentrosomeVis : public IVisObject
 private:
     void createCentrosomeGeometry();
     std::shared_ptr<Centrosome> m_pCentrosome;
-    std::shared_ptr<GPUMesh> m_pGPUMesh;
+    std::shared_ptr<GPUMesh> m_pUnitCylinderGpuMesh;
+    // Cached root scene node; children[0] = X-axis node, children[1] = Y-axis node
+    GPUMeshNode m_rootNode;
+
+    // Build a linear transform that maps a unit cylinder (local Z = axis, local X/Y = radial)
+    // to a cylinder aligned with 'axisUnit' in world space, with the given 'length' and 'radius'.
+    // Returns a float3x3 whose rows are [radial1*radius, radial2*radius, axis*length].
+    static float3x3 buildScaledCylinderMatrix(const float3& axisUnit, float length, float radius);
 };
 

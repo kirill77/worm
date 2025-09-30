@@ -14,15 +14,6 @@ void GPUMeshNode::addMesh(std::shared_ptr<GPUMesh> mesh)
     }
 }
 
-void GPUMeshNode::addChild(const GPUMeshNode& child)
-{
-    m_children.push_back(child);
-}
-
-void GPUMeshNode::addChild(GPUMeshNode&& child)
-{
-    m_children.push_back(std::move(child));
-}
 
 box3 GPUMeshNode::getBoundingBox() const
 {
