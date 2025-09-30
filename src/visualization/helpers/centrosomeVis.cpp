@@ -3,6 +3,7 @@
 #include "visualization/gpu/GPUMeshNode.h"
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/organelles/Centrosome.h"
+#include "biology/organelles/Y_TuRC.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
 #include "geometry/geomHelpers/BVHMesh.h"
@@ -65,27 +66,8 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
     // Update transforms only
     m_rootNode.setTransform(centrosomeToWorld);
 
-    // Centriole physical dimensions (micrometers) from EM literature; used for visualization.
-    // Typical metazoan centriole: length ≈ 0.15 µm, radius ≈ 0.06 µm.
-    const float fLengthMicroM = 0.15f; // µm
-    const float fRadiusMicroM = 0.06f; // µm
-
-    affine3 rotateToX = affine3::identity();
-    // Cylinder along +X
-    rotateToX.m_linear = CentrosomeVis::buildScaledCylinderMatrix(float3(1,0,0), fLengthMicroM, fRadiusMicroM);
-    auto& children = m_rootNode.getChildren();
-    if (children.size() >= 2)
-    {
-        children[0].setTransform(rotateToX);
-    }
-
-    affine3 rotateToY = affine3::identity();
-    // Cylinder along +Y
-    rotateToY.m_linear = CentrosomeVis::buildScaledCylinderMatrix(float3(0,1,0), fLengthMicroM, fRadiusMicroM);
-    if (children.size() >= 2)
-    {
-        children[1].setTransform(rotateToY);
-    }
+    updateCentriolesNodes();
+    updateRingComplexNodes();
 
     return m_rootNode;
 }
@@ -106,6 +88,67 @@ float3x3 CentrosomeVis::buildScaledCylinderMatrix(const float3& axisUnit, float 
         radial2.x * radius, radial2.y * radius, radial2.z * radius,
         axis.x * length,    axis.y * length,    axis.z * length
     );
+}
+
+void CentrosomeVis::updateCentriolesNodes()
+{
+    auto& children = m_rootNode.getChildren();
+    if (children.size() < 2)
+        return;
+
+    // Centriole physical dimensions (micrometers) from EM literature; used for visualization.
+    // Typical metazoan centriole: length ≈ 0.15 µm, radius ≈ 0.06 µm.
+    const float fLengthMicroM = 0.15f; // µm
+    const float fRadiusMicroM = 0.06f; // µm
+
+    affine3 rotateToX = affine3::identity();
+    rotateToX.m_linear = CentrosomeVis::buildScaledCylinderMatrix(float3(1,0,0), fLengthMicroM, fRadiusMicroM);
+    children[0].setTransform(rotateToX);
+
+    affine3 rotateToY = affine3::identity();
+    rotateToY.m_linear = CentrosomeVis::buildScaledCylinderMatrix(float3(0,1,0), fLengthMicroM, fRadiusMicroM);
+    children[1].setTransform(rotateToY);
+}
+
+void CentrosomeVis::updateRingComplexNodes()
+{
+    auto& children = m_rootNode.getChildren();
+    // Add/update additional cylinders for each ring complex (Y_TuRC)
+    const auto& ringComplexes = m_pCentrosome->getRingComplexes();
+    const size_t numRings = ringComplexes.size();
+
+    // Ensure capacity: first two are centrioles
+    const size_t needed = 2 + numRings;
+    if (children.size() < needed && m_pUnitCylinderGpuMesh)
+    {
+        while (children.size() < needed)
+        {
+            GPUMeshNode n(affine3::identity());
+            n.addMesh(m_pUnitCylinderGpuMesh);
+            children.emplace_back(n);
+        }
+    }
+    else if (children.size() > needed)
+    {
+        children.resize(needed);
+    }
+
+    // Ring cylinders are placed using Y_TuRC positions (in µm, relative to centrosome center)
+    const float fRingCylLengthMicroM = 0.04f;
+    const float fRingCylRadiusMicroM = 0.01f;
+
+    for (size_t i = 0; i < numRings; ++i)
+    {
+        auto& pRing = ringComplexes[i];
+        assert(pRing && "Y_TuRC pointer should not be null");
+        float3 pos = pRing->getPosition();
+        float3 dir = pRing->getDirection();
+
+        affine3 ringXf = affine3::identity();
+        ringXf.m_linear = CentrosomeVis::buildScaledCylinderMatrix(dir, fRingCylLengthMicroM, fRingCylRadiusMicroM);
+        ringXf.m_translation = pos;
+        children[2 + i].setTransform(ringXf);
+    }
 }
 
 void CentrosomeVis::createCentrosomeGeometry()

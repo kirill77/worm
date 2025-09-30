@@ -24,5 +24,11 @@ private:
     // to a cylinder aligned with 'axisUnit' in world space, with the given 'length' and 'radius'.
     // Returns a float3x3 whose rows are [radial1*radius, radial2*radius, axis*length].
     static float3x3 buildScaledCylinderMatrix(const float3& axisUnit, float length, float radius);
+
+    // Update transforms for the two centriole cylinders (children[0], children[1])
+    void updateCentriolesNodes();
+
+    // Update/add child cylinders for each ring complex (children[2..])
+    void updateRingComplexNodes();
 };
 
