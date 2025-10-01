@@ -26,6 +26,15 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     {
         double volume = pOwnedCell->getInternalMedium().getVolumeMicroM();
         m_pTensionSphere = std::make_shared<TensionSphere>(2, volume);
+        // Initialize BVH from the tension sphere mesh for spatial queries
+        if (m_pTensionSphere)
+        {
+            auto pMesh = m_pTensionSphere->getEdgeMesh();
+            if (pMesh)
+            {
+                m_pCortexBVH = std::make_shared<BVHMesh>(pMesh);
+            }
+        }
     }
 
     // Initialize list of molecules that can bind to cortex
@@ -55,7 +64,6 @@ void Cortex::update(double fDtSec, Cell& cell)
         if (pCortexMesh)
         {
             m_pCortexBVH = std::make_shared<BVHMesh>(pCortexMesh);
-            cell.setCortexBVH(m_pCortexBVH);
         }
     }
 
@@ -252,18 +260,23 @@ public:
 };
 }
 
+float Cortex::traceClosestHit(const BVH& bvhRef, const float3& origin, const float3& dir, float tMin, float tMax) const
+{
+    class RayHit : public IRay {
+    public:
+        float m_closest; bool m_found;
+        RayHit(const float3& o, const float3& d, float tmin, float tmax)
+        { m_vPos = o; m_vDir = normalize(d); m_fMin = tmin; m_fMax = tmax; m_closest = std::numeric_limits<float>::max(); m_found = false; }
+        void notifyIntersection(float fDist, const ITraceableObject*, uint32_t) override
+        { if (fDist >= m_fMin && fDist <= m_fMax && fDist < m_closest) { m_closest = fDist; m_found = true; } }
+    } ray(origin, dir, tMin, tMax);
+    bvhRef.trace(ray, 0);
+    return ray.m_found ? ray.m_closest : 0.0f;
+}
+
 float3 Cortex::normalizedToWorld(const float3& normalizedPos)
 {
-    if (!m_pCortexBVH) {
-        // Build BVH if missing
-        auto pCortexMesh = m_pTensionSphere ? m_pTensionSphere->getEdgeMesh() : nullptr;
-        if (pCortexMesh) {
-            m_pCortexBVH = std::make_shared<BVHMesh>(pCortexMesh);
-        }
-    }
-    if (!m_pCortexBVH) {
-        return float3(0,0,0);
-    }
+    assert(m_pCortexBVH && "Cortex BVH must be initialized before normalizedToWorld");
 
     // Get bounding box center as ray origin
     const box3 boundingBox = m_pCortexBVH->getBox();
@@ -274,12 +287,9 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
     }
 
     const float3 direction = normalize(normalizedPos);
-
-    CortexRay ray(center, direction);
     const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
-    bvh.trace(ray, 0);
-
-    if (!ray.m_hasIntersection)
+    float hitDist = traceClosestHit(bvh, center, direction, 0.0f, std::numeric_limits<float>::max());
+    if (hitDist <= 0.0f)
     {
         const float3 diagonal = boundingBox.diagonal();
         return center + normalizedPos * (diagonal * 0.5f);
@@ -287,7 +297,15 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
 
     float normalizedLength = length(normalizedPos);
     normalizedLength = std::min(1.0f, std::max(-1.0f, normalizedLength));
-    return center + direction * (ray.m_closestDistance * normalizedLength);
+    return center + direction * (hitDist * normalizedLength);
+}
+
+float Cortex::distanceToCortex(const float3& originWorld, const float3& dirWorld)
+{
+    assert(m_pCortexBVH && "Cortex BVH must be initialized before distanceToCortex");
+
+    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
+    return traceClosestHit(bvh, originWorld, dirWorld, 0.0f, std::numeric_limits<float>::max());
 }
 
 float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const

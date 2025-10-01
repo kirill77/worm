@@ -36,7 +36,6 @@ class Cell : public std::enable_shared_from_this<Cell>
 private:
     std::vector<std::shared_ptr<class Organelle>> m_pOrganelles;
     std::shared_ptr<class Medium> m_pInternalMedium;  // Internal cellular environment
-    std::shared_ptr<BVHMesh> m_pCortexBVH;  // BVH for the cell cortex/boundary
     CellCycleState m_cellCycleState;
     CellType m_type;  // Store type just for spindle creation
     std::vector<Chromosome> m_chromosomes;  // Store chromosomes for delayed organelle creation
@@ -80,19 +79,6 @@ public:
     // ATP-related functions
     bool consumeATP(double fAmount);
     
-    // Cortex BVH access
-    /**
-     * Get the cortex BVH mesh for spatial queries
-     * 
-     * @return Shared pointer to the cortex BVH mesh
-     */
-    std::shared_ptr<BVHMesh> getCortexBVH() const { return m_pCortexBVH; }
-    
-    /**
-     * Set the cortex BVH mesh
-     * 
-     * @param pBVHMesh Shared pointer to the BVH mesh
-     */
-    void setCortexBVH(std::shared_ptr<BVHMesh> pBVHMesh) { m_pCortexBVH = pBVHMesh; }
+    // Cortex BVH moved to Cortex; queries should go through Cortex
 };
 

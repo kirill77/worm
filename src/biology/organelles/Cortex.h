@@ -64,6 +64,17 @@ public:
     // Map normalized coordinates [-1,1] to cortex surface world position via ray cast
     float3 normalizedToWorld(const float3& normalizedPos);
 
+    // Compute the distance from a world-space origin along a world-space direction
+    // to the cortex surface. Returns 0 if no intersection.
+    float distanceToCortex(const float3& originWorld, const float3& dirWorld);
+
+    // Expose BVH mesh for visualization
+    std::shared_ptr<class BVHMesh> getBVHMesh() const { return m_pCortexBVH; }
+
+private:
+    // Trace a ray against the cortex BVH and return closest hit distance in [tMin, tMax], or 0 if none
+    float traceClosestHit(const class BVH& bvhRef, const float3& origin, const float3& dir, float tMin, float tMax) const;
+
 private:
     // Convert triangle index and barycentric coordinates to normalized [-1,1] coordinates
     float3 baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const;

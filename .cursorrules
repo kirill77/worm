@@ -1,0 +1,4 @@
+Do not write comments that describe prior code or incremental changes.
+Comments must describe the current behavior, intent, constraints, and rationale.
+
+

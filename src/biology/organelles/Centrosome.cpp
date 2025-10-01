@@ -5,6 +5,7 @@
 #include "chemistry/molecules/MoleculeWiki.h"
 #include "utils/log/ILog.h"
 #include "Y_TuRC.h"
+#include "Cortex.h"
 
 Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     : Organelle(pCell)
@@ -132,11 +133,22 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     }
 
     // Step microtubule dynamics for each existing Y_TuRC
+    // Compute centrosome world position once
+    float3 centrosomeWorldPos = float3(0,0,0);
+    std::shared_ptr<Cortex> pCortex;
+    if (auto pCellPtr = getCell())
+    {
+        pCortex = std::dynamic_pointer_cast<Cortex>(pCellPtr->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
+        if (pCortex)
+        {
+            centrosomeWorldPos = pCortex->normalizedToWorld(getNormalizedPosition());
+        }
+    }
     for (auto& pRing : m_pRingComplexes)
     {
         if (pRing)
         {
-            pRing->update(dt);
+            pRing->update(dt, centrosomeWorldPos, pCortex);
         }
     }
 }

@@ -1,5 +1,8 @@
 #include "Y_TuRC.h"
 #include "Centrosome.h"
+#include "Cortex.h"
+#include "Cell.h"
+#include "chemistry/molecules/StringDict.h"
 #include <random>
 #include <cmath>
 #include <numbers>
@@ -47,7 +50,7 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     );
 }
 
-void Y_TuRC::update(double dtSec)
+void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::shared_ptr<Cortex>& pCortex)
 {
     // Defaults (tunable)
     auto rand01 = []() {
@@ -65,6 +68,16 @@ void Y_TuRC::update(double dtSec)
         if (m_mtState == MTState::Growing)
         {
             m_mtLengthMicroM += static_cast<float>(vGrow * dtSec);
+            // Clamp by cortex distance along the MT direction in world space
+            if (pCortex)
+            {
+                float3 originWorld = centrosomeWorldPos + m_vPosMicroM;
+                float maxLen = pCortex->distanceToCortex(originWorld, m_vDir);
+                if (maxLen > 0.0f && m_mtLengthMicroM > maxLen)
+                {
+                    m_mtLengthMicroM = maxLen;
+                }
+            }
             if (rand01() < pCat * dtSec)
             {
                 m_mtState = MTState::Shrinking;

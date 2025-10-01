@@ -4,6 +4,7 @@
 #include "geometry/vectors/vector.h"
 
 struct Centrosome;
+class Cortex;
 
 // represents Gamma-TuRC (gamma-tubulin ring complex) - the place where a microtubule nucleates
 struct Y_TuRC
@@ -14,7 +15,9 @@ struct Y_TuRC
     const float3& getPosition() { return m_vPosMicroM; }
 
     // Update microtubule lifecycle and dynamics (simple dynamic instability)
-    void update(double dtSec);
+    // centrosomeWorldPos: world-space position of the centrosome center (µm)
+    // pCortex: cortex organelle for geometry queries
+    void update(double dtSec, const float3& centrosomeWorldPos, const std::shared_ptr<Cortex>& pCortex);
     // Accessors for MT visualization (optional)
     float getMTLengthMicroM() const { return m_mtLengthMicroM; }
     bool  hasActiveMT() const { return m_mtLengthMicroM > 0.0f; }

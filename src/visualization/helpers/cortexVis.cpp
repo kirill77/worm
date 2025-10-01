@@ -5,6 +5,8 @@
 #include "visualization/gpu/GPUMesh.h"
 #include "biology/organelles/Organelle.h"
 #include "biology/organelles/Cell.h"
+#include "biology/organelles/Cortex.h"
+#include "chemistry/molecules/StringDict.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/vectors/affine.h"
 #include <stdexcept>
@@ -42,7 +44,14 @@ void CortexVis::updateGPUMesh()
         return;
     }
 
-    auto pBVHMesh = pCell->getCortexBVH();
+    // Fetch BVH from Cortex organelle
+    auto pCortex = std::dynamic_pointer_cast<Cortex>(pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
+    if (!pCortex)
+    {
+        assert(false);
+        return;
+    }
+    auto pBVHMesh = pCortex->getBVHMesh();
     if (!pBVHMesh)
     {
         assert(false);
