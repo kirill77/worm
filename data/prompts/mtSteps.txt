@@ -5,8 +5,8 @@ Purpose
 
 Context and current status
 - Nucleation site class exists: Y_TuRC (γ-tubulin ring complex), owned by `Centrosome`.
-- Y_TuRC target now scales with PCM maturation × local γ-tubulin (γ/50 scaled by PCM), not pure γ/50.
-- DataCollector logs: Time(s), NucleationSites(Y_TuRC), selected molecules per point, StepTime(ms); outputs go to data/simOutput/sim.csv.
+- Y_TuRC target now scales with PCM maturation × bound γ-tubulin concentration (concentration-based), with a small basal component when PCM emerges.
+- DataCollector logs: Time(s), NucleationSites(Y_TuRC), selected molecules per point, StepTime(ms); outputs go to data/simOutDebug/sim.csv (Debug) or data/simOutRelease/sim.csv (Release).
 - Added pathway molecules (StringDict): GTP, GDP, RHO_1, RHO_1_GTP, RHO_1_GDP, ECT_2, CHIN_1, CDC_42, CDC_42_GTP, CDC_42_GDP, NMY_2, AIR_1, MT_PLUS_END_CONTACT, SPD_2, SPD_5, PCMD_1, ZYG_1, SAS_6, SAS_5, SAS_4.
 - Maternal provisioning: γ-tubulin seed + SPD_2, SPD_5, PLK_1, AIR_1 near posterior centrosome; species-consistent lookups.
 - Uniform cytosolic pools alone do not produce asymmetry; we will add cortex-bound pools and AstralMTs.
@@ -39,8 +39,15 @@ Immediate next steps (code changes)
 
 5) Implement AstralMTs and cortex contact mapping (required for posterior cue)
 - Dynamic instability (growth/shrink, catastrophe/rescue), 3D plus-end tracking.
-- Cortex contact via cortex BVH; derive M_contact(x) as per-site contact density.
-- Couple M_contact(x) to local molecule kinetics: reduce ECT-2 effectiveness / increase CHIN-1; modestly boost PAR-2 on-rate; enrich AIR-1 near centrosome/MTs.
+  - Represent each MT with parent Y_TuRC, current length L(t), state S∈{Grow,Shrink}, and tip position.
+  - Per-step update with probabilities per second: catastrophe (Grow→Shrink), rescue (Shrink→Grow).
+  - Initial defaults at 20–22 °C (tunable): v_grow ≈ 0.2–0.5 µm/s; v_shrink ≈ 0.5–1.0 µm/s; p_cat ≈ 0.1–0.3 s⁻¹; p_rescue ≈ 0.02–0.1 s⁻¹.
+- Couple growth to soluble α/β‑tubulin concentration near PCM: v_grow = v_max · [Tub]/(K_m + [Tub]); modulate p_cat↓ and p_rescue↑ with [Tub].
+- Nucleation lifecycle at Y_TuRC:
+  - Allow ≤1 active MT per Y_TuRC; after full depolymerization (L→0), wait a refractory time τ_ref before re‑nucleation.
+- Cortex contact via cortex BVH:
+  - Detect tip–cortex contact; increase catastrophe probability and/or pause; optional buckling/shortening upon sustained contact.
+- Optional GTP‑cap module (later): hydrolysis delay; catastrophe probability rises sharply when cap is lost.
 
 6) Cortex-bound pools and surface mechanics
 - Add cortex-bound complexes for: RHO-1-GTP:CORTEX, RHO-1-GDP:CORTEX, ECT-2:CORTEX, CHIN-1:CORTEX, NMY-2:CORTEX (alongside existing PAR_X:CORTEX).
@@ -52,8 +59,15 @@ Immediate next steps (code changes)
 - Add 2D advection of bound species by v(x) and lateral surface diffusion; CFL checks.
 
 7) Data & validation
-- DataCollector: keep NucleationSites(Y_TuRC); add per-centrosome γ-tubulin near PCM and (optional) PCM size proxy; later add M_contact(x) coverage.
-- Validate stage plateaus: nucleators/MTs ~10^3 early → ~10^4 at metaphase; maintain non-saturation capacity.
+- DataCollector: keep NucleationSites(Y_TuRC); add per-centrosome γ-tubulin near PCM and (optional) PCM size proxy; add MT metrics:
+  - total MT count, mean/median MT length, length histogram, fraction of MTs contacting cortex, mean v_grow, event counts (catastrophe/rescue).
+- Validate stage plateaus and dynamics:
+  - nucleators/MTs ~10^3 early → ~10^4 at metaphase; maintain non-saturation capacity.
+  - rising MT counts and increasing cortex contact toward NEBD/metaphase; posterior > anterior contact asymmetry with posterior cue.
+
+8) Visualization (performance‑aware)
+- Render MTs as thin cylinders/segments from Y_TuRC position along current direction with length L; color by state (grow/shrink).
+- Cache mesh resources; update transforms only to minimize per‑frame allocations.
 
 Notes
 - This plan avoids seed proxies; posterior asymmetry arises from AstralMT contacts and cortex-bound molecule kinetics.
