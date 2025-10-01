@@ -4,6 +4,7 @@
 // Needed for nucleation site counting
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Centrosome.h"
+#include "biology/organelles/Y_TuRC.h"
 #include "chemistry/molecules/StringDict.h"
 
 DataCollector::DataCollector(Medium& medium, const std::string& outputFile, double collectionInterval)
@@ -79,27 +80,12 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
     
     // Prepare row of data
     std::vector<double> dataRow;
-    dataRow.push_back(currentTime); // First column is time
+    dataRow.push_back(currentTime);
     if (m_trackNucleationSites) {
-        // Count Y_TuRC instances from cell's centrosome(s)
-        double ringCount = 0.0;
-        if (auto cellPtr = m_cell.lock()) {
-            auto pCentro = std::dynamic_pointer_cast<Centrosome>(cellPtr->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
-            if (pCentro) {
-                ringCount = static_cast<double>(pCentro->getRingComplexes().size());
-            }
-        }
-        dataRow.push_back(ringCount);
+        dataRow.push_back(computeRingCount());
     }
     
-    // For each collection point, get molecule concentrations (molecules per µm^3)
-    for (const auto& point : m_collectionPoints) {
-        // For each molecule at this point
-        for (const auto& molecule : point.molecules) {
-            double concentration = m_medium.getMoleculeConcentration(molecule, point.position);
-            dataRow.push_back(concentration);
-        }
-    }
+    dataRow.push_back(computeAverageMTLength());
     
     // Append step time per row (ms)
     dataRow.push_back(stepTimeMs);
@@ -127,24 +113,42 @@ std::vector<std::string> DataCollector::generateHeaders() const
         headers.push_back("NucleationSites(Y_TuRC)");
     }
     
-    // For each collection point, add molecule headers
-    for (const auto& point : m_collectionPoints) {
-        for (const auto& molecule : point.molecules) {
-            std::string moleculeTypeStr;
-            switch (molecule.getType()) {
-                case ChemicalType::PROTEIN: moleculeTypeStr = "PROT"; break;
-                case ChemicalType::MRNA: moleculeTypeStr = "mRNA"; break;
-                case ChemicalType::TRNA: moleculeTypeStr = "tRNA"; break;
-                case ChemicalType::DNA: moleculeTypeStr = "DNA"; break;
-                case ChemicalType::NUCLEOTIDE: moleculeTypeStr = "NUC"; break;
-                default: moleculeTypeStr = "OTHER"; break;
-            }
-            headers.push_back(molecule.getName() + "(" + moleculeTypeStr + ")_" + point.name + "[/µm^3]");
-        }
-    }
+    // Average MT length column (µm)
+    headers.push_back("AverageMTLength(µm)");
     
     // Append per-row step time header
     headers.push_back("StepTime(ms)");
     
     return headers;
 } 
+
+double DataCollector::computeAverageMTLength() const
+{
+    size_t mtCount = 0;
+    double mtSum = 0.0;
+    if (auto cellPtr = m_cell.lock()) {
+        auto pCentro = std::dynamic_pointer_cast<Centrosome>(cellPtr->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
+        if (pCentro) {
+            const auto& rings = pCentro->getRingComplexes();
+            for (const auto& r : rings) {
+                if (r && r->hasActiveMT()) {
+                    mtSum += static_cast<double>(r->getMTLengthMicroM());
+                    ++mtCount;
+                }
+            }
+        }
+    }
+    return (mtCount > 0) ? (mtSum / static_cast<double>(mtCount)) : 0.0;
+}
+
+double DataCollector::computeRingCount() const
+{
+    double ringCount = 0.0;
+    if (auto cellPtr = m_cell.lock()) {
+        auto pCentro = std::dynamic_pointer_cast<Centrosome>(cellPtr->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
+        if (pCentro) {
+            ringCount = static_cast<double>(pCentro->getRingComplexes().size());
+        }
+    }
+    return ringCount;
+}

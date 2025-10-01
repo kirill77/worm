@@ -13,11 +13,23 @@ struct Y_TuRC
     const float3& getDirection() { return m_vDir; }
     const float3& getPosition() { return m_vPosMicroM; }
 
+    // Update microtubule lifecycle and dynamics (simple dynamic instability)
+    void update(double dtSec);
+    // Accessors for MT visualization (optional)
+    float getMTLengthMicroM() const { return m_mtLengthMicroM; }
+    bool  hasActiveMT() const { return m_mtLengthMicroM > 0.0f; }
+
 private:
     std::weak_ptr<Centrosome> m_pCentrosome;
 
     float3 m_vDir; // normalized direction
     float3 m_vPosMicroM; // position in micro-meters in respect to centrosome center
+
+    // Microtubule dynamic state (inline, without a separate class)
+    enum class MTState { Growing, Shrinking };
+    MTState m_mtState = MTState::Growing;
+    float m_mtLengthMicroM = 0.0f; // current length in µm
+    float m_mtRefractorySec = 0.0f; // wait time before re-nucleation after disassembly
 
     // microtubule grows by attaching alpha and beta tubulins
     uint32_t m_nAlphaTubulins = 0;

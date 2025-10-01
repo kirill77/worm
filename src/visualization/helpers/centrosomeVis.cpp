@@ -110,6 +110,7 @@ void CentrosomeVis::updateCentriolesNodes()
     children[1].setTransform(rotateToY);
 }
 
+// Visualize microtubules by scaling ring cylinders to match each MT's length
 void CentrosomeVis::updateRingComplexNodes()
 {
     auto& children = m_rootNode.getChildren();
@@ -134,7 +135,7 @@ void CentrosomeVis::updateRingComplexNodes()
     }
 
     // Ring cylinders are placed using Y_TuRC positions (in µm, relative to centrosome center)
-    const float fRingCylLengthMicroM = 0.04f;
+    const float fDefaultStubMicroM = 0.04f;
     const float fRingCylRadiusMicroM = 0.01f;
 
     for (size_t i = 0; i < numRings; ++i)
@@ -145,8 +146,10 @@ void CentrosomeVis::updateRingComplexNodes()
         float3 dir = pRing->getDirection();
 
         affine3 ringXf = affine3::identity();
-        ringXf.m_linear = CentrosomeVis::buildScaledCylinderMatrix(dir, fRingCylLengthMicroM, fRingCylRadiusMicroM);
-        ringXf.m_translation = pos;
+        float useLen = pRing->hasActiveMT() ? std::max(pRing->getMTLengthMicroM(), fDefaultStubMicroM) : fDefaultStubMicroM;
+        ringXf.m_linear = CentrosomeVis::buildScaledCylinderMatrix(dir, useLen, fRingCylRadiusMicroM);
+        // Shift by +0.5 * length along axis so the cylinder starts at the ring center and grows outward
+        ringXf.m_translation = pos + dir * (0.5f * useLen);
         children[2 + i].setTransform(ringXf);
     }
 }

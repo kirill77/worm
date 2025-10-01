@@ -96,6 +96,12 @@ private:
      */
     std::vector<std::string> generateHeaders() const;
 
+    // Helpers
+    // Compute average microtubule length (µm) across active MTs nucleated by Y_TuRC
+    double computeAverageMTLength() const;
+    // Compute nucleation site (Y_TuRC) count
+    double computeRingCount() const;
+
 public:
     /**
      * @brief Provide Cell to enable global metrics (e.g., nucleation sites)

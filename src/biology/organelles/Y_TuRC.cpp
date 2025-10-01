@@ -3,6 +3,7 @@
 #include <random>
 #include <cmath>
 #include <numbers>
+#include <algorithm>
 
 Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     : m_pCentrosome(pCentrosome)
@@ -44,4 +45,56 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
         r * std::sin(phi) * std::sin(theta), 
         r * std::cos(phi)
     );
+}
+
+void Y_TuRC::update(double dtSec)
+{
+    // Defaults (tunable)
+    auto rand01 = []() {
+        static thread_local std::mt19937 gen(std::random_device{}());
+        static thread_local std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+        return dis(gen);
+    };
+    const float vGrow = 0.3f;   // µm/s
+    const float vShrink = 0.8f; // µm/s
+    const float pCat = 0.15f;   // s^-1
+    const float pRes = 0.05f;   // s^-1
+
+    if (m_mtLengthMicroM > 0.0f)
+    {
+        if (m_mtState == MTState::Growing)
+        {
+            m_mtLengthMicroM += static_cast<float>(vGrow * dtSec);
+            if (rand01() < pCat * dtSec)
+            {
+                m_mtState = MTState::Shrinking;
+            }
+        }
+        else // Shrinking
+        {
+            m_mtLengthMicroM -= static_cast<float>(vShrink * dtSec);
+            if (m_mtLengthMicroM <= 0.0f)
+            {
+                m_mtLengthMicroM = 0.0f;
+                m_mtRefractorySec = 1.0f; // wait before re-nucleation
+            }
+            else if (rand01() < pRes * dtSec)
+            {
+                m_mtState = MTState::Growing;
+            }
+        }
+    }
+    else
+    {
+        if (m_mtRefractorySec > 0.0f)
+        {
+            m_mtRefractorySec = std::max(0.0f, m_mtRefractorySec - static_cast<float>(dtSec));
+        }
+        else
+        {
+            // Nucleate a new MT
+            m_mtState = MTState::Growing;
+            m_mtLengthMicroM = 0.02f;
+        }
+    }
 }

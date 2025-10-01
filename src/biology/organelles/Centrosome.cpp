@@ -130,6 +130,15 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
             m_pRingComplexes.pop_back();
         }
     }
+
+    // Step microtubule dynamics for each existing Y_TuRC
+    for (auto& pRing : m_pRingComplexes)
+    {
+        if (pRing)
+        {
+            pRing->update(dt);
+        }
+    }
 }
 
 void Centrosome::updatePCMMaturation(double dt, const Cell& cell, Medium& internalMedium)
