@@ -378,7 +378,11 @@ std::vector<std::shared_ptr<TranslationInteraction>> MoleculeInteractionLoader::
                 continue;
             Molecule mRNACandidate(id, ChemicalType::MRNA, species);
             if (!GeneWiki::getInstance().hasGeneData(mRNACandidate))
+            {
+                LOG_WARN("No GeneWiki data for %s (mRNA, %d); skipping TranslationInteraction.",
+                         StringDict::idToString(id).c_str(), static_cast<int>(species));
                 continue;
+            }
 
             // Get translation rate from MoleculeWiki (species-aware)
             const auto& info = MoleculeWiki::getInfo(mRNACandidate);

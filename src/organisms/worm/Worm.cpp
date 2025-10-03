@@ -89,7 +89,9 @@ std::vector<Chromosome> Worm::initializeGenes()
     pDNA4->addGene(StringDict::ID::TRNA_ASN_AAC, 0.8, 0.15); // Asparagine
 
     // Chromosome V - Centrosome, cytoskeleton, and aromatic amino acid tRNAs
-    pDNA5->addGene(StringDict::ID::GAMMA_TUBULIN, 0.1, 0.05);  // γ-tubulin: low basal expression, will be regulated by CDK2/CyclinE
+    pDNA5->addGene(StringDict::ID::ALPHA_TUBULIN, 0.5, 0.2);   // α-tubulin (tba-1): cytoskeletal dimer component
+    pDNA5->addGene(StringDict::ID::BETA_TUBULIN, 0.5, 0.2);    // β-tubulin (tbb-2): cytoskeletal dimer component
+    pDNA5->addGene(StringDict::ID::GAMMA_TUBULIN, 0.1, 0.05);  // γ-tubulin (tbg-1): nucleation scaffold
     
     // Aromatic and special amino acids (lower abundance)
     pDNA5->addGene(StringDict::ID::TRNA_PHE_TTC, 0.8, 0.14); // Phenylalanine

@@ -14,3 +14,6 @@ Comments must avoid referencing prior code states; describe only the current beh
   - If the protein form is used in validation/logic, also add a protein info entry (or ensure the consuming logic does not need `MoleculeWiki` data).
 - Maintain the one-ID rule: gene vs mRNA vs protein distinguished only by `ChemicalType`.
 
+# Engineering policy
+- Avoid workarounds that mask root causes (e.g., ad-hoc maternal seeding to compensate for missing biology). Prefer biologically grounded fixes. Use temporary instrumentation/logging to diagnose, not to alter biology.
+

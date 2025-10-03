@@ -86,6 +86,19 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
     }
     
     dataRow.push_back(computeAverageMTLength());
+    // Global average alpha/beta tubulin protein concentrations (approximate)
+    dataRow.push_back(computeApproxCellAverageConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::PROTEIN, Species::C_ELEGANS)));
+    dataRow.push_back(computeApproxCellAverageConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::PROTEIN, Species::C_ELEGANS)));
+    // Global average alpha/beta tubulin mRNA concentrations (approximate)
+    dataRow.push_back(computeApproxCellAverageConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)));
+    dataRow.push_back(computeApproxCellAverageConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::MRNA, Species::C_ELEGANS)));
+    // Centrosome-proximal alpha/beta tubulin (posterior centrosome)
+    float3 posteriorCentro(0.0f, -0.8f, 0.0f);
+    Species cel = Species::C_ELEGANS;
+    dataRow.push_back(m_medium.getMoleculeConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::PROTEIN, cel), posteriorCentro));
+    dataRow.push_back(m_medium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::PROTEIN, cel), posteriorCentro));
+    dataRow.push_back(m_medium.getMoleculeConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::MRNA, cel), posteriorCentro));
+    dataRow.push_back(m_medium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::MRNA, cel), posteriorCentro));
     
     // Append step time per row (ms)
     dataRow.push_back(stepTimeMs);
@@ -115,6 +128,14 @@ std::vector<std::string> DataCollector::generateHeaders() const
     
     // Average MT length column (µm)
     headers.push_back("AverageMTLength(µm)");
+    headers.push_back("ALPHA_TUBULIN[/µm^3]");
+    headers.push_back("BETA_TUBULIN[/µm^3]");
+    headers.push_back("ALPHA_TUBULIN_mRNA[/µm^3]");
+    headers.push_back("BETA_TUBULIN_mRNA[/µm^3]");
+    headers.push_back("ALPHA_TUBULIN@Centro[/µm^3]");
+    headers.push_back("BETA_TUBULIN@Centro[/µm^3]");
+    headers.push_back("ALPHA_TUBULIN_mRNA@Centro[/µm^3]");
+    headers.push_back("BETA_TUBULIN_mRNA@Centro[/µm^3]");
     
     // Append per-row step time header
     headers.push_back("StepTime(ms)");
@@ -151,4 +172,14 @@ double DataCollector::computeRingCount() const
         }
     }
     return ringCount;
+}
+
+double DataCollector::computeApproxCellAverageConcentration(const Molecule& molecule) const
+{
+    static const float3 pts[7] = { float3(0,0,0), float3(0.5f,0,0), float3(-0.5f,0,0), float3(0,0.5f,0), float3(0,-0.5f,0), float3(0,0,0.5f), float3(0,0,-0.5f) };
+    double sum = 0.0;
+    for (const auto& p : pts) {
+        sum += m_medium.getMoleculeConcentration(molecule, p);
+    }
+    return sum / 7.0;
 }

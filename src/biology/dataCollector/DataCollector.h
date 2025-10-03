@@ -101,6 +101,8 @@ private:
     double computeAverageMTLength() const;
     // Compute nucleation site (Y_TuRC) count
     double computeRingCount() const;
+    // Approximate cell-average concentration for a given molecule by sampling a few positions
+    double computeApproxCellAverageConcentration(const Molecule& molecule) const;
 
 public:
     /**
