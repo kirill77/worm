@@ -1,5 +1,6 @@
 #include "BVH.h"
 #include <algorithm>
+#include "geometry/vectors/intersections.h"
 
 BVH::BVH()
 {
@@ -80,21 +81,11 @@ void BVH::rebuildHierarchy()
 
 bool BVH::rayIntersectsBox(const IRay& ray, const box3& box) const
 {
-    // Ray-box intersection test using slab method
-    float3 invDir = float3(1.0f / ray.m_vDir.x, 1.0f / ray.m_vDir.y, 1.0f / ray.m_vDir.z);
-    
-    float3 t1 = (box.m_mins - ray.m_vPos) * invDir;
-    float3 t2 = (box.m_maxs - ray.m_vPos) * invDir;
-    
-    float3 tMin = min(t1, t2);
-    float3 tMax = max(t1, t2);
-    
-    // Manually compute max and min components to avoid template conflicts
-    float tNear = std::max(tMin.x, std::max(tMin.y, tMin.z));
-    float tFar = std::min(tMax.x, std::min(tMax.y, tMax.z));
-    
-    // Check if intersection is within ray's active range
-    return tNear <= tFar && tFar >= ray.m_fMin && tNear <= ray.m_fMax;
+    float tNear, tFar;
+    if (!intersectRayAABB<float, 3>(ray.m_vPos, ray.m_vDir, box, tNear, tFar))
+        return false;
+    // Check if intersection interval overlaps the ray's active range
+    return tFar >= ray.m_fMin && tNear <= ray.m_fMax;
 }
 
 std::unique_ptr<BVH::Node> BVH::buildNode(std::vector<SubObj>& subObjects, int depth)

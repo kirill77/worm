@@ -75,6 +75,8 @@ GeneWiki::GeneWiki()
     // PERICENTRIN has no direct worm ortholog; prefer spd-2 or spd-5 depending on intent
     // Default to spd-2 as a scaffold component for sequence retrieval
     m_lookupAliases[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "spd-2";
+    m_lookupAliases[Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "tba-1";
+    m_lookupAliases[Molecule(StringDict::ID::BETA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "tbb-2";
 
     // Human-specific aliases removed; use GENERIC for cross-species where applicable
 }

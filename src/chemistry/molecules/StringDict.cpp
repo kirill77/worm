@@ -32,8 +32,11 @@ void StringDict::initialize()
     m_idToString[static_cast<size_t>(ID::PLK_1)] = "PLK-1";
     m_idToString[static_cast<size_t>(ID::PLK_4)] = "PLK-4";
     
+    // Tubulins (gene/protein distinguished by ChemicalType)
+    m_idToString[static_cast<size_t>(ID::ALPHA_TUBULIN)] = "ALPHA-TUBULIN";
+    m_idToString[static_cast<size_t>(ID::BETA_TUBULIN)] = "BETA-TUBULIN";
+    m_idToString[static_cast<size_t>(ID::GAMMA_TUBULIN)] = "GAMMA-TUBULIN";
     // Centrosome proteins
-    m_idToString[static_cast<size_t>(ID::GAMMA_TUBULIN)] = "γ-TUBULIN";
     m_idToString[static_cast<size_t>(ID::PERICENTRIN)] = "PERICENTRIN";
     m_idToString[static_cast<size_t>(ID::NINEIN)] = "NINEIN";
     

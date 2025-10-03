@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="box.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="intersections.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>

@@ -232,7 +232,11 @@ void MoleculeWiki::initializeMRNAInfo()
     
     // Centrosome protein mRNAs - structural proteins, moderate translation
     m_moleculesInfo[Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
-        MolInfo("γ-TUBULIN mRNA", "mRNA", 44000.0, "γ-tubulin mRNA", 3600.0, 1.2, 0.0);
+        MolInfo("GAMMA-TUBULIN mRNA", "mRNA", 44000.0, "gamma-tubulin mRNA", 3600.0, 1.2, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
+        MolInfo("ALPHA-TUBULIN mRNA", "mRNA", 44000.0, "alpha-tubulin mRNA", 3600.0, 1.5, 0.0);
+    m_moleculesInfo[Molecule(StringDict::ID::BETA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
+        MolInfo("BETA-TUBULIN mRNA", "mRNA", 44000.0, "beta-tubulin mRNA", 3600.0, 1.5, 0.0);
     m_moleculesInfo[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 
         MolInfo("PERICENTRIN mRNA", "mRNA", 52000.0, "Centrosome scaffold mRNA", 3600.0, 1.0, 0.0);
     m_moleculesInfo[Molecule(StringDict::ID::NINEIN, ChemicalType::MRNA, Species::C_ELEGANS)] = 

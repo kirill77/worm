@@ -66,7 +66,9 @@ struct StringDict
         PAL_1,
         PIE_1,
 
-        // Centrosome structural proteins (genes)
+        // Tubulins (genes/proteins distinguished by ChemicalType)
+        ALPHA_TUBULIN,
+        BETA_TUBULIN,
         GAMMA_TUBULIN,
         PERICENTRIN,
         NINEIN,

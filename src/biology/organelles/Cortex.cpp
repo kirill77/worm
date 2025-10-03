@@ -33,6 +33,21 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
             if (pMesh)
             {
                 m_pCortexBVH = std::make_shared<BVHMesh>(pMesh);
+
+                // Validate mapping consistency between normalizedToWorld and worldToNormalized
+                static std::mt19937 rng(std::random_device{}());
+                std::uniform_real_distribution<float> uni(-1.0f, 1.0f);
+                for (int i = 0; i < 10; ++i)
+                {
+                    float3 n = float3(uni(rng), uni(rng), uni(rng));
+                    float r = length(n);
+                    if (r < 1e-6f) n = float3(1, 0, 0), r = 1.0f;
+                    float3 w = normalizedToWorld(n);
+                    float3 n2 = worldToNormalized(w);
+                    float3 d = n2 - n;
+                    float err = length(d);
+                    assert(err < 1e-3f && "Cortex world/normalized mappings must be approximately inverse after clamping to unit length");
+                }
             }
         }
     }
@@ -57,15 +72,6 @@ void Cortex::update(double fDtSec, Cell& cell)
     double volume = cell.getInternalMedium().getVolumeMicroM();
     m_pTensionSphere->setVolume(volume);
     m_pTensionSphere->makeTimeStep(fDtSec);
-
-    if (!m_pCortexBVH)
-    {
-        auto pCortexMesh = m_pTensionSphere->getEdgeMesh();
-        if (pCortexMesh)
-        {
-            m_pCortexBVH = std::make_shared<BVHMesh>(pCortexMesh);
-        }
-    }
 
     // Push molecules back into the grid at updated positions after shape update
     transferBindingSiteMoleculesToMedium();
@@ -278,26 +284,37 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
 {
     assert(m_pCortexBVH && "Cortex BVH must be initialized before normalizedToWorld");
 
-    // Get bounding box center as ray origin
-    const box3 boundingBox = m_pCortexBVH->getBox();
-    const float3 center = boundingBox.center();
+    // Get bounding box center (for ray origin)
+    const box3 bbox = m_pCortexBVH->getBox();
+    const float3 center = bbox.center();
 
-    if (length(normalizedPos) < 1e-6f) {
+    // Early-out for near-origin input
+    float nLen = length(normalizedPos);
+    if (nLen < 1e-6f)
         return center;
-    }
 
-    const float3 direction = normalize(normalizedPos);
+    // Decompose normalized input into (unit direction, scalar s in [0,1])
+    // s encodes the fraction to the cortex along the ray; use L-infinity norm to remain inside cube
+    float s = std::max(std::max(std::abs(normalizedPos.x), std::abs(normalizedPos.y)), std::abs(normalizedPos.z));
+    s = std::min(1.0f, std::max(0.0f, s));
+    float3 dirInf = normalizedPos / nLen; // unit direction in normalized space (L2)
+
+    // Convert normalized-space direction to world-space ray direction by applying half-extents, then renormalizing
+    const float3 half = (bbox.m_maxs - bbox.m_mins) * 0.5f;
+    float3 dirWorldPre = float3(dirInf.x * half.x, dirInf.y * half.y, dirInf.z * half.z);
+    float preLen = length(dirWorldPre);
+    if (preLen < 1e-6f)
+        return center;
+    float3 dirWorldUnit = dirWorldPre / preLen;
+
+    // Distance to cortex along this direction
     const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
-    float hitDist = traceClosestHit(bvh, center, direction, 0.0f, std::numeric_limits<float>::max());
-    if (hitDist <= 0.0f)
-    {
-        const float3 diagonal = boundingBox.diagonal();
-        return center + normalizedPos * (diagonal * 0.5f);
-    }
+    float distCortex = traceClosestHit(bvh, center, dirWorldUnit, 0.0f, std::numeric_limits<float>::max());
+    if (distCortex <= 0.0f)
+        return center; // Degenerate case
 
-    float normalizedLength = length(normalizedPos);
-    normalizedLength = std::min(1.0f, std::max(-1.0f, normalizedLength));
-    return center + direction * (hitDist * normalizedLength);
+    // Map to world along the same ray by fraction s of the cortex distance
+    return center + dirWorldUnit * (distCortex * s);
 }
 
 float Cortex::distanceToCortex(const float3& originWorld, const float3& dirWorld)
@@ -306,6 +323,38 @@ float Cortex::distanceToCortex(const float3& originWorld, const float3& dirWorld
 
     const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
     return traceClosestHit(bvh, originWorld, dirWorld, 0.0f, std::numeric_limits<float>::max());
+}
+
+float3 Cortex::worldToNormalized(const float3& worldPos) const
+{
+    assert(m_pCortexBVH && "Cortex BVH must be initialized before worldToNormalized");
+    const box3 bbox = m_pCortexBVH->getBox();
+    const float3 center = bbox.center();
+    float3 v = worldPos - center;
+    float len = length(v);
+    if (len < 1e-6f) return float3(0,0,0);
+    float3 dirWorldUnit = v / len;
+    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
+    float distCortex = traceClosestHit(bvh, center, dirWorldUnit, 0.0f, std::numeric_limits<float>::max());
+    if (distCortex <= 0.0f)
+        return float3(0,0,0);
+
+    // Fraction along the ray to the cortex (clamped)
+    float s = std::min(1.0f, std::max(0.0f, len / distCortex));
+
+    // Undo anisotropic scaling to recover normalized-space direction, then L-infinity normalize
+    const float3 half = (bbox.m_maxs - bbox.m_mins) * 0.5f;
+    const float eps = 1e-8f;
+    float3 pre = float3(
+        (std::abs(half.x) > eps) ? (dirWorldUnit.x / half.x) : 0.0f,
+        (std::abs(half.y) > eps) ? (dirWorldUnit.y / half.y) : 0.0f,
+        (std::abs(half.z) > eps) ? (dirWorldUnit.z / half.z) : 0.0f
+    );
+    float maxAbs = std::max(std::abs(pre.x), std::max(std::abs(pre.y), std::abs(pre.z)));
+    if (maxAbs < eps) return float3(0,0,0);
+    float3 dirInf = pre / maxAbs;
+
+    return dirInf * s;
 }
 
 float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const

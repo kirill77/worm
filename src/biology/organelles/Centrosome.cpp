@@ -148,7 +148,7 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     {
         if (pRing)
         {
-            pRing->update(dt, centrosomeWorldPos, pCortex);
+            pRing->update(dt, centrosomeWorldPos, pCortex, internalMedium);
         }
     }
 }

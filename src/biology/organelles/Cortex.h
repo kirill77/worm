@@ -64,6 +64,9 @@ public:
     // Map normalized coordinates [-1,1] to cortex surface world position via ray cast
     float3 normalizedToWorld(const float3& normalizedPos);
 
+    // Map world position to normalized coordinates [-1,1] using cortex bounding box
+    float3 worldToNormalized(const float3& worldPos) const;
+
     // Compute the distance from a world-space origin along a world-space direction
     // to the cortex surface. Returns 0 if no intersection.
     float distanceToCortex(const float3& originWorld, const float3& dirWorld);

@@ -1,4 +1,16 @@
-Do not write comments that describe prior code or incremental changes.
-Comments must describe the current behavior, intent, constraints, and rationale.
+Comments must avoid referencing prior code states; describe only the current behavior, intent, constraints, and rationale.
 
+# Domain-specific modeling rules
+- Use a single `StringDict::ID` for a biological entity across forms; distinguish by `Molecule::ChemicalType`:
+  - Example: `ALPHA_TUBULIN`, `BETA_TUBULIN`, `GAMMA_TUBULIN` should represent gene, mRNA, and protein via `ChemicalType::DNA`/`MRNA`/`PROTEIN` rather than separate IDs.
+- Prefer concentration-based logic (`Medium::getMoleculeConcentration`) over absolute counts to avoid grid-resolution dependence.
+
+# Gene onboarding workflow (mandatory when adding new genes)
+- Always add the gene as a single `StringDict::ID` within the genes range (`GENES_START..GENES_END`).
+- Use ASCII-only, uppercase, hyphenated names in `StringDict` strings (e.g., `GAMMA-TUBULIN`), no Greek letters.
+- For the new gene ID:
+  - Add species-aware alias in `chemistry/genes/GeneWiki.cpp` (`m_lookupAliases`) mapping `Molecule(id, ChemicalType::MRNA, Species::C_ELEGANS)` to the canonical C. elegans gene symbol (e.g., `tbg-1`, `tba-1`, `tbb-2`).
+  - Add `MoleculeWiki` entries in `chemistry/molecules/MoleculeWiki.cpp` for at least the mRNA form under `initializeMRNAInfo()`; include reasonable defaults for translation/half-life if no data.
+  - If the protein form is used in validation/logic, also add a protein info entry (or ensure the consuming logic does not need `MoleculeWiki` data).
+- Maintain the one-ID rule: gene vs mRNA vs protein distinguished only by `ChemicalType`.
 
