@@ -117,7 +117,7 @@ void Medium::updateGridCellVolumes(Cortex& cortex)
     }
 }
 
-void Medium::toBindingSites(std::vector<BindingSite>& bindingSites, const std::vector<Molecule>& bindableMolecules)
+void Medium::toBindingSites(std::vector<CortexMolecules>& bindingSites, const std::vector<Molecule>& bindableMolecules)
 {
     // Group binding sites by grid cell index
     std::unordered_map<uint32_t, std::vector<size_t>> cellToSites;
@@ -155,7 +155,7 @@ void Medium::toBindingSites(std::vector<BindingSite>& bindingSites, const std::v
 
             for (size_t idx : siteIndices)
             {
-                BindingSite& site = bindingSites[idx];
+                CortexMolecules& site = bindingSites[idx];
                 auto& pop = site.m_bsMolecules[mol];
                 pop.m_fNumber += share;
                 pop.setBound(true); // we're working with binding sites here

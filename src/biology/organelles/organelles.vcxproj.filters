@@ -63,7 +63,7 @@
     <ClInclude Include="Y_TuRC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BindingSite.h">
+    <ClInclude Include="CortexLocation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

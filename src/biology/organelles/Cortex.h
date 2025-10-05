@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include "Medium.h"
-#include "BindingSite.h"
+#include "CortexLocation.h"
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
 
@@ -23,7 +23,7 @@ private:
     double m_fThickness; // Membrane thickness in micrometers
     std::shared_ptr<class BVHMesh> m_pCortexBVH;
     std::shared_ptr<class TensionSphere> m_pTensionSphere;
-    std::vector<BindingSite> m_pBindingSites;
+    std::vector<CortexMolecules> m_pBindingSites;
     std::vector<Molecule> m_bindableMolecules;
 
 public:

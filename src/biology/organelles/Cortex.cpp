@@ -163,7 +163,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
         double b1 = sr1 * (1.0 - r2);
         double b2 = sr1 * r2;
 
-        BindingSite site;
+        CortexMolecules site;
         site.m_triangleIndex = triIdx;
         site.m_barycentric = float3(static_cast<float>(b0), static_cast<float>(b1), static_cast<float>(b2));
         // Initialize population on this binding site
