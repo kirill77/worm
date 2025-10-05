@@ -6,7 +6,7 @@ Purpose
 Context and current status
 - Nucleation site class exists: Y_TuRC (γ-tubulin ring complex), owned by `Centrosome`.
 - Y_TuRC target now scales with PCM maturation × bound γ-tubulin concentration (concentration-based), with a small basal component when PCM emerges.
-- DataCollector logs: Time(s), NucleationSites(Y_TuRC), selected molecules per point, StepTime(ms); outputs go to data/simOutDebug/sim.csv (Debug) or data/simOutRelease/sim.csv (Release).
+- DataCollector logs to timestamped folders under data/simOutput/YYYYMMDD_HHMMSS; columns now include: Time(s), NucleationSites(Y_TuRC), AverageMTLength(µm), global α/β‑tubulin protein cell‑average, and MT tip diagnostics (AvgTipTubulinDimer, AvgMT_vGrowEff, AvgMT_pCatEff, AvgMT_pResEff, AvgMT_DistToCortex, FracMT_ContactingCortex), plus StepTime(ms).
 - Added pathway molecules (StringDict): GTP, GDP, RHO_1, RHO_1_GTP, RHO_1_GDP, ECT_2, CHIN_1, CDC_42, CDC_42_GTP, CDC_42_GDP, NMY_2, AIR_1, MT_PLUS_END_CONTACT, SPD_2, SPD_5, PCMD_1, ZYG_1, SAS_6, SAS_5, SAS_4.
 - Maternal provisioning: γ-tubulin seed + SPD_2, SPD_5, PLK_1, AIR_1 near posterior centrosome; species-consistent lookups.
 - Uniform cytosolic pools alone do not produce asymmetry; we will add cortex-bound pools and AstralMTs.
@@ -41,12 +41,12 @@ Immediate next steps (code changes)
 - Dynamic instability (growth/shrink, catastrophe/rescue), 3D plus-end tracking.
   - Represent each MT with parent Y_TuRC, current length L(t), state S∈{Grow,Shrink}, and tip position.
   - Per-step update with probabilities per second: catastrophe (Grow→Shrink), rescue (Shrink→Grow).
-  - Initial defaults at 20–22 °C (tunable): v_grow ≈ 0.2–0.5 µm/s; v_shrink ≈ 0.5–1.0 µm/s; p_cat ≈ 0.1–0.3 s⁻¹; p_rescue ≈ 0.02–0.1 s⁻¹.
+  - Initial defaults centralized in simConstants.h (tunable): MT_VGROW_MAX_UM_PER_S, MT_VSHRINK_UM_PER_S, MT_CATASTROPHE_BASE_FREE/CONTACT, MT_K_TUB, MT_K_AIR, MT_CAP_*.
 - Couple growth to soluble α/β‑tubulin concentration near PCM: v_grow = v_max · [Tub]/(K_m + [Tub]); modulate p_cat↓ and p_rescue↑ with [Tub].
 - Nucleation lifecycle at Y_TuRC:
   - Allow ≤1 active MT per Y_TuRC; after full depolymerization (L→0), wait a refractory time τ_ref before re‑nucleation.
 - Cortex contact via cortex BVH:
-  - Detect tip–cortex contact; increase catastrophe probability and/or pause; optional buckling/shortening upon sustained contact.
+  - Detect tip–cortex contact; increase catastrophe probability and/or pause; next: probabilistic cortical anchoring (dynein-mediated) with pulling proxy; optional buckling/shortening with sustained contact.
 - Optional GTP‑cap module (later): hydrolysis delay; catastrophe probability rises sharply when cap is lost.
 
 6) Cortex-bound pools and surface mechanics

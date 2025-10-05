@@ -9,6 +9,9 @@ This file gives a big-picture summary of the main interactions in this codebase.
   - Participate in ComplexFormationInteraction (e.g., PAR-3:PAR-6, PAR-6:PKC-3).
   - Undergo phosphorylation/dephosphorylation (interaction rates from data/proteinRules).
 
+- Concentration-first policy (grid-agnostic): all molecule queries in the Medium use concentration (molecules/µm^3), computed with per-grid-cell volumes derived from `Cortex::normalizedToWorld()`.
+- tRNA production/export: Pol III-style tRNA production is modeled in the nucleus; tRNAs are exported (and charged in cytosol) and drive translation throughput.
+
 - Cortex (cell membrane):
   - Holds bound protein populations (e.g., PAR-3:CORTEX, PAR-2:CORTEX).
   - PAR proteins exhibit mutual antagonism:
@@ -21,12 +24,14 @@ This file gives a big-picture summary of the main interactions in this codebase.
   - Local MT(MicroTubules)-cortex proximity/contact reduces posterior RHO-1/ECT-2 activity (AIR-1/Aurora A pathway) and stabilizes PAR-2.
   - PCM maturation (SPD-2/SPD-5; PLK-1/AIR-1) recruits γ-tubulin/γ-TuRC and sets MT nucleation capacity; MT number scales with PCM.
   - Lower local contractility at the posterior can drive anterior-directed cortical flows (planned/refined model).
+  - MT plus-ends follow dynamic instability (growth/shrink, catastrophe/rescue) with rates centralized in `simConstants.h`; future step: probabilistic cortical anchoring (dynein-based) and pulling proxy.
 
 - CellSim and mechanics:
   - CellSim integrates chemistry/biology each step.
   - TensionSphere represents cortex shape; force constants can be adjusted from molecular state.
 
 - Data collection and validation:
-  - DataCollector samples specific molecules at defined positions over time (CSV).
+  - DataCollector writes CSV snapshots to timestamped folders under `data/simOutput/YYYYMMDD_HHMMSS`.
+  - Columns include nucleation site counts, average MT length, global α/β-tubulin protein concentrations, and MT tip diagnostics (local tubulin, effective growth/catastrophe/rescue, distance to cortex, contact fraction).
   - Validation checks compare simulated patterns (e.g., PAR A/P ratios, centrosome behavior) against expected biological trends.
 

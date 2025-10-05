@@ -8,6 +8,7 @@
 #include <cmath>
 #include <numbers>
 #include <algorithm>
+#include "chemistry/molecules/simConstants.h"
 
 Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     : m_pCentrosome(pCentrosome)
@@ -67,10 +68,10 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
         return dis(gen);
     };
     // Baseline rates at 20–22 °C
-    const float vGrowMax = 0.45f;    // µm/s (at high tubulin)
-    const float vShrink = 0.9f;      // µm/s
-    const float kHyd = 0.3f;         // s^-1 cap hydrolysis
-    float pCatFree = 0.12f;          // s^-1 baseline catastrophe (free tip)
+    const float vGrowMax = static_cast<float>(MoleculeConstants::MT_VGROW_MAX_UM_PER_S);    // µm/s (at high tubulin)
+    const float vShrink  = static_cast<float>(MoleculeConstants::MT_VSHRINK_UM_PER_S);      // µm/s
+    const float kHyd = static_cast<float>(MoleculeConstants::MT_CAP_HYDROLYSIS_RATE_S); // s^-1 cap hydrolysis
+    float pCatFree = static_cast<float>(MoleculeConstants::MT_CATASTROPHE_BASE_FREE);   // s^-1 baseline catastrophe (free tip)
     float pRes = 0.05f;              // s^-1 baseline rescue
 
     if (m_mtLengthMicroM > 0.0f)
@@ -86,13 +87,13 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
         double air1 = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, m_species), tipNorm);
         // Cortex-contact increases catastrophe probability
         if (m_mtContactCortex)
-            pCatFree = 0.6f; // stronger catastrophic bias at contact
+            pCatFree = static_cast<float>(MoleculeConstants::MT_CATASTROPHE_BASE_CONTACT); // stronger catastrophic bias at contact
 
         // Local soluble tubulin coupling (Michaelis–Menten-like)
-        const float K_tub = 50.0f;
+        const float K_tub = static_cast<float>(MoleculeConstants::MT_K_TUB);
         float vGrow = vGrowMax * (tubDimer / (K_tub + tubDimer));
         // Catastrophe/rescue modulation by tubulin and AIR-1
-        const float K_air = 10.0f;
+        const float K_air = static_cast<float>(MoleculeConstants::MT_K_AIR);
         float f_air_cat = 1.0f / (1.0f + static_cast<float>(air1) / K_air);
         float f_tub_cat = (K_tub / (K_tub + std::max(tubDimer, 0.0f)));
         float f_tub_res = 1.0f + (std::max(tubDimer, 0.0f) / (K_tub + std::max(tubDimer, 0.0f)));
@@ -117,7 +118,8 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
             m_mtCapLengthMicroM = std::max(0.0f, m_mtCapLengthMicroM - static_cast<float>(kHyd * dtSec));
             // Catastrophe probability rises when cap is depleted
             float pCat = pCatFree;
-            if (m_mtCapLengthMicroM < 0.02f) pCat *= 3.0f;
+            if (m_mtCapLengthMicroM < static_cast<float>(MoleculeConstants::MT_CAP_DEPLETED_THRESHOLD_MICROM))
+                pCat *= static_cast<float>(MoleculeConstants::MT_CAP_DEPLETION_CATASTROPHE_MULT);
             if (rand01() < pCat * dtSec)
             {
                 m_mtState = MTState::Shrinking;

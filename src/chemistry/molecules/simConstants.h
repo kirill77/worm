@@ -20,6 +20,20 @@ namespace MoleculeConstants
     constexpr double BETA_TUBULIN_EXPRESSION_RATE  = 50000.0;
     constexpr double ALPHA_TUBULIN_BASAL_LEVEL     = 0.2;
     constexpr double BETA_TUBULIN_BASAL_LEVEL      = 0.2;
+
+    // Microtubule dynamic instability (catastrophe-related parameters)
+    // Note: These affect catastrophe probability directly or via cap/tip modulators
+    constexpr double MT_CATASTROPHE_BASE_FREE            = 0.12;  // s^-1 baseline (free tip)
+    constexpr double MT_CATASTROPHE_BASE_CONTACT         = 0.60;  // s^-1 when contacting cortex
+    constexpr double MT_K_TUB                            = 50.0;  // molecules/µm^3 (tubulin saturation scale)
+    constexpr double MT_K_AIR                            = 10.0;  // molecules/µm^3 (AIR-1 modulation scale)
+    constexpr double MT_CAP_HYDROLYSIS_RATE_S            = 0.03;  // s^-1 (used to drain cap length proxy)
+    constexpr double MT_CAP_DEPLETED_THRESHOLD_MICROM    = 0.02;  // µm (cap length threshold for high catastrophe)
+    constexpr double MT_CAP_DEPLETION_CATASTROPHE_MULT   = 3.0;   // catastrophe multiplier when cap depleted
+
+    // Microtubule growth/shrink speeds
+    constexpr double MT_VGROW_MAX_UM_PER_S = 0.45;  // µm/s at high tubulin
+    constexpr double MT_VSHRINK_UM_PER_S   = 0.09;  // µm/s
 }
 
 
