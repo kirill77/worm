@@ -16,6 +16,11 @@ void StringDict::initialize()
     
     // Special types
     m_idToString[static_cast<size_t>(ID::eUNKNOWN)] = "UNKNOWN";
+    // Range markers for readability in logs
+    m_idToString[static_cast<size_t>(ID::GENES_START)] = "GENES_START";
+    m_idToString[static_cast<size_t>(ID::GENES_END)] = "GENES_END";
+    m_idToString[static_cast<size_t>(ID::TRNA_GENES_START)] = "TRNA_GENES_START";
+    m_idToString[static_cast<size_t>(ID::TRNA_GENES_END)] = "TRNA_GENES_END";
     
     // PAR proteins (polarity establishment)
     m_idToString[static_cast<size_t>(ID::PAR_1)] = "PAR-1";

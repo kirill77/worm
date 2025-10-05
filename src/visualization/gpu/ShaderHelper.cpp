@@ -31,7 +31,7 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderHelper::loadShader(
     
     // Find the shader file in different directories
     std::filesystem::path foundPath;
-    if (!FileUtils::findFile(filePath, foundPath))
+    if (!FileUtils::findTheFile(filePath, foundPath))
     {
         // Convert wide string to narrow string using filesystem path
         std::filesystem::path pathObj(filePath);
@@ -79,7 +79,7 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderHelper::loadCompiledShader(const std::wst
     
     // Find the shader file in different directories
     std::filesystem::path foundPath;
-    if (!FileUtils::findFile(filePath, foundPath))
+    if (!FileUtils::findTheFile(filePath, foundPath))
     {
         return nullptr;
     }

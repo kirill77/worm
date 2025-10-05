@@ -236,16 +236,10 @@ void Worm::setupDataCollector()
     auto& internalMedium = m_pCellSims[0]->getCell()->getInternalMedium();
     
     // Initialize the DataCollector with the cell's internal medium
-    // Resolve data/simOutDebug (Debug) or data/simOutRelease (Release) via FileUtils and write sim.csv there
+    // Create a timestamp-based output folder under data/simOutput and write sim.csv there
     std::filesystem::path simOutPath;
     std::string simCsv = "sim.csv";
-    #ifdef _DEBUG
-    const char* kSimOutFolder = "data/simOutDebug";
-    #else
-    const char* kSimOutFolder = "data/simOutRelease";
-    #endif
-    if (FileUtils::findTheFolder(kSimOutFolder, simOutPath)) {
-        std::filesystem::create_directories(simOutPath);
+    if (FileUtils::getOrCreateSubFolderUsingTimestamp("data/simOutput", simOutPath)) {
         simCsv = (simOutPath / simCsv).string();
     }
     m_pDataCollector = std::make_unique<DataCollector>(

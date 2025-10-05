@@ -30,18 +30,25 @@ VisEngine::~VisEngine() = default;
 
 bool VisEngine::initialize(std::shared_ptr<Organism> pOrganism)
 {
-    // Initialize logging to a file in data/simOutDebug (Debug) or data/simOutRelease (Release)
+    // Initialize logging to a file in a timestamped data/simOutput/<ts> folder
     {
         std::filesystem::path dataPath;
-        #ifdef _DEBUG
-        const char* kSimOutFolder = "data/simOutDebug";
-        #else
-        const char* kSimOutFolder = "data/simOutRelease";
-        #endif
-        if (FileUtils::findTheFolder(kSimOutFolder, dataPath)) {
-            std::filesystem::create_directories(dataPath);
+        if (FileUtils::getOrCreateSubFolderUsingTimestamp("data/simOutput", dataPath)) {
             const std::string logPath = (dataPath / "sim.log").string();
             ILog::create(logPath);
+
+            // Copy simulation constants snapshot for reproducibility
+            std::filesystem::path srcConstants;
+            if (FileUtils::findTheFile(L"src/chemistry/molecules/simConstants.h", srcConstants)) {
+                if (std::filesystem::exists(srcConstants)) {
+                    std::filesystem::path dstConstants = dataPath / "simConstants.h";
+                    try {
+                        std::filesystem::copy_file(srcConstants, dstConstants, std::filesystem::copy_options::overwrite_existing);
+                    } catch (const std::exception& e) {
+                        LOG_INFO("Warning: failed to copy simConstants.h to output folder: %s", e.what());
+                    }
+                }
+            }
         }
     }
 
