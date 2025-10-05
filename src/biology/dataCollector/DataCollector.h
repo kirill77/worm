@@ -81,6 +81,9 @@ private:
     std::unordered_map<std::string, double> m_performanceMetrics; // Performance metrics like step time
     std::weak_ptr<Cell> m_cell;                 // Optional: access to cell for global metrics
     bool m_trackNucleationSites = false;        // Whether to record nucleation site counts
+    // Optional probe tRNA to monitor in nucleus and cytosol
+    Molecule m_probeTRNAUncharged = Molecule(StringDict::ID::TRNA_GLU_GAG, ChemicalType::TRNA, Species::GENERIC);
+    Molecule m_probeTRNACharged   = Molecule(StringDict::ID::TRNA_GLU_GAG_CHARGED, ChemicalType::TRNA, Species::GENERIC);
     std::chrono::high_resolution_clock::time_point m_lastWallTime; // wall-clock of last collection
     bool m_hasLastWallTime = false;             // whether last wall time is valid
     

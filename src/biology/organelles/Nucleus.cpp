@@ -4,13 +4,14 @@
 #include "Medium.h"
 #include "Cell.h"
 #include <algorithm>
+#include "chemistry/molecules/simConstants.h"
 
 void Nucleus::update(double fDt, Cell& cell)
 {
     Medium& medium = cell.getInternalMedium();
     
     // 1. Nuclear import - transport transcription factors from cytoplasm to nucleus
-    if (m_fEnvelopeIntegrity > 0.5) {
+    if (m_fEnvelopeIntegrity > MoleculeConstants::ENVELOPE_EXPORT_THRESHOLD) {
         float3 nucleusCenter(0.0f, 0.0f, 0.0f);
         
         // List of proteins that should be imported into nucleus (transcription factors)
@@ -21,7 +22,7 @@ void Nucleus::update(double fDt, Cell& cell)
         };
         
         // Simple import model: fraction of cytoplasmic amount enters nucleus per time step
-        double importRate = 0.1;  // 10% per time step
+        double importRate = MoleculeConstants::NUCLEAR_TF_IMPORT_RATE;  // 10% per time step
         
         for (const auto& proteinID : transcriptionFactors) {
             double cytoplasmicLevel = medium.getMoleculeConcentration(Molecule(proteinID, ChemicalType::PROTEIN), nucleusCenter);
@@ -58,7 +59,7 @@ void Nucleus::update(double fDt, Cell& cell)
     }
 
     // 3. Transcription and mRNA export (only during interphase when envelope is mostly intact)
-    if (cell.getCellCycleState() == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > 0.8)
+    if (cell.getCellCycleState() == CellCycleState::INTERPHASE && m_fEnvelopeIntegrity > MoleculeConstants::ENVELOPE_TRANSCRIBE_THRESHOLD)
     {
         // Transcribe genes using nuclear compartment and add to nuclear pool
         auto newRNAs = transcribeAll(fDt);
@@ -71,13 +72,15 @@ void Nucleus::update(double fDt, Cell& cell)
     }
     
     // 4. Try to export existing RNAs from nuclear pool (if we have ATP and envelope is intact)
-    if (m_fEnvelopeIntegrity > 0.5)
+    if (m_fEnvelopeIntegrity > MoleculeConstants::ENVELOPE_EXPORT_THRESHOLD)
     {
         // Find RNA molecules in the nuclear compartment
         auto& molecules = m_nuclearCompartment.m_molecules;
         auto it = molecules.begin();
         while (it != molecules.end()) {
-            if (it->first.getType() == ChemicalType::MRNA && it->second.m_fNumber > 0.1) {
+            ChemicalType t = it->first.getType();
+            bool isExportableRNA = (t == ChemicalType::MRNA || t == ChemicalType::TRNA);
+            if (isExportableRNA && it->second.m_fNumber > 0.1) {
                 if (cell.consumeATP(ATPCosts::fMRNA_EXPORT)) {
                     auto rnaPtr = std::make_shared<MPopulation>(it->first, it->second.m_fNumber);
                     exportRNA(rnaPtr);
@@ -143,12 +146,18 @@ bool Nucleus::areChromosomesDecondensed() const
     return true;
 }
 
+double Nucleus::getNuclearMoleculeAmount(const Molecule& molecule) const
+{
+    auto it = m_nuclearCompartment.m_molecules.find(molecule);
+    return (it != m_nuclearCompartment.m_molecules.end()) ? it->second.m_fNumber : 0.0;
+}
+
 std::vector<std::shared_ptr<MPopulation>> Nucleus::transcribeAll(double fDt) const
 {
     std::vector<std::shared_ptr<MPopulation>> allTranscripts;
     
     // Only transcribe if nuclear envelope is mostly intact
-    if (m_fEnvelopeIntegrity > 0.8)
+    if (m_fEnvelopeIntegrity > MoleculeConstants::ENVELOPE_TRANSCRIBE_THRESHOLD)
     {
         // Collect transcripts from all chromosomes using nuclear compartment
         for (const auto& chromosome : m_chromosomes)
@@ -164,7 +173,7 @@ std::vector<std::shared_ptr<MPopulation>> Nucleus::transcribeAll(double fDt) con
 void Nucleus::importMolecule(const Molecule& molecule, double amount)
 {
     // Import molecule into nuclear compartment (only if envelope is intact)
-    if (m_fEnvelopeIntegrity > 0.5 && amount > 0.0) {
+    if (m_fEnvelopeIntegrity > MoleculeConstants::ENVELOPE_EXPORT_THRESHOLD && amount > 0.0) {
         auto& nuclearMoleculePop = m_nuclearCompartment.getOrCreateMolPop(molecule);
         nuclearMoleculePop.m_fNumber += amount;
     }
@@ -173,7 +182,7 @@ void Nucleus::importMolecule(const Molecule& molecule, double amount)
 void Nucleus::exportRNA(std::shared_ptr<MPopulation> rna)
 {
     // Export RNA to cytoplasm near nucleus (only if envelope is intact)
-    if (m_fEnvelopeIntegrity > 0.5) {
+    if (m_fEnvelopeIntegrity > MoleculeConstants::ENVELOPE_EXPORT_THRESHOLD) {
         if (auto pCell = getCell()) {
             // Add RNAs slightly offset from center to simulate nuclear pores
             float angle = static_cast<float>(rand()) / RAND_MAX * 6.28318f;  // Random angle

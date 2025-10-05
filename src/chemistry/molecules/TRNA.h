@@ -12,6 +12,8 @@ class TRNA
 public:
     // Check if an ID represents a charged tRNA
     static bool isChargedTRNA(StringDict::ID id);
+    // Check if an ID represents a tRNA gene (uncharged isoacceptor IDs)
+    static bool isTRNAGeneId(StringDict::ID id);
     
     // Convert an uncharged tRNA ID to its charged variant
     static StringDict::ID getChargedVariant(StringDict::ID unchargedID);

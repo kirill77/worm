@@ -30,7 +30,8 @@ struct StringDict
         
         // tRNA genes (essential set for translation)
         // Start codon
-        TRNA_MET_ATG,        // Methionine initiator tRNA
+        TRNA_GENES_START,    // Marker: start of uncharged tRNA gene IDs (inclusive)
+        TRNA_MET_ATG = TRNA_GENES_START,        // Methionine initiator tRNA
         
         // Common amino acids (high abundance needed)
         TRNA_GLY_GGA,        // Glycine (preferred codon in C. elegans)
@@ -59,6 +60,7 @@ struct StringDict
         TRNA_ASN_AAC,        // Asparagine
         TRNA_GLN_CAG,        // Glutamine  
         TRNA_ILE_ATC,        // Isoleucine
+        TRNA_GENES_END,      // Marker: end of uncharged tRNA gene IDs (inclusive)
         
         // Cell fate specification genes
         MEX_3,

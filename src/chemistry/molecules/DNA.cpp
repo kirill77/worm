@@ -1,6 +1,8 @@
 #include "DNA.h"
 #include "StringDict.h"
 #include "chemistry/interactions/GridCell.h"
+#include "TRNA.h"
+#include "simConstants.h"
 
 void DNA::addGene(StringDict::ID id, double expressionRate, double basalLevel)
 {
@@ -21,9 +23,31 @@ std::vector<std::shared_ptr<MPopulation>> DNA::transcribeAll(double dt) const
     
     for (const auto& gene : m_pGenes)
     {
-        if (auto mRNA = gene->transcribe(dt))
+        // For tRNA genes, produce TRNA molecules directly (Pol III products), not mRNA
+        StringDict::ID id = gene->getId();
+        bool isTRNAGene = TRNA::isTRNAGeneId(id);
+
+        if (isTRNAGene)
         {
-            transcribedRNA.push_back(mRNA);
+            if (auto amountProbe = gene->transcribe(dt))
+            {
+                // Reuse computed production amount; emit uncharged TRNA of the same gene ID and species
+                // TRNAs are species-agnostic in this model; use GENERIC to match charging/translation keys
+                Molecule trnaMol(id, ChemicalType::TRNA, Species::GENERIC);
+                // Diagnostic boost: increase tRNA nuclear production to test charging/consumption bottlenecks
+                const double kTRNA_PRODUCTION_BOOST = MoleculeConstants::TRNA_POLIII_PRODUCTION_MULTIPLIER;
+                Population boosted = amountProbe->m_population;
+                boosted.m_fNumber *= kTRNA_PRODUCTION_BOOST;
+                auto trnaPop = std::make_shared<MPopulation>(trnaMol, boosted);
+                transcribedRNA.push_back(trnaPop);
+            }
+        }
+        else
+        {
+            if (auto mRNA = gene->transcribe(dt))
+            {
+                transcribedRNA.push_back(mRNA);
+            }
         }
     }
     
@@ -60,11 +84,11 @@ void DNA::updateTranscriptionalRegulation(double dt, const GridCell& nuclearComp
         // Calculate transcriptional activation using Hill kinetics
         // Both CDK2 and CyclinE needed for activation (AND logic)
         double transcriptionFactorActivity = (cdk2Level * cyclinELevel) / 
-                                           (250000.0 + (cdk2Level * cyclinELevel));
+                                           (MoleculeConstants::TF_ACTIVITY_K + (cdk2Level * cyclinELevel));
         
         // Base expression rate + cell cycle-activated rate
-        double basalRate = 0.05;  // Low basal transcription
-        double maxActivatedRate = 0.8;  // Maximum activated transcription
+        double basalRate = MoleculeConstants::TRANSCRIPTION_BASAL_RATE;  // Low basal transcription
+        double maxActivatedRate = MoleculeConstants::TRANSCRIPTION_MAX_ACTIVATED_RATE;  // Maximum activated transcription
         double newExpressionRate = basalRate + (maxActivatedRate * transcriptionFactorActivity);
         
         // Set the new expression rate

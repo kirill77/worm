@@ -10,6 +10,7 @@
 #include "biology/organelles/Cortex.h"
 #include "biology/organelles/Spindle.h"
 #include "chemistry/molecules/MoleculeWiki.h"
+#include "chemistry/molecules/simConstants.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <chrono> // For high_resolution_clock
@@ -89,8 +90,8 @@ std::vector<Chromosome> Worm::initializeGenes()
     pDNA4->addGene(StringDict::ID::TRNA_ASN_AAC, 0.8, 0.15); // Asparagine
 
     // Chromosome V - Centrosome, cytoskeleton, and aromatic amino acid tRNAs
-    pDNA5->addGene(StringDict::ID::ALPHA_TUBULIN, 0.5, 0.2);   // α-tubulin (tba-1): cytoskeletal dimer component
-    pDNA5->addGene(StringDict::ID::BETA_TUBULIN, 0.5, 0.2);    // β-tubulin (tbb-2): cytoskeletal dimer component
+    pDNA5->addGene(StringDict::ID::ALPHA_TUBULIN, MoleculeConstants::ALPHA_TUBULIN_EXPRESSION_RATE, MoleculeConstants::ALPHA_TUBULIN_BASAL_LEVEL); // α-tubulin (tba-1): cytoskeletal dimer component (1000x expression)
+    pDNA5->addGene(StringDict::ID::BETA_TUBULIN,  MoleculeConstants::BETA_TUBULIN_EXPRESSION_RATE,  MoleculeConstants::BETA_TUBULIN_BASAL_LEVEL);  // β-tubulin (tbb-2): cytoskeletal dimer component (1000x expression)
     pDNA5->addGene(StringDict::ID::GAMMA_TUBULIN, 0.1, 0.05);  // γ-tubulin (tbg-1): nucleation scaffold
     
     // Aromatic and special amino acids (lower abundance)
@@ -114,107 +115,7 @@ std::vector<Chromosome> Worm::initializeGenes()
 
 void Worm::addMaternalTRNAs(Medium& medium, const float3& position)
 {
-    // Add essential maternal tRNAs to bootstrap translation
-    // These represent tRNAs inherited from the mother egg
-    // We add charged tRNAs since they come from the mother in a charged state
-    
-    // START CODON - absolutely essential for translation initiation  
-    MPopulation metCharged(Molecule(StringDict::ID::TRNA_MET_ATG_CHARGED, ChemicalType::TRNA), 500.0);
-    medium.addMolecule(metCharged, position);
-    
-    // MOST COMMON AMINO ACIDS - needed for early protein synthesis
-    // Glycine (highly abundant in C. elegans)
-    MPopulation glyGGACharged(Molecule(StringDict::ID::TRNA_GLY_GGA_CHARGED, ChemicalType::TRNA), 300.0);
-    medium.addMolecule(glyGGACharged, position);
-    
-    MPopulation glyGGTCharged(Molecule(StringDict::ID::TRNA_GLY_GGT_CHARGED, ChemicalType::TRNA), 200.0);
-    medium.addMolecule(glyGGTCharged, position);
-    
-    // Alanine (very common)
-    MPopulation alaGCACharged(Molecule(StringDict::ID::TRNA_ALA_GCA_CHARGED, ChemicalType::TRNA), 250.0);
-    medium.addMolecule(alaGCACharged, position);
-    
-    MPopulation alaGCCCharged(Molecule(StringDict::ID::TRNA_ALA_GCC_CHARGED, ChemicalType::TRNA), 150.0);
-    medium.addMolecule(alaGCCCharged, position);
-    
-    // Leucine (highly preferred in C. elegans)
-    MPopulation leuCTGCharged(Molecule(StringDict::ID::TRNA_LEU_CTG_CHARGED, ChemicalType::TRNA), 350.0);
-    medium.addMolecule(leuCTGCharged, position);
-    
-    MPopulation leuCTCCharged(Molecule(StringDict::ID::TRNA_LEU_CTC_CHARGED, ChemicalType::TRNA), 200.0);
-    medium.addMolecule(leuCTCCharged, position);
-    
-    // Serine (common)
-    MPopulation serTCACharged(Molecule(StringDict::ID::TRNA_SER_TCA_CHARGED, ChemicalType::TRNA), 220.0);
-    medium.addMolecule(serTCACharged, position);
-    
-    MPopulation serTCGCharged(Molecule(StringDict::ID::TRNA_SER_TCG_CHARGED, ChemicalType::TRNA), 150.0);
-    medium.addMolecule(serTCGCharged, position);
-    
-    // Valine (both codons needed for GAMMA_TUBULIN translation)
-    MPopulation valGTGCharged(Molecule(StringDict::ID::TRNA_VAL_GTG_CHARGED, ChemicalType::TRNA), 200.0);
-    medium.addMolecule(valGTGCharged, position);
-    
-    MPopulation valGTCCharged(Molecule(StringDict::ID::TRNA_VAL_GTC_CHARGED, ChemicalType::TRNA), 150.0);
-    medium.addMolecule(valGTCCharged, position);
-    
-    // ESSENTIAL AMINO ACIDS - lower abundance but necessary
-    // Lysine (positively charged, important for proteins)
-    MPopulation lysAAGCharged(Molecule(StringDict::ID::TRNA_LYS_AAG_CHARGED, ChemicalType::TRNA), 180.0);
-    medium.addMolecule(lysAAGCharged, position);
-    
-    // Arginine (required by γ-tubulin sequence in worm data)
-    MPopulation argCGACharged(Molecule(StringDict::ID::TRNA_ARG_CGA_CHARGED, ChemicalType::TRNA), 160.0);
-    medium.addMolecule(argCGACharged, position);
-
-    // Additional essentials observed in sequence requirements
-    // Histidine
-    MPopulation hisCACCharged(Molecule(StringDict::ID::TRNA_HIS_CAC_CHARGED, ChemicalType::TRNA), 140.0);
-    medium.addMolecule(hisCACCharged, position);
-    // Tyrosine
-    MPopulation tyrTACCharged(Molecule(StringDict::ID::TRNA_TYR_TAC_CHARGED, ChemicalType::TRNA), 120.0);
-    medium.addMolecule(tyrTACCharged, position);
-    // Cysteine
-    MPopulation cysTGCCharged(Molecule(StringDict::ID::TRNA_CYS_TGC_CHARGED, ChemicalType::TRNA), 120.0);
-    medium.addMolecule(cysTGCCharged, position);
-    // Tryptophan
-    MPopulation trpTGGCharged(Molecule(StringDict::ID::TRNA_TRP_TGG_CHARGED, ChemicalType::TRNA), 100.0);
-    medium.addMolecule(trpTGGCharged, position);
-    // Asparagine
-    MPopulation asnAACCharged(Molecule(StringDict::ID::TRNA_ASN_AAC_CHARGED, ChemicalType::TRNA), 140.0);
-    medium.addMolecule(asnAACCharged, position);
-    // Glutamine
-    MPopulation glnCAGCharged(Molecule(StringDict::ID::TRNA_GLN_CAG_CHARGED, ChemicalType::TRNA), 140.0);
-    medium.addMolecule(glnCAGCharged, position);
-    // Isoleucine
-    MPopulation ileATCCharged(Molecule(StringDict::ID::TRNA_ILE_ATC_CHARGED, ChemicalType::TRNA), 150.0);
-    medium.addMolecule(ileATCCharged, position);
-    
-    // Aspartic acid (negatively charged)
-    MPopulation aspGACCharged(Molecule(StringDict::ID::TRNA_ASP_GAC_CHARGED, ChemicalType::TRNA), 160.0);
-    medium.addMolecule(aspGACCharged, position);
-    
-    // Glutamic acid (negatively charged)
-    MPopulation gluGAGCharged(Molecule(StringDict::ID::TRNA_GLU_GAG_CHARGED, ChemicalType::TRNA), 170.0);
-    medium.addMolecule(gluGAGCharged, position);
-    
-    // Proline (structure-forming)
-    MPopulation proCCACharged(Molecule(StringDict::ID::TRNA_PRO_CCA_CHARGED, ChemicalType::TRNA), 140.0);
-    medium.addMolecule(proCCACharged, position);
-    
-    // Threonine
-    MPopulation thrACACharged(Molecule(StringDict::ID::TRNA_THR_ACA_CHARGED, ChemicalType::TRNA), 140.0);
-    medium.addMolecule(thrACACharged, position);
-    
-    // Phenylalanine (essential for GAMMA_TUBULIN translation)
-    MPopulation pheTTCCharged(Molecule(StringDict::ID::TRNA_PHE_TTC_CHARGED, ChemicalType::TRNA), 130.0);
-    medium.addMolecule(pheTTCCharged, position);
-    
-    // These maternal tRNAs will allow initial translation of:
-    // 1. More tRNAs (from transcribed tRNA mRNAs) 
-    // 2. tRNA synthetases (to charge more tRNAs)
-    // 3. Ribosomal proteins (to make more ribosomes)
-    // 4. Other essential proteins for cellular function
+    // Endogenous tRNA production/export is active; no maternal provisioning needed.
 }
 
 std::shared_ptr<Medium> Worm::createZygoteMedium()

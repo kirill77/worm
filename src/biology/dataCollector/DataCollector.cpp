@@ -4,6 +4,7 @@
 // Needed for nucleation site counting
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Centrosome.h"
+#include "biology/organelles/Nucleus.h"
 #include "biology/organelles/Y_TuRC.h"
 #include "chemistry/molecules/StringDict.h"
 
@@ -100,6 +101,21 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
     dataRow.push_back(m_medium.getMoleculeConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::MRNA, cel), posteriorCentro));
     dataRow.push_back(m_medium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::MRNA, cel), posteriorCentro));
     
+    // Probe tRNA: nuclear counts and cytosolic center concentrations
+    double trnaUn_nuc = 0.0, trnaCh_nuc = 0.0;
+    if (auto cellPtr = m_cell.lock()) {
+        auto pNucleus = std::dynamic_pointer_cast<Nucleus>(cellPtr->getOrganelle(StringDict::ID::ORGANELLE_NUCLEUS));
+        if (pNucleus) {
+            trnaUn_nuc = pNucleus->getNuclearMoleculeAmount(m_probeTRNAUncharged);
+            trnaCh_nuc = pNucleus->getNuclearMoleculeAmount(m_probeTRNACharged);
+        }
+    }
+    dataRow.push_back(trnaUn_nuc);
+    dataRow.push_back(trnaCh_nuc);
+    float3 center(0,0,0);
+    dataRow.push_back(m_medium.getMoleculeConcentration(m_probeTRNAUncharged, center));
+    dataRow.push_back(m_medium.getMoleculeConcentration(m_probeTRNACharged, center));
+    
     // Append step time per row (ms)
     dataRow.push_back(stepTimeMs);
     
@@ -138,6 +154,10 @@ std::vector<std::string> DataCollector::generateHeaders() const
     headers.push_back("BETA_TUBULIN_mRNA@Centro[/µm^3]");
     
     // Append per-row step time header
+    headers.push_back("TRNA_GLU_GAG_nuclear(count)");
+    headers.push_back("TRNA_GLU_GAG_CHARGED_nuclear(count)");
+    headers.push_back("TRNA_GLU_GAG_cytosol_center[/µm^3]");
+    headers.push_back("TRNA_GLU_GAG_CHARGED_cytosol_center[/µm^3]");
     headers.push_back("StepTime(ms)");
     
     return headers;

@@ -8,6 +8,11 @@ bool TRNA::isChargedTRNA(StringDict::ID id)
     return id >= StringDict::ID::TRNA_MET_ATG_CHARGED && id <= StringDict::ID::TRNA_ILE_ATC_CHARGED;
 }
 
+bool TRNA::isTRNAGeneId(StringDict::ID id)
+{
+    return id >= StringDict::ID::TRNA_GENES_START && id <= StringDict::ID::TRNA_GENES_END;
+}
+
 StringDict::ID TRNA::getChargedVariant(StringDict::ID unchargedID)
 {
     switch (unchargedID)

@@ -34,6 +34,9 @@ public:
     bool areChromosomesAttached() const;
     bool areChromosomesSeparated() const;
     bool areChromosomesDecondensed() const;
+
+    // Query amount of a molecule in the nuclear compartment (number of molecules)
+    double getNuclearMoleculeAmount(const Molecule& molecule) const;
     std::vector<std::shared_ptr<MPopulation>> transcribeAll(double fDt) const;
 
     // Nuclear transport
