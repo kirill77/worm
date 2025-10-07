@@ -17,9 +17,7 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     // Set the position component of the transform
     m_mToParent.m_translation = vNormalizedPos;
     
-    // Set the binding surface type to CENTROSOME
-    m_surfaceType = StringDict::ID::ORGANELLE_CENTROSOME;
-    
+
     // Initialize centrosome-specific proteins
     if (auto pCellPtr = pCell.lock()) {
         auto& internalMedium = pCellPtr->getInternalMedium();

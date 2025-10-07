@@ -8,7 +8,6 @@
 #include "StringDict.h"
 
 // Forward declarations
-class BindingSurface;
 struct MPopulation;
 
 // Chemical type classification for molecules

@@ -2,8 +2,6 @@
 #include "chemistry/interactions/PhosphorylationInteraction.h"
 #include "chemistry/interactions/ComplexFormationInteraction.h"
 #include "chemistry/interactions/DephosphorylationInteraction.h"
-#include "BindingSurface.h"
-// Interactions are now managed in InteractionsWiki (separate project)
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <algorithm>
@@ -27,8 +25,6 @@ void MoleculeWiki::Initialize()
     
     // Interactions are initialized from InteractionsWiki
 }
-
-// Interactions accessors were removed; use InteractionsWiki directly
 
 std::string MoleculeWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)
 {

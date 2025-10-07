@@ -21,9 +21,6 @@
     <ClInclude Include="StringDict.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BindingSurface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DNA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -50,9 +47,7 @@
     <ClCompile Include="Gene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProteinBindingSurface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    
     <ClCompile Include="MoleculeWiki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
