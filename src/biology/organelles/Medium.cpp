@@ -254,6 +254,4 @@ double Medium::getAvailableATP(const float3& position) const
 Medium::Medium()
 {
     m_fVolumeMicroM = 23561.0;  // Initialize volume to 23561 micrometers
-    // No need to initialize protein antagonisms here anymore
-    // They are now managed by MoleculeWiki
 }

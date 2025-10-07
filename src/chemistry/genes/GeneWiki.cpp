@@ -77,8 +77,6 @@ GeneWiki::GeneWiki()
     m_lookupAliases[Molecule(StringDict::ID::PERICENTRIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "spd-2";
     m_lookupAliases[Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "tba-1";
     m_lookupAliases[Molecule(StringDict::ID::BETA_TUBULIN, ChemicalType::MRNA, Species::C_ELEGANS)] = "tbb-2";
-
-    // Human-specific aliases removed; use GENERIC for cross-species where applicable
 }
 
 GeneWiki& GeneWiki::getInstance()
@@ -387,8 +385,6 @@ bool GeneWiki::ensureGeneDataComputed(const Molecule& mrna) const
     m_geneData[keyMol] = std::move(data);
     return true;
 }
-
-// makeKey removed: sequences are keyed by Molecule
 
 void GeneWiki::loadMissingCache(Species species) const
 {

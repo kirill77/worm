@@ -17,3 +17,6 @@ Comments must avoid referencing prior code states; describe only the current beh
 # Engineering policy
 - Avoid workarounds that mask root causes (e.g., ad-hoc maternal seeding to compensate for missing biology). Prefer biologically grounded fixes. Use temporary instrumentation/logging to diagnose, not to alter biology.
 
+# Build system
+- Never execute msbuild commands. The user will build the project manually from Visual Studio.
+

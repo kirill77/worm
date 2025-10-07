@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include "chemistry/molecules/BindingSurface.h"
 
 class Cell;
 class Medium;
@@ -11,7 +10,7 @@ struct IVisObject;
  * Base class for all cellular organelles.
  * Organelles can bind proteins and interact with the cell's internal medium.
  */
-class Organelle : public BindingSurface
+class Organelle : public std::enable_shared_from_this<Organelle>
 {
 private:
     std::weak_ptr<Cell> m_pCell;  // Reference to the cell containing this organelle
@@ -24,8 +23,7 @@ public:
      * @param pCell Weak pointer to the cell containing this organelle
      */
     Organelle(std::weak_ptr<Cell> pCell)
-        : BindingSurface()
-        , m_pCell(pCell)
+        : m_pCell(pCell)
     {}
     
     /**

@@ -17,8 +17,6 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     : Organelle(pCell)
     , m_fThickness(fThickness)
 {
-    // Set the binding surface type for cortex
-    m_surfaceType = StringDict::ID::ORGANELLE_CORTEX;
 
     // Initialize the tension sphere using the current cell volume
     auto pOwnedCell = getCell();

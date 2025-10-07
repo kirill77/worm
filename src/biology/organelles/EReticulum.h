@@ -2,6 +2,7 @@
 
 #include "Organelle.h"
 #include <memory>
+#include "geometry/vectors/vector.h"
 
 class Cell;
 

@@ -144,7 +144,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BindingSurface.h" />
     <ClInclude Include="DNA.h" />
     <ClInclude Include="Gene.h" />
     <ClInclude Include="Molecule.h" />
@@ -157,7 +156,7 @@
     <ClCompile Include="DNA.cpp" />
     <ClCompile Include="Gene.cpp" />
     <ClCompile Include="MoleculeWiki.cpp" />
-    <ClCompile Include="ProteinBindingSurface.cpp" />
+    
     <ClCompile Include="StringDict.cpp" />
     <ClCompile Include="TRNA.cpp" />
   </ItemGroup>

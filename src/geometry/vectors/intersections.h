@@ -52,4 +52,51 @@ inline bool intersectRayAABB(const vector<T, n>& pos,
     return true;
 }
 
+// Compute barycentric coordinates of a point with respect to a triangle
+// Returns barycentric coordinates (w0, w1, w2) where point = w0*v0 + w1*v1 + w2*v2
+// For points inside the triangle: w0 + w1 + w2 = 1 and all w >= 0
+// For points outside: coordinates are clamped to valid triangle boundary
+template <class T>
+inline vector<T, 3> computeBarycentricCoordinates(const vector<T, 3>& point,
+                                                   const vector<T, 3>& v0,
+                                                   const vector<T, 3>& v1,
+                                                   const vector<T, 3>& v2)
+{
+    // Project point onto triangle plane and compute barycentric coordinates
+    vector<T, 3> edge0 = v1 - v0;
+    vector<T, 3> edge1 = v2 - v0;
+    vector<T, 3> v0ToPoint = point - v0;
+    
+    T dot00 = dot(edge0, edge0);
+    T dot01 = dot(edge0, edge1);
+    T dot11 = dot(edge1, edge1);
+    T dot20 = dot(v0ToPoint, edge0);
+    T dot21 = dot(v0ToPoint, edge1);
+    
+    T denom = dot00 * dot11 - dot01 * dot01;
+    
+    // Handle degenerate triangle - return coordinates for vertex 0
+    if (std::abs(denom) < std::numeric_limits<T>::epsilon())
+    {
+        return vector<T, 3>(T(1), T(0), T(0));
+    }
+    
+    T invDenom = T(1) / denom;
+    T u = (dot11 * dot20 - dot01 * dot21) * invDenom;  // weight for v1
+    T v = (dot00 * dot21 - dot01 * dot20) * invDenom;  // weight for v2
+    
+    // Ensure barycentric coordinates are valid (clamp to triangle boundary)
+    u = std::max(T(0), std::min(T(1), u));
+    v = std::max(T(0), std::min(T(1), v));
+    if (u + v > T(1))
+    {
+        T s = u + v;
+        u /= s;
+        v /= s;
+    }
+    
+    T w = T(1) - u - v;  // weight for v0
+    return vector<T, 3>(w, u, v);
+}
+
 
