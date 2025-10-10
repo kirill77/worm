@@ -56,9 +56,6 @@ private:
 
     // Edge rest lengths (computed from initial mesh)
     std::vector<double> m_edgeRestLengths;
-    
-    // Edge connectivity (pairs of vertex indices)
-    std::vector<std::pair<uint32_t, uint32_t>> m_edgeConnectivity;
 
     // constants controlling spring behaviour
     double m_fSpringC = 0.1, m_fDampingCoeff = 1;

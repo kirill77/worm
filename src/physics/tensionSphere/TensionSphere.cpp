@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "TensionSphere.h"
 #include <cmath>
 #include <algorithm>
@@ -29,14 +28,12 @@ void TensionSphere::initializePhysics()
     // Initialize velocities to zero
     m_vertexVelocities.resize(vertexCount, double3(0, 0, 0));
     
-    // Get edge connectivity directly from the mesh
-    m_edgeConnectivity = m_pMesh->getAllEdges();
-    
-    // Compute rest lengths for each edge
+    // Compute rest lengths for each edge from the mesh
     m_edgeRestLengths.clear();
-    m_edgeRestLengths.reserve(m_edgeConnectivity.size());
+    const auto& edges = m_pMesh->getAllEdges();
+    m_edgeRestLengths.reserve(edges.size());
 
-    for (const auto& edge : m_edgeConnectivity)
+    for (const auto& edge : edges)
     {
         // Compute rest length as current distance between vertices
         float3 pos1 = m_pMesh->getVertexPosition(edge.first);
@@ -52,10 +49,12 @@ void TensionSphere::computeSpringForces(std::vector<double3>& forces, double dt)
     std::fill(forces.begin(), forces.end(), double3(0, 0, 0));
     
     // Compute spring forces for each edge
-    for (size_t edgeIdx = 0; edgeIdx < m_edgeConnectivity.size(); ++edgeIdx)
+    const auto& edges = m_pMesh->getAllEdges();
+    assert(m_edgeRestLengths.size() == edges.size() && "Edge count changed after rest length initialization");
+    for (size_t edgeIdx = 0; edgeIdx < edges.size(); ++edgeIdx)
     {
-        uint32_t v1 = m_edgeConnectivity[edgeIdx].first;
-        uint32_t v2 = m_edgeConnectivity[edgeIdx].second;
+        uint32_t v1 = edges[edgeIdx].first;
+        uint32_t v2 = edges[edgeIdx].second;
         
         float3 pos1 = m_pMesh->getVertexPosition(v1);
         float3 pos2 = m_pMesh->getVertexPosition(v2);
