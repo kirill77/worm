@@ -124,7 +124,7 @@ void Medium::toBindingSites(std::vector<CortexMolecules>& bindingSites, const st
     cellToSites.reserve(bindingSites.size());
     for (size_t i = 0; i < bindingSites.size(); ++i)
     {
-        const float3& pos = bindingSites[i].m_normalized;
+        const float3& pos = bindingSites[i].getNormalized();
         uint32_t cellIndex = m_grid.positionToIndex(pos);
         cellToSites[cellIndex].push_back(i);
     }

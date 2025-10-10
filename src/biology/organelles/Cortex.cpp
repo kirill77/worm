@@ -163,7 +163,7 @@ bool Cortex::initializeBindingSites(double totalAmount)
 
         CortexMolecules site;
         site.m_triangleIndex = triIdx;
-        site.m_barycentric = float3(static_cast<float>(b0), static_cast<float>(b1), static_cast<float>(b2));
+        site.setBarycentric(float3(static_cast<float>(b0), static_cast<float>(b1), static_cast<float>(b2)));
         // Initialize population on this binding site
         Population pop(amountPerPosition);
         pop.setBound(true);
@@ -203,8 +203,8 @@ void Cortex::transferBindingSiteMoleculesToMedium()
             continue;
 
         // Update normalized [-1,1] position on cortex from triangle + barycentric
-        site.m_normalized = baryToNormalized(site.m_triangleIndex, site.m_barycentric);
-        const float3 pos = site.m_normalized;
+        site.setNormalized(baryToNormalized(site.m_triangleIndex, site.getBarycentric()));
+        const float3 pos = site.getNormalized();
 
         // Transfer each molecule population to the medium at this position and zero source immediately
         for (auto& kv : site.m_bsMolecules) {
