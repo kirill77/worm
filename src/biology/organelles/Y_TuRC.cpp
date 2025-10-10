@@ -12,8 +12,6 @@
 
 Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     : m_pCentrosome(pCentrosome)
-    , m_nAlphaTubulins(0)
-    , m_nBetaTubulins(0)
 {
     // Initialize random direction for microtubule nucleation
     static std::random_device rd;
@@ -105,15 +103,20 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
             m_mtLengthMicroM += static_cast<float>(vGrow * dtSec);
             // GTP-cap grows with addition
             m_mtCapLengthMicroM += static_cast<float>(vGrow * dtSec);
-            // Clamp by cortex distance along the MT direction in world space
-            float maxLen = pCortex->distanceToCortex(originWorld, m_vDir);
-            if (maxLen > 0.0f && m_mtLengthMicroM > maxLen)
+            // Enhanced cortex intersection with cached triangle information
+            Cortex::CortexRay intersection(originWorld, m_vDir);
+            if (pCortex->findClosestIntersection(intersection) && m_mtLengthMicroM > intersection.distance)
             {
-                m_mtLengthMicroM = maxLen;
-                m_mtContactCortex = true;
+                m_mtLengthMicroM = intersection.distance;
+                if (!m_mtContactCortex) {
+                    // First contact - attempt cortical binding directly
+                    m_mtContactCortex = true;
+                    attemptCorticalBindingWithIntersection(intersection, pCortex, internalMedium, dtSec, rand01);
+                }
             }
-            else
+            else {
                 m_mtContactCortex = false;
+            }
             // Hydrolyze cap behind the tip
             m_mtCapLengthMicroM = std::max(0.0f, m_mtCapLengthMicroM - static_cast<float>(kHyd * dtSec));
             // Catastrophe probability rises when cap is depleted
@@ -125,7 +128,7 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
                 m_mtState = MTState::Shrinking;
             }
         }
-        else // Shrinking
+        else if (m_mtState == MTState::Shrinking)
         {
             m_mtLengthMicroM -= static_cast<float>(vShrink * dtSec);
             // Cap collapses in shrink
@@ -135,10 +138,25 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
                 m_mtLengthMicroM = 0.0f;
                 m_mtRefractorySec = 1.0f; // wait before re-nucleation
                 m_mtContactCortex = false;
+                
+                // If was bound, reset binding state (cortex cleanup is lazy)
+                if (m_bindingStrength > 0.0) {
+                    m_bindingStrength = 0.0;
+                    m_bindingTime = 0.0;
+                }
             }
             else if (rand01() < pRes * dtSec)
             {
                 m_mtState = MTState::Growing;
+            }
+        }
+        else if (m_mtState == MTState::Bound)
+        {
+            // Update binding time and check for unbinding
+            m_bindingTime += dtSec;
+            if (shouldUnbind(dtSec, rand01)) {
+                // Unbind from cortex (cortex cleanup is lazy) 
+                unbindFromCortex();
             }
         }
     }
@@ -155,6 +173,68 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
             m_mtLengthMicroM = 0.02f;
             m_mtCapLengthMicroM = 0.02f;
             m_mtContactCortex = false;
+            
+            // Reset binding parameters
+            m_bindingStrength = 0.0;
+            m_bindingTime = 0.0;
         }
     }
 }
+
+void Y_TuRC::bindToCortex(double dyneinConc)
+{
+    m_mtState = MTState::Bound;
+    m_bindingStrength = dyneinConc;
+    m_bindingTime = 0.0;
+}
+
+void Y_TuRC::unbindFromCortex()
+{
+    m_mtState = MTState::Shrinking;  // Unbinding typically triggers catastrophe
+    m_mtContactCortex = false;
+    m_bindingStrength = 0.0;
+    m_bindingTime = 0.0;
+}
+
+bool Y_TuRC::shouldUnbind(double dtSec, const std::function<float()>& rand01) const
+{
+    if (m_mtState != MTState::Bound) return false;
+    
+    // Compute unbinding probability based on binding strength
+    const double baseUnbindRate = MoleculeConstants::MT_CORTEX_UNBIND_BASE;
+    const double weakUnbindRate = MoleculeConstants::MT_CORTEX_UNBIND_WEAK;
+    const double K_bind = MoleculeConstants::MT_CORTEX_K_BIND;
+    
+    // Stronger binding (higher dynein) = lower unbinding rate
+    double unbindRate = baseUnbindRate;
+    if (m_bindingStrength < K_bind) {
+        // Weak binding - higher unbinding rate
+        double weakFactor = 1.0 - (m_bindingStrength / K_bind);
+        unbindRate = baseUnbindRate + weakUnbindRate * weakFactor;
+    }
+    
+    return rand01() < unbindRate * dtSec;
+}
+
+void Y_TuRC::attemptCorticalBindingWithIntersection(const Cortex::CortexRay& intersection,
+                                                   const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium, 
+                                                   double dtSec, const std::function<float()>& rand01)
+{
+    
+    // Sample NMY-2 (myosin II) concentration at contact point for binding probability
+    const bool isOnCortex = true;
+    float3 contactNorm = pCortex->worldToNormalized(intersection.worldHitPoint, isOnCortex);
+    double dyneinConc = internalMedium.getMoleculeConcentration(
+        Molecule(StringDict::ID::NMY_2, ChemicalType::PROTEIN, m_species), contactNorm);
+    
+    // Michaelis-Menten-like binding probability based on motor concentration
+    const double K_bind = MoleculeConstants::MT_CORTEX_K_BIND;
+    const double bindRate = MoleculeConstants::MT_CORTEX_BIND_RATE;
+    double bindingProb = (dyneinConc / (K_bind + dyneinConc)) * bindRate * dtSec;
+    
+    if (rand01() < bindingProb) {
+        // Successfully bind to cortex using cached intersection data
+        bindToCortex(dyneinConc);
+    }
+}
+

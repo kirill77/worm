@@ -122,7 +122,9 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
                 double tubDimer = std::min(tubAlpha, tubBeta);
                 double air1     = m_medium.getMoleculeConcentration(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, cellPtr->getSpecies()), tipNorm);
                 // Distance to cortex along the ray
-                float maxLen = pCortex->distanceToCortex(originWorld, dir);
+                Cortex::CortexRay ray(originWorld, dir);
+                bool hit = pCortex->findClosestIntersection(ray);
+                float maxLen = hit ? ray.getDistance() : 0.0f;
                 bool contact = (maxLen > 0.0f) && (length >= maxLen - 1e-4f);
                 double distToCortex = (maxLen > 0.0f) ? std::max(0.0, static_cast<double>(maxLen - length)) : 0.0;
                 // Recompute effective vGrow and probabilities to log (mirror Y_TuRC constants)

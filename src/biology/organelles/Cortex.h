@@ -4,10 +4,12 @@
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
+#include <limits>
 #include "Medium.h"
 #include "CortexLocation.h"
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
+#include "geometry/BVH/ITraceableObject.h"
 
 /**
  * The Cortex class represents the cell membrane that separates
@@ -65,18 +67,30 @@ public:
     float3 normalizedToWorld(const float3& normalizedPos);
 
     // Map world position to normalized coordinates [-1,1] using cortex bounding box
-    float3 worldToNormalized(const float3& worldPos) const;
-
-    // Compute the distance from a world-space origin along a world-space direction
-    // to the cortex surface. Returns 0 if no intersection.
-    float distanceToCortex(const float3& originWorld, const float3& dirWorld);
+    float3 worldToNormalized(const float3& worldPos, bool isOnCortex = false) const;
 
     // Expose BVH mesh for visualization
     std::shared_ptr<class BVHMesh> getBVHMesh() const { return m_pCortexBVH; }
 
-private:
-    // Trace a ray against the cortex BVH and return closest hit distance in [tMin, tMax], or 0 if none
-    float traceClosestHit(const class BVH& bvhRef, const float3& origin, const float3& dir, float tMin, float tMax) const;
+    // Ray used for cortex BVH tracing with intersection data
+    struct CortexRay : public IRay {
+        float distance = std::numeric_limits<float>::max();  // Distance to closest intersection
+        uint32_t triangleIndex = 0;   // Index of intersected triangle
+        float3 worldHitPoint = float3(0,0,0);  // World position of intersection
+        bool hasHit = false;          // Whether intersection occurred
+
+        // Constructor to set up ray parameters
+        CortexRay(const float3& origin, const float3& direction);
+
+        // IRay interface implementation
+        void notifyIntersection(float fDist, const ITraceableObject*, uint32_t uSubObj) override;
+
+        // Convenience method to get distance (0 if no hit for backward compatibility)
+        float getDistance() const { return hasHit ? distance : 0.0f; }
+    };
+
+    // Find closest intersection with cortex surface along a ray
+    bool findClosestIntersection(CortexRay &ray) const;
 
 private:
     // Convert triangle index and barycentric coordinates to normalized [-1,1] coordinates

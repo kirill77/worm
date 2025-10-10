@@ -20,9 +20,3 @@ struct CortexMolecules : public CortexLocation
 {
     std::unordered_map<Molecule, Population> m_bsMolecules;
 };
-
-// Represents a capture/anchoring of an astral microtubule plus-end at the cortex
-struct CorticalMT : public CortexLocation
-{
-    std::shared_ptr<Y_TuRC> m_pMT;
-};

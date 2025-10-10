@@ -206,19 +206,19 @@ void Cortex::transferBindingSiteMoleculesToMedium()
         site.m_normalized = baryToNormalized(site.m_triangleIndex, site.m_barycentric);
         const float3 pos = site.m_normalized;
 
-		// Transfer each molecule population to the medium at this position and zero source immediately
-		for (auto& kv : site.m_bsMolecules) {
-			const Molecule& mol = kv.first;
-			Population& pop = kv.second;
-			if (pop.m_fNumber > 0.0) {
-				MPopulation mpop(mol, pop);
-				assert(mpop.isBound()); // we're working with molecules bound to cortex here
-				medium.addMolecule(mpop, pos);
-				// zero out source
-				pop.m_fNumber = 0.0;
-				pop.setBound(false);
-			}
-		}
+        // Transfer each molecule population to the medium at this position and zero source immediately
+        for (auto& kv : site.m_bsMolecules) {
+            const Molecule& mol = kv.first;
+            Population& pop = kv.second;
+            if (pop.m_fNumber > 0.0) {
+                MPopulation mpop(mol, pop);
+                assert(mpop.isBound()); // we're working with molecules bound to cortex here
+                medium.addMolecule(mpop, pos);
+                // zero out source
+                pop.m_fNumber = 0.0;
+                pop.setBound(false);
+            }
+        }
     }
 }
 
@@ -236,47 +236,7 @@ void Cortex::pullBindingSiteMoleculesFromMedium()
     medium.toBindingSites(m_pBindingSites, m_bindableMolecules);
 }
 
-namespace {
-class CortexRay : public IRay
-{
-public:
-    float m_closestDistance;
-    bool m_hasIntersection;
 
-    CortexRay(const float3& pos, const float3& dir)
-        : m_closestDistance(std::numeric_limits<float>::max())
-        , m_hasIntersection(false)
-    {
-        m_vPos = pos;
-        m_vDir = normalize(dir);
-        m_fMin = 0.0f;
-        m_fMax = std::numeric_limits<float>::max();
-    }
-
-    void notifyIntersection(float fDist, const ITraceableObject* /*pObject*/, uint32_t /*uSubObj*/) override
-    {
-        if (fDist >= m_fMin && fDist <= m_fMax && fDist < m_closestDistance)
-        {
-            m_closestDistance = fDist;
-            m_hasIntersection = true;
-        }
-    }
-};
-}
-
-float Cortex::traceClosestHit(const BVH& bvhRef, const float3& origin, const float3& dir, float tMin, float tMax) const
-{
-    class RayHit : public IRay {
-    public:
-        float m_closest; bool m_found;
-        RayHit(const float3& o, const float3& d, float tmin, float tmax)
-        { m_vPos = o; m_vDir = normalize(d); m_fMin = tmin; m_fMax = tmax; m_closest = std::numeric_limits<float>::max(); m_found = false; }
-        void notifyIntersection(float fDist, const ITraceableObject*, uint32_t) override
-        { if (fDist >= m_fMin && fDist <= m_fMax && fDist < m_closest) { m_closest = fDist; m_found = true; } }
-    } ray(origin, dir, tMin, tMax);
-    bvhRef.trace(ray, 0);
-    return ray.m_found ? ray.m_closest : 0.0f;
-}
 
 float3 Cortex::normalizedToWorld(const float3& normalizedPos)
 {
@@ -306,8 +266,8 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
     float3 dirWorldUnit = dirWorldPre / preLen;
 
     // Distance to cortex along this direction
-    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
-    float distCortex = traceClosestHit(bvh, center, dirWorldUnit, 0.0f, std::numeric_limits<float>::max());
+    CortexRay ray(center, dirWorldUnit);
+    float distCortex = findClosestIntersection(ray) ? ray.getDistance() : 0.0f;
     if (distCortex <= 0.0f)
         return center; // Degenerate case
 
@@ -315,15 +275,8 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
     return center + dirWorldUnit * (distCortex * s);
 }
 
-float Cortex::distanceToCortex(const float3& originWorld, const float3& dirWorld)
-{
-    assert(m_pCortexBVH && "Cortex BVH must be initialized before distanceToCortex");
 
-    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
-    return traceClosestHit(bvh, originWorld, dirWorld, 0.0f, std::numeric_limits<float>::max());
-}
-
-float3 Cortex::worldToNormalized(const float3& worldPos) const
+float3 Cortex::worldToNormalized(const float3& worldPos, bool isOnCortex) const
 {
     assert(m_pCortexBVH && "Cortex BVH must be initialized before worldToNormalized");
     const box3 bbox = m_pCortexBVH->getBox();
@@ -332,8 +285,13 @@ float3 Cortex::worldToNormalized(const float3& worldPos) const
     float len = length(v);
     if (len < 1e-6f) return float3(0,0,0);
     float3 dirWorldUnit = v / len;
-    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
-    float distCortex = traceClosestHit(bvh, center, dirWorldUnit, 0.0f, std::numeric_limits<float>::max());
+    float distCortex = 0.0f;
+    if (isOnCortex) {
+        distCortex = len;
+    } else {
+        CortexRay ray(center, dirWorldUnit);
+        distCortex = findClosestIntersection(ray) ? ray.getDistance() : 0.0f;
+    }
     if (distCortex <= 0.0f)
         return float3(0,0,0);
 
@@ -371,25 +329,35 @@ float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentri
     const float3 v2 = pMesh->getVertexPosition(tri.z);
 
     const float3 world = v0 * barycentric.x + v1 * barycentric.y + v2 * barycentric.z;
-
-    // Find the direction of the ray from the center of the cube to the point of interest
-    const box3 bbox = pMesh->getBox();
-    const float3 center = bbox.center();
-    const float3 half = (bbox.m_maxs - bbox.m_mins) * 0.5f;
-    float3 dirWorld = world - center;
-
-    // Convert to normalized cube space by scaling with half-extents
-    const float eps = 1e-8f;
-    float3 dN(
-        (half.x > eps) ? (dirWorld.x / half.x) : 0.0f,
-        (half.y > eps) ? (dirWorld.y / half.y) : 0.0f,
-        (half.z > eps) ? (dirWorld.z / half.z) : 0.0f
-    );
-
-    // For the intersection with the unit cube surface, scale so the max abs component is 1
-    float fMax = std::max(std::abs(dN.x), std::abs(dN.y));
-    fMax = std::max(fMax, std::abs(dN.z));
-    if (fMax < eps)
-        return float3(0,0,0);
-    return dN / fMax;
+    const bool isOnCortex = true;
+    return worldToNormalized(world, isOnCortex);
 }
+
+bool Cortex::findClosestIntersection(CortexRay &ray) const
+{
+    assert(m_pCortexBVH && "Cortex BVH must be initialized before findClosestIntersection");
+    // Trace directly using the ray object (implements IRay)
+    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
+    bvh.trace(ray, 0);
+    return ray.hasHit;
+}
+
+// Cortex::CortexRay definitions
+Cortex::CortexRay::CortexRay(const float3& origin, const float3& direction)
+{
+    m_vPos = origin;
+    m_vDir = normalize(direction);
+    m_fMin = 0.0f;
+    m_fMax = std::numeric_limits<float>::max();
+}
+
+void Cortex::CortexRay::notifyIntersection(float fDist, const ITraceableObject*, uint32_t uSubObj)
+{
+    if (fDist >= m_fMin && fDist <= m_fMax && fDist < distance) {
+        distance = fDist;
+        triangleIndex = uSubObj;
+        hasHit = true;
+        worldHitPoint = m_vPos + m_vDir * fDist;
+    }
+}
+

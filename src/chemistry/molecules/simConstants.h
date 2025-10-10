@@ -34,6 +34,12 @@ namespace MoleculeConstants
     // Microtubule growth/shrink speeds
     constexpr double MT_VGROW_MAX_UM_PER_S = 0.45;  // µm/s at high tubulin
     constexpr double MT_VSHRINK_UM_PER_S   = 0.09;  // µm/s
+    
+    // Cortical binding (dynein-mediated MT-cortex anchoring)
+    constexpr double MT_CORTEX_K_BIND      = 100.0;  // molecules/µm^3 (dynein concentration for half-max binding)
+    constexpr double MT_CORTEX_BIND_RATE   = 2.0;    // s^-1 (attempt rate when in contact)
+    constexpr double MT_CORTEX_UNBIND_BASE = 0.1;    // s^-1 (base unbinding rate)
+    constexpr double MT_CORTEX_UNBIND_WEAK = 1.0;    // s^-1 (unbinding rate for weak binding)
 }
 
 
