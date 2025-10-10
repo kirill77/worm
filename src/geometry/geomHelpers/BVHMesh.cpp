@@ -5,28 +5,19 @@
 BVHMesh::BVHMesh(std::shared_ptr<Mesh> pMesh)
     : m_pMesh(pMesh)
 {
+}
+void BVHMesh::rebuildForCurrentMesh()
+{
     m_nSubObjects = m_pMesh->getTriangleCount();
+    m_bvh.accessObjects().clear();
+    m_bvh.accessObjects().push_back(shared_from_this());
+    m_bvh.rebuildHierarchy();
+#ifndef NDEBUG
+    m_debugVersion = m_pMesh->getVersion();
+#endif
 }
 
-const BVH &BVHMesh::updateAndGetBVH()
-{
-    // Check if the mesh has been modified since last update
-    uint64_t currentVersion = m_pMesh->getVersion();
-    if (m_cachedVersion != currentVersion)
-    {
-        // Mesh has changed or BVH doesn't exist, create/rebuild BVH
-        m_nSubObjects = m_pMesh->getTriangleCount();
-        
-        // Create new BVH and add this mesh to it
-        m_bvh.accessObjects().clear();
-        m_bvh.accessObjects().push_back(shared_from_this());
-        m_bvh.rebuildHierarchy();
-        
-        m_cachedVersion = currentVersion;
-    }
-    
-    return m_bvh;
-}
+// BVH is maintained fresh by BVHCache-managed refresh in clients
 
 box3 BVHMesh::getBox() const
 {
@@ -50,7 +41,8 @@ box3 BVHMesh::getSubObjectBox(uint32_t uSubObj) const
 
 void BVHMesh::trace(IRay& ray, uint32_t triangleIndex) const
 {
-    assert(m_cachedVersion == m_pMesh->getVersion());
+    assert(m_pMesh && "BVHMesh must have a valid Mesh");
+    assert(m_debugVersion == m_pMesh->getVersion() && "BVHMesh BVH is out of sync with Mesh version");
     const float EPSILON = 1e-8f;
 
     // Get triangle vertices

@@ -18,6 +18,14 @@
     <ClInclude Include="BVHMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BVHCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BVHCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVHMesh.cpp">

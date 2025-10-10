@@ -4,9 +4,10 @@
 #include <cstdint>
 #include <memory>
 #include "geometry/vectors/vector.h"
+#include "Identifiable.h"
 #include "geometry/vectors/box.h"
 
-class Mesh : public std::enable_shared_from_this<Mesh>
+class Mesh : public Identifiable
 {
 public:
     static const uint32_t INVALID_INDEX = UINT32_MAX;

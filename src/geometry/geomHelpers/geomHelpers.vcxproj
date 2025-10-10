@@ -144,6 +144,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BVHMesh.h" />
+    <ClInclude Include="BVHCache.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BVHCache.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVHMesh.cpp" />

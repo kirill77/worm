@@ -4,6 +4,7 @@
 #include "Cell.h"
 #include "utils/log/ILog.h"
 #include "geometry/geomHelpers/BVHMesh.h"
+#include "geometry/geomHelpers/BVHCache.h"
 #include "physics/tensionSphere/TensionSphere.h"
 #include "geometry/BVH/BVH.h"
 #include "geometry/BVH/ITraceableObject.h"
@@ -30,7 +31,7 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
             auto pMesh = m_pTensionSphere->getEdgeMesh();
             if (pMesh)
             {
-                m_pCortexBVH = std::make_shared<BVHMesh>(pMesh);
+                m_pCortexBVH = BVHCache::instance().getOrCreate(pMesh);
 
                 // Validate mapping consistency between normalizedToWorld and worldToNormalized
                 static std::mt19937 rng(std::random_device{}());
@@ -70,6 +71,10 @@ void Cortex::update(double fDtSec, Cell& cell)
     double volume = cell.getInternalMedium().getVolumeMicroM();
     m_pTensionSphere->setVolume(volume);
     m_pTensionSphere->makeTimeStep(fDtSec);
+
+    // Ensure BVHMesh is up-to-date with the latest mesh version
+    auto pMesh = m_pTensionSphere->getEdgeMesh();
+    m_pCortexBVH = BVHCache::instance().getOrCreate(pMesh);
 
     // Push molecules back into the grid at updated positions after shape update
     transferBindingSiteMoleculesToMedium();
@@ -337,7 +342,8 @@ bool Cortex::findClosestIntersection(CortexRay &ray) const
 {
     assert(m_pCortexBVH && "Cortex BVH must be initialized before findClosestIntersection");
     // Trace directly using the ray object (implements IRay)
-    const BVH& bvh = m_pCortexBVH->updateAndGetBVH();
+    // BVHMesh is refreshed via BVHCache in update(); its BVH is up-to-date here
+    const BVH& bvh = m_pCortexBVH->getBVH();
     bvh.trace(ray, 0);
     return ray.hasHit;
 }
