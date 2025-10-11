@@ -7,6 +7,8 @@
 #include <memory>
 #include "geometry/vectors/vector.h"
 #include "geometry/mesh/edgeMesh.h"
+#include "ForceGenerator.h"
+#include "PhysicsConstraints.h"
 
 /**
  * @brief Class for simulating tension forces in a spherical cell cortex using a geodesic sphere model
@@ -41,11 +43,6 @@ public:
      */
     void setVolume(double volume);
 
-    /**
-     * @brief Get the current volume of the simulated sphere
-     * @return Current volume calculated from the mesh
-     */
-    double getCurrentVolume() const;
 
 private:
     // The underlying mesh data structure
@@ -63,11 +60,13 @@ private:
     // Volume of the tension sphere
     double m_fVolume;
 
+    // Pluggable force generators acting on the mesh
+    std::vector<std::unique_ptr<IForceGenerator>> m_forceGenerators;
+
+    // Per-body constraints (XPBD-style)
+    std::vector<std::unique_ptr<IConstraint>> m_constraints;
+
     // Helper methods
     void initializePhysics();
-    void computeSpringForces(std::vector<double3>& forces, double dt);
-    void integrateMotion(const std::vector<double3>& forces, double dt);
-    double calculateCurrentVolume() const;
-    void applyVolumeConstraint();
 };
 

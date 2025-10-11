@@ -144,10 +144,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BodyInterfaces.h" />
+    <ClInclude Include="ForceGenerator.h" />
+    <ClInclude Include="SoftBodyMeshAdapter.h" />
     <ClInclude Include="tensionSphere.h" />
+    <ClInclude Include="VolumeConstraint.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ForceGenerator.cpp" />
     <ClCompile Include="tensionSphere.cpp" />
+    <ClCompile Include="VolumeConstraint.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

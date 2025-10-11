@@ -36,7 +36,6 @@ public:
     // Edge access methods
     uint32_t getEdgeCount() const;
     std::pair<uint32_t, uint32_t> getEdge(uint32_t edgeIndex) const;
-    std::vector<std::pair<uint32_t, uint32_t>> getAllEdges() const;
 
 private:
     std::vector<Edge> edges;

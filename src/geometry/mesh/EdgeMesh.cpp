@@ -41,18 +41,6 @@ std::pair<uint32_t, uint32_t> EdgeMesh::getEdge(uint32_t edgeIndex) const {
     return std::make_pair(INVALID_INDEX, INVALID_INDEX);
 }
 
-// Get all edges as pairs of vertex indices
-std::vector<std::pair<uint32_t, uint32_t>> EdgeMesh::getAllEdges() const {
-    std::vector<std::pair<uint32_t, uint32_t>> result;
-    result.reserve(edges.size());
-    
-    for (const Edge& edge : edges) {
-        result.emplace_back(edge.startVertex, edge.endVertex);
-    }
-    
-    return result;
-}
-
 // Generate a key for edge lookup
 uint64_t EdgeMesh::directionalEdgeKey(uint32_t startVertex, uint32_t endVertex) {
     return ((uint64_t)endVertex << 32) | (uint64_t)startVertex;
