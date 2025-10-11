@@ -20,3 +20,10 @@ Comments must avoid referencing prior code states; describe only the current beh
 # Build system
 - Never execute msbuild commands. The user will build the project manually from Visual Studio.
 
+# Formatting rules
+- Use spaces only for indentation; never use tabs.
+- Default indent width: 4 spaces across all languages.
+- Preserve existing indentation in untouched lines; do not bulk reformat.
+- When editing files with mixed indentation, do not convert prior lines; use spaces for new/modified lines only.
+- Match surrounding brace placement and spacing; prefer clarity over dense one-liners.
+
