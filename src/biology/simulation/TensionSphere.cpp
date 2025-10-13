@@ -1,10 +1,10 @@
-#include "TensionSphere.h"
+#include "biology/organelles/TensionSphere.h"
 #include <cmath>
 #include <algorithm>
 #include <cassert>
 #include "SoftBodyMeshAdapter.h"
-#include "PhysicsIntegrator.h"
-#include "VolumeConstraint.h"
+#include "physics/tensionSphere/PhysicsIntegrator.h"
+#include "physics/tensionSphere/VolumeConstraint.h"
 #include "utils/log/ILog.h"
 
 constexpr double PI = 3.14159265358979323846;
@@ -97,3 +97,5 @@ void TensionSphere::setVolume(double volume)
 {
     m_fVolume = volume;
 }
+
+

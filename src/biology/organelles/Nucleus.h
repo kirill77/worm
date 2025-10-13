@@ -3,7 +3,7 @@
 #include "Organelle.h"
 #include "chemistry/molecules/DNA.h"
 #include "Chromosome.h"
-#include "chemistry/interactions/GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 #include <memory>
 #include <vector>
 

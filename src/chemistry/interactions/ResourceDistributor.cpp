@@ -1,5 +1,5 @@
 #include "ResourceDistributor.h"
-#include "GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 #include "MoleculeInteraction.h"
 #include <cassert>
 #include <algorithm>

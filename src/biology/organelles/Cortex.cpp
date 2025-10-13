@@ -5,7 +5,7 @@
 #include "utils/log/ILog.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/geomHelpers/BVHCache.h"
-#include "physics/tensionSphere/TensionSphere.h"
+#include "TensionSphere.h"
 #include "geometry/BVH/BVH.h"
 #include "geometry/BVH/ITraceableObject.h"
 #include <algorithm>
@@ -54,18 +54,18 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     // Initialize list of molecules that can bind to cortex
     // For now, include the cortex-binding protein key
     Species species = pOwnedCell ? pOwnedCell->getSpecies() : Species::GENERIC;
-	m_bindableMolecules.emplace_back(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN, species);
-	// Also include specific cortex-bound PAR complexes
-	m_bindableMolecules.emplace_back(StringDict::ID::PAR_1_CORTEX, ChemicalType::PROTEIN, species);
-	m_bindableMolecules.emplace_back(StringDict::ID::PAR_2_CORTEX, ChemicalType::PROTEIN, species);
-	m_bindableMolecules.emplace_back(StringDict::ID::PAR_3_CORTEX, ChemicalType::PROTEIN, species);
+    m_bindableMolecules.emplace_back(StringDict::ID::ORGANELLE_CORTEX, ChemicalType::PROTEIN, species);
+    // Also include specific cortex-bound PAR complexes
+    m_bindableMolecules.emplace_back(StringDict::ID::PAR_1_CORTEX, ChemicalType::PROTEIN, species);
+    m_bindableMolecules.emplace_back(StringDict::ID::PAR_2_CORTEX, ChemicalType::PROTEIN, species);
+    m_bindableMolecules.emplace_back(StringDict::ID::PAR_3_CORTEX, ChemicalType::PROTEIN, species);
 }
 
 void Cortex::update(double fDtSec, Cell& cell)
 {
     // Pull molecules from grid to binding sites prior to shape update
     pullBindingSiteMoleculesFromMedium();
-    
+
     // Maintain and advance tension sphere / BVH state for the cortex
     // Assume tension sphere exists; update volume and advance simulation
     double volume = cell.getInternalMedium().getVolumeMicroM();
@@ -288,17 +288,18 @@ float3 Cortex::worldToNormalized(const float3& worldPos, bool isOnCortex) const
     const float3 center = bbox.center();
     float3 v = worldPos - center;
     float len = length(v);
-    if (len < 1e-6f) return float3(0,0,0);
+    if (len < 1e-6f) return float3(0, 0, 0);
     float3 dirWorldUnit = v / len;
     float distCortex = 0.0f;
     if (isOnCortex) {
         distCortex = len;
-    } else {
+    }
+    else {
         CortexRay ray(center, dirWorldUnit);
         distCortex = findClosestIntersection(ray) ? ray.getDistance() : 0.0f;
     }
     if (distCortex <= 0.0f)
-        return float3(0,0,0);
+        return float3(0, 0, 0);
 
     // Fraction along the ray to the cortex (clamped)
     float s = std::min(1.0f, std::max(0.0f, len / distCortex));
@@ -312,7 +313,7 @@ float3 Cortex::worldToNormalized(const float3& worldPos, bool isOnCortex) const
         (std::abs(half.z) > eps) ? (dirWorldUnit.z / half.z) : 0.0f
     );
     float maxAbs = std::max(std::abs(pre.x), std::max(std::abs(pre.y), std::abs(pre.z)));
-    if (maxAbs < eps) return float3(0,0,0);
+    if (maxAbs < eps) return float3(0, 0, 0);
     float3 dirInf = pre / maxAbs;
 
     return dirInf * s;
@@ -321,12 +322,12 @@ float3 Cortex::worldToNormalized(const float3& worldPos, bool isOnCortex) const
 float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const
 {
     if (!m_pTensionSphere)
-        return float3(0,0,0);
+        return float3(0, 0, 0);
     auto pMesh = m_pTensionSphere->getEdgeMesh();
     if (!pMesh)
-        return float3(0,0,0);
+        return float3(0, 0, 0);
     if (triangleIndex >= pMesh->getTriangleCount())
-        return float3(0,0,0);
+        return float3(0, 0, 0);
 
     const uint3 tri = pMesh->getTriangleVertices(triangleIndex);
     const float3 v0 = pMesh->getVertexPosition(tri.x);
@@ -338,7 +339,7 @@ float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentri
     return worldToNormalized(world, isOnCortex);
 }
 
-bool Cortex::findClosestIntersection(CortexRay &ray) const
+bool Cortex::findClosestIntersection(CortexRay& ray) const
 {
     assert(m_pCortexBVH && "Cortex BVH must be initialized before findClosestIntersection");
     // Trace directly using the ray object (implements IRay)

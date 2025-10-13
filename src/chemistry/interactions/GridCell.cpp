@@ -1,4 +1,4 @@
-#include "GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 #include "chemistry/molecules/Molecule.h"
 #include "chemistry/molecules/MoleculeWiki.h"
 #include "chemistry/molecules/TRNA.h"

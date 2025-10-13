@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "BodyInterfaces.h"
+#include "physics/tensionSphere/BodyInterfaces.h"
 #include "geometry/mesh/edgeMesh.h"
 
 // Adapter that exposes EdgeMesh + per-vertex state as IBody views

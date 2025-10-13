@@ -144,11 +144,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    
     <ClInclude Include="Cell.h" />
     <ClInclude Include="CellTypes.h" />
     <ClInclude Include="Centrosome.h" />
     <ClInclude Include="Chromosome.h" />
+    <ClInclude Include="CortexLocation.h" />
     <ClInclude Include="EReticulum.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Grid.h" />
@@ -160,6 +160,7 @@
     <ClInclude Include="Organelle.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Spindle.h" />
+    <ClInclude Include="TensionSphere.h" />
     <ClInclude Include="Y_TuRC.h" />
   </ItemGroup>
   <ItemGroup>

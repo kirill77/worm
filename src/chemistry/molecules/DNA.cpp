@@ -1,6 +1,6 @@
 #include "DNA.h"
 #include "StringDict.h"
-#include "chemistry/interactions/GridCell.h"
+#include "GridCell.h"
 #include "TRNA.h"
 #include "simConstants.h"
 

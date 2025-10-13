@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MoleculeInteraction.h"
-#include "GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 #include "chemistry/molecules/Molecule.h"
 #include "chemistry/molecules/StringDict.h"
 

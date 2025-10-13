@@ -27,6 +27,7 @@
   <ItemGroup>
     <ClCompile Include="CellSim.cpp" />
     <ClCompile Include="Organism.cpp" />
+    <ClCompile Include="TensionSphere.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

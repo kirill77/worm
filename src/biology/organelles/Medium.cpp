@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <vector>
-#include "chemistry/interactions/GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 // Use forward-declared Cortex; include header only where needed
 #include "Cortex.h"
 
