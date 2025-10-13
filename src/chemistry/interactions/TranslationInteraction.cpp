@@ -1,6 +1,6 @@
 #include "TranslationInteraction.h"
 #include "ResourceDistributor.h"
-#include "GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 #include "chemistry/genes/GeneWiki.h"
 #include "chemistry/molecules/TRNA.h"
 #include "chemistry/molecules/StringDict.h"

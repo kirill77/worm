@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "chemistry/interactions/MoleculeInteraction.h"
 #include "StringDict.h"
 #include "Molecule.h"
 
@@ -39,8 +38,6 @@ private:
 public:
     // Initialize all known molecule interactions
     static void Initialize();
-
-    // Interactions are managed by InteractionsWiki; call there directly from clients
     
     // Get the bound molecule name for a molecule on a specific surface
     static std::string GetBoundProteinName(const std::string& proteinName, StringDict::ID surface);

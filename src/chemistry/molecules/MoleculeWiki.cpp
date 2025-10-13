@@ -1,7 +1,4 @@
 #include "MoleculeWiki.h"
-#include "chemistry/interactions/PhosphorylationInteraction.h"
-#include "chemistry/interactions/ComplexFormationInteraction.h"
-#include "chemistry/interactions/DephosphorylationInteraction.h"
 #include "utils/log/ILog.h"
 #include "utils/fileUtils/fileUtils.h"
 #include <algorithm>
@@ -22,8 +19,6 @@ void MoleculeWiki::Initialize()
     
     // Initialize mRNA molecule information
     initializeMRNAInfo();
-    
-    // Interactions are initialized from InteractionsWiki
 }
 
 std::string MoleculeWiki::GetBoundProteinName(const std::string& proteinName, StringDict::ID surface)

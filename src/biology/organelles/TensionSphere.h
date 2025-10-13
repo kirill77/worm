@@ -7,8 +7,8 @@
 #include <memory>
 #include "geometry/vectors/vector.h"
 #include "geometry/mesh/edgeMesh.h"
-#include "ForceGenerator.h"
-#include "PhysicsConstraints.h"
+#include "physics/tensionSphere/ForceGenerator.h"
+#include "physics/tensionSphere/PhysicsConstraints.h"
 
 /**
  * @brief Class for simulating tension forces in a spherical cell cortex using a geodesic sphere model
@@ -69,4 +69,5 @@ private:
     // Helper methods
     void initializePhysics();
 };
+
 

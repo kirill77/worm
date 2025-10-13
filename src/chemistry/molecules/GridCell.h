@@ -39,3 +39,5 @@ private:
     double m_volumeMicroM3;
     // No longer need separate RNA storage - use m_molecules with MRNA type
 }; 
+
+

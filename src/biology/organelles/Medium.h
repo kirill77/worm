@@ -10,7 +10,7 @@
 
 #include "geometry/vectors/vector.h"
 #include "chemistry/molecules/MoleculeWiki.h"
-#include "chemistry/interactions/GridCell.h"
+#include "chemistry/molecules/GridCell.h"
 #include "Grid.h"
 #include "GridDiffusion.h"
 #include "chemistry/interactions/ResourceDistributor.h"

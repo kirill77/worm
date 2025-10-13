@@ -57,6 +57,7 @@ class IncludeScanner:
                     if '/' in includePath or '\\' in includePath:
                         # Path contains slashes - relative to solution directory
                         headerDir = os.path.dirname(includePath)
+                        headerDir = os.path.normpath(headerDir)
                         headerName = os.path.basename(includePath)
                         
                         # Verify the header exists at this location using full path
@@ -73,7 +74,7 @@ class IncludeScanner:
                     else:
                         # No slashes - header is in same directory as source file
                         headerName = includePath
-                        headerDir = sourceDir
+                        headerDir = os.path.normpath(sourceDir)
                         
                         # Verify the header exists in the same directory using full path
                         headerFullPath = os.path.abspath(os.path.join(self.solutionDir, sourceDir, headerName))
@@ -113,14 +114,17 @@ class IncludeScanner:
                     sourceFilesFound += 1
                     sourceFilePath = os.path.join(root, file)
                     sourceDir = os.path.relpath(root, self.solutionDir)
+                    sourceDir = os.path.normpath(sourceDir)
                     
                     # Extract includes from this source file
                     includes = self.extractIncludesFromSource(sourceFilePath, sourceDir)
                     
                     # For each included header, create the map entry
                     for headerName, headerDir in includes:
-                        if sourceDir != headerDir:  # Only include if different directories
-                            self.includeMap[(sourceDir, headerDir)].add(headerName)
+                        # Normalize headerDir defensively
+                        normHeaderDir = os.path.normpath(headerDir)
+                        if sourceDir != normHeaderDir:  # Only include if different directories
+                            self.includeMap[(sourceDir, normHeaderDir)].add(headerName)
         
         print(f"Scanned {sourceFilesFound} source files")
     
