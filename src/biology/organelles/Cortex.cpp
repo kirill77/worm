@@ -5,7 +5,7 @@
 #include "utils/log/ILog.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/geomHelpers/BVHCache.h"
-#include "TensionSphere.h"
+#include "geometry/mesh/edgeMesh.h"
 #include "geometry/BVH/BVH.h"
 #include "geometry/BVH/ITraceableObject.h"
 #include <algorithm>
@@ -14,41 +14,31 @@
 #include <numeric>
 #include <limits>
 
+static constexpr double PI = 3.14159265358979323846;
+
 Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     : Organelle(pCell)
     , m_fThickness(fThickness)
 {
-
-    // Initialize the tension sphere using the current cell volume
     auto pOwnedCell = getCell();
-    if (pOwnedCell)
-    {
-        double volume = pOwnedCell->getInternalMedium().getVolumeMicroM();
-        m_pTensionSphere = std::make_shared<TensionSphere>(2, volume);
-        // Initialize BVH from the tension sphere mesh for spatial queries
-        if (m_pTensionSphere)
-        {
-            auto pMesh = m_pTensionSphere->getEdgeMesh();
-            if (pMesh)
-            {
-                m_pCortexBVH = BVHCache::instance().getOrCreate(pMesh);
+    double fVolumeMicroM = pOwnedCell->getInternalMedium().getVolumeMicroM();
+    double fRadiusMicroM = std::cbrt(fVolumeMicroM * 3.0 / (4.0 * PI));
+    m_pCortexMesh = std::make_shared<EdgeMesh>(fRadiusMicroM, 2);
+    m_pCortexBVH = BVHCache::instance().getOrCreate(m_pCortexMesh);
 
-                // Validate mapping consistency between normalizedToWorld and worldToNormalized
-                static std::mt19937 rng(std::random_device{}());
-                std::uniform_real_distribution<float> uni(-1.0f, 1.0f);
-                for (int i = 0; i < 10; ++i)
-                {
-                    float3 n = float3(uni(rng), uni(rng), uni(rng));
-                    float r = length(n);
-                    if (r < 1e-6f) n = float3(1, 0, 0), r = 1.0f;
-                    float3 w = normalizedToWorld(n);
-                    float3 n2 = worldToNormalized(w);
-                    float3 d = n2 - n;
-                    float err = length(d);
-                    assert(err < 1e-3f && "Cortex world/normalized mappings must be approximately inverse after clamping to unit length");
-                }
-            }
-        }
+    // Validate mapping consistency between normalizedToWorld and worldToNormalized
+    static std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<float> uni(-1.0f, 1.0f);
+    for (int i = 0; i < 10; ++i)
+    {
+        float3 n = float3(uni(rng), uni(rng), uni(rng));
+        float r = length(n);
+        if (r < 1e-6f) n = float3(1, 0, 0), r = 1.0f;
+        float3 w = normalizedToWorld(n);
+        float3 n2 = worldToNormalized(w);
+        float3 d = n2 - n;
+        float err = length(d);
+        assert(err < 1e-3f && "Cortex world/normalized mappings must be approximately inverse after clamping to unit length");
     }
 
     // Initialize list of molecules that can bind to cortex
@@ -66,16 +56,6 @@ void Cortex::update(double fDtSec, Cell& cell)
     // Pull molecules from grid to binding sites prior to shape update
     pullBindingSiteMoleculesFromMedium();
 
-    // Maintain and advance tension sphere / BVH state for the cortex
-    // Assume tension sphere exists; update volume and advance simulation
-    double volume = cell.getInternalMedium().getVolumeMicroM();
-    m_pTensionSphere->setVolume(volume);
-    m_pTensionSphere->makeTimeStep(fDtSec);
-
-    // Ensure BVHMesh is up-to-date with the latest mesh version
-    auto pMesh = m_pTensionSphere->getEdgeMesh();
-    m_pCortexBVH = BVHCache::instance().getOrCreate(pMesh);
-
     // Push molecules back into the grid at updated positions after shape update
     transferBindingSiteMoleculesToMedium();
 
@@ -92,13 +72,7 @@ void Cortex::update(double fDtSec, Cell& cell)
 
 bool Cortex::initializeBindingSites(double totalAmount)
 {
-    // Ensure tension sphere and its mesh exist
-    if (!m_pTensionSphere) {
-        LOG_ERROR("Cannot initialize binding sites: tension sphere is not initialized");
-        return false;
-    }
-
-    auto pMesh = m_pTensionSphere->getEdgeMesh();
+    auto pMesh = m_pCortexMesh;
     if (!pMesh) {
         LOG_ERROR("Cannot initialize binding sites: cortex mesh is not available");
         return false;
@@ -189,12 +163,12 @@ void Cortex::transferBindingSiteMoleculesToMedium()
         LOG_ERROR("Cannot transfer binding site molecules: cell reference is invalid");
         return;
     }
-    if (!m_pTensionSphere) {
-        LOG_ERROR("Cannot transfer binding site molecules: tension sphere is not initialized");
+    if (!m_pCortexMesh) {
+        LOG_ERROR("Cannot transfer binding site molecules: cortex mesh is not set");
         return;
     }
 
-    auto pMesh = m_pTensionSphere->getEdgeMesh();
+    auto pMesh = m_pCortexMesh;
     if (!pMesh) {
         LOG_ERROR("Cannot transfer binding site molecules: cortex mesh is not available");
         return;
@@ -321,9 +295,9 @@ float3 Cortex::worldToNormalized(const float3& worldPos, bool isOnCortex) const
 
 float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentric) const
 {
-    if (!m_pTensionSphere)
+    if (!m_pCortexMesh)
         return float3(0, 0, 0);
-    auto pMesh = m_pTensionSphere->getEdgeMesh();
+    auto pMesh = m_pCortexMesh;
     if (!pMesh)
         return float3(0, 0, 0);
     if (triangleIndex >= pMesh->getTriangleCount())
@@ -366,5 +340,17 @@ void Cortex::CortexRay::notifyIntersection(float fDist, const ITraceableObject*,
         hasHit = true;
         worldHitPoint = m_vPos + m_vDir * fDist;
     }
+}
+
+// Provide cortex surface mesh from external simulation
+void Cortex::setMesh(const std::shared_ptr<EdgeMesh> pMesh)
+{
+    m_pCortexMesh = pMesh;
+    m_pCortexBVH = BVHCache::instance().getOrCreate(m_pCortexMesh);
+}
+
+std::shared_ptr<EdgeMesh> Cortex::getEdgeMesh() const
+{
+    return m_pCortexMesh;
 }
 

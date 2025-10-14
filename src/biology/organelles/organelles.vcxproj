@@ -160,7 +160,6 @@
     <ClInclude Include="Organelle.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Spindle.h" />
-    <ClInclude Include="TensionSphere.h" />
     <ClInclude Include="Y_TuRC.h" />
   </ItemGroup>
   <ItemGroup>

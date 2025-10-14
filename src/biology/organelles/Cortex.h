@@ -24,7 +24,7 @@ public:
 private:
     double m_fThickness; // Membrane thickness in micrometers
     std::shared_ptr<class BVHMesh> m_pCortexBVH;
-    std::shared_ptr<class TensionSphere> m_pTensionSphere;
+    std::shared_ptr<class EdgeMesh> m_pCortexMesh;
     std::vector<CortexMolecules> m_pBindingSites;
     std::vector<Molecule> m_bindableMolecules;
 
@@ -46,6 +46,12 @@ public:
      * @param cell Reference to the cell containing this cortex
      */
     void update(double fDtSec, Cell& cell) override;
+
+    // Provide cortex surface mesh from external simulation (e.g., TensionSphere)
+    void setMesh(const std::shared_ptr<EdgeMesh> pMesh);
+
+    // Access underlying cortex surface mesh
+    std::shared_ptr<class EdgeMesh> getEdgeMesh() const;
 
     /**
      * Initialize binding sites in the cell's internal medium.

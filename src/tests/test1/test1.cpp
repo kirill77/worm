@@ -6,11 +6,16 @@
 
 int main()
 {
+    // Create and initialize visualization engine
+    VisEngine visEngine;
+    if (!visEngine.initLog())
+    {
+        assert(false);
+    }
+
     // Create simulation objects
     std::shared_ptr<Worm> pWorm = std::make_shared<Worm>();
 
-    // Create and initialize visualization engine
-    VisEngine visEngine;
     if (!visEngine.initialize(pWorm)) {
         LOG_ERROR("Failed to initialize visualization engine");
         return 1;

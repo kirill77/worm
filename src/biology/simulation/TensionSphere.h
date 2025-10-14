@@ -18,10 +18,10 @@ class TensionSphere {
 public:
     /**
      * @brief Constructor
-     * @param subdivisionLevel Number of times to subdivide the base icosahedron (increases detail)
-     * @param volume Initial volume of the tension sphere
+     * @param pMesh Shared EdgeMesh provided by Cortex
+     * @param fVolumeMicroM Initial target volume (optional)
      */
-    TensionSphere(uint32_t subdivisionLevel = 2, double volume = 0.0);
+    TensionSphere(std::shared_ptr<EdgeMesh> pMesh, double fVolumeMicroM = 0.0);
 
     void makeTimeStep(double fDtSec);
 

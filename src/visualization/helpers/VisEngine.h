@@ -19,6 +19,8 @@ struct Line;
 
 struct VisEngine
 {
+    // Initialize logging output directory and log file; call before creating objects that log in constructors
+    bool initLog();
     bool initialize(std::shared_ptr<Organism> pOrganism);
     bool update(float fDtSec);
     void shutdown();

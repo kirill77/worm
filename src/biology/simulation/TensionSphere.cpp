@@ -1,4 +1,4 @@
-#include "biology/organelles/TensionSphere.h"
+#include "TensionSphere.h"
 #include <cmath>
 #include <algorithm>
 #include <cassert>
@@ -7,19 +7,14 @@
 #include "physics/tensionSphere/VolumeConstraint.h"
 #include "utils/log/ILog.h"
 
-constexpr double PI = 3.14159265358979323846;
-
 // TensionSphere implementation
-TensionSphere::TensionSphere(uint32_t subdivisionLevel, double volume)
+TensionSphere::TensionSphere(std::shared_ptr<EdgeMesh> pMesh, double volume)
 {
     // Initialize volume to the specified value
     m_fVolume = volume;
-    
-    // Create the base mesh with icosahedron and subdivisions using radius matching target volume
-    double baseRadius = 1.0;
-    if (m_fVolume > 0.0)
-        baseRadius = std::cbrt(m_fVolume * 3.0 / (4.0 * PI));
-    m_pMesh = std::make_shared<EdgeMesh>(baseRadius, subdivisionLevel);
+
+    // Use external mesh provided by cortex
+    m_pMesh = std::move(pMesh);
 
     // Initialize physics simulation data
     initializePhysics();
