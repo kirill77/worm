@@ -21,13 +21,14 @@
   <ItemGroup>
     <ClInclude Include="CellSim.h" />
     <ClInclude Include="Organism.h" />
+    <ClInclude Include="PhysicsCore.h" />
     <ClInclude Include="TimeContext.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CellSim.cpp" />
     <ClCompile Include="Organism.cpp" />
-    <ClCompile Include="TensionSphere.cpp" />
+    <ClCompile Include="PhysicsCore.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

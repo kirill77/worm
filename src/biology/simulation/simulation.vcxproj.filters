@@ -27,6 +27,9 @@
     <ClInclude Include="TimeContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PhysicsCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="World.cpp">
@@ -38,7 +41,7 @@
     <ClCompile Include="CellSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TensionSphere.cpp">
+    <ClCompile Include="PhysicsCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

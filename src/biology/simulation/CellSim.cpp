@@ -1,30 +1,21 @@
 #include "CellSim.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
-#include "biology/simulation/TensionSphere.h"
+#include "biology/simulation/PhysicsCore.h"
 
 CellSim::CellSim(std::shared_ptr<Cell> pCell)
     : m_pCell(pCell)
 {
-    // Wire cortex mesh and pass it into TensionSphere
-    auto pCortex = std::dynamic_pointer_cast<Cortex>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
-
-    // Cortex constructs its mesh in its constructor; reuse it directly
-    auto pCortexMesh = pCortex->getEdgeMesh();
-    m_pTensionSphere = std::make_shared<TensionSphere>(pCortexMesh, m_pCell->getInternalMedium().getVolumeMicroM());
+    // Create and initialize physics core; it pulls mesh and volume from the cell
+    m_pPhysicsCore = std::make_shared<PhysicsCore>();
+    m_pPhysicsCore->initialize(m_pCell);
 }
 
 void CellSim::update(const TimeContext& time)
 {
-    // Advance physics on the tension sphere first
-    assert(m_pTensionSphere && m_pCell);
-    double fVolume = m_pCell->getInternalMedium().getVolumeMicroM();
-    m_pTensionSphere->setVolume(fVolume);
-    m_pTensionSphere->makeTimeStep(time.m_deltaTSec);
-
-    // Refresh cortex mesh BVH if needed
-    auto pCortex = std::dynamic_pointer_cast<Cortex>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
-    pCortex->setMesh(m_pTensionSphere->getEdgeMesh());
+    // Advance physics; it pulls volume from cell and pushes mesh back to cortex
+    assert(m_pPhysicsCore && m_pCell);
+    m_pPhysicsCore->makeTimeStep(time.m_deltaTSec);
 
     m_pCell->update(time.m_deltaTSec);
 }

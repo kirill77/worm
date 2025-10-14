@@ -47,7 +47,7 @@ public:
      */
     void update(double fDtSec, Cell& cell) override;
 
-    // Provide cortex surface mesh from external simulation (e.g., TensionSphere)
+    // Provide cortex surface mesh from external simulation (e.g., PhysicsCore)
     void setMesh(const std::shared_ptr<EdgeMesh> pMesh);
 
     // Access underlying cortex surface mesh

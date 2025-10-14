@@ -2,16 +2,17 @@
 
 #include <memory>
 #include "biology/simulation/TimeContext.h"
+#include "biology/simulation/PhysicsCore.h"
 
 class Cell;
 class BVHMesh;
-class TensionSphere;
+class PhysicsCore;
 
 class CellSim
 {
 private:
     std::shared_ptr<Cell> m_pCell;
-    std::shared_ptr<TensionSphere> m_pTensionSphere;
+    std::shared_ptr<PhysicsCore> m_pPhysicsCore;
 
 public:
     // Constructor
