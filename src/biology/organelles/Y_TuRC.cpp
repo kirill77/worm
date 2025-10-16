@@ -18,13 +18,13 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     static std::mt19937 gen(rd());
     static std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
     
-    // Generate random normalized direction
-    m_vDir = float3(dis(gen), dis(gen), dis(gen));
-    float length = sqrtf(m_vDir.x * m_vDir.x + m_vDir.y * m_vDir.y + m_vDir.z * m_vDir.z);
+    // Generate random normalized direction for nucleation
+    m_vTipDir = float3(dis(gen), dis(gen), dis(gen));
+    float length = sqrtf(m_vTipDir.x * m_vTipDir.x + m_vTipDir.y * m_vTipDir.y + m_vTipDir.z * m_vTipDir.z);
     if (length > 0.0f) {
-        m_vDir = float3(m_vDir.x / length, m_vDir.y / length, m_vDir.z / length);
+        m_vTipDir = float3(m_vTipDir.x / length, m_vTipDir.y / length, m_vTipDir.z / length);
     } else {
-        m_vDir = float3(1.0f, 0.0f, 0.0f); // Default direction
+        m_vTipDir = float3(1.0f, 0.0f, 0.0f); // Default direction
     }
     
     // Initialize species from owning cell if available
@@ -49,12 +49,17 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     float theta = thetaDis(gen);  // Azimuthal angle
     float phi = std::acos(phiDis(gen));  // Polar angle
     
-    // Convert spherical to Cartesian coordinates
-    m_vPosMicroM = float3(
+    // Convert spherical to Cartesian coordinates and store as origin point
+    float3 nucleationPos = float3(
         r * std::sin(phi) * std::cos(theta),
         r * std::sin(phi) * std::sin(theta), 
         r * std::cos(phi)
     );
+    
+    // Initialize with origin and a small initial segment
+    m_mtSegmentPoints.clear();
+    m_mtSegmentPoints.push_back(nucleationPos);
+    m_mtSegmentPoints.push_back(nucleationPos + m_vTipDir * 0.02f);
 }
 
 void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium)
@@ -69,110 +74,186 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
     const float vGrowMax = static_cast<float>(MoleculeConstants::MT_VGROW_MAX_UM_PER_S);    // µm/s (at high tubulin)
     const float vShrink  = static_cast<float>(MoleculeConstants::MT_VSHRINK_UM_PER_S);      // µm/s
     const float kHyd = static_cast<float>(MoleculeConstants::MT_CAP_HYDROLYSIS_RATE_S); // s^-1 cap hydrolysis
-    float pCatFree = static_cast<float>(MoleculeConstants::MT_CATASTROPHE_BASE_FREE);   // s^-1 baseline catastrophe (free tip)
-    float pRes = 0.05f;              // s^-1 baseline rescue
+    float catastropheRate = static_cast<float>(MoleculeConstants::MT_CATASTROPHE_BASE_FREE);   // s^-1 baseline catastrophe (free tip)
+    float rescueRate = 0.05f;              // s^-1 baseline rescue
 
-    if (m_mtLengthMicroM > 0.0f)
+    // Sample concentrations at plus-end position
+    float3 tipWorld = centrosomeWorldPos + getTipPosition();
+    assert(pCortex && "pCortex must not be null in Y_TuRC::update");
+    float3 tipNorm = pCortex->worldToNormalized(tipWorld);
+    double tubAlpha = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::PROTEIN, m_species), tipNorm);
+    double tubBeta  = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::PROTEIN, m_species), tipNorm);
+    float tubDimer = static_cast<float>(std::min(tubAlpha, tubBeta));
+    double air1 = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, m_species), tipNorm);
+    // Cortex-contact increases catastrophe probability
+    if (m_mtContactCortex)
+        catastropheRate = static_cast<float>(MoleculeConstants::MT_CATASTROPHE_BASE_CONTACT); // stronger catastrophic bias at contact
+
+    // Local soluble tubulin coupling (Michaelis–Menten-like)
+    const float K_tub = static_cast<float>(MoleculeConstants::MT_K_TUB);
+    float vGrow = vGrowMax * (tubDimer / (K_tub + tubDimer));
+    // Catastrophe/rescue modulation by tubulin and AIR-1
+    const float K_air = static_cast<float>(MoleculeConstants::MT_K_AIR);
+    float f_air_cat = 1.0f / (1.0f + static_cast<float>(air1) / K_air);
+    float f_tub_cat = (K_tub / (K_tub + std::max(tubDimer, 0.0f)));
+    float f_tub_res = 1.0f + (std::max(tubDimer, 0.0f) / (K_tub + std::max(tubDimer, 0.0f)));
+    catastropheRate *= f_air_cat * f_tub_cat;
+    rescueRate *= f_tub_res;
+
+    if (m_mtState == MTState::Growing)
     {
-        // Sample concentrations at plus-end position
-        float3 originWorld = centrosomeWorldPos + m_vPosMicroM;
-        float3 tipWorld = originWorld + m_vDir * m_mtLengthMicroM;
-        assert(pCortex && "pCortex must not be null in Y_TuRC::update");
-        float3 tipNorm = pCortex->worldToNormalized(tipWorld);
-        double tubAlpha = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::PROTEIN, m_species), tipNorm);
-        double tubBeta  = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::PROTEIN, m_species), tipNorm);
-        float tubDimer = static_cast<float>(std::min(tubAlpha, tubBeta));
-        double air1 = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, m_species), tipNorm);
-        // Cortex-contact increases catastrophe probability
-        if (m_mtContactCortex)
-            pCatFree = static_cast<float>(MoleculeConstants::MT_CATASTROPHE_BASE_CONTACT); // stronger catastrophic bias at contact
-
-        // Local soluble tubulin coupling (Michaelis–Menten-like)
-        const float K_tub = static_cast<float>(MoleculeConstants::MT_K_TUB);
-        float vGrow = vGrowMax * (tubDimer / (K_tub + tubDimer));
-        // Catastrophe/rescue modulation by tubulin and AIR-1
-        const float K_air = static_cast<float>(MoleculeConstants::MT_K_AIR);
-        float f_air_cat = 1.0f / (1.0f + static_cast<float>(air1) / K_air);
-        float f_tub_cat = (K_tub / (K_tub + std::max(tubDimer, 0.0f)));
-        float f_tub_res = 1.0f + (std::max(tubDimer, 0.0f) / (K_tub + std::max(tubDimer, 0.0f)));
-        pCatFree *= f_air_cat * f_tub_cat;
-        pRes *= f_tub_res;
-
-        if (m_mtState == MTState::Growing)
+        float growthThisStep = static_cast<float>(vGrow * dtSec);
+        const float segmentLength = static_cast<float>(MoleculeConstants::MT_SEGMENT_LENGTH_MICROM);
+        
+        // Grow the last segment in the tip direction
+        float3 currentTip = m_mtSegmentPoints.back();
+        float3 newTip = currentTip + m_vTipDir * growthThisStep;
+        m_mtSegmentPoints.back() = newTip;
+        
+        // Add new full segments when last segment exceeds segment length
+        float lastSegLen = getLastSegmentLength();
+        while (lastSegLen >= segmentLength)
         {
-            m_mtLengthMicroM += static_cast<float>(vGrow * dtSec);
-            // GTP-cap grows with addition
-            m_mtCapLengthMicroM += static_cast<float>(vGrow * dtSec);
-            // Enhanced cortex intersection with cached triangle information
-            Cortex::CortexRay intersection(originWorld, m_vDir);
-            if (pCortex->findClosestIntersection(intersection) && m_mtLengthMicroM > intersection.distance)
-            {
-                m_mtLengthMicroM = intersection.distance;
-                if (!m_mtContactCortex) {
-                    // First contact - attempt cortical binding directly
-                    m_mtContactCortex = true;
-                    attemptCorticalBindingWithIntersection(intersection, pCortex, internalMedium, dtSec, rand01);
-                }
-            }
-            else {
-                m_mtContactCortex = false;
-            }
-            // Hydrolyze cap behind the tip
-            m_mtCapLengthMicroM = std::max(0.0f, m_mtCapLengthMicroM - static_cast<float>(kHyd * dtSec));
-            // Catastrophe probability rises when cap is depleted
-            float pCat = pCatFree;
-            if (m_mtCapLengthMicroM < static_cast<float>(MoleculeConstants::MT_CAP_DEPLETED_THRESHOLD_MICROM))
-                pCat *= static_cast<float>(MoleculeConstants::MT_CAP_DEPLETION_CATASTROPHE_MULT);
-            if (rand01() < pCat * dtSec)
-            {
-                m_mtState = MTState::Shrinking;
-            }
+            // Make the last segment exactly segmentLength
+            float3 prevPoint = m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
+            m_mtSegmentPoints.back() = prevPoint + m_vTipDir * segmentLength;
+            
+            // Add a new segment starting from current tip
+            float3 segmentEnd = m_mtSegmentPoints.back();
+            float3 newSegmentEnd = segmentEnd + m_vTipDir * (lastSegLen - segmentLength);
+            m_mtSegmentPoints.push_back(newSegmentEnd);
+            
+            lastSegLen = getLastSegmentLength();
         }
-        else if (m_mtState == MTState::Shrinking)
-        {
-            m_mtLengthMicroM -= static_cast<float>(vShrink * dtSec);
-            // Cap collapses in shrink
-            m_mtCapLengthMicroM = std::max(0.0f, m_mtCapLengthMicroM - static_cast<float>(kHyd * dtSec));
-            if (m_mtLengthMicroM <= 0.0f)
+        
+        // Check cortex intersection for the tip segment only
+        size_t lastIdx = m_mtSegmentPoints.size() - 1;
+        float3 segStart = centrosomeWorldPos + m_mtSegmentPoints[lastIdx - 1];
+        float3 segEnd = centrosomeWorldPos + m_mtSegmentPoints[lastIdx];
+        float3 segDir = segEnd - segStart;
+        float segLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
+        
+        m_mtContactCortex = false;
+        if (segLen > 0.0f) {
+            segDir = float3(segDir.x / segLen, segDir.y / segLen, segDir.z / segLen);
+            
+            Cortex::CortexRay intersection(segStart, segDir);
+            if (pCortex->findClosestIntersection(intersection) && intersection.distance < segLen)
             {
-                m_mtLengthMicroM = 0.0f;
-                m_mtRefractorySec = 1.0f; // wait before re-nucleation
-                m_mtContactCortex = false;
+                // Truncate MT at cortex contact
+                float3 contactPoint = segStart + segDir * intersection.distance - centrosomeWorldPos;
+                m_mtSegmentPoints[lastIdx] = contactPoint;
                 
-                // If was bound, reset binding state (cortex cleanup is lazy)
-                if (m_bindingStrength > 0.0) {
-                    m_bindingStrength = 0.0;
-                    m_bindingTime = 0.0;
-                }
-            }
-            else if (rand01() < pRes * dtSec)
-            {
-                m_mtState = MTState::Growing;
+                // First contact - attempt cortical binding directly
+                m_mtContactCortex = true;
+                attemptCorticalBindingWithIntersection(intersection, pCortex, internalMedium, dtSec, rand01);
             }
         }
-        else if (m_mtState == MTState::Bound)
+        
+        // Catastrophe probability rises when cap is depleted
+        float capLength = getCapLengthMicroM();
+        float effectiveCatastropheRate = catastropheRate;
+        if (capLength < static_cast<float>(MoleculeConstants::MT_CAP_DEPLETED_THRESHOLD_MICROM))
+            effectiveCatastropheRate *= static_cast<float>(MoleculeConstants::MT_CAP_DEPLETION_CATASTROPHE_MULT);
+        if (rand01() < effectiveCatastropheRate * dtSec)
         {
-            // Update binding time and check for unbinding
-            m_bindingTime += dtSec;
-            if (shouldUnbind(dtSec, rand01)) {
-                // Unbind from cortex (cortex cleanup is lazy) 
-                unbindFromCortex();
-            }
+            m_mtState = MTState::Shrinking;
         }
     }
-    else
+    else if (m_mtState == MTState::Shrinking)
     {
-        if (m_mtRefractorySec > 0.0f)
+        float shrinkageThisStep = static_cast<float>(vShrink * dtSec);
+        
+        // Shrink the last segment
+        float lastSegLen = getLastSegmentLength();
+        if (shrinkageThisStep >= lastSegLen)
         {
-            m_mtRefractorySec = std::max(0.0f, m_mtRefractorySec - static_cast<float>(dtSec));
+            // Remove segments until shrinkage is consumed
+            shrinkageThisStep -= lastSegLen;
+            while (m_mtSegmentPoints.size() > 2 && shrinkageThisStep > 0.0f)
+            {
+                m_mtSegmentPoints.pop_back();
+                float segLen = getLastSegmentLength();
+                if (shrinkageThisStep >= segLen)
+                {
+                    shrinkageThisStep -= segLen;
+                }
+                else
+                {
+                    // Partially shrink this segment
+                    float3 prevPoint = m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
+                    float3 currentTip = m_mtSegmentPoints.back();
+                    float3 segDir = currentTip - prevPoint;
+                    float currentLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
+                    if (currentLen > 0.0f) {
+                        segDir = float3(segDir.x / currentLen, segDir.y / currentLen, segDir.z / currentLen);
+                        m_mtSegmentPoints.back() = prevPoint + segDir * (currentLen - shrinkageThisStep);
+                        m_vTipDir = segDir; // Update tip direction
+                    }
+                    shrinkageThisStep = 0.0f;
+                }
+            }
+            
+            // If down to minimum size (2 points), enter refractory period
+            if (m_mtSegmentPoints.size() == 2)
+            {
+                float remainingLen = getLastSegmentLength();
+                if (remainingLen <= 0.02f || shrinkageThisStep > 0.0f)
+                {
+                    // Reset to small stub
+                    float3 origin = m_mtSegmentPoints[0];
+                    m_mtSegmentPoints[1] = origin + m_vTipDir * 0.02f;
+                    m_mtRefractorySec = 1.0f; // wait before re-nucleation
+                    m_mtContactCortex = false;
+                    
+                    // If was bound, reset binding state
+                    if (m_bindingStrength > 0.0) {
+                        m_bindingStrength = 0.0;
+                        m_bindingTime = 0.0;
+                    }
+                }
+            }
         }
         else
         {
-            // Nucleate a new MT
+            // Partially shrink the last segment
+            float3 prevPoint = m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
+            float3 currentTip = m_mtSegmentPoints.back();
+            float3 segDir = currentTip - prevPoint;
+            if (lastSegLen > 0.0f) {
+                segDir = float3(segDir.x / lastSegLen, segDir.y / lastSegLen, segDir.z / lastSegLen);
+                m_mtSegmentPoints.back() = prevPoint + segDir * (lastSegLen - shrinkageThisStep);
+            }
+        }
+        
+        if (rand01() < rescueRate * dtSec)
+        {
             m_mtState = MTState::Growing;
-            m_mtLengthMicroM = 0.02f;
-            m_mtCapLengthMicroM = 0.02f;
+        }
+    }
+    else if (m_mtState == MTState::Bound)
+    {
+        // Update binding time and check for unbinding
+        m_bindingTime += dtSec;
+        if (shouldUnbind(dtSec, rand01)) {
+            // Unbind from cortex (cortex cleanup is lazy) 
+            unbindFromCortex();
+        }
+    }
+    
+    // Handle refractory period
+    if (m_mtRefractorySec > 0.0f)
+    {
+        m_mtRefractorySec = std::max(0.0f, m_mtRefractorySec - static_cast<float>(dtSec));
+        if (m_mtRefractorySec == 0.0f)
+        {
+            // Re-nucleate
+            m_mtState = MTState::Growing;
             m_mtContactCortex = false;
+            
+            // Reset to small segment in tip direction
+            float3 origin = m_mtSegmentPoints[0];
+            m_mtSegmentPoints[1] = origin + m_vTipDir * 0.02f;
             
             // Reset binding parameters
             m_bindingStrength = 0.0;
@@ -214,6 +295,38 @@ bool Y_TuRC::shouldUnbind(double dtSec, const std::function<float()>& rand01) co
     }
     
     return rand01() < unbindRate * dtSec;
+}
+
+float Y_TuRC::getLastSegmentLength() const
+{
+    if (m_mtSegmentPoints.size() < 2) return 0.0f;
+    float3 diff = m_mtSegmentPoints.back() - m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
+    return sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+}
+
+float Y_TuRC::getMTLengthMicroM() const
+{
+    if (m_mtSegmentPoints.size() < 2) return 0.0f;
+    
+    const float segmentLength = static_cast<float>(MoleculeConstants::MT_SEGMENT_LENGTH_MICROM);
+    // All segments except the last are full length
+    float totalLength = segmentLength * static_cast<float>(m_mtSegmentPoints.size() - 2);
+    // Add the last segment
+    totalLength += getLastSegmentLength();
+    return totalLength;
+}
+
+float Y_TuRC::getCapLengthMicroM() const
+{
+    // Cap length is proportional to how much the MT has grown
+    // For simplicity, cap length equals total MT length (grows with polymerization)
+    // In reality, GTP cap hydrolyzes over time - this could be tracked separately
+    // For now, we use a simple proxy: cap depletes when MT is short
+    float mtLength = getMTLengthMicroM();
+    const float kHyd = static_cast<float>(MoleculeConstants::MT_CAP_HYDROLYSIS_RATE_S);
+    // Simple approximation: cap is proportional to recent growth
+    // This is a placeholder - proper implementation would track cap separately
+    return mtLength * 0.1f; // Rough proxy: 10% of MT length is capped
 }
 
 void Y_TuRC::attemptCorticalBindingWithIntersection(const Cortex::CortexRay& intersection,

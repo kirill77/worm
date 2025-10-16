@@ -35,6 +35,9 @@ namespace MoleculeConstants
     constexpr double MT_VGROW_MAX_UM_PER_S = 0.45;  // µm/s at high tubulin
     constexpr double MT_VSHRINK_UM_PER_S   = 0.09;  // µm/s
     
+    // Microtubule segmentation (for bendable microtubules)
+    constexpr double MT_SEGMENT_LENGTH_MICROM = 0.25;  // µm per segment (250 nm)
+    
     // Cortical binding (dynein-mediated MT-cortex anchoring)
     constexpr double MT_CORTEX_K_BIND      = 100.0;  // molecules/µm^3 (dynein concentration for half-max binding)
     constexpr double MT_CORTEX_BIND_RATE   = 2.0;    // s^-1 (attempt rate when in contact)

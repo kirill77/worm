@@ -111,9 +111,7 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
             for (const auto& r : rings) {
                 if (!r || !r->hasActiveMT()) continue;
                 const float length = r->getMTLengthMicroM();
-                const float3 originWorld = centroWorld + r->getPosition();
-                const float3 dir = r->getDirection();
-                const float3 tipWorld = originWorld + dir * length;
+                const float3 tipWorld = centroWorld + r->getTipPosition();
                 // Convert tip to normalized for sampling
                 const float3 tipNorm = pCortex->worldToNormalized(tipWorld);
                 // Sample local tubulin and AIR-1
@@ -121,12 +119,17 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
                 double tubBeta  = m_medium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::PROTEIN, cellPtr->getSpecies()), tipNorm);
                 double tubDimer = std::min(tubAlpha, tubBeta);
                 double air1     = m_medium.getMoleculeConcentration(Molecule(StringDict::ID::AIR_1, ChemicalType::PROTEIN, cellPtr->getSpecies()), tipNorm);
-                // Distance to cortex along the ray
-                Cortex::CortexRay ray(originWorld, dir);
+                // Distance to cortex along the ray from centrosome to tip
+                float3 dirToTip = tipWorld - centroWorld;
+                float distToTip = sqrtf(dirToTip.x * dirToTip.x + dirToTip.y * dirToTip.y + dirToTip.z * dirToTip.z);
+                if (distToTip > 0.0f) {
+                    dirToTip = float3(dirToTip.x / distToTip, dirToTip.y / distToTip, dirToTip.z / distToTip);
+                }
+                Cortex::CortexRay ray(centroWorld, dirToTip);
                 bool hit = pCortex->findClosestIntersection(ray);
                 float maxLen = hit ? ray.getDistance() : 0.0f;
-                bool contact = (maxLen > 0.0f) && (length >= maxLen - 1e-4f);
-                double distToCortex = (maxLen > 0.0f) ? std::max(0.0, static_cast<double>(maxLen - length)) : 0.0;
+                bool contact = (maxLen > 0.0f) && (distToTip >= maxLen - 1e-4f);
+                double distToCortex = (maxLen > 0.0f) ? std::max(0.0, static_cast<double>(maxLen - distToTip)) : 0.0;
                 // Recompute effective vGrow and probabilities to log (mirror Y_TuRC constants)
                 const double vGrowMax = 0.45;   // µm/s
                 const double K_tub    = 50.0;   // molecules/µm^3 proxy

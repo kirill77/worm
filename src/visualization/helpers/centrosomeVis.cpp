@@ -142,8 +142,12 @@ void CentrosomeVis::updateRingComplexNodes()
     {
         auto& pRing = ringComplexes[i];
         assert(pRing && "Y_TuRC pointer should not be null");
-        float3 pos = pRing->getPosition();
-        float3 dir = pRing->getDirection();
+        
+        // For now, visualize as a single cylinder from origin to tip
+        // TODO: Update to render as poly-line segments for bendable visualization
+        float3 pos = pRing->getOrigin();
+        float3 dir = pRing->getTipDirection();
+        float3 tipPos = pRing->getTipPosition();
 
         affine3 ringXf = affine3::identity();
         float useLen = pRing->hasActiveMT() ? std::max(pRing->getMTLengthMicroM(), fDefaultStubMicroM) : fDefaultStubMicroM;

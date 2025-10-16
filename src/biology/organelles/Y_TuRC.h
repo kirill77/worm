@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <memory>
+#include <vector>
 #include "geometry/vectors/vector.h"
 #include "chemistry/molecules/Molecule.h"
 
@@ -16,16 +17,18 @@ struct Y_TuRC : public std::enable_shared_from_this<Y_TuRC>
 
     Y_TuRC(std::weak_ptr<Centrosome> pCentrosome);
 
-    const float3& getDirection() { return m_vDir; }
-    const float3& getPosition() { return m_vPosMicroM; }
+    const float3& getOrigin() const { return m_mtSegmentPoints[0]; }
+    const std::vector<float3>& getSegmentPoints() const { return m_mtSegmentPoints; }
 
     // Update microtubule lifecycle and dynamics (simple dynamic instability)
     // centrosomeWorldPos: world-space position of the centrosome center (µm)
     // pCortex: cortex organelle for geometry queries
     void update(double dtSec, const float3& centrosomeWorldPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium);
     // Accessors for MT visualization (optional)
-    float getMTLengthMicroM() const { return m_mtLengthMicroM; }
-    bool  hasActiveMT() const { return m_mtLengthMicroM > 0.0f; }
+    float getMTLengthMicroM() const;
+    bool  hasActiveMT() const { return m_mtSegmentPoints.size() >= 2; }
+    float3 getTipPosition() const { return m_mtSegmentPoints.back(); }
+    float3 getTipDirection() const { return m_vTipDir; }
     
     // Cortical binding accessors
     bool isBound() const { return m_mtState == MTState::Bound; }
@@ -35,20 +38,22 @@ private:
     std::weak_ptr<Centrosome> m_pCentrosome;
     Species m_species = Species::GENERIC;
 
-    float3 m_vDir; // normalized direction
-    float3 m_vPosMicroM; // position in micro-meters in respect to centrosome center
+    float3 m_vTipDir; // current tip direction (normalized)
+    std::vector<float3> m_mtSegmentPoints; // array of points: [0] = nucleation origin, [1..n] = segment endpoints (always size >= 2)
 
     // Microtubule dynamic state
     MTState m_mtState = MTState::Growing;
-    float m_mtLengthMicroM = 0.0f; // current length in µm
     float m_mtRefractorySec = 0.0f; // wait time before re-nucleation after disassembly
-    float m_mtCapLengthMicroM = 0.0f; // GTP-cap proxy length in µm
     bool  m_mtContactCortex = false;   // whether tip is in contact with cortex
     
     // Cortical binding state
     double m_bindingStrength = 0.0;   // dynein-dependent binding strength for unbinding kinetics
     double m_bindingTime = 0.0;       // how long MT has been bound to cortex
 
+    // Helper methods
+    float getLastSegmentLength() const;
+    float getCapLengthMicroM() const;
+    
     // Cortical binding state management 
     void bindToCortex(double dyneinConc);
     void unbindFromCortex();
