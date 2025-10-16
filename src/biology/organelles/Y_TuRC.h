@@ -21,9 +21,9 @@ struct Y_TuRC : public std::enable_shared_from_this<Y_TuRC>
     const std::vector<float3>& getSegmentPoints() const { return m_mtSegmentPoints; }
 
     // Update microtubule lifecycle and dynamics (simple dynamic instability)
-    // centrosomeWorldPos: world-space position of the centrosome center (µm)
+    // centrosomeCellPos: cell-space position of the centrosome center (µm, cortex-centered)
     // pCortex: cortex organelle for geometry queries
-    void update(double dtSec, const float3& centrosomeWorldPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium);
+    void update(double dtSec, const float3& centrosomeCellPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium);
     // Accessors for MT visualization (optional)
     float getMTLengthMicroM() const;
     bool  hasActiveMT() const { return m_mtSegmentPoints.size() >= 2; }

@@ -62,7 +62,7 @@ void Medium::updateGridCellVolumes(Cortex& cortex)
     for (uint32_t iz = 0; iz < vres; ++iz)
     {
         float3 npos((float)edges[ix], (float)edges[iy], (float)edges[iz]);
-        worldVerts[vindex(ix,iy,iz)] = cortex.normalizedToWorld(npos);
+        worldVerts[vindex(ix,iy,iz)] = cortex.normalizedToCell(npos);
     }
 
     // Helper to compute volume of a tetrahedron

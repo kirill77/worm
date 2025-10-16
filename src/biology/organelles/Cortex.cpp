@@ -26,7 +26,7 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     m_pCortexMesh = std::make_shared<EdgeMesh>(fRadiusMicroM, 2);
     m_pCortexBVH = BVHCache::instance().getOrCreate(m_pCortexMesh);
 
-    // Validate mapping consistency between normalizedToWorld and worldToNormalized
+    // Validate mapping consistency between normalizedToCell and cellToNormalized
     static std::mt19937 rng(std::random_device{}());
     std::uniform_real_distribution<float> uni(-1.0f, 1.0f);
     for (int i = 0; i < 10; ++i)
@@ -34,11 +34,11 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
         float3 n = float3(uni(rng), uni(rng), uni(rng));
         float r = length(n);
         if (r < 1e-6f) n = float3(1, 0, 0), r = 1.0f;
-        float3 w = normalizedToWorld(n);
-        float3 n2 = worldToNormalized(w);
+        float3 c = normalizedToCell(n);
+        float3 n2 = cellToNormalized(c);
         float3 d = n2 - n;
         float err = length(d);
-        assert(err < 1e-3f && "Cortex world/normalized mappings must be approximately inverse after clamping to unit length");
+        assert(err < 1e-3f && "Cortex cell/normalized mappings must be approximately inverse after clamping to unit length");
     }
 
     // Initialize list of molecules that can bind to cortex
@@ -217,9 +217,9 @@ void Cortex::pullBindingSiteMoleculesFromMedium()
 
 
 
-float3 Cortex::normalizedToWorld(const float3& normalizedPos)
+float3 Cortex::normalizedToCell(const float3& normalizedPos)
 {
-    assert(m_pCortexBVH && "Cortex BVH must be initialized before normalizedToWorld");
+    assert(m_pCortexBVH && "Cortex BVH must be initialized before normalizedToCell");
 
     // Get bounding box center (for ray origin)
     const box3 bbox = m_pCortexBVH->getBox();
@@ -255,12 +255,12 @@ float3 Cortex::normalizedToWorld(const float3& normalizedPos)
 }
 
 
-float3 Cortex::worldToNormalized(const float3& worldPos, bool isOnCortex) const
+float3 Cortex::cellToNormalized(const float3& cellPos, bool isOnCortex) const
 {
-    assert(m_pCortexBVH && "Cortex BVH must be initialized before worldToNormalized");
+    assert(m_pCortexBVH && "Cortex BVH must be initialized before cellToNormalized");
     const box3 bbox = m_pCortexBVH->getBox();
     const float3 center = bbox.center();
-    float3 v = worldPos - center;
+    float3 v = cellPos - center;
     float len = length(v);
     if (len < 1e-6f) return float3(0, 0, 0);
     float3 dirWorldUnit = v / len;
@@ -308,9 +308,9 @@ float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentri
     const float3 v1 = pMesh->getVertexPosition(tri.y);
     const float3 v2 = pMesh->getVertexPosition(tri.z);
 
-    const float3 world = v0 * barycentric.x + v1 * barycentric.y + v2 * barycentric.z;
+    const float3 cellPos = v0 * barycentric.x + v1 * barycentric.y + v2 * barycentric.z;
     const bool isOnCortex = true;
-    return worldToNormalized(world, isOnCortex);
+    return cellToNormalized(cellPos, isOnCortex);
 }
 
 bool Cortex::findClosestIntersection(CortexRay& ray) const

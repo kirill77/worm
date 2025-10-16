@@ -131,22 +131,22 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     }
 
     // Step microtubule dynamics for each existing Y_TuRC
-    // Compute centrosome world position once
-    float3 centrosomeWorldPos = float3(0,0,0);
+    // Compute centrosome cell position once
+    float3 centrosomeCellPos = float3(0,0,0);
     std::shared_ptr<Cortex> pCortex;
     if (auto pCellPtr = getCell())
     {
         pCortex = std::dynamic_pointer_cast<Cortex>(pCellPtr->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
         if (pCortex)
         {
-            centrosomeWorldPos = pCortex->normalizedToWorld(getNormalizedPosition());
+            centrosomeCellPos = pCortex->normalizedToCell(getNormalizedPosition());
         }
     }
     for (auto& pRing : m_pRingComplexes)
     {
         if (pRing)
         {
-            pRing->update(dt, centrosomeWorldPos, pCortex, internalMedium);
+            pRing->update(dt, centrosomeCellPos, pCortex, internalMedium);
         }
     }
 }

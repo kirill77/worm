@@ -62,7 +62,7 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     m_mtSegmentPoints.push_back(nucleationPos + m_vTipDir * 0.02f);
 }
 
-void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium)
+void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium)
 {
     // Defaults (embedded constants; not user-configurable)
     auto rand01 = []() {
@@ -78,9 +78,9 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
     float rescueRate = 0.05f;              // s^-1 baseline rescue
 
     // Sample concentrations at plus-end position
-    float3 tipWorld = centrosomeWorldPos + getTipPosition();
+    float3 tipCell = centrosomeCellPos + getTipPosition();
     assert(pCortex && "pCortex must not be null in Y_TuRC::update");
-    float3 tipNorm = pCortex->worldToNormalized(tipWorld);
+    float3 tipNorm = pCortex->cellToNormalized(tipCell);
     double tubAlpha = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::ALPHA_TUBULIN, ChemicalType::PROTEIN, m_species), tipNorm);
     double tubBeta  = internalMedium.getMoleculeConcentration(Molecule(StringDict::ID::BETA_TUBULIN,  ChemicalType::PROTEIN, m_species), tipNorm);
     float tubDimer = static_cast<float>(std::min(tubAlpha, tubBeta));
@@ -128,8 +128,8 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
         
         // Check cortex intersection for the tip segment only
         size_t lastIdx = m_mtSegmentPoints.size() - 1;
-        float3 segStart = centrosomeWorldPos + m_mtSegmentPoints[lastIdx - 1];
-        float3 segEnd = centrosomeWorldPos + m_mtSegmentPoints[lastIdx];
+        float3 segStart = centrosomeCellPos + m_mtSegmentPoints[lastIdx - 1];
+        float3 segEnd = centrosomeCellPos + m_mtSegmentPoints[lastIdx];
         float3 segDir = segEnd - segStart;
         float segLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
         
@@ -141,7 +141,7 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeWorldPos, const std::s
             if (pCortex->findClosestIntersection(intersection) && intersection.distance < segLen)
             {
                 // Truncate MT at cortex contact
-                float3 contactPoint = segStart + segDir * intersection.distance - centrosomeWorldPos;
+                float3 contactPoint = segStart + segDir * intersection.distance - centrosomeCellPos;
                 m_mtSegmentPoints[lastIdx] = contactPoint;
                 
                 // First contact - attempt cortical binding directly
@@ -336,7 +336,7 @@ void Y_TuRC::attemptCorticalBindingWithIntersection(const Cortex::CortexRay& int
     
     // Sample NMY-2 (myosin II) concentration at contact point for binding probability
     const bool isOnCortex = true;
-    float3 contactNorm = pCortex->worldToNormalized(intersection.worldHitPoint, isOnCortex);
+    float3 contactNorm = pCortex->cellToNormalized(intersection.worldHitPoint, isOnCortex);
     double dyneinConc = internalMedium.getMoleculeConcentration(
         Molecule(StringDict::ID::NMY_2, ChemicalType::PROTEIN, m_species), contactNorm);
     

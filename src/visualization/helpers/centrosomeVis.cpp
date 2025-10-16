@@ -50,21 +50,18 @@ GPUMeshNode CentrosomeVis::updateAndGetMeshNode()
         return GPUMeshNode(affine3::identity());
     }
     
-    // Get the centrosome's transform and convert to world coordinates
+    // Get the centrosome's transform and convert to cell coordinates
     const float3& normalizedPosition = m_pCentrosome->getNormalizedPosition();
-    // Use Cortex method for mapping normalized position to world
+    // Use Cortex method for mapping normalized position to cell coordinates
     auto pCortex = std::dynamic_pointer_cast<Cortex>(pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
-    float3 position = pCortex ? pCortex->normalizedToWorld(normalizedPosition) : float3(0,0,0);
+    float3 position = pCortex ? pCortex->normalizedToCell(normalizedPosition) : float3(0,0,0);
     
-    // Get the full transform matrix from centrosome space to cell space
-    const affine3& centrosomeToCell = m_pCentrosome->getToParentTransform();
-    
-    // Convert the centrosome's transform to world space coordinates
-    affine3 centrosomeToWorld = affine3::identity();
-    centrosomeToWorld.m_translation = position;
+    // Create transform from centrosome space to cell space coordinates
+    affine3 centrosomeToCell = affine3::identity();
+    centrosomeToCell.m_translation = position;
     
     // Update transforms only
-    m_rootNode.setTransform(centrosomeToWorld);
+    m_rootNode.setTransform(centrosomeToCell);
 
     updateCentriolesNodes();
     updateRingComplexNodes();

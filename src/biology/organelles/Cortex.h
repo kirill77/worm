@@ -69,11 +69,11 @@ public:
      */
     void transferBindingSiteMoleculesToMedium();
 
-    // Map normalized coordinates [-1,1] to cortex surface world position via ray cast
-    float3 normalizedToWorld(const float3& normalizedPos);
+    // Map normalized coordinates [-1,1] to cell coordinates (µm, cortex-centered) via ray cast
+    float3 normalizedToCell(const float3& normalizedPos);
 
-    // Map world position to normalized coordinates [-1,1] using cortex bounding box
-    float3 worldToNormalized(const float3& worldPos, bool isOnCortex = false) const;
+    // Map cell coordinates (µm, cortex-centered) to normalized coordinates [-1,1]
+    float3 cellToNormalized(const float3& cellPos, bool isOnCortex = false) const;
 
     // Expose BVH mesh for visualization
     std::shared_ptr<class BVHMesh> getBVHMesh() const { return m_pCortexBVH; }
