@@ -34,9 +34,6 @@ private:
     // Underlying mesh (currently cortex); more adapters can be added later
     std::shared_ptr<EdgeMesh> m_pCortexMesh;
 
-    // Edge rest lengths (computed from initial mesh)
-    std::vector<double> m_edgeRestLengths;
-
     // Mesh adapter (reused across timesteps to avoid repeated allocations)
     std::shared_ptr<SoftBodyMeshAdapter> m_pMeshAdapter;
 
@@ -54,9 +51,6 @@ private:
 
     // Per-body constraints (XPBD-style)
     std::vector<std::unique_ptr<IConstraint>> m_constraints;
-
-    // Internal initialization helpers
-    void initializePhysics();
 };
 
 

@@ -21,33 +21,16 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     // Pull volume from cell's internal medium
     m_fVolume = m_pCell->getInternalMedium().getVolumeMicroM();
 
-    initializePhysics();
-
     // Create adapter once (reused across timesteps to avoid repeated allocations)
     m_pMeshAdapter = std::make_shared<SoftBodyMeshAdapter>(m_pCortexMesh);
 
     // Register body with integrator
     m_integrator.addBody(m_pMeshAdapter);
 
-    m_forceGenerators.emplace_back(std::make_unique<EdgeSpringForce>(*m_pMeshAdapter, m_fSpringC, m_edgeRestLengths));
+    m_forceGenerators.emplace_back(std::make_unique<EdgeSpringForce>(*m_pMeshAdapter, m_fSpringC));
     m_forceGenerators.emplace_back(std::make_unique<EdgeDampingForce>(*m_pMeshAdapter, m_fDampingCoeff));
 
     m_constraints.emplace_back(std::make_unique<VolumeConstraintXPBD>(*m_pMeshAdapter, m_fVolume, 0.0));
-}
-
-void PhysicsCore::initializePhysics()
-{
-    m_edgeRestLengths.clear();
-    const uint32_t edgeCount = m_pCortexMesh->getEdgeCount();
-    m_edgeRestLengths.reserve(edgeCount);
-    for (uint32_t e = 0; e < edgeCount; ++e)
-    {
-        auto edge = m_pCortexMesh->getEdge(e);
-        float3 pos1 = m_pCortexMesh->getVertexPosition(edge.first);
-        float3 pos2 = m_pCortexMesh->getVertexPosition(edge.second);
-        double restLength = length(pos2 - pos1);
-        m_edgeRestLengths.push_back(restLength);
-    }
 }
 
 void PhysicsCore::makeTimeStep(double fDtSec)

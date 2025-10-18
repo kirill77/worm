@@ -22,11 +22,7 @@ public:
 class EdgeSpringForce : public IForceGenerator
 {
 public:
-    EdgeSpringForce(IFaceBody& body, double springConstant, const std::vector<double>& edgeRestLengths)
-        : m_body(body)
-        , m_springConstant(springConstant)
-        , m_edgeRestLengths(edgeRestLengths) {
-    }
+    EdgeSpringForce(IFaceBody& body, double springConstant);
 
     void apply(double dt) override;
 

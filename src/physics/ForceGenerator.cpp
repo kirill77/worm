@@ -1,6 +1,23 @@
 #include "ForceGenerator.h"
 #include "geometry/mesh/EdgeMesh.h"
 
+EdgeSpringForce::EdgeSpringForce(IFaceBody& body, double springConstant)
+    : m_body(body)
+    , m_springConstant(springConstant)
+{
+    const uint32_t edgeCount = m_body.m_pMesh->getEdgeCount();
+    m_edgeRestLengths.reserve(edgeCount);
+    
+    for (uint32_t e = 0; e < edgeCount; ++e)
+    {
+        auto edge = m_body.m_pMesh->getEdge(e);
+        float3 pos1 = m_body.m_pMesh->getVertexPosition(edge.first);
+        float3 pos2 = m_body.m_pMesh->getVertexPosition(edge.second);
+        double restLength = length(pos2 - pos1);
+        m_edgeRestLengths.push_back(restLength);
+    }
+}
+
 void EdgeSpringForce::apply(double dt)
 {
     (void)dt;
