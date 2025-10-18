@@ -7,29 +7,31 @@
 
 /**
  * Interface for force generators acting on a mesh-based soft body.
- * Implementations write forces into the provided outForces buffer.
+ * Each force is bound to specific bodies at construction time.
  */
 class IForceGenerator
 {
 public:
     virtual ~IForceGenerator() = default;
 
-    // Apply forces to a generic body via node/edge views
-    virtual void apply(IFaceBody& body, double dt) = 0;
+    // Apply forces to the associated body
+    virtual void apply(double dt) = 0;
 };
 
 /** Edge-aligned Hookean springs for each mesh edge */
 class EdgeSpringForce : public IForceGenerator
 {
 public:
-    EdgeSpringForce(double springConstant, const std::vector<double>& edgeRestLengths)
-        : m_springConstant(springConstant)
+    EdgeSpringForce(IFaceBody& body, double springConstant, const std::vector<double>& edgeRestLengths)
+        : m_body(body)
+        , m_springConstant(springConstant)
         , m_edgeRestLengths(edgeRestLengths) {
     }
 
-    void apply(IFaceBody& body, double dt) override;
+    void apply(double dt) override;
 
 private:
+    IFaceBody& m_body;
     double m_springConstant;
     std::vector<double> m_edgeRestLengths;
 };
@@ -38,13 +40,15 @@ private:
 class EdgeDampingForce : public IForceGenerator
 {
 public:
-    explicit EdgeDampingForce(double dampingCoeff)
-        : m_dampingCoeff(dampingCoeff) {
+    EdgeDampingForce(IFaceBody& body, double dampingCoeff)
+        : m_body(body)
+        , m_dampingCoeff(dampingCoeff) {
     }
 
-    void apply(IFaceBody& body, double dt) override;
+    void apply(double dt) override;
 
 private:
+    IFaceBody& m_body;
     double m_dampingCoeff;
 };
 

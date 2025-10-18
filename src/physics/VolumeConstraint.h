@@ -9,8 +9,9 @@
 class VolumeConstraintXPBD : public IConstraint
 {
 public:
-    VolumeConstraintXPBD(double targetVolume, double compliance = 0.0)
-        : m_targetVolume(targetVolume)
+    VolumeConstraintXPBD(IFaceBody& body, double targetVolume, double compliance = 0.0)
+        : m_body(body)
+        , m_targetVolume(targetVolume)
         , m_compliance(compliance)
         , m_lambda(0.0)
     {
@@ -22,12 +23,13 @@ public:
     double getCompliance() const { return m_compliance; }
 
     // Project positions to satisfy volume constraint (soft if compliance > 0)
-    void project(IFaceBody& body, double dt) override;
+    void project(double dt) override;
 
     // Utility: compute signed volume using faces and node positions
-    static double computeSignedVolume(const IFaceBody& body);
+    double computeSignedVolume() const;
 
 private:
+    IFaceBody& m_body;
     double m_targetVolume;
     double m_compliance;      // XPBD compliance (0 for hard), in units of 1/stiffness
     double m_lambda;          // XPBD Lagrange multiplier accumulator
