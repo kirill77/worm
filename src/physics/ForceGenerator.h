@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include "geometry/vectors/vector.h"
-#include "physics/tensionSphere/BodyInterfaces.h"
+#include "physics/BodyInterfaces.h"
 
 /**
  * Interface for force generators acting on a mesh-based soft body.

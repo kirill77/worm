@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cassert>
 #include "SoftBodyMeshAdapter.h"
-#include "physics/tensionSphere/PhysicsIntegrator.h"
-#include "physics/tensionSphere/VolumeConstraint.h"
+#include "physics/PhysicsIntegrator.h"
+#include "physics/VolumeConstraint.h"
 #include "utils/log/ILog.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"

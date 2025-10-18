@@ -21,9 +21,6 @@
     <ClInclude Include="BodyInterfaces.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SoftBodyMeshAdapter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="VolumeConstraint.h">
       <Filter>Header Files</Filter>
     </ClInclude>

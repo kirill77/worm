@@ -22,6 +22,7 @@
     <ClInclude Include="CellSim.h" />
     <ClInclude Include="Organism.h" />
     <ClInclude Include="PhysicsCore.h" />
+    <ClInclude Include="SoftBodyMeshAdapter.h" />
     <ClInclude Include="TimeContext.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>

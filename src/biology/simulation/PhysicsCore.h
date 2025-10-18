@@ -7,8 +7,8 @@
 #include <memory>
 #include "geometry/vectors/vector.h"
 #include "geometry/mesh/edgeMesh.h"
-#include "physics/tensionSphere/ForceGenerator.h"
-#include "physics/tensionSphere/PhysicsConstraints.h"
+#include "physics/ForceGenerator.h"
+#include "physics/PhysicsConstraints.h"
 #include "SoftBodyMeshAdapter.h"
 
 class Cell;
