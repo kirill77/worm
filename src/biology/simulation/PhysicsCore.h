@@ -9,6 +9,7 @@
 #include "geometry/mesh/edgeMesh.h"
 #include "physics/ForceGenerator.h"
 #include "physics/PhysicsConstraints.h"
+#include "physics/PhysicsIntegrator.h"
 #include "SoftBodyMeshAdapter.h"
 
 class Cell;
@@ -44,6 +45,9 @@ private:
 
     // Target volume
     double m_fVolume;
+
+    // Physics integrator managing all bodies
+    PhysicsIntegrator m_integrator;
 
     // Pluggable force generators acting on the mesh
     std::vector<std::unique_ptr<IForceGenerator>> m_forceGenerators;

@@ -16,7 +16,7 @@ struct INodeView
 
 // Interface for soft body physics operating on edge-based meshes
 // Provides access to mesh topology (via m_pMesh) and per-vertex dynamic state (via getVertex)
-struct IFaceBody
+struct IFaceBody : public std::enable_shared_from_this<IFaceBody>
 {
     virtual ~IFaceBody() = default;
 

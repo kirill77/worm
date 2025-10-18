@@ -26,6 +26,9 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     // Create adapter once (reused across timesteps to avoid repeated allocations)
     m_pMeshAdapter = std::make_shared<SoftBodyMeshAdapter>(m_pCortexMesh);
 
+    // Register body with integrator
+    m_integrator.addBody(m_pMeshAdapter);
+
     m_forceGenerators.emplace_back(std::make_unique<EdgeSpringForce>(*m_pMeshAdapter, m_fSpringC, m_edgeRestLengths));
     m_forceGenerators.emplace_back(std::make_unique<EdgeDampingForce>(*m_pMeshAdapter, m_fDampingCoeff));
 
@@ -57,7 +60,7 @@ void PhysicsCore::makeTimeStep(double fDtSec)
     for (auto& gen : m_forceGenerators)
         gen->apply(fDtSec);
 
-    PhysicsIntegrator::step(*m_pMeshAdapter, fDtSec);
+    m_integrator.step(fDtSec);
 
     std::vector<double3> preProject(vertexCount);
     for (uint32_t i = 0; i < vertexCount; ++i)
