@@ -9,11 +9,9 @@ class SoftBodyMeshAdapter : public IFaceBody
 {
 public:
     SoftBodyMeshAdapter(std::shared_ptr<EdgeMesh> mesh,
-        std::vector<double3>& velocities,
-        const std::vector<double>& edgeRestLengths)
+        std::vector<double3>& velocities)
         : m_mesh(std::move(mesh))
         , m_velocities(velocities)
-        , m_edgeRestLengths(edgeRestLengths)
     {}
 
     INodeView& nodes() override { return m_nodeView; }
@@ -43,7 +41,6 @@ private:
         explicit EdgeViewImpl(SoftBodyMeshAdapter& p) : parent(p) {}
         size_t edgeCount() const override { return parent.m_mesh->getEdgeCount(); }
         std::pair<uint32_t,uint32_t> edge(uint32_t e) const override { return parent.m_mesh->getEdge(e); }
-        double restLength(uint32_t e) const override { return parent.m_edgeRestLengths[e]; }
     } m_edgeView { *this };
 
     struct FaceViewImpl : public IFaceView
@@ -65,7 +62,6 @@ public:
 private:
     std::shared_ptr<EdgeMesh> m_mesh;
     std::vector<double3>& m_velocities;
-    const std::vector<double>& m_edgeRestLengths;
     std::vector<double3> m_forces;
 };
 

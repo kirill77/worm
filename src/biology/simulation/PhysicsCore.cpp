@@ -24,9 +24,9 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     initializePhysics();
 
     // Create adapter once (reused across timesteps to avoid repeated allocations)
-    m_pMeshAdapter = std::make_shared<SoftBodyMeshAdapter>(m_pCortexMesh, m_vertexVelocities, m_edgeRestLengths);
+    m_pMeshAdapter = std::make_shared<SoftBodyMeshAdapter>(m_pCortexMesh, m_vertexVelocities);
 
-    m_forceGenerators.emplace_back(std::make_unique<EdgeSpringForce>(m_fSpringC));
+    m_forceGenerators.emplace_back(std::make_unique<EdgeSpringForce>(m_fSpringC, m_edgeRestLengths));
     m_forceGenerators.emplace_back(std::make_unique<EdgeDampingForce>(m_fDampingCoeff));
 
     m_constraints.emplace_back(std::make_unique<VolumeConstraintXPBD>(m_fVolume, 0.0));

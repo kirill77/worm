@@ -24,7 +24,6 @@ struct IEdgeView
     virtual ~IEdgeView() = default;
     virtual size_t edgeCount() const = 0;
     virtual std::pair<uint32_t,uint32_t> edge(uint32_t e) const = 0;
-    virtual double restLength(uint32_t e) const = 0;
 };
 
 struct IFaceView
@@ -39,7 +38,6 @@ struct NullEdgeView final : public IEdgeView
 {
     size_t edgeCount() const override { return 0; }
     std::pair<uint32_t,uint32_t> edge(uint32_t) const override { return {0u,0u}; }
-    double restLength(uint32_t) const override { return 0.0; }
 };
 
 struct NullFaceView final : public IFaceView

@@ -22,14 +22,16 @@ public:
 class EdgeSpringForce : public IForceGenerator
 {
 public:
-    explicit EdgeSpringForce(double springConstant)
-        : m_springConstant(springConstant) {
+    EdgeSpringForce(double springConstant, const std::vector<double>& edgeRestLengths)
+        : m_springConstant(springConstant)
+        , m_edgeRestLengths(edgeRestLengths) {
     }
 
     void apply(IFaceBody& body, double dt) override;
 
 private:
     double m_springConstant;
+    std::vector<double> m_edgeRestLengths;
 };
 
 /** Edge-aligned relative-velocity damping for each mesh edge */

@@ -16,7 +16,7 @@ void EdgeSpringForce::apply(IFaceBody& body, double dt)
         double L = length(edgeVec);
         if (L <= 1e-10) continue;
         double3 n = edgeVec / L;
-        double L0 = E.restLength(e);
+        double L0 = m_edgeRestLengths[e];
         double3 f = -m_springConstant * (L - L0) * n;
         N.addForce(ab.first, -f);
         N.addForce(ab.second,  f);
