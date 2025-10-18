@@ -1,6 +1,6 @@
 #include "ForceGenerator.h"
 
-void EdgeSpringForce::apply(IBody& body, double dt)
+void EdgeSpringForce::apply(IFaceBody& body, double dt)
 {
     (void)dt;
     auto& E = body.edges();
@@ -23,7 +23,7 @@ void EdgeSpringForce::apply(IBody& body, double dt)
     }
 }
 
-void EdgeDampingForce::apply(IBody& body, double dt)
+void EdgeDampingForce::apply(IFaceBody& body, double dt)
 {
     (void)dt;
     auto& E = body.edges();

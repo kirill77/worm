@@ -7,14 +7,14 @@
 struct IConstraint
 {
     virtual ~IConstraint() = default;
-    virtual void project(IBody& body, double dt) = 0;
+    virtual void project(IFaceBody& body, double dt) = 0;
 };
 
 // Two-body constraint interface for interactions
 struct ITwoBodyConstraint
 {
     virtual ~ITwoBodyConstraint() = default;
-    virtual void project(IBody& a, IBody& b, double dt) = 0;
+    virtual void project(IFaceBody& a, IFaceBody& b, double dt) = 0;
 };
 
 

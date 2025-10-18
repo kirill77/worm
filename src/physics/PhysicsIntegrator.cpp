@@ -1,7 +1,7 @@
 #include "PhysicsIntegrator.h"
 #include <algorithm>
 
-void PhysicsIntegrator::step(IBody& body, std::vector<double3>& forces, double dt)
+void PhysicsIntegrator::step(IFaceBody& body, std::vector<double3>& forces, double dt)
 {
     if (dt <= 0.0) return;
     auto& N = body.nodes();

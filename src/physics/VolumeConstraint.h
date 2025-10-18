@@ -5,7 +5,7 @@
 #include "BodyInterfaces.h"
 #include "PhysicsConstraints.h"
 
-// XPBD-style volume constraint operating on IBody face view
+// XPBD-style volume constraint operating on IFaceBody face view
 class VolumeConstraintXPBD : public IConstraint
 {
 public:
@@ -22,10 +22,10 @@ public:
     double getCompliance() const { return m_compliance; }
 
     // Project positions to satisfy volume constraint (soft if compliance > 0)
-    void project(IBody& body, double dt) override;
+    void project(IFaceBody& body, double dt) override;
 
     // Utility: compute signed volume using faces and node positions
-    static double computeSignedVolume(const IBody& body);
+    static double computeSignedVolume(const IFaceBody& body);
 
 private:
     double m_targetVolume;

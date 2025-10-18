@@ -15,7 +15,7 @@ public:
     virtual ~IForceGenerator() = default;
 
     // Apply forces to a generic body via node/edge views
-    virtual void apply(IBody& body, double dt) = 0;
+    virtual void apply(IFaceBody& body, double dt) = 0;
 };
 
 /** Edge-aligned Hookean springs for each mesh edge */
@@ -26,7 +26,7 @@ public:
         : m_springConstant(springConstant) {
     }
 
-    void apply(IBody& body, double dt) override;
+    void apply(IFaceBody& body, double dt) override;
 
 private:
     double m_springConstant;
@@ -40,7 +40,7 @@ public:
         : m_dampingCoeff(dampingCoeff) {
     }
 
-    void apply(IBody& body, double dt) override;
+    void apply(IFaceBody& body, double dt) override;
 
 private:
     double m_dampingCoeff;

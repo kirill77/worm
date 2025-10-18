@@ -48,9 +48,9 @@ struct NullFaceView final : public IFaceView
     uint3  face(uint32_t) const override { return uint3{0u,0u,0u}; }
 };
 
-struct IBody
+struct IFaceBody
 {
-    virtual ~IBody() = default;
+    virtual ~IFaceBody() = default;
     virtual INodeView& nodes() = 0;
     virtual const INodeView& nodes() const = 0;
     // Default implementations return null-object views

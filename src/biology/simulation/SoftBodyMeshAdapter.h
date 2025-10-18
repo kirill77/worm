@@ -4,8 +4,8 @@
 #include "physics/BodyInterfaces.h"
 #include "geometry/mesh/edgeMesh.h"
 
-// Adapter that exposes EdgeMesh + per-vertex state as IBody views
-class SoftBodyMeshAdapter : public IBody
+// Adapter that exposes EdgeMesh + per-vertex state as IFaceBody views
+class SoftBodyMeshAdapter : public IFaceBody
 {
 public:
     SoftBodyMeshAdapter(std::shared_ptr<EdgeMesh> mesh,

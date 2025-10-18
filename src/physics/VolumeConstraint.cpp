@@ -1,6 +1,6 @@
 #include "VolumeConstraint.h"
 
-double VolumeConstraintXPBD::computeSignedVolume(const IBody& body)
+double VolumeConstraintXPBD::computeSignedVolume(const IFaceBody& body)
 {
     const auto& F = body.faces();
     const auto& N = body.nodes();
@@ -18,7 +18,7 @@ double VolumeConstraintXPBD::computeSignedVolume(const IBody& body)
     return V;
 }
 
-void VolumeConstraintXPBD::project(IBody& body, double dt)
+void VolumeConstraintXPBD::project(IFaceBody& body, double dt)
 {
     const auto& F = body.faces();
     auto& N = body.nodes();
