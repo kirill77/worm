@@ -1,18 +1,17 @@
 #include "VolumeConstraint.h"
+#include "geometry/mesh/EdgeMesh.h"
 
 double VolumeConstraintXPBD::computeSignedVolume(const IFaceBody& body)
 {
-    const auto& F = body.faces();
-    const auto& N = body.nodes();
-    const size_t faceCount = F.faceCount();
+    const uint32_t faceCount = body.m_pMesh->getTriangleCount();
     if (faceCount == 0) return 0.0;
     double V = 0.0;
     for (uint32_t f = 0; f < faceCount; ++f)
     {
-        uint3 tri = F.face(f);
-        double3 a = N.getPosition(tri.x);
-        double3 b = N.getPosition(tri.y);
-        double3 c = N.getPosition(tri.z);
+        uint3 tri = body.m_pMesh->getTriangleVertices(f);
+        double3 a = double3(body.m_pMesh->getVertexPosition(tri.x));
+        double3 b = double3(body.m_pMesh->getVertexPosition(tri.y));
+        double3 c = double3(body.m_pMesh->getVertexPosition(tri.z));
         V += (1.0/6.0) * dot(a, cross(b, c));
     }
     return V;
@@ -20,23 +19,21 @@ double VolumeConstraintXPBD::computeSignedVolume(const IFaceBody& body)
 
 void VolumeConstraintXPBD::project(IFaceBody& body, double dt)
 {
-    const auto& F = body.faces();
-    auto& N = body.nodes();
-    const size_t faceCount = F.faceCount();
+    const uint32_t faceCount = body.m_pMesh->getTriangleCount();
     if (faceCount == 0 || dt <= 0.0)
         return;
 
     // Accumulate per-vertex gradients dV/dx
-    const size_t n = N.size();
+    const uint32_t n = body.m_pMesh->getVertexCount();
     std::vector<double3> grad(n, double3(0,0,0));
 
     for (uint32_t f = 0; f < faceCount; ++f)
     {
-        uint3 tri = F.face(f);
+        uint3 tri = body.m_pMesh->getTriangleVertices(f);
         uint32_t ia = tri.x, ib = tri.y, ic = tri.z;
-        double3 a = N.getPosition(ia);
-        double3 b = N.getPosition(ib);
-        double3 c = N.getPosition(ic);
+        double3 a = double3(body.m_pMesh->getVertexPosition(ia));
+        double3 b = double3(body.m_pMesh->getVertexPosition(ib));
+        double3 c = double3(body.m_pMesh->getVertexPosition(ic));
         // dV/da = (1/6) (b x c), etc.
         grad[ia] += (1.0/6.0) * cross(b, c);
         grad[ib] += (1.0/6.0) * cross(c, a);
@@ -51,7 +48,7 @@ void VolumeConstraintXPBD::project(IFaceBody& body, double dt)
     double denom = 0.0;
     for (uint32_t i = 0; i < n; ++i)
     {
-        const double wi = 1.0 / std::max(1e-12, N.getMass(i));
+        const double wi = 1.0 / std::max(1e-12, body.getVertex(i).m_fMass);
         denom += wi * dot(grad[i], grad[i]);
     }
     if (denom <= 1e-20)
@@ -66,10 +63,11 @@ void VolumeConstraintXPBD::project(IFaceBody& body, double dt)
     // Apply position corrections and velocity update
     for (uint32_t i = 0; i < n; ++i)
     {
-        const double wi = 1.0 / std::max(1e-12, N.getMass(i));
+        const double wi = 1.0 / std::max(1e-12, body.getVertex(i).m_fMass);
         const double3 dx = -wi * deltaLambda * grad[i];
-        const double3 xNew = N.getPosition(i) + dx;
-        N.setPosition(i, xNew);
+        const double3 xOld = double3(body.m_pMesh->getVertexPosition(i));
+        const double3 xNew = xOld + dx;
+        body.m_pMesh->setVertexPosition(i, float3(xNew));
     }
 }
 

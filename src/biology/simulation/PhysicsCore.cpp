@@ -24,7 +24,7 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     initializePhysics();
 
     // Create adapter once (reused across timesteps to avoid repeated allocations)
-    m_pMeshAdapter = std::make_shared<SoftBodyMeshAdapter>(m_pCortexMesh, m_vertexVelocities);
+    m_pMeshAdapter = std::make_shared<SoftBodyMeshAdapter>(m_pCortexMesh);
 
     m_forceGenerators.emplace_back(std::make_unique<EdgeSpringForce>(m_fSpringC, m_edgeRestLengths));
     m_forceGenerators.emplace_back(std::make_unique<EdgeDampingForce>(m_fDampingCoeff));
@@ -34,9 +34,6 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
 
 void PhysicsCore::initializePhysics()
 {
-    const uint32_t vertexCount = m_pCortexMesh->getVertexCount();
-    m_vertexVelocities.resize(vertexCount, double3(0, 0, 0));
-
     m_edgeRestLengths.clear();
     const uint32_t edgeCount = m_pCortexMesh->getEdgeCount();
     m_edgeRestLengths.reserve(edgeCount);
@@ -56,12 +53,11 @@ void PhysicsCore::makeTimeStep(double fDtSec)
     m_fVolume = m_pCell->getInternalMedium().getVolumeMicroM();
 
     const uint32_t vertexCount = m_pCortexMesh->getVertexCount();
-    m_pMeshAdapter->resizeForces();
 
     for (auto& gen : m_forceGenerators)
         gen->apply(*m_pMeshAdapter, fDtSec);
 
-    PhysicsIntegrator::step(*m_pMeshAdapter, m_pMeshAdapter->forces(), fDtSec);
+    PhysicsIntegrator::step(*m_pMeshAdapter, fDtSec);
 
     std::vector<double3> preProject(vertexCount);
     for (uint32_t i = 0; i < vertexCount; ++i)
@@ -75,7 +71,7 @@ void PhysicsCore::makeTimeStep(double fDtSec)
         for (uint32_t i = 0; i < vertexCount; ++i)
         {
             double3 xProj = double3(m_pCortexMesh->getVertexPosition(i));
-            m_vertexVelocities[i] += (xProj - preProject[i]) / fDtSec;
+            m_pMeshAdapter->getVertex(i).m_vVelocity += (xProj - preProject[i]) / fDtSec;
         }
     }
 

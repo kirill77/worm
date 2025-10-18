@@ -33,9 +33,6 @@ private:
     // Underlying mesh (currently cortex); more adapters can be added later
     std::shared_ptr<EdgeMesh> m_pCortexMesh;
 
-    // Velocity for each vertex (same indexing as mesh vertices)
-    std::vector<double3> m_vertexVelocities;
-
     // Edge rest lengths (computed from initial mesh)
     std::vector<double> m_edgeRestLengths;
 

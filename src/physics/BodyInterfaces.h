@@ -1,61 +1,28 @@
 #pragma once
 
-#include <cstddef>
-#include <utility>
-#include <vector>
+#include <memory>
 #include "geometry/vectors/vector.h"
 
-// Body-agnostic node/edge/face views to support different topologies
+class EdgeMesh;
 
+// Per-vertex dynamic state (velocity, force, mass)
+// Position is stored in the mesh geometry
 struct INodeView
 {
-    virtual ~INodeView() = default;
-    virtual size_t size() const = 0;
-    virtual double3 getPosition(uint32_t i) const = 0;
-    virtual double3 getVelocity(uint32_t i) const = 0;
-    virtual double  getMass(uint32_t i) const = 0;
-    virtual void    setPosition(uint32_t i, const double3& p) = 0;
-    virtual void    setVelocity(uint32_t i, const double3& v) = 0;
-    virtual void    addForce(uint32_t i, const double3& f) = 0;
+    double3 m_vVelocity;
+    double3 m_vForce;
+    double m_fMass;
 };
 
-struct IEdgeView
-{
-    virtual ~IEdgeView() = default;
-    virtual size_t edgeCount() const = 0;
-    virtual std::pair<uint32_t,uint32_t> edge(uint32_t e) const = 0;
-};
-
-struct IFaceView
-{
-    virtual ~IFaceView() = default;
-    virtual size_t faceCount() const = 0;
-    virtual uint3  face(uint32_t f) const = 0;
-};
-
-// Null-object views to avoid pointer/null checks
-struct NullEdgeView final : public IEdgeView
-{
-    size_t edgeCount() const override { return 0; }
-    std::pair<uint32_t,uint32_t> edge(uint32_t) const override { return {0u,0u}; }
-};
-
-struct NullFaceView final : public IFaceView
-{
-    size_t faceCount() const override { return 0; }
-    uint3  face(uint32_t) const override { return uint3{0u,0u,0u}; }
-};
-
+// Interface for soft body physics operating on edge-based meshes
+// Provides access to mesh topology (via m_pMesh) and per-vertex dynamic state (via getVertex)
 struct IFaceBody
 {
     virtual ~IFaceBody() = default;
-    virtual INodeView& nodes() = 0;
-    virtual const INodeView& nodes() const = 0;
-    // Default implementations return null-object views
-    virtual const IEdgeView& edges() const { static const NullEdgeView kNull; return kNull; }
-    virtual IEdgeView& edges() { static NullEdgeView kNull; return kNull; }
-    virtual const IFaceView& faces() const { static const NullFaceView kNull; return kNull; }
-    virtual IFaceView& faces() { static NullFaceView kNull; return kNull; }
-};
 
+    std::shared_ptr<EdgeMesh> m_pMesh;
+
+    virtual const INodeView& getVertex(uint32_t index) const = 0;
+    virtual INodeView& getVertex(uint32_t index) = 0;
+};
 
