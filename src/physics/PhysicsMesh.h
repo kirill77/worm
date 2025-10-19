@@ -8,7 +8,7 @@ class EdgeMesh;
 
 // Per-vertex dynamic state (velocity, force, mass)
 // Position is stored in the mesh geometry
-struct INodeView
+struct PhysVertex
 {
     double3 m_vVelocity;
     double3 m_vForce;
@@ -23,10 +23,10 @@ public:
 
     explicit PhysicsMesh(std::shared_ptr<EdgeMesh> mesh);
 
-    const INodeView& getVertex(uint32_t index) const { return m_nodeData[index]; }
-    INodeView& getVertex(uint32_t index) { return m_nodeData[index]; }
+    const PhysVertex& getVertex(uint32_t index) const { return m_nodeData[index]; }
+    PhysVertex& getVertex(uint32_t index) { return m_nodeData[index]; }
 
 private:
-    std::vector<INodeView> m_nodeData;
+    std::vector<PhysVertex> m_nodeData;
 };
 

@@ -9,13 +9,13 @@
 
 Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     : Organelle(pCell)
-    , m_mToParent(affine3::identity())  // Initialize as identity transform
+    , m_toNormalizedCell(affine3::identity())  // Initialize as identity transform
     , m_isDuplicated(false)
     , m_duplicationTime(0.0)
     , m_fPCMRadiusMicroM(0.5f)  // Default PCM radius of 0.5 micrometers
 {
     // Set the position component of the transform
-    m_mToParent.m_translation = vNormalizedPos;
+    m_toNormalizedCell.m_translation = vNormalizedPos;
     
 
     // Initialize centrosome-specific proteins
@@ -26,10 +26,10 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
         
         // Add other centrosome proteins
         MPopulation pericentrin(Molecule(StringDict::ID::PERICENTRIN, ChemicalType::PROTEIN), 500.0);
-        internalMedium.addMolecule(pericentrin, m_mToParent.m_translation);
+        internalMedium.addMolecule(pericentrin, m_toNormalizedCell.m_translation);
         
         MPopulation ninein(Molecule(StringDict::ID::NINEIN, ChemicalType::PROTEIN), 300.0);
-        internalMedium.addMolecule(ninein, m_mToParent.m_translation);
+        internalMedium.addMolecule(ninein, m_toNormalizedCell.m_translation);
     }
     
     // Note: Ring complexes will be created in the update method
@@ -56,13 +56,13 @@ void Centrosome::update(double dt, Cell& cell)
             // During mitosis, centrosomes move to opposite poles
             if (m_isDuplicated) {
                 // Move to opposite poles (simplified - in reality this is more complex)
-                float3 polePosition = m_mToParent.m_translation;
-                if (m_mToParent.m_translation.y > 0) {
+                float3 polePosition = m_toNormalizedCell.m_translation;
+                if (m_toNormalizedCell.m_translation.y > 0) {
                     polePosition.y = 0.8f;  // Anterior pole
                 } else {
                     polePosition.y = -0.8f; // Posterior pole
                 }
-                m_mToParent.m_translation = polePosition;
+                m_toNormalizedCell.m_translation = polePosition;
             }
             break;
             
@@ -95,7 +95,7 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     // Local γ-tubulin concentration (molecules per µm^3)
     double gammaConc = internalMedium.getMoleculeConcentration(
         Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species),
-        m_mToParent.m_translation);
+        m_toNormalizedCell.m_translation);
     
     // γ-tubulin recruitment driven by PCM maturation and local pool
     // Work purely with concentrations; additions to the medium remain count-based but should be derived from reaction models elsewhere.
@@ -155,7 +155,7 @@ void Centrosome::updatePCMMaturation(double dt, const Cell& cell, Medium& intern
 {
     Species species = cell.getSpecies();
     auto localCount = [&](StringDict::ID id) {
-        return internalMedium.getMoleculeConcentration(Molecule(id, ChemicalType::PROTEIN, species), m_mToParent.m_translation);
+        return internalMedium.getMoleculeConcentration(Molecule(id, ChemicalType::PROTEIN, species), m_toNormalizedCell.m_translation);
     };
     const double spd2 = localCount(StringDict::ID::SPD_2);
     const double spd5 = localCount(StringDict::ID::SPD_5);
@@ -186,33 +186,3 @@ void Centrosome::updatePCMMaturation(double dt, const Cell& cell, Medium& intern
     m_pcmMaturation = std::clamp(m_pcmMaturation + (pcmProd - pcmLoss) * dt, 0.0, 1.0);
 }
 
-void Centrosome::duplicate()
-{
-    if (!m_isDuplicated) {
-        m_isDuplicated = true;
-        m_duplicationTime = 0.0;  // Reset timer
-        
-        // Add duplicated centrosome proteins
-        if (auto pCellPtr = getCell()) {
-            auto& internalMedium = pCellPtr->getInternalMedium();
-            
-            // Add additional γ-tubulin for the duplicated centrosome
-            MPopulation gammaTubulin(Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN), 500.0);
-            internalMedium.addMolecule(gammaTubulin, m_mToParent.m_translation);
-            
-            // Add other duplication-related proteins
-            MPopulation plk4(Molecule(StringDict::ID::PLK_4, ChemicalType::PROTEIN), 200.0);  // Polo-like kinase 4 for centriole duplication
-            internalMedium.addMolecule(plk4, m_mToParent.m_translation);
-            
-            // Add additional ring complexes for the duplicated centrosome
-            int additionalRingComplexes = static_cast<int>(m_pRingComplexes.size() * 0.5); // 50% more
-            std::weak_ptr<Centrosome> thisWeakPtr = std::static_pointer_cast<Centrosome>(shared_from_this());
-            for (int i = 0; i < additionalRingComplexes; i++) {
-                auto ringComplex = std::make_shared<Y_TuRC>(thisWeakPtr);
-                m_pRingComplexes.push_back(ringComplex);
-            }
-            
-            LOG_INFO("Added %d additional ring complexes during centrosome duplication", additionalRingComplexes);
-        }
-    }
-}

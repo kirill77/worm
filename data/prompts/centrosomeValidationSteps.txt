@@ -20,7 +20,7 @@ Status update (current implementation)
 
 2) Correct ring-complex creation inputs
 - (Done) Ensure γ-tubulin is available at the centrosome position at t=0 (maternal provisioning) so target Y_TuRC > 0 before duplication.
-- (Done) Confirm `Centrosome::update` queries γ-tubulin at exactly `m_mToParent.m_translation` with correct species.
+- (Done) Confirm `Centrosome::update` queries γ-tubulin at exactly `m_toNormalizedCell.m_translation` with correct species.
 - (Optional) Add one-time logs: γ-tubulin@centrosome, targetYTuRC, currentYTuRC; duplication attempts.
 
 3) Add missing pathway molecules and (later) localization
