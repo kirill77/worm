@@ -12,6 +12,7 @@ public:
     enum class MTState { Growing, Shrinking, Bound };
 
     PhysMicrotubule() = default;
+    virtual ~PhysMicrotubule() = default;
 
     explicit PhysMicrotubule(std::vector<float3> points)
         : m_points(std::move(points))

@@ -9,13 +9,13 @@
 
 Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
     : Organelle(pCell)
-    , m_toNormalizedCell(affine3::identity())  // Initialize as identity transform
+    , m_pPhysCentrosome(std::make_shared<PhysCentrosome>())
     , m_isDuplicated(false)
     , m_duplicationTime(0.0)
     , m_fPCMRadiusMicroM(0.5f)  // Default PCM radius of 0.5 micrometers
 {
     // Set the position component of the transform
-    m_toNormalizedCell.m_translation = vNormalizedPos;
+    m_pPhysCentrosome->getToNormalizedCell().m_translation = vNormalizedPos;
     
 
     // Initialize centrosome-specific proteins
@@ -26,10 +26,10 @@ Centrosome::Centrosome(std::weak_ptr<Cell> pCell, const float3& vNormalizedPos)
         
         // Add other centrosome proteins
         MPopulation pericentrin(Molecule(StringDict::ID::PERICENTRIN, ChemicalType::PROTEIN), 500.0);
-        internalMedium.addMolecule(pericentrin, m_toNormalizedCell.m_translation);
+        internalMedium.addMolecule(pericentrin, m_pPhysCentrosome->getToNormalizedCell().m_translation);
         
         MPopulation ninein(Molecule(StringDict::ID::NINEIN, ChemicalType::PROTEIN), 300.0);
-        internalMedium.addMolecule(ninein, m_toNormalizedCell.m_translation);
+        internalMedium.addMolecule(ninein, m_pPhysCentrosome->getToNormalizedCell().m_translation);
     }
     
     // Note: Ring complexes will be created in the update method
@@ -56,13 +56,13 @@ void Centrosome::update(double dt, Cell& cell)
             // During mitosis, centrosomes move to opposite poles
             if (m_isDuplicated) {
                 // Move to opposite poles (simplified - in reality this is more complex)
-                float3 polePosition = m_toNormalizedCell.m_translation;
-                if (m_toNormalizedCell.m_translation.y > 0) {
+                float3 polePosition = m_pPhysCentrosome->getToNormalizedCell().m_translation;
+                if (m_pPhysCentrosome->getToNormalizedCell().m_translation.y > 0) {
                     polePosition.y = 0.8f;  // Anterior pole
                 } else {
                     polePosition.y = -0.8f; // Posterior pole
                 }
-                m_toNormalizedCell.m_translation = polePosition;
+                m_pPhysCentrosome->getToNormalizedCell().m_translation = polePosition;
             }
             break;
             
@@ -95,7 +95,7 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     // Local γ-tubulin concentration (molecules per µm^3)
     double gammaConc = internalMedium.getMoleculeConcentration(
         Molecule(StringDict::ID::GAMMA_TUBULIN, ChemicalType::PROTEIN, species),
-        m_toNormalizedCell.m_translation);
+        m_pPhysCentrosome->getToNormalizedCell().m_translation);
     
     // γ-tubulin recruitment driven by PCM maturation and local pool
     // Work purely with concentrations; additions to the medium remain count-based but should be derived from reaction models elsewhere.
@@ -113,20 +113,20 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
     int targetRingComplexes = static_cast<int>(std::round(std::max(0.0, m_gammaBoundConc) * beta * m_pcmMaturation)) + basal;
     if (targetRingComplexes < 0) targetRingComplexes = 0;
     if (targetRingComplexes < 0) targetRingComplexes = 0;
-    int currentRingComplexes = static_cast<int>(m_pRingComplexes.size());
+    int currentRingComplexes = static_cast<int>(m_pPhysCentrosome->getMicrotubules().size());
 
     if (currentRingComplexes < targetRingComplexes) {
         // Create new ring complexes using shared_from_this() and cast to weak_ptr
         std::weak_ptr<Centrosome> thisWeakPtr = std::static_pointer_cast<Centrosome>(shared_from_this());
         for (int i = currentRingComplexes; i < targetRingComplexes; i++) {
             auto ringComplex = std::make_shared<Y_TuRC>(thisWeakPtr);
-            m_pRingComplexes.push_back(ringComplex);
+            m_pPhysCentrosome->getMicrotubules().push_back(ringComplex);
         }
     } else if (currentRingComplexes > targetRingComplexes) {
         // Remove excess ring complexes
         int complexesToRemove = currentRingComplexes - targetRingComplexes;
         for (int i = 0; i < complexesToRemove; i++) {
-            m_pRingComplexes.pop_back();
+            m_pPhysCentrosome->getMicrotubules().pop_back();
         }
     }
 
@@ -142,12 +142,11 @@ void Centrosome::updateGammaAndRingComplexes(double dt, const Cell& cell, Medium
             centrosomeCellPos = pCortex->normalizedToCell(getNormalizedPosition());
         }
     }
-    for (auto& pRing : m_pRingComplexes)
+    for (auto& pMT : m_pPhysCentrosome->getMicrotubules())
     {
-        if (pRing)
-        {
-            pRing->update(dt, centrosomeCellPos, pCortex, internalMedium);
-        }
+        // Cast PhysMicrotubule to Y_TuRC to call update
+        auto pRing = std::dynamic_pointer_cast<Y_TuRC>(pMT);
+        pRing->update(dt, centrosomeCellPos, pCortex, internalMedium);
     }
 }
 
@@ -155,7 +154,7 @@ void Centrosome::updatePCMMaturation(double dt, const Cell& cell, Medium& intern
 {
     Species species = cell.getSpecies();
     auto localCount = [&](StringDict::ID id) {
-        return internalMedium.getMoleculeConcentration(Molecule(id, ChemicalType::PROTEIN, species), m_toNormalizedCell.m_translation);
+        return internalMedium.getMoleculeConcentration(Molecule(id, ChemicalType::PROTEIN, species), m_pPhysCentrosome->getToNormalizedCell().m_translation);
     };
     const double spd2 = localCount(StringDict::ID::SPD_2);
     const double spd5 = localCount(StringDict::ID::SPD_5);

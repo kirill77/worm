@@ -137,8 +137,11 @@ void CentrosomeVis::updateRingComplexNodes()
 
     for (size_t i = 0; i < numRings; ++i)
     {
-        auto& pRing = ringComplexes[i];
-        assert(pRing && "Y_TuRC pointer should not be null");
+        auto& pMT = ringComplexes[i];
+        assert(pMT && "Microtubule pointer should not be null");
+        
+        // Cast to Y_TuRC to access biological methods
+        auto pRing = std::dynamic_pointer_cast<Y_TuRC>(pMT);
         
         // For now, visualize as a single cylinder from origin to tip
         // TODO: Update to render as poly-line segments for bendable visualization

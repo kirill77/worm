@@ -145,6 +145,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ForceGenerator.h" />
+    <ClInclude Include="PhysCentrosome.h" />
     <ClInclude Include="PhysicsConstraints.h" />
     <ClInclude Include="PhysicsIntegrator.h" />
     <ClInclude Include="PhysicsMesh.h" />

@@ -3,18 +3,17 @@
 #include <memory>
 #include <vector>
 #include "Organelle.h"
-#include "geometry/vectors/affine.h"
+#include "physics/PhysCentrosome.h"
 
 struct Y_TuRC;
 
 struct Centrosome : public Organelle
 {
 private:
-    affine3 m_toNormalizedCell;  // Transform from centrosome space to normalized cell space (-1, 1)
+    std::shared_ptr<PhysCentrosome> m_pPhysCentrosome;
     bool m_isDuplicated;  // Whether the centrosome has duplicated
     double m_duplicationTime;  // Time when duplication occurred
     float m_fPCMRadiusMicroM;  // PCM (Pericentriolar Material) radius in micrometers
-    std::vector<std::shared_ptr<Y_TuRC>> m_pRingComplexes;
     // Simple PCM maturation proxy in [0,1] to drive γ-tubulin recruitment capacity
     double m_pcmMaturation = 0.1;
     // Bound γ-tubulin concentration proxy at centrosome (molecules/µm^3), grid-agnostic
@@ -42,7 +41,7 @@ public:
      * 
      * @return Position vector in normalized coordinates (-1, 1)
      */
-    float3 getNormalizedPosition() const { return m_toNormalizedCell.m_translation; }
+    float3 getNormalizedPosition() const { return m_pPhysCentrosome->getToNormalizedCell().m_translation; }
 
     /**
      * Check if the centrosome has duplicated
@@ -70,6 +69,6 @@ public:
      * 
      * @return Vector of Y_TuRC ring complexes
      */
-    const std::vector<std::shared_ptr<Y_TuRC>>& getRingComplexes() const { return m_pRingComplexes; }
+    const std::vector<std::shared_ptr<PhysMicrotubule>>& getRingComplexes() const { return m_pPhysCentrosome->getMicrotubules(); }
 };
 

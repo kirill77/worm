@@ -30,9 +30,6 @@
     <ClInclude Include="PhysicsCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SoftBodyMeshAdapter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="World.cpp">
