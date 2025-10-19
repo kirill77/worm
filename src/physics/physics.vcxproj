@@ -148,11 +148,13 @@
     <ClInclude Include="PhysicsConstraints.h" />
     <ClInclude Include="PhysicsIntegrator.h" />
     <ClInclude Include="PhysicsMesh.h" />
+    <ClInclude Include="PhysMicrotubule.h" />
     <ClInclude Include="VolumeConstraint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForceGenerator.cpp" />
     <ClCompile Include="PhysicsIntegrator.cpp" />
+    <ClCompile Include="PhysMicrotubule.cpp" />
     <ClCompile Include="PhysicsMesh.cpp" />
     <ClCompile Include="VolumeConstraint.cpp" />
   </ItemGroup>

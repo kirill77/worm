@@ -30,6 +30,9 @@
     <ClInclude Include="PhysicsMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PhysMicrotubule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForceGenerator.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PhysicsMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysMicrotubule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -57,9 +57,8 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     );
     
     // Initialize with origin and a small initial segment
-    m_mtSegmentPoints.clear();
-    m_mtSegmentPoints.push_back(nucleationPos);
-    m_mtSegmentPoints.push_back(nucleationPos + m_vTipDir * 0.02f);
+    getPoints().push_back(nucleationPos);
+    getPoints().push_back(nucleationPos + m_vTipDir * 0.02f);
 }
 
 void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium)
@@ -100,36 +99,36 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
     catastropheRate *= f_air_cat * f_tub_cat;
     rescueRate *= f_tub_res;
 
-    if (m_mtState == MTState::Growing)
+    if (getState() == MTState::Growing)
     {
         float growthThisStep = static_cast<float>(vGrow * dtSec);
         const float segmentLength = static_cast<float>(MoleculeConstants::MT_SEGMENT_LENGTH_MICROM);
         
         // Grow the last segment in the tip direction
-        float3 currentTip = m_mtSegmentPoints.back();
+        float3 currentTip = getPoints().back();
         float3 newTip = currentTip + m_vTipDir * growthThisStep;
-        m_mtSegmentPoints.back() = newTip;
+        getPoints().back() = newTip;
         
         // Add new full segments when last segment exceeds segment length
         float lastSegLen = getLastSegmentLength();
         while (lastSegLen >= segmentLength)
         {
             // Make the last segment exactly segmentLength
-            float3 prevPoint = m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
-            m_mtSegmentPoints.back() = prevPoint + m_vTipDir * segmentLength;
+            float3 prevPoint = getPoints()[getPoints().size() - 2];
+            getPoints().back() = prevPoint + m_vTipDir * segmentLength;
             
             // Add a new segment starting from current tip
-            float3 segmentEnd = m_mtSegmentPoints.back();
+            float3 segmentEnd = getPoints().back();
             float3 newSegmentEnd = segmentEnd + m_vTipDir * (lastSegLen - segmentLength);
-            m_mtSegmentPoints.push_back(newSegmentEnd);
+            getPoints().push_back(newSegmentEnd);
             
             lastSegLen = getLastSegmentLength();
         }
         
         // Check cortex intersection for the tip segment only
-        size_t lastIdx = m_mtSegmentPoints.size() - 1;
-        float3 segStart = centrosomeCellPos + m_mtSegmentPoints[lastIdx - 1];
-        float3 segEnd = centrosomeCellPos + m_mtSegmentPoints[lastIdx];
+        size_t lastIdx = getPoints().size() - 1;
+        float3 segStart = centrosomeCellPos + getPoints()[lastIdx - 1];
+        float3 segEnd = centrosomeCellPos + getPoints()[lastIdx];
         float3 segDir = segEnd - segStart;
         float segLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
         
@@ -142,7 +141,7 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
             {
                 // Truncate MT at cortex contact
                 float3 contactPoint = segStart + segDir * intersection.distance - centrosomeCellPos;
-                m_mtSegmentPoints[lastIdx] = contactPoint;
+                getPoints()[lastIdx] = contactPoint;
                 
                 // First contact - attempt cortical binding directly
                 m_mtContactCortex = true;
@@ -157,10 +156,10 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
             effectiveCatastropheRate *= static_cast<float>(MoleculeConstants::MT_CAP_DEPLETION_CATASTROPHE_MULT);
         if (rand01() < effectiveCatastropheRate * dtSec)
         {
-            m_mtState = MTState::Shrinking;
+            setState(MTState::Shrinking);
         }
     }
-    else if (m_mtState == MTState::Shrinking)
+    else if (getState() == MTState::Shrinking)
     {
         float shrinkageThisStep = static_cast<float>(vShrink * dtSec);
         
@@ -170,9 +169,9 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
         {
             // Remove segments until shrinkage is consumed
             shrinkageThisStep -= lastSegLen;
-            while (m_mtSegmentPoints.size() > 2 && shrinkageThisStep > 0.0f)
+            while (getPoints().size() > 2 && shrinkageThisStep > 0.0f)
             {
-                m_mtSegmentPoints.pop_back();
+                getPoints().pop_back();
                 float segLen = getLastSegmentLength();
                 if (shrinkageThisStep >= segLen)
                 {
@@ -181,13 +180,13 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
                 else
                 {
                     // Partially shrink this segment
-                    float3 prevPoint = m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
-                    float3 currentTip = m_mtSegmentPoints.back();
+                    float3 prevPoint = getPoints()[getPoints().size() - 2];
+                    float3 currentTip = getPoints().back();
                     float3 segDir = currentTip - prevPoint;
                     float currentLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
                     if (currentLen > 0.0f) {
                         segDir = float3(segDir.x / currentLen, segDir.y / currentLen, segDir.z / currentLen);
-                        m_mtSegmentPoints.back() = prevPoint + segDir * (currentLen - shrinkageThisStep);
+                        getPoints().back() = prevPoint + segDir * (currentLen - shrinkageThisStep);
                         m_vTipDir = segDir; // Update tip direction
                     }
                     shrinkageThisStep = 0.0f;
@@ -195,14 +194,14 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
             }
             
             // If down to minimum size (2 points), enter refractory period
-            if (m_mtSegmentPoints.size() == 2)
+            if (getPoints().size() == 2)
             {
                 float remainingLen = getLastSegmentLength();
                 if (remainingLen <= 0.02f || shrinkageThisStep > 0.0f)
                 {
                     // Reset to small stub
-                    float3 origin = m_mtSegmentPoints[0];
-                    m_mtSegmentPoints[1] = origin + m_vTipDir * 0.02f;
+                    float3 origin = getPoints()[0];
+                    getPoints()[1] = origin + m_vTipDir * 0.02f;
                     m_mtRefractorySec = 1.0f; // wait before re-nucleation
                     m_mtContactCortex = false;
                     
@@ -217,21 +216,21 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
         else
         {
             // Partially shrink the last segment
-            float3 prevPoint = m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
-            float3 currentTip = m_mtSegmentPoints.back();
+            float3 prevPoint = getPoints()[getPoints().size() - 2];
+            float3 currentTip = getPoints().back();
             float3 segDir = currentTip - prevPoint;
             if (lastSegLen > 0.0f) {
                 segDir = float3(segDir.x / lastSegLen, segDir.y / lastSegLen, segDir.z / lastSegLen);
-                m_mtSegmentPoints.back() = prevPoint + segDir * (lastSegLen - shrinkageThisStep);
+                getPoints().back() = prevPoint + segDir * (lastSegLen - shrinkageThisStep);
             }
         }
         
         if (rand01() < rescueRate * dtSec)
         {
-            m_mtState = MTState::Growing;
+            setState(MTState::Growing);
         }
     }
-    else if (m_mtState == MTState::Bound)
+    else if (getState() == MTState::Bound)
     {
         // Update binding time and check for unbinding
         m_bindingTime += dtSec;
@@ -248,12 +247,12 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
         if (m_mtRefractorySec == 0.0f)
         {
             // Re-nucleate
-            m_mtState = MTState::Growing;
+            setState(MTState::Growing);
             m_mtContactCortex = false;
             
             // Reset to small segment in tip direction
-            float3 origin = m_mtSegmentPoints[0];
-            m_mtSegmentPoints[1] = origin + m_vTipDir * 0.02f;
+            float3 origin = getPoints()[0];
+            getPoints()[1] = origin + m_vTipDir * 0.02f;
             
             // Reset binding parameters
             m_bindingStrength = 0.0;
@@ -264,14 +263,14 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
 
 void Y_TuRC::bindToCortex(double dyneinConc)
 {
-    m_mtState = MTState::Bound;
+    setState(MTState::Bound);
     m_bindingStrength = dyneinConc;
     m_bindingTime = 0.0;
 }
 
 void Y_TuRC::unbindFromCortex()
 {
-    m_mtState = MTState::Shrinking;  // Unbinding typically triggers catastrophe
+    setState(MTState::Shrinking);  // Unbinding typically triggers catastrophe
     m_mtContactCortex = false;
     m_bindingStrength = 0.0;
     m_bindingTime = 0.0;
@@ -279,7 +278,7 @@ void Y_TuRC::unbindFromCortex()
 
 bool Y_TuRC::shouldUnbind(double dtSec, const std::function<float()>& rand01) const
 {
-    if (m_mtState != MTState::Bound) return false;
+    if (getState() != MTState::Bound) return false;
     
     // Compute unbinding probability based on binding strength
     const double baseUnbindRate = MoleculeConstants::MT_CORTEX_UNBIND_BASE;
@@ -295,25 +294,6 @@ bool Y_TuRC::shouldUnbind(double dtSec, const std::function<float()>& rand01) co
     }
     
     return rand01() < unbindRate * dtSec;
-}
-
-float Y_TuRC::getLastSegmentLength() const
-{
-    if (m_mtSegmentPoints.size() < 2) return 0.0f;
-    float3 diff = m_mtSegmentPoints.back() - m_mtSegmentPoints[m_mtSegmentPoints.size() - 2];
-    return sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
-}
-
-float Y_TuRC::getMTLengthMicroM() const
-{
-    if (m_mtSegmentPoints.size() < 2) return 0.0f;
-    
-    const float segmentLength = static_cast<float>(MoleculeConstants::MT_SEGMENT_LENGTH_MICROM);
-    // All segments except the last are full length
-    float totalLength = segmentLength * static_cast<float>(m_mtSegmentPoints.size() - 2);
-    // Add the last segment
-    totalLength += getLastSegmentLength();
-    return totalLength;
 }
 
 float Y_TuRC::getCapLengthMicroM() const
