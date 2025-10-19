@@ -2,7 +2,7 @@
 #include "geometry/mesh/EdgeMesh.h"
 #include <algorithm>
 
-void PhysicsIntegrator::addBody(std::shared_ptr<IFaceBody> body)
+void PhysicsIntegrator::addBody(std::shared_ptr<PhysicsMesh> body)
 {
     m_bodies.push_back(body);
 }

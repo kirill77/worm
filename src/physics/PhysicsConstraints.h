@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "BodyInterfaces.h"
+#include "PhysicsMesh.h"
 
 // Constraint interface (XPBD-style)
 // Each constraint is bound to specific bodies at construction time

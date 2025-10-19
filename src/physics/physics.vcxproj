@@ -144,15 +144,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BodyInterfaces.h" />
     <ClInclude Include="ForceGenerator.h" />
     <ClInclude Include="PhysicsConstraints.h" />
     <ClInclude Include="PhysicsIntegrator.h" />
+    <ClInclude Include="PhysicsMesh.h" />
     <ClInclude Include="VolumeConstraint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForceGenerator.cpp" />
     <ClCompile Include="PhysicsIntegrator.cpp" />
+    <ClCompile Include="PhysicsMesh.cpp" />
     <ClCompile Include="VolumeConstraint.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

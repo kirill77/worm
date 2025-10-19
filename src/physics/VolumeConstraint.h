@@ -2,14 +2,14 @@
 
 #include <vector>
 #include <memory>
-#include "BodyInterfaces.h"
+#include "PhysicsMesh.h"
 #include "PhysicsConstraints.h"
 
-// XPBD-style volume constraint operating on IFaceBody face view
+// XPBD-style volume constraint operating on PhysicsMesh face view
 class VolumeConstraintXPBD : public IConstraint
 {
 public:
-    VolumeConstraintXPBD(IFaceBody& body, double targetVolume, double compliance = 0.0)
+    VolumeConstraintXPBD(PhysicsMesh& body, double targetVolume, double compliance = 0.0)
         : m_body(body)
         , m_targetVolume(targetVolume)
         , m_compliance(compliance)
@@ -29,7 +29,7 @@ public:
     double computeSignedVolume() const;
 
 private:
-    IFaceBody& m_body;
+    PhysicsMesh& m_body;
     double m_targetVolume;
     double m_compliance;      // XPBD compliance (0 for hard), in units of 1/stiffness
     double m_lambda;          // XPBD Lagrange multiplier accumulator

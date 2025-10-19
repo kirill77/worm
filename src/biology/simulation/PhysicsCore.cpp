@@ -2,7 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cassert>
-#include "SoftBodyMeshAdapter.h"
+#include "physics/PhysicsMesh.h"
 #include "physics/PhysicsIntegrator.h"
 #include "physics/VolumeConstraint.h"
 #include "utils/log/ILog.h"
@@ -13,11 +13,11 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
 {
     m_pCell = pCell;
 
-    // Pull mesh from cell's cortex and create adapter
+    // Pull mesh from cell's cortex and create physics mesh
     auto pCortex = std::dynamic_pointer_cast<Cortex>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
     assert(pCortex && "Cell must have a cortex organelle");
     auto pCortexMesh = pCortex->getEdgeMesh();
-    m_pCortexAdapter = std::make_shared<SoftBodyMeshAdapter>(pCortexMesh);
+    m_pCortexAdapter = std::make_shared<PhysicsMesh>(pCortexMesh);
 
     // Register body with integrator
     m_integrator.addBody(m_pCortexAdapter);

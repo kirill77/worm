@@ -1,7 +1,7 @@
 #include "ForceGenerator.h"
 #include "geometry/mesh/EdgeMesh.h"
 
-EdgeSpringForce::EdgeSpringForce(IFaceBody& body, double springConstant)
+EdgeSpringForce::EdgeSpringForce(PhysicsMesh& body, double springConstant)
     : m_body(body)
     , m_springConstant(springConstant)
 {

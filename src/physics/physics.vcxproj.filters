@@ -18,9 +18,6 @@
     <ClInclude Include="ForceGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BodyInterfaces.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="VolumeConstraint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -28,6 +25,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PhysicsConstraints.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -39,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PhysicsIntegrator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

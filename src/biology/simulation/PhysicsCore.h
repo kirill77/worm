@@ -9,7 +9,7 @@
 #include "geometry/mesh/edgeMesh.h"
 #include "physics/PhysicsIntegrator.h"
 #include "physics/VolumeConstraint.h"
-#include "SoftBodyMeshAdapter.h"
+#include "physics/PhysicsMesh.h"
 
 class Cell;
 
@@ -30,8 +30,8 @@ private:
     // Reference to the cell (for accessing cortex mesh and medium volume)
     std::shared_ptr<Cell> m_pCell;
 
-    // Cortex adapter (reused across timesteps to avoid repeated allocations)
-    std::shared_ptr<SoftBodyMeshAdapter> m_pCortexAdapter;
+    // Cortex physics mesh (reused across timesteps to avoid repeated allocations)
+    std::shared_ptr<PhysicsMesh> m_pCortexAdapter;
 
     // constants controlling spring behaviour
     double m_fSpringC = 0.1, m_fDampingCoeff = 1;

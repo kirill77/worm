@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include "geometry/vectors/vector.h"
-#include "physics/BodyInterfaces.h"
+#include "physics/PhysicsMesh.h"
 
 /**
  * Interface for force generators acting on a mesh-based soft body.
@@ -22,12 +22,12 @@ public:
 class EdgeSpringForce : public IForceGenerator
 {
 public:
-    EdgeSpringForce(IFaceBody& body, double springConstant);
+    EdgeSpringForce(PhysicsMesh& body, double springConstant);
 
     void apply(double dt) override;
 
 private:
-    IFaceBody& m_body;
+    PhysicsMesh& m_body;
     double m_springConstant;
     std::vector<double> m_edgeRestLengths;
 };
@@ -36,7 +36,7 @@ private:
 class EdgeDampingForce : public IForceGenerator
 {
 public:
-    EdgeDampingForce(IFaceBody& body, double dampingCoeff)
+    EdgeDampingForce(PhysicsMesh& body, double dampingCoeff)
         : m_body(body)
         , m_dampingCoeff(dampingCoeff) {
     }
@@ -44,7 +44,7 @@ public:
     void apply(double dt) override;
 
 private:
-    IFaceBody& m_body;
+    PhysicsMesh& m_body;
     double m_dampingCoeff;
 };
 
