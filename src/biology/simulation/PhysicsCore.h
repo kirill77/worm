@@ -7,9 +7,8 @@
 #include <memory>
 #include "geometry/vectors/vector.h"
 #include "geometry/mesh/edgeMesh.h"
-#include "physics/ForceGenerator.h"
-#include "physics/PhysicsConstraints.h"
 #include "physics/PhysicsIntegrator.h"
+#include "physics/VolumeConstraint.h"
 #include "SoftBodyMeshAdapter.h"
 
 class Cell;
@@ -31,26 +30,17 @@ private:
     // Reference to the cell (for accessing cortex mesh and medium volume)
     std::shared_ptr<Cell> m_pCell;
 
-    // Underlying mesh (currently cortex); more adapters can be added later
-    std::shared_ptr<EdgeMesh> m_pCortexMesh;
-
-    // Mesh adapter (reused across timesteps to avoid repeated allocations)
-    std::shared_ptr<SoftBodyMeshAdapter> m_pMeshAdapter;
+    // Cortex adapter (reused across timesteps to avoid repeated allocations)
+    std::shared_ptr<SoftBodyMeshAdapter> m_pCortexAdapter;
 
     // constants controlling spring behaviour
     double m_fSpringC = 0.1, m_fDampingCoeff = 1;
 
-    // Target volume
-    double m_fVolume;
-
-    // Physics integrator managing all bodies
+    // Physics integrator managing complete physics pipeline
     PhysicsIntegrator m_integrator;
 
-    // Pluggable force generators acting on the mesh
-    std::vector<std::unique_ptr<IForceGenerator>> m_forceGenerators;
-
-    // Per-body constraints (XPBD-style)
-    std::vector<std::unique_ptr<IConstraint>> m_constraints;
+    // Volume constraint for dynamic volume updates
+    std::shared_ptr<VolumeConstraintXPBD> m_pVolumeConstraint;
 };
 
 

@@ -3,8 +3,11 @@
 #include <vector>
 #include <memory>
 #include "BodyInterfaces.h"
+#include "ForceGenerator.h"
+#include "PhysicsConstraints.h"
 
-// Semi-implicit Euler integrator operating on generic bodies
+// Physics integrator managing the complete simulation pipeline:
+// force application, integration, constraint projection, and velocity correction
 class PhysicsIntegrator
 {
 public:
@@ -13,11 +16,19 @@ public:
     // Add a body to be integrated
     void addBody(std::shared_ptr<IFaceBody> body);
 
-    // Integrate all registered bodies
+    // Add a force generator to the simulation
+    void addForceGenerator(std::unique_ptr<IForceGenerator> generator);
+
+    // Add a constraint to the simulation
+    void addConstraint(std::shared_ptr<IConstraint> constraint);
+
+    // Execute complete physics pipeline: forces -> integration -> constraints
     void step(double dt);
 
 private:
     std::vector<std::shared_ptr<IFaceBody>> m_bodies;
+    std::vector<std::unique_ptr<IForceGenerator>> m_forceGenerators;
+    std::vector<std::shared_ptr<IConstraint>> m_constraints;
 };
 
 
