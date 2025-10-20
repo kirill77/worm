@@ -5,9 +5,13 @@
 #include "physics/PhysicsMesh.h"
 #include "physics/PhysicsIntegrator.h"
 #include "physics/VolumeConstraint.h"
+#include "physics/DyneinPullingForce.h"
+#include "physics/PhysCentrosome.h"
+#include "chemistry/molecules/simConstants.h"
 #include "utils/log/ILog.h"
 #include "biology/organelles/Cell.h"
 #include "biology/organelles/Cortex.h"
+#include "biology/organelles/Centrosome.h"
 
 void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
 {
@@ -22,9 +26,16 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     // Register body with integrator
     m_integrator.addBody(m_pCortexAdapter);
 
+    // Get centrosomes for dynein force
+    auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
+    auto pPhysCentrosome = pCentrosome->getPhysCentrosome();
+    m_centrosomes.push_back(pPhysCentrosome);
+
     // Register force generators with integrator
     m_integrator.addForceGenerator(std::make_unique<EdgeSpringForce>(*m_pCortexAdapter, m_fSpringC));
     m_integrator.addForceGenerator(std::make_unique<EdgeDampingForce>(*m_pCortexAdapter, m_fDampingCoeff));
+    m_integrator.addForceGenerator(
+        std::make_unique<DyneinPullingForce>(*m_pCortexAdapter, m_centrosomes, MoleculeConstants::DYNEIN_PULLING_FORCE_PICONEWTONS));
 
     // Pull volume from cell's internal medium
     double fVolume = m_pCell->getInternalMedium().getVolumeMicroM();

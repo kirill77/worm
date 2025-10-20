@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DyneinPullingForce.h" />
     <ClInclude Include="ForceGenerator.h" />
     <ClInclude Include="PhysCentrosome.h" />
     <ClInclude Include="PhysicsConstraints.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="VolumeConstraint.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DyneinPullingForce.cpp" />
     <ClCompile Include="ForceGenerator.cpp" />
     <ClCompile Include="PhysicsIntegrator.cpp" />
     <ClCompile Include="PhysMicrotubule.cpp" />

@@ -43,6 +43,9 @@ namespace MoleculeConstants
     constexpr double MT_CORTEX_BIND_RATE   = 2.0;    // s^-1 (attempt rate when in contact)
     constexpr double MT_CORTEX_UNBIND_BASE = 0.1;    // s^-1 (base unbinding rate)
     constexpr double MT_CORTEX_UNBIND_WEAK = 1.0;    // s^-1 (unbinding rate for weak binding)
+    
+    // Dynein pulling force (physics)
+    constexpr double DYNEIN_PULLING_FORCE_PICONEWTONS = 5.0;  // pN (picoNewtons per bound microtubule)
 }
 
 

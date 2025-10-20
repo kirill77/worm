@@ -9,6 +9,8 @@
 #include <numbers>
 #include <algorithm>
 #include "chemistry/molecules/simConstants.h"
+#include "geometry/vectors/intersections.h"
+#include "geometry/mesh/EdgeMesh.h"
 
 Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     : m_pCentrosome(pCentrosome)
@@ -261,9 +263,11 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
     }
 }
 
-void Y_TuRC::bindToCortex(double dyneinConc)
+void Y_TuRC::bindToCortex(const MeshLocation& location, double dyneinConc)
 {
     setState(MTState::Bound);
+    // Store attachment location for physics force calculation
+    setAttachmentLocation(location);
     m_bindingStrength = dyneinConc;
     m_bindingTime = 0.0;
 }
@@ -326,8 +330,17 @@ void Y_TuRC::attemptCorticalBindingWithIntersection(const Cortex::CortexRay& int
     double bindingProb = (dyneinConc / (K_bind + dyneinConc)) * bindRate * dtSec;
     
     if (rand01() < bindingProb) {
-        // Successfully bind to cortex using cached intersection data
-        bindToCortex(dyneinConc);
+        // Create mesh location for attachment point
+        MeshLocation location;
+        location.m_triangleIndex = intersection.triangleIndex;
+        
+        // Compute barycentric coordinates at the intersection point via mesh helper
+        auto pMesh = pCortex->getEdgeMesh();
+        float3 baryCoords = pMesh->computeBary(intersection.triangleIndex, intersection.worldHitPoint);
+        location.setBarycentric(baryCoords);
+        
+        // Successfully bind to cortex
+        bindToCortex(location, dyneinConc);
     }
 }
 

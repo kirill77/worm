@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <limits>
 #include "Medium.h"
-#include "CortexLocation.h"
+#include "CortexMolecules.h"
 #include "Organelle.h"
 #include "geometry/vectors/vector.h"
 #include "geometry/BVH/ITraceableObject.h"

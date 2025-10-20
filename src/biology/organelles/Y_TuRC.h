@@ -5,6 +5,7 @@
 #include "geometry/vectors/vector.h"
 #include "chemistry/molecules/Molecule.h"
 #include "physics/PhysMicrotubule.h"
+#include "geometry/mesh/MeshLocation.h"
 
 struct Centrosome;
 #include "Cortex.h" // needed for nested Cortex::IntersectionResult type
@@ -41,7 +42,7 @@ private:
     float getCapLengthMicroM() const;
     
     // Cortical binding state management 
-    void bindToCortex(double dyneinConc);
+    void bindToCortex(const MeshLocation& location, double dyneinConc);
     void unbindFromCortex();
     bool shouldUnbind(double dtSec, const std::function<float()>& rand01) const;
     

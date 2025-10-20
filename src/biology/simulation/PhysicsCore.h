@@ -12,6 +12,7 @@
 #include "physics/PhysicsMesh.h"
 
 class Cell;
+class PhysCentrosome;
 
 /**
  * Core physics simulator for the cell that advances mechanics and constraints
@@ -32,6 +33,9 @@ private:
 
     // Cortex physics mesh (reused across timesteps to avoid repeated allocations)
     std::shared_ptr<PhysicsMesh> m_pCortexAdapter;
+
+    // Centrosomes for dynein force calculations
+    std::vector<std::shared_ptr<PhysCentrosome>> m_centrosomes;
 
     // constants controlling spring behaviour
     double m_fSpringC = 0.1, m_fDampingCoeff = 1;

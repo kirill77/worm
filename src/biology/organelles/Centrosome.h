@@ -70,5 +70,12 @@ public:
      * @return Vector of Y_TuRC ring complexes
      */
     const std::vector<std::shared_ptr<PhysMicrotubule>>& getRingComplexes() const { return m_pPhysCentrosome->getMicrotubules(); }
+    
+    /**
+     * Get the physics representation of this centrosome
+     * 
+     * @return Physics centrosome for force calculations
+     */
+    std::shared_ptr<PhysCentrosome> getPhysCentrosome() const { return m_pPhysCentrosome; }
 };
 

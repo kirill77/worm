@@ -6,7 +6,7 @@
 #include <array>
 #include <unordered_map>
 #include "chemistry/molecules/Molecule.h"
-#include "biology/organelles/CortexLocation.h"
+#include "biology/organelles/CortexMolecules.h"
 
 #include "geometry/vectors/vector.h"
 #include "chemistry/molecules/MoleculeWiki.h"

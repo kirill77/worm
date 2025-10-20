@@ -33,6 +33,10 @@ public:
     double calculateTriangleArea(uint32_t triangleIndex) const;
     double3 calculateTriangleNormal(uint32_t triangleIndex) const;
     
+    // Compute barycentric coordinates of a point with respect to a triangle
+    // Returns barycentric coordinates (w0, w1, w2) where point = w0*v0 + w1*v1 + w2*v2
+    float3 computeBary(uint32_t triangleIndex, const float3& point) const;
+    
     virtual uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3);
 
     // Clear mesh data

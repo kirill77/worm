@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include <algorithm>
 #include <cmath>
+#include "geometry/vectors/intersections.h"
 
 // Constructor
 Mesh::Mesh() {
@@ -113,6 +114,15 @@ double3 Mesh::calculateTriangleNormal(uint32_t triangleIndex) const {
     } else {
         return double3(0.0, 0.0, 1.0); // Default normal if degenerate triangle
     }
+}
+
+// Compute barycentric coordinates for a point with respect to a triangle
+float3 Mesh::computeBary(uint32_t triangleIndex, const float3& point) const {
+    const uint3 tri = getTriangleVertices(triangleIndex);
+    const float3 v0 = getVertexPosition(tri.x);
+    const float3 v1 = getVertexPosition(tri.y);
+    const float3 v2 = getVertexPosition(tri.z);
+    return computeBarycentricCoordinates(point, v0, v1, v2);
 }
 
 // Helper method for derived classes to add triangles directly to storage
