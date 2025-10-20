@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <cassert>
 #include <limits>
 #include <cmath>
-#include <cassert>
 #include "geometry/vectors/vector.h"
 
 // Generic geometric address on a triangulated surface
@@ -39,4 +39,3 @@ public:
         m_normalized = v;
     }
 };
-
