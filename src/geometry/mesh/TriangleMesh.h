@@ -6,12 +6,12 @@
 #include "geometry/vectors/vector.h"
 #include "VertexMesh.h"
 
-class Mesh : public VertexMesh
+class TriangleMesh : public VertexMesh
 {
 public:
     // Constructors and main methods
-    Mesh();
-    virtual ~Mesh() = default;
+    TriangleMesh();
+    virtual ~TriangleMesh() = default;
     
     // Triangle operations (basic access, no connectivity)
     uint3 getTriangleVertices(uint32_t triangleIndex) const;
@@ -33,4 +33,4 @@ public:
 
 protected:
     std::vector<uint3> m_triangles;
-}; 
+};

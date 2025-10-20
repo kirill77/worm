@@ -18,7 +18,7 @@
     <ClInclude Include="EdgeMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
+    <ClInclude Include="TriangleMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VertexMesh.h">
@@ -35,7 +35,7 @@
     <ClCompile Include="EdgeMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
+    <ClCompile Include="TriangleMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VertexMesh.cpp">

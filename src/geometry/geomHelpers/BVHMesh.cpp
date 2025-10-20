@@ -2,7 +2,7 @@
 #include <limits>
 #include <algorithm>
 
-BVHMesh::BVHMesh(std::shared_ptr<Mesh> pMesh)
+BVHMesh::BVHMesh(std::shared_ptr<TriangleMesh> pMesh)
     : m_pMesh(pMesh)
 {
 }
@@ -41,8 +41,8 @@ box3 BVHMesh::getSubObjectBox(uint32_t uSubObj) const
 
 void BVHMesh::trace(IRay& ray, uint32_t triangleIndex) const
 {
-    assert(m_pMesh && "BVHMesh must have a valid Mesh");
-    assert(m_debugVersion == m_pMesh->getVersion() && "BVHMesh BVH is out of sync with Mesh version");
+    assert(m_pMesh && "BVHMesh must have a valid TriangleMesh");
+    assert(m_debugVersion == m_pMesh->getVersion() && "BVHMesh BVH is out of sync with TriangleMesh version");
     const float EPSILON = 1e-8f;
 
     // Get triangle vertices

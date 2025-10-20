@@ -5,9 +5,9 @@
 #include <string>
 #include <cstdint>
 #include "geometry/vectors/vector.h"
-#include "Mesh.h"
+#include "TriangleMesh.h"
 
-class EdgeMesh : public Mesh {
+class EdgeMesh : public TriangleMesh {
 public:
     struct Edge {
         uint32_t startVertex;
@@ -25,7 +25,7 @@ public:
     EdgeMesh();
     EdgeMesh(double radius, uint32_t subdivisionLevel);
 
-    // inherited Mesh methods
+    // inherited TriangleMesh methods
     virtual void clear() override;
     virtual uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) override;
     virtual std::vector<uint3> extractTriangles() override;

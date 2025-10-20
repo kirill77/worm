@@ -22,7 +22,7 @@ EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel) {
 
 // Clear all mesh data
 void EdgeMesh::clear() {
-    Mesh::clear(); // Clear base class data (vertices and triangles)
+    TriangleMesh::clear(); // Clear base class data (vertices and triangles)
     edges.clear();
     edgeMap.clear();
 }
@@ -96,7 +96,7 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 #endif
     
     // Store triangle vertices using base class method
-    uint32_t triangleIndex = Mesh::addTriangle(v1, v2, v3);
+    uint32_t triangleIndex = TriangleMesh::addTriangle(v1, v2, v3);
     
     // Still maintain edges for neighbor queries and other functionality
     uint32_t e1 = addEdge(v1, v2);
@@ -119,7 +119,7 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 // Extract triangles and clear edge connectivity data
 std::vector<uint3> EdgeMesh::extractTriangles() {
     // Extract triangles using base class method
-    std::vector<uint3> extracted = Mesh::extractTriangles();
+    std::vector<uint3> extracted = TriangleMesh::extractTriangles();
     
     // Clear edge connectivity data since triangles are gone
     edges.clear();

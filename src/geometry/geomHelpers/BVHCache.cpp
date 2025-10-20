@@ -1,6 +1,6 @@
 #include "BVHCache.h"
 #include "BVHMesh.h"
-#include "geometry/mesh/Mesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 
 BVHCache& BVHCache::instance()
 {
@@ -8,7 +8,7 @@ BVHCache& BVHCache::instance()
     return cache;
 }
 
-std::shared_ptr<BVHMesh> BVHCache::getOrCreate(const std::shared_ptr<Mesh>& mesh)
+std::shared_ptr<BVHMesh> BVHCache::getOrCreate(const std::shared_ptr<TriangleMesh>& mesh)
 {
     if (!mesh) return nullptr;
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -21,7 +21,7 @@ std::shared_ptr<BVHMesh> BVHCache::getOrCreate(const std::shared_ptr<Mesh>& mesh
     {
         auto bvh = std::make_shared<BVHMesh>(mesh);
         bvh->rebuildForCurrentMesh();
-        m_entries.emplace(key, Entry{ std::weak_ptr<Mesh>(mesh), std::weak_ptr<BVHMesh>(bvh), ver });
+        m_entries.emplace(key, Entry{ std::weak_ptr<TriangleMesh>(mesh), std::weak_ptr<BVHMesh>(bvh), ver });
         return bvh;
     }
 
@@ -32,7 +32,7 @@ std::shared_ptr<BVHMesh> BVHCache::getOrCreate(const std::shared_ptr<Mesh>& mesh
     {
         auto bvh = std::make_shared<BVHMesh>(mesh);
         bvh->rebuildForCurrentMesh();
-        e = Entry{ std::weak_ptr<Mesh>(mesh), std::weak_ptr<BVHMesh>(bvh), ver };
+        e = Entry{ std::weak_ptr<TriangleMesh>(mesh), std::weak_ptr<BVHMesh>(bvh), ver };
         return bvh;
     }
 

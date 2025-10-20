@@ -5,9 +5,9 @@
 #include <mutex>
 #include <cstdint>
 
-// Simple flyweight-style cache for BVHMesh per Mesh instance.
-// Rebuilds BVHMesh whenever Mesh version changes.
-class Mesh;
+// Simple flyweight-style cache for BVHMesh per TriangleMesh instance.
+// Rebuilds BVHMesh whenever TriangleMesh version changes.
+class TriangleMesh;
 class BVHMesh;
 
 class BVHCache
@@ -15,14 +15,14 @@ class BVHCache
 public:
     static BVHCache& instance();
 
-    std::shared_ptr<BVHMesh> getOrCreate(const std::shared_ptr<Mesh>& mesh);
+    std::shared_ptr<BVHMesh> getOrCreate(const std::shared_ptr<TriangleMesh>& mesh);
 
 private:
     BVHCache() = default;
 
     struct Entry
     {
-        std::weak_ptr<Mesh>    mesh;
+        std::weak_ptr<TriangleMesh>    mesh;
         std::weak_ptr<BVHMesh> bvh;
         uint64_t               cachedVersion = 0;
     };

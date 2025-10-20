@@ -20,14 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EdgeMesh.h" />
-    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="TriangleMesh.h" />
     <ClInclude Include="VertexMesh.h" />
     <ClInclude Include="MeshLocation.h" />
     <ClInclude Include="Identifiable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EdgeMesh.cpp" />
-    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="TriangleMesh.cpp" />
     <ClCompile Include="VertexMesh.cpp" />
     <ClCompile Include="Identifiable.cpp" />
   </ItemGroup>
