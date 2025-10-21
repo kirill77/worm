@@ -66,7 +66,7 @@ void CortexVis::updateGPUMesh()
     }
 
     // Get vertex count and triangle count
-    uint32_t vertexCount = pMesh->getVertexCount();
+    uint32_t vertexCount = pMesh->getVertexMesh()->getVertexCount();
     uint32_t triangleCount = pMesh->getTriangleCount();
 
     // Convert vertices to GPUMesh::Vertex format
@@ -75,7 +75,7 @@ void CortexVis::updateGPUMesh()
     for (uint32_t i = 0; i < vertexCount; ++i)
     {
         GPUMesh::Vertex gpuVertex;
-        convertVector(gpuVertex.vPos, pMesh->getVertexPosition(i));
+        convertVector(gpuVertex.vPos, pMesh->getVertexMesh()->getVertexPosition(i));
         gpuVertices.push_back(gpuVertex);
     }
 

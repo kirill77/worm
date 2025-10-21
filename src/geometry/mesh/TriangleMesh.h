@@ -4,14 +4,23 @@
 #include <cstdint>
 #include <memory>
 #include "geometry/vectors/vector.h"
-#include "VertexMesh.h"
+#include "geometry/vectors/box.h"
+#include "Vertices.h"
+#include "Identifiable.h"
 
-class TriangleMesh : public VertexMesh
+class TriangleMesh : public Identifiable
 {
 public:
+    static const uint32_t INVALID_INDEX = UINT32_MAX;
+    
     // Constructors and main methods
     TriangleMesh();
+    TriangleMesh(std::shared_ptr<Vertices> vertexMesh);
     virtual ~TriangleMesh() = default;
+    
+    // Vertex mesh access
+    std::shared_ptr<Vertices> getVertexMesh() const { return m_pVertexMesh; }
+    void setVertexMesh(std::shared_ptr<Vertices> vertexMesh) { m_pVertexMesh = vertexMesh; }
     
     // Triangle operations (basic access, no connectivity)
     uint3 getTriangleVertices(uint32_t triangleIndex) const;
@@ -26,11 +35,21 @@ public:
     virtual uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3);
 
     // Clear mesh data (vertices and triangles)
-    virtual void clear() override;
+    virtual void clear();
     
     // Extract triangles (move out, leaving vertices intact)
     virtual std::vector<uint3> extractTriangles();
+    
+    // Version tracking
+    uint64_t getVersion() const { return m_version + m_pVertexMesh->getVersion(); }
+    
+    // Bounding box
+    box3 getBox() const;
 
 protected:
+    void incrementVersion() { ++m_version; }
+    
+    std::shared_ptr<Vertices> m_pVertexMesh;
     std::vector<uint3> m_triangles;
+    uint64_t m_version = 0;
 };

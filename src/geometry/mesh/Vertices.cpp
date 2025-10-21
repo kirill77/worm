@@ -1,12 +1,12 @@
-#include "VertexMesh.h"
+#include "Vertices.h"
 #include <algorithm>
 
 // Constructor
-VertexMesh::VertexMesh() {
+Vertices::Vertices() {
 }
 
 // Get bounding box (cached based on version)
-box3 VertexMesh::getBox() const {
+box3 Vertices::getBox() const {
     // Check if cached box is valid for current version
     if (m_cachedBoxVersion == m_version) {
         return m_cachedBox;
@@ -37,20 +37,20 @@ box3 VertexMesh::getBox() const {
 }
 
 // Clear all vertex data
-void VertexMesh::clear() {
+void Vertices::clear() {
     m_vertices.clear();
     ++m_version;
 }
 
 // Add a vertex to the mesh
-uint32_t VertexMesh::addVertex(const float3& position) {
+uint32_t Vertices::addVertex(const float3& position) {
     m_vertices.emplace_back(position);
     ++m_version;
     return static_cast<uint32_t>(m_vertices.size() - 1);
 }
 
 // Get vertex position
-float3 VertexMesh::getVertexPosition(uint32_t index) const {
+float3 Vertices::getVertexPosition(uint32_t index) const {
     if (index < m_vertices.size()) {
         return m_vertices[index].position;
     }
@@ -58,7 +58,7 @@ float3 VertexMesh::getVertexPosition(uint32_t index) const {
 }
 
 // Set vertex position
-void VertexMesh::setVertexPosition(uint32_t index, const float3& position) {
+void Vertices::setVertexPosition(uint32_t index, const float3& position) {
     if (index < m_vertices.size()) {
         m_vertices[index].position = position;
         ++m_version;
@@ -66,7 +66,7 @@ void VertexMesh::setVertexPosition(uint32_t index, const float3& position) {
 }
 
 // Get number of vertices
-uint32_t VertexMesh::getVertexCount() const {
+uint32_t Vertices::getVertexCount() const {
     return static_cast<uint32_t>(m_vertices.size());
 }
 

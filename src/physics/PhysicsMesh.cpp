@@ -4,7 +4,7 @@
 PhysicsMesh::PhysicsMesh(std::shared_ptr<EdgeMesh> mesh)
     : m_pMesh(std::move(mesh))
 {
-    const uint32_t vertexCount = m_pMesh->getVertexCount();
+    const uint32_t vertexCount = m_pMesh->getVertexMesh()->getVertexCount();
     m_nodeData.resize(vertexCount);
     for (uint32_t i = 0; i < vertexCount; ++i)
     {

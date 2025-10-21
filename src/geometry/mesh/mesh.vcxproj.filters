@@ -21,7 +21,7 @@
     <ClInclude Include="TriangleMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexMesh.h">
+    <ClInclude Include="Vertices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MeshLocation.h">
@@ -38,7 +38,7 @@
     <ClCompile Include="TriangleMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VertexMesh.cpp">
+    <ClCompile Include="Vertices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Identifiable.cpp">

@@ -79,9 +79,9 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
 {
 #ifndef NDEBUG
     {
-        const auto& p1 = getVertexPosition(v1);
-        const auto& p2 = getVertexPosition(v2);
-        const auto& p3 = getVertexPosition(v3);
+        const auto& p1 = getVertexMesh()->getVertexPosition(v1);
+        const auto& p2 = getVertexMesh()->getVertexPosition(v2);
+        const auto& p3 = getVertexMesh()->getVertexPosition(v3);
         
         // Calculate triangle normal
         float3 normal = cross(p2 - p1, p3 - p1);
@@ -171,18 +171,18 @@ void EdgeMesh::createIcosahedron(double radius) {
     float b = (float)(radius * PHI / norm);
     
     // Add 12 vertices of the icosahedron
-    addVertex(float3(0, a, b));  // 0
-    addVertex(float3(0, a, -b)); // 1
-    addVertex(float3(0, -a, b)); // 2
-    addVertex(float3(0, -a, -b)); // 3
-    addVertex(float3(a, b, 0));  // 4
-    addVertex(float3(-a, b, 0)); // 5
-    addVertex(float3(a, -b, 0)); // 6
-    addVertex(float3(-a, -b, 0)); // 7
-    addVertex(float3(b, 0, a));  // 8
-    addVertex(float3(-b, 0, a)); // 9
-    addVertex(float3(b, 0, -a)); // 10
-    addVertex(float3(-b, 0, -a)); // 11
+    getVertexMesh()->addVertex(float3(0, a, b));  // 0
+    getVertexMesh()->addVertex(float3(0, a, -b)); // 1
+    getVertexMesh()->addVertex(float3(0, -a, b)); // 2
+    getVertexMesh()->addVertex(float3(0, -a, -b)); // 3
+    getVertexMesh()->addVertex(float3(a, b, 0));  // 4
+    getVertexMesh()->addVertex(float3(-a, b, 0)); // 5
+    getVertexMesh()->addVertex(float3(a, -b, 0)); // 6
+    getVertexMesh()->addVertex(float3(-a, -b, 0)); // 7
+    getVertexMesh()->addVertex(float3(b, 0, a));  // 8
+    getVertexMesh()->addVertex(float3(-b, 0, a)); // 9
+    getVertexMesh()->addVertex(float3(b, 0, -a)); // 10
+    getVertexMesh()->addVertex(float3(-b, 0, -a)); // 11
     
     // Add 20 triangular triangles
     addTriangle(0, 8, 4);
@@ -224,10 +224,10 @@ void EdgeMesh::subdivide(uint32_t levels) {
         
         // Calculate average radius for vertex projection
         double radius = 0.0;
-        for (uint32_t i = 0; i < getVertexCount(); ++i) {
-            radius += length(getVertexPosition(i));
+        for (uint32_t i = 0; i < getVertexMesh()->getVertexCount(); ++i) {
+            radius += length(getVertexMesh()->getVertexPosition(i));
         }
-        radius /= getVertexCount();
+        radius /= getVertexMesh()->getVertexCount();
         
         // Clear edge data (triangles are already extracted)
         edges.clear();
@@ -270,8 +270,8 @@ uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
     }
     
     // Create a new midpoint using current mesh vertex positions
-    const auto &pos1 = getVertexPosition(v1);
-    const auto &pos2 = getVertexPosition(v2);
+    const auto &pos1 = getVertexMesh()->getVertexPosition(v1);
+    const auto &pos2 = getVertexMesh()->getVertexPosition(v2);
     
     // Calculate midpoint and project onto sphere
     float3 midpoint = (pos1 + pos2) * 0.5f;
@@ -281,7 +281,7 @@ uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
     }
     
     // Add new vertex and register in midpoint map
-    uint32_t midpointIdx = addVertex(midpoint);
+    uint32_t midpointIdx = getVertexMesh()->addVertex(midpoint);
     midpoints[key] = midpointIdx;
     
     return midpointIdx;

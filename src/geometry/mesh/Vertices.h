@@ -8,7 +8,7 @@
 
 // Base mesh class containing only vertices
 // Can represent point clouds or serve as base for 1D/2D/3D primitives
-class VertexMesh : public Identifiable
+class Vertices : public Identifiable
 {
 public:
     static const uint32_t INVALID_INDEX = UINT32_MAX;
@@ -19,8 +19,8 @@ public:
     };
 
     // Constructors
-    VertexMesh();
-    virtual ~VertexMesh() = default;
+    Vertices();
+    virtual ~Vertices() = default;
     
     // Vertex operations
     uint32_t addVertex(const float3& position);

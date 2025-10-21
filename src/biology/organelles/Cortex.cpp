@@ -304,9 +304,9 @@ float3 Cortex::baryToNormalized(uint32_t triangleIndex, const float3& barycentri
         return float3(0, 0, 0);
 
     const uint3 tri = pMesh->getTriangleVertices(triangleIndex);
-    const float3 v0 = pMesh->getVertexPosition(tri.x);
-    const float3 v1 = pMesh->getVertexPosition(tri.y);
-    const float3 v2 = pMesh->getVertexPosition(tri.z);
+    const float3 v0 = pMesh->getVertexMesh()->getVertexPosition(tri.x);
+    const float3 v1 = pMesh->getVertexMesh()->getVertexPosition(tri.y);
+    const float3 v2 = pMesh->getVertexMesh()->getVertexPosition(tri.z);
 
     const float3 cellPos = v0 * barycentric.x + v1 * barycentric.y + v2 * barycentric.z;
     const bool isOnCortex = true;
