@@ -18,6 +18,9 @@ public:
     TriangleMesh(std::shared_ptr<Vertices> vertexMesh);
     virtual ~TriangleMesh() = default;
     
+    // Factory methods
+    static std::shared_ptr<TriangleMesh> createIcosahedron(double radius);
+    
     // Vertex mesh access
     std::shared_ptr<Vertices> getVertexMesh() const { return m_pVertexMesh; }
     void setVertexMesh(std::shared_ptr<Vertices> vertexMesh) { m_pVertexMesh = vertexMesh; }
@@ -48,6 +51,7 @@ public:
 
 protected:
     void incrementVersion() { ++m_version; }
+    void populateIcosahedron(double radius);
     
     std::shared_ptr<Vertices> m_pVertexMesh;
     std::vector<uint3> m_triangles;

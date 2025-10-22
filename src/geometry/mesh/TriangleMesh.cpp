@@ -97,3 +97,63 @@ std::vector<uint3> TriangleMesh::extractTriangles() {
     return extracted;
 }
 
+// Static factory method to create an icosahedron
+std::shared_ptr<TriangleMesh> TriangleMesh::createIcosahedron(double radius) {
+    auto mesh = std::make_shared<TriangleMesh>();
+    mesh->populateIcosahedron(radius);
+    return mesh;
+}
+
+// Populate the mesh with icosahedron geometry
+void TriangleMesh::populateIcosahedron(double radius) {
+    clear();
+    
+    // Golden ratio for icosahedron calculations
+    const double PHI = 1.61803398874989484820;
+    
+    // Calculate vertex positions for a unit icosahedron
+    double norm = std::sqrt(1.0 + PHI * PHI);
+    float a = (float)(radius / norm);
+    float b = (float)(radius * PHI / norm);
+    
+    // Add 12 vertices of the icosahedron
+    m_pVertexMesh->addVertex(float3(0, a, b));  // 0
+    m_pVertexMesh->addVertex(float3(0, a, -b)); // 1
+    m_pVertexMesh->addVertex(float3(0, -a, b)); // 2
+    m_pVertexMesh->addVertex(float3(0, -a, -b)); // 3
+    m_pVertexMesh->addVertex(float3(a, b, 0));  // 4
+    m_pVertexMesh->addVertex(float3(-a, b, 0)); // 5
+    m_pVertexMesh->addVertex(float3(a, -b, 0)); // 6
+    m_pVertexMesh->addVertex(float3(-a, -b, 0)); // 7
+    m_pVertexMesh->addVertex(float3(b, 0, a));  // 8
+    m_pVertexMesh->addVertex(float3(-b, 0, a)); // 9
+    m_pVertexMesh->addVertex(float3(b, 0, -a)); // 10
+    m_pVertexMesh->addVertex(float3(-b, 0, -a)); // 11
+    
+    // Add 20 triangular faces
+    addTriangle(0, 8, 4);
+    addTriangle(0, 4, 5);
+    addTriangle(0, 5, 9);
+    addTriangle(0, 9, 2);
+    addTriangle(0, 2, 8);
+    
+    addTriangle(1, 5, 4);
+    addTriangle(1, 4, 10);
+    addTriangle(1, 10, 3);
+    addTriangle(1, 3, 11);
+    addTriangle(1, 11, 5);
+    
+    addTriangle(2, 7, 6);
+    addTriangle(2, 6, 8);
+    addTriangle(2, 9, 7);
+    
+    addTriangle(3, 6, 7);
+    addTriangle(3, 7, 11);
+    addTriangle(3, 10, 6);
+    
+    addTriangle(4, 8, 10);
+    addTriangle(5, 11, 9);
+    addTriangle(6, 10, 8);
+    addTriangle(7, 9, 11);
+}
+

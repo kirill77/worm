@@ -27,8 +27,7 @@ public:
 private:
     std::shared_ptr<Edges> m_pEdges;
     
-    // Helper methods for icosahedron creation
-    void createIcosahedron(double radius);
+    // Helper methods for mesh subdivision
     void subdivide(uint32_t levels);
     uint32_t getMidpoint(uint32_t v1, uint32_t v2, 
                        std::unordered_map<uint64_t, uint32_t>& midpoints,
