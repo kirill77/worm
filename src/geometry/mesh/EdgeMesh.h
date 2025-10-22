@@ -4,23 +4,13 @@
 #include <unordered_map>
 #include <string>
 #include <cstdint>
+#include <memory>
 #include "geometry/vectors/vector.h"
 #include "TriangleMesh.h"
+#include "Edges.h"
 
 class EdgeMesh : public TriangleMesh {
 public:
-    struct Edge {
-        uint32_t startVertex;
-        uint32_t endVertex;
-        uint32_t rightTriangle;
-        uint32_t nextEdge;
-        Edge(uint32_t start, uint32_t end) 
-            : startVertex(start)
-            , endVertex(end)
-            , rightTriangle(INVALID_INDEX)
-            , nextEdge(INVALID_INDEX) {}
-    };
-
     // Constructors and main methods
     EdgeMesh();
     EdgeMesh(double radius, uint32_t subdivisionLevel);
@@ -30,19 +20,14 @@ public:
     virtual uint32_t addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) override;
     virtual std::vector<uint3> extractTriangles() override;
 
-    uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);
-
     // Edge access methods
     uint32_t getEdgeCount() const;
     std::pair<uint32_t, uint32_t> getEdge(uint32_t edgeIndex) const;
 
 private:
-    std::vector<Edge> edges;
-    std::unordered_map<uint64_t, uint32_t> edgeMap;
+    std::shared_ptr<Edges> m_pEdges;
 
-    static uint64_t directionalEdgeKey(uint32_t startVertex, uint32_t endVertex);
-    static uint64_t directionlessEdgeKey(uint32_t v1, uint32_t v2);
-    uint32_t findEdge(uint32_t startVertex, uint32_t endVertex) const;
+    uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);
     
     // Helper methods for icosahedron creation
     void createIcosahedron(double radius);

@@ -7,11 +7,13 @@
 #include <cassert>  // For assert()
 
 // Constructor
-EdgeMesh::EdgeMesh() {
+EdgeMesh::EdgeMesh()
+    : m_pEdges(std::make_shared<Edges>()) {
 }
 
 // Constructor with radius and subdivision
-EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel) {
+EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel)
+    : m_pEdges(std::make_shared<Edges>()) {
     createIcosahedron(radius);
     if (subdivisionLevel > 0) {
         subdivide(subdivisionLevel);
@@ -23,55 +25,22 @@ EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel) {
 // Clear all mesh data
 void EdgeMesh::clear() {
     TriangleMesh::clear(); // Clear base class data (vertices and triangles)
-    edges.clear();
-    edgeMap.clear();
+    m_pEdges->clear();
 }
 
 // Get number of edges
 uint32_t EdgeMesh::getEdgeCount() const {
-    return static_cast<uint32_t>(edges.size());
+    return m_pEdges->getEdgeCount();
 }
 
 // Get a specific edge as a pair of vertex indices
 std::pair<uint32_t, uint32_t> EdgeMesh::getEdge(uint32_t edgeIndex) const {
-    if (edgeIndex < edges.size()) {
-        const Edge& edge = edges[edgeIndex];
-        return std::make_pair(edge.startVertex, edge.endVertex);
-    }
-    return std::make_pair(INVALID_INDEX, INVALID_INDEX);
-}
-
-// Generate a key for edge lookup
-uint64_t EdgeMesh::directionalEdgeKey(uint32_t startVertex, uint32_t endVertex) {
-    return ((uint64_t)endVertex << 32) | (uint64_t)startVertex;
-}
-uint64_t EdgeMesh::directionlessEdgeKey(uint32_t v1, uint32_t v2) {
-    return (v1 <= v2) ? directionalEdgeKey(v1, v2) : directionalEdgeKey(v2, v1);
-}
-
-// Find an edge by vertices
-uint32_t EdgeMesh::findEdge(uint32_t startVertex, uint32_t endVertex) const {
-    auto it = edgeMap.find(directionalEdgeKey(startVertex, endVertex));
-    return (it != edgeMap.end()) ? it->second : INVALID_INDEX;
+    return m_pEdges->getEdge(edgeIndex);
 }
 
 // Add an edge to the mesh
 uint32_t EdgeMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
-    auto key = directionalEdgeKey(startVertex, endVertex);
-    auto it = edgeMap.find(key);
-    
-    if (it != edgeMap.end()) {
-        return it->second; // Edge already exists
-    }
-    
-    // Create new edge
-    edges.emplace_back(startVertex, endVertex);
-    uint32_t edgeIndex = static_cast<uint32_t>(edges.size() - 1);
-    
-    // Add to map for fast lookup
-    edgeMap[key] = edgeIndex;
-    
-    return edgeIndex;
+    return m_pEdges->addEdge(startVertex, endVertex);
 }
 
 // Add a triangle to the mesh
@@ -99,19 +68,9 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
     uint32_t triangleIndex = TriangleMesh::addTriangle(v1, v2, v3);
     
     // Still maintain edges for neighbor queries and other functionality
-    uint32_t e1 = addEdge(v1, v2);
-    uint32_t e2 = addEdge(v2, v3);
-    uint32_t e3 = addEdge(v3, v1);
-    
-    // Link edges to this triangle and to each other for neighbor traversal
-    edges[e1].rightTriangle = triangleIndex;
-    edges[e2].rightTriangle = triangleIndex;
-    edges[e3].rightTriangle = triangleIndex;
-    
-    // Link edges in a loop: e1 -> e2 -> e3 -> e1
-    edges[e1].nextEdge = e2;
-    edges[e2].nextEdge = e3;
-    edges[e3].nextEdge = e1;
+    addEdge(v1, v2);
+    addEdge(v2, v3);
+    addEdge(v3, v1);
     
     return triangleIndex;
 }
@@ -122,8 +81,7 @@ std::vector<uint3> EdgeMesh::extractTriangles() {
     std::vector<uint3> extracted = TriangleMesh::extractTriangles();
     
     // Clear edge connectivity data since triangles are gone
-    edges.clear();
-    edgeMap.clear();
+    m_pEdges->clear();
     
     return extracted;
 }
@@ -200,8 +158,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
         radius /= getVertexMesh()->getVertexCount();
         
         // Clear edge data (triangles are already extracted)
-        edges.clear();
-        edgeMap.clear();
+        m_pEdges->clear();
         
         // Process each original triangle
         for (uint32_t triangleIdx = 0; triangleIdx < originalTriangles.size(); ++triangleIdx) {
@@ -231,7 +188,7 @@ uint32_t EdgeMesh::getMidpoint(uint32_t v1, uint32_t v2,
                                std::unordered_map<uint64_t, uint32_t>& midpoints,
                                float radius) {
     // Use a normalized edge key (smaller vertex index first)
-    uint64_t key = directionlessEdgeKey(v1, v2);
+    uint64_t key = Edges::directionlessEdgeKey(v1, v2);
     
     // Check if midpoint already exists
     auto it = midpoints.find(key);
