@@ -31,8 +31,7 @@ public:
     virtual std::vector<uint3> extractTriangles() override;
 
     uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);
-    std::vector<uint32_t> getTriangleNeighbors(uint32_t triangleIndex) const;
-    
+
     // Edge access methods
     uint32_t getEdgeCount() const;
     std::pair<uint32_t, uint32_t> getEdge(uint32_t edgeIndex) const;

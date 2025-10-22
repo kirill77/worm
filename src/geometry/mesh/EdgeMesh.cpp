@@ -128,36 +128,6 @@ std::vector<uint3> EdgeMesh::extractTriangles() {
     return extracted;
 }
 
-// Get neighboring triangles
-std::vector<uint32_t> EdgeMesh::getTriangleNeighbors(uint32_t triangleIndex) const {
-    std::vector<uint32_t> neighbors;
-    
-    // Get triangle vertices
-    uint3 verts = getTriangleVertices(triangleIndex);
-    
-    // Check each edge's opposite
-    for (int i = 0; i < 3; ++i) {
-        uint32_t v1 = verts[i];
-        uint32_t v2 = verts[(i + 1) % 3];
-        
-        // Find edge going the other way
-        uint32_t oppositeEdge = findEdge(v2, v1);
-        if (oppositeEdge != INVALID_INDEX && oppositeEdge < edges.size()) {
-            uint32_t neighborTriangle = edges[oppositeEdge].rightTriangle;
-            if (neighborTriangle != INVALID_INDEX && neighborTriangle != triangleIndex) {
-                // Avoid duplicates
-                if (std::find(neighbors.begin(), neighbors.end(), neighborTriangle) == neighbors.end()) {
-                    neighbors.push_back(neighborTriangle);
-                }
-            }
-        }
-    }
-    
-    return neighbors;
-}
-
-
-
 // Create an icosahedron with the given radius
 void EdgeMesh::createIcosahedron(double radius) {
     clear();
