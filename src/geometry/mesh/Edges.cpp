@@ -1,14 +1,26 @@
 #include "Edges.h"
+#include "TriangleMesh.h"
 
 Edges::Edges() {
 }
 
-void Edges::clear() {
-    edges.clear();
-    edgeMap.clear();
+std::shared_ptr<Edges> Edges::computeEdges(const TriangleMesh& mesh) {
+    auto edges = std::shared_ptr<Edges>(new Edges());
+    
+    std::unordered_map<uint64_t, uint32_t> edgeMap;
+    
+    const uint32_t triangleCount = mesh.getTriangleCount();
+    for (uint32_t i = 0; i < triangleCount; ++i) {
+        uint3 triangle = mesh.getTriangleVertices(i);
+        edges->addEdge(triangle.x, triangle.y, edgeMap);
+        edges->addEdge(triangle.y, triangle.z, edgeMap);
+        edges->addEdge(triangle.z, triangle.x, edgeMap);
+    }
+    
+    return edges;
 }
 
-uint32_t Edges::addEdge(uint32_t startVertex, uint32_t endVertex) {
+uint32_t Edges::addEdge(uint32_t startVertex, uint32_t endVertex, std::unordered_map<uint64_t, uint32_t>& edgeMap) {
     auto key = directionalEdgeKey(startVertex, endVertex);
     auto it = edgeMap.find(key);
     

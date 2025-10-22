@@ -7,13 +7,11 @@
 #include <cassert>  // For assert()
 
 // Constructor
-EdgeMesh::EdgeMesh()
-    : m_pEdges(std::make_shared<Edges>()) {
+EdgeMesh::EdgeMesh() {
 }
 
 // Constructor with radius and subdivision
-EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel)
-    : m_pEdges(std::make_shared<Edges>()) {
+EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel) {
     createIcosahedron(radius);
     if (subdivisionLevel > 0) {
         subdivide(subdivisionLevel);
@@ -25,22 +23,20 @@ EdgeMesh::EdgeMesh(double radius, uint32_t subdivisionLevel)
 // Clear all mesh data
 void EdgeMesh::clear() {
     TriangleMesh::clear(); // Clear base class data (vertices and triangles)
-    m_pEdges->clear();
+    m_pEdges.reset();
 }
 
 // Get number of edges
 uint32_t EdgeMesh::getEdgeCount() const {
-    return m_pEdges->getEdgeCount();
+    return m_pEdges ? m_pEdges->getEdgeCount() : 0;
 }
 
 // Get a specific edge as a pair of vertex indices
 std::pair<uint32_t, uint32_t> EdgeMesh::getEdge(uint32_t edgeIndex) const {
-    return m_pEdges->getEdge(edgeIndex);
-}
-
-// Add an edge to the mesh
-uint32_t EdgeMesh::addEdge(uint32_t startVertex, uint32_t endVertex) {
-    return m_pEdges->addEdge(startVertex, endVertex);
+    if (m_pEdges) {
+        return m_pEdges->getEdge(edgeIndex);
+    }
+    return std::make_pair(INVALID_INDEX, INVALID_INDEX);
 }
 
 // Add a triangle to the mesh
@@ -67,11 +63,6 @@ uint32_t EdgeMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3)
     // Store triangle vertices using base class method
     uint32_t triangleIndex = TriangleMesh::addTriangle(v1, v2, v3);
     
-    // Still maintain edges for neighbor queries and other functionality
-    addEdge(v1, v2);
-    addEdge(v2, v3);
-    addEdge(v3, v1);
-    
     return triangleIndex;
 }
 
@@ -81,7 +72,7 @@ std::vector<uint3> EdgeMesh::extractTriangles() {
     std::vector<uint3> extracted = TriangleMesh::extractTriangles();
     
     // Clear edge connectivity data since triangles are gone
-    m_pEdges->clear();
+    m_pEdges.reset();
     
     return extracted;
 }
@@ -137,6 +128,9 @@ void EdgeMesh::createIcosahedron(double radius) {
     addTriangle(5, 11, 9);
     addTriangle(6, 10, 8);
     addTriangle(7, 9, 11);
+    
+    // Compute edges from all triangles
+    m_pEdges = Edges::computeEdges(*this);
 }
 
 // Subdivide the mesh
@@ -158,7 +152,7 @@ void EdgeMesh::subdivide(uint32_t levels) {
         radius /= getVertexMesh()->getVertexCount();
         
         // Clear edge data (triangles are already extracted)
-        m_pEdges->clear();
+        m_pEdges.reset();
         
         // Process each original triangle
         for (uint32_t triangleIdx = 0; triangleIdx < originalTriangles.size(); ++triangleIdx) {
@@ -180,6 +174,9 @@ void EdgeMesh::subdivide(uint32_t levels) {
             addTriangle(m31, m23, v3);
             addTriangle(m12, m23, m31);
         }
+        
+        // Compute edges from all triangles
+        m_pEdges = Edges::computeEdges(*this);
     }
 }
 

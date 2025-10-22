@@ -26,8 +26,6 @@ public:
 
 private:
     std::shared_ptr<Edges> m_pEdges;
-
-    uint32_t addEdge(uint32_t startVertex, uint32_t endVertex);
     
     // Helper methods for icosahedron creation
     void createIcosahedron(double radius);
