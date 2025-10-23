@@ -1,7 +1,9 @@
 #include "TriangleMesh.h"
 #include <algorithm>
 #include <cmath>
+#include <unordered_map>
 #include "geometry/vectors/intersections.h"
+#include "Edges.h"
 
 // Constructor
 TriangleMesh::TriangleMesh() 
@@ -99,14 +101,7 @@ std::vector<uint3> TriangleMesh::extractTriangles() {
 
 // Static factory method to create an icosahedron
 std::shared_ptr<TriangleMesh> TriangleMesh::createIcosahedron(double radius) {
-    auto mesh = std::make_shared<TriangleMesh>();
-    mesh->populateIcosahedron(radius);
-    return mesh;
-}
-
-// Populate the mesh with icosahedron geometry
-void TriangleMesh::populateIcosahedron(double radius) {
-    clear();
+    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>();
     
     // Golden ratio for icosahedron calculations
     const double PHI = 1.61803398874989484820;
@@ -117,43 +112,127 @@ void TriangleMesh::populateIcosahedron(double radius) {
     float b = (float)(radius * PHI / norm);
     
     // Add 12 vertices of the icosahedron
-    m_pVertexMesh->addVertex(float3(0, a, b));  // 0
-    m_pVertexMesh->addVertex(float3(0, a, -b)); // 1
-    m_pVertexMesh->addVertex(float3(0, -a, b)); // 2
-    m_pVertexMesh->addVertex(float3(0, -a, -b)); // 3
-    m_pVertexMesh->addVertex(float3(a, b, 0));  // 4
-    m_pVertexMesh->addVertex(float3(-a, b, 0)); // 5
-    m_pVertexMesh->addVertex(float3(a, -b, 0)); // 6
-    m_pVertexMesh->addVertex(float3(-a, -b, 0)); // 7
-    m_pVertexMesh->addVertex(float3(b, 0, a));  // 8
-    m_pVertexMesh->addVertex(float3(-b, 0, a)); // 9
-    m_pVertexMesh->addVertex(float3(b, 0, -a)); // 10
-    m_pVertexMesh->addVertex(float3(-b, 0, -a)); // 11
+    mesh->m_pVertexMesh->addVertex(float3(0, a, b));  // 0
+    mesh->m_pVertexMesh->addVertex(float3(0, a, -b)); // 1
+    mesh->m_pVertexMesh->addVertex(float3(0, -a, b)); // 2
+    mesh->m_pVertexMesh->addVertex(float3(0, -a, -b)); // 3
+    mesh->m_pVertexMesh->addVertex(float3(a, b, 0));  // 4
+    mesh->m_pVertexMesh->addVertex(float3(-a, b, 0)); // 5
+    mesh->m_pVertexMesh->addVertex(float3(a, -b, 0)); // 6
+    mesh->m_pVertexMesh->addVertex(float3(-a, -b, 0)); // 7
+    mesh->m_pVertexMesh->addVertex(float3(b, 0, a));  // 8
+    mesh->m_pVertexMesh->addVertex(float3(-b, 0, a)); // 9
+    mesh->m_pVertexMesh->addVertex(float3(b, 0, -a)); // 10
+    mesh->m_pVertexMesh->addVertex(float3(-b, 0, -a)); // 11
     
     // Add 20 triangular faces
-    addTriangle(0, 8, 4);
-    addTriangle(0, 4, 5);
-    addTriangle(0, 5, 9);
-    addTriangle(0, 9, 2);
-    addTriangle(0, 2, 8);
+    mesh->addTriangle(0, 8, 4);
+    mesh->addTriangle(0, 4, 5);
+    mesh->addTriangle(0, 5, 9);
+    mesh->addTriangle(0, 9, 2);
+    mesh->addTriangle(0, 2, 8);
     
-    addTriangle(1, 5, 4);
-    addTriangle(1, 4, 10);
-    addTriangle(1, 10, 3);
-    addTriangle(1, 3, 11);
-    addTriangle(1, 11, 5);
+    mesh->addTriangle(1, 5, 4);
+    mesh->addTriangle(1, 4, 10);
+    mesh->addTriangle(1, 10, 3);
+    mesh->addTriangle(1, 3, 11);
+    mesh->addTriangle(1, 11, 5);
     
-    addTriangle(2, 7, 6);
-    addTriangle(2, 6, 8);
-    addTriangle(2, 9, 7);
+    mesh->addTriangle(2, 7, 6);
+    mesh->addTriangle(2, 6, 8);
+    mesh->addTriangle(2, 9, 7);
     
-    addTriangle(3, 6, 7);
-    addTriangle(3, 7, 11);
-    addTriangle(3, 10, 6);
+    mesh->addTriangle(3, 6, 7);
+    mesh->addTriangle(3, 7, 11);
+    mesh->addTriangle(3, 10, 6);
     
-    addTriangle(4, 8, 10);
-    addTriangle(5, 11, 9);
-    addTriangle(6, 10, 8);
-    addTriangle(7, 9, 11);
+    mesh->addTriangle(4, 8, 10);
+    mesh->addTriangle(5, 11, 9);
+    mesh->addTriangle(6, 10, 8);
+    mesh->addTriangle(7, 9, 11);
+    
+    return mesh;
+}
+
+// Verify mesh topology using Euler's formula
+void TriangleMesh::verifyTopology() const {
+    // For a closed triangle mesh, Euler's formula: V - E + F = 2
+    // Since we don't have edges computed, we use the derived relationship: V = 2 + F/2
+    // This comes from E = 3F/2 (each triangle has 3 edges, each edge shared by 2 triangles)
+    uint32_t V = m_pVertexMesh->getVertexCount();
+    uint32_t F = getTriangleCount();
+    uint32_t expectedV = 2 + F / 2;
+    
+    assert(F % 2 == 0 && "Face count must be even for closed triangle mesh");
+    assert(V == expectedV && "Vertex count should equal 2 + F/2 for closed triangle mesh");
+}
+
+// Subdivide the mesh once (creates a new subdivided mesh)
+std::shared_ptr<TriangleMesh> TriangleMesh::subdivide() const {
+    auto subdivided = std::make_shared<TriangleMesh>(m_pVertexMesh);
+    
+    // Map to store midpoints to avoid duplication
+    std::unordered_map<uint64_t, uint32_t> midpoints;
+    
+    // Calculate average radius for vertex projection onto sphere
+    double radius = 0.0;
+    for (uint32_t i = 0; i < m_pVertexMesh->getVertexCount(); ++i) {
+        radius += length(m_pVertexMesh->getVertexPosition(i));
+    }
+    radius /= m_pVertexMesh->getVertexCount();
+    float fRadius = (float)radius;
+    
+    // Process each original triangle
+    for (uint32_t triangleIdx = 0; triangleIdx < m_triangles.size(); ++triangleIdx) {
+        const uint3& triangleVerts = m_triangles[triangleIdx];
+        
+        uint32_t v1 = triangleVerts.x;
+        uint32_t v2 = triangleVerts.y;
+        uint32_t v3 = triangleVerts.z;
+        
+        // Create midpoints
+        uint32_t m12 = subdivided->getMidpoint(v1, v2, midpoints, fRadius);
+        uint32_t m23 = subdivided->getMidpoint(v2, v3, midpoints, fRadius);
+        uint32_t m31 = subdivided->getMidpoint(v3, v1, midpoints, fRadius);
+        
+        // Create four new triangular faces
+        subdivided->addTriangle(v1, m12, m31);
+        subdivided->addTriangle(m12, v2, m23);
+        subdivided->addTriangle(m31, m23, v3);
+        subdivided->addTriangle(m12, m23, m31);
+    }
+    
+    return subdivided;
+}
+
+// Helper to get or create midpoint between two vertices
+uint32_t TriangleMesh::getMidpoint(uint32_t v1, uint32_t v2, 
+                                   std::unordered_map<uint64_t, uint32_t>& midpoints,
+                                   float radius) {
+    // Use a normalized edge key (smaller vertex index first)
+    uint64_t key = Edges::directionlessEdgeKey(v1, v2);
+    
+    // Check if midpoint already exists
+    auto it = midpoints.find(key);
+    if (it != midpoints.end()) {
+        return it->second;
+    }
+    
+    // Create a new midpoint using current mesh vertex positions
+    const float3 pos1 = m_pVertexMesh->getVertexPosition(v1);
+    const float3 pos2 = m_pVertexMesh->getVertexPosition(v2);
+    
+    // Calculate midpoint and project onto sphere
+    float3 midpoint = (pos1 + pos2) * 0.5f;
+    float len = length(midpoint);
+    if (len > 1e-10) {
+        midpoint = (midpoint / len) * radius;
+    }
+    
+    // Add new vertex and register in midpoint map
+    uint32_t midpointIdx = m_pVertexMesh->addVertex(midpoint);
+    midpoints[key] = midpointIdx;
+    
+    return midpointIdx;
 }
 

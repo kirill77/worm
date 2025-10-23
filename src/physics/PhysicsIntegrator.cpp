@@ -28,7 +28,7 @@ void PhysicsIntegrator::step(double dt)
     // Step 2: Semi-implicit Euler integration
     for (auto& pBody : m_bodies)
     {
-        const uint32_t n = pBody->m_pMesh->getVertexMesh()->getVertexCount();
+        const uint32_t n = pBody->m_pMesh->getVertices()->getVertexCount();
 
         for (uint32_t i = 0; i < n; ++i)
         {
@@ -36,9 +36,9 @@ void PhysicsIntegrator::step(double dt)
             const double m = std::max(1e-12, node.m_fMass);
             const double3 a = node.m_vForce / m;
             node.m_vVelocity += a * dt;
-            const double3 xOld = double3(pBody->m_pMesh->getVertexMesh()->getVertexPosition(i));
+            const double3 xOld = double3(pBody->m_pMesh->getVertices()->getVertexPosition(i));
             const double3 xNew = xOld + node.m_vVelocity * dt;
-            pBody->m_pMesh->getVertexMesh()->setVertexPosition(i, float3(xNew));
+            pBody->m_pMesh->getVertices()->setVertexPosition(i, float3(xNew));
         }
     }
 
@@ -47,10 +47,10 @@ void PhysicsIntegrator::step(double dt)
     preProjectPositions.reserve(m_bodies.size());
     for (auto& pBody : m_bodies)
     {
-        const uint32_t n = pBody->m_pMesh->getVertexMesh()->getVertexCount();
+        const uint32_t n = pBody->m_pMesh->getVertices()->getVertexCount();
         std::vector<double3> positions(n);
         for (uint32_t i = 0; i < n; ++i)
-            positions[i] = double3(pBody->m_pMesh->getVertexMesh()->getVertexPosition(i));
+            positions[i] = double3(pBody->m_pMesh->getVertices()->getVertexPosition(i));
         preProjectPositions.push_back(std::move(positions));
     }
 
@@ -62,12 +62,12 @@ void PhysicsIntegrator::step(double dt)
     for (size_t bodyIdx = 0; bodyIdx < m_bodies.size(); ++bodyIdx)
     {
         auto& pBody = m_bodies[bodyIdx];
-        const uint32_t n = pBody->m_pMesh->getVertexMesh()->getVertexCount();
+        const uint32_t n = pBody->m_pMesh->getVertices()->getVertexCount();
         const auto& prePos = preProjectPositions[bodyIdx];
 
         for (uint32_t i = 0; i < n; ++i)
         {
-            double3 xProj = double3(pBody->m_pMesh->getVertexMesh()->getVertexPosition(i));
+            double3 xProj = double3(pBody->m_pMesh->getVertices()->getVertexPosition(i));
             pBody->getVertex(i).m_vVelocity += (xProj - prePos[i]) / dt;
         }
     }
@@ -75,7 +75,7 @@ void PhysicsIntegrator::step(double dt)
     // Step 6: Clear forces for next timestep
     for (auto& pBody : m_bodies)
     {
-        const uint32_t n = pBody->m_pMesh->getVertexMesh()->getVertexCount();
+        const uint32_t n = pBody->m_pMesh->getVertices()->getVertexCount();
         for (uint32_t i = 0; i < n; ++i)
             pBody->getVertex(i).m_vForce = double3(0, 0, 0);
     }

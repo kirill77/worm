@@ -21,7 +21,7 @@ std::shared_ptr<Edges> Edges::computeEdges(const TriangleMesh& mesh) {
 }
 
 uint32_t Edges::addEdge(uint32_t startVertex, uint32_t endVertex, std::unordered_map<uint64_t, uint32_t>& edgeMap) {
-    auto key = directionalEdgeKey(startVertex, endVertex);
+    auto key = directionlessEdgeKey(startVertex, endVertex);
     auto it = edgeMap.find(key);
     
     if (it != edgeMap.end()) {

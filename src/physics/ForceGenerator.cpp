@@ -11,8 +11,8 @@ EdgeSpringForce::EdgeSpringForce(PhysicsMesh& body, double springConstant)
     for (uint32_t e = 0; e < edgeCount; ++e)
     {
         auto edge = m_body.m_pMesh->getEdge(e);
-        float3 pos1 = m_body.m_pMesh->getVertexMesh()->getVertexPosition(edge.first);
-        float3 pos2 = m_body.m_pMesh->getVertexMesh()->getVertexPosition(edge.second);
+        float3 pos1 = m_body.m_pMesh->getVertices()->getVertexPosition(edge.first);
+        float3 pos2 = m_body.m_pMesh->getVertices()->getVertexPosition(edge.second);
         double restLength = length(pos2 - pos1);
         m_edgeRestLengths.push_back(restLength);
     }
@@ -27,8 +27,8 @@ void EdgeSpringForce::apply(double dt)
     for (uint32_t e = 0; e < edgeCount; ++e)
     {
         auto ab = m_body.m_pMesh->getEdge(e);
-        double3 pa = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ab.first));
-        double3 pb = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ab.second));
+        double3 pa = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.first));
+        double3 pb = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.second));
         double3 edgeVec = pb - pa;
         double L = length(edgeVec);
         if (L <= 1e-10) continue;
@@ -49,8 +49,8 @@ void EdgeDampingForce::apply(double dt)
     for (uint32_t e = 0; e < edgeCount; ++e)
     {
         auto ab = m_body.m_pMesh->getEdge(e);
-        double3 pa = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ab.first));
-        double3 pb = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ab.second));
+        double3 pa = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.first));
+        double3 pb = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.second));
         double3 edgeVec = pb - pa;
         double L = length(edgeVec);
         if (L <= 1e-10) continue;

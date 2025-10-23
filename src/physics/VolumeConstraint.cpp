@@ -9,9 +9,9 @@ double VolumeConstraintXPBD::computeSignedVolume() const
     for (uint32_t f = 0; f < faceCount; ++f)
     {
         uint3 tri = m_body.m_pMesh->getTriangleVertices(f);
-        double3 a = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(tri.x));
-        double3 b = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(tri.y));
-        double3 c = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(tri.z));
+        double3 a = double3(m_body.m_pMesh->getVertices()->getVertexPosition(tri.x));
+        double3 b = double3(m_body.m_pMesh->getVertices()->getVertexPosition(tri.y));
+        double3 c = double3(m_body.m_pMesh->getVertices()->getVertexPosition(tri.z));
         V += (1.0/6.0) * dot(a, cross(b, c));
     }
     return V;
@@ -24,16 +24,16 @@ void VolumeConstraintXPBD::project(double dt)
         return;
 
     // Accumulate per-vertex gradients dV/dx
-    const uint32_t n = m_body.m_pMesh->getVertexMesh()->getVertexCount();
+    const uint32_t n = m_body.m_pMesh->getVertices()->getVertexCount();
     std::vector<double3> grad(n, double3(0,0,0));
 
     for (uint32_t f = 0; f < faceCount; ++f)
     {
         uint3 tri = m_body.m_pMesh->getTriangleVertices(f);
         uint32_t ia = tri.x, ib = tri.y, ic = tri.z;
-        double3 a = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ia));
-        double3 b = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ib));
-        double3 c = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(ic));
+        double3 a = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ia));
+        double3 b = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ib));
+        double3 c = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ic));
         // dV/da = (1/6) (b x c), etc.
         grad[ia] += (1.0/6.0) * cross(b, c);
         grad[ib] += (1.0/6.0) * cross(c, a);
@@ -65,9 +65,9 @@ void VolumeConstraintXPBD::project(double dt)
     {
         const double wi = 1.0 / std::max(1e-12, m_body.getVertex(i).m_fMass);
         const double3 dx = -wi * deltaLambda * grad[i];
-        const double3 xOld = double3(m_body.m_pMesh->getVertexMesh()->getVertexPosition(i));
+        const double3 xOld = double3(m_body.m_pMesh->getVertices()->getVertexPosition(i));
         const double3 xNew = xOld + dx;
-        m_body.m_pMesh->getVertexMesh()->setVertexPosition(i, float3(xNew));
+        m_body.m_pMesh->getVertices()->setVertexPosition(i, float3(xNew));
     }
 }
 

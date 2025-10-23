@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include "geometry/vectors/vector.h"
 #include "geometry/vectors/box.h"
 #include "Vertices.h"
@@ -21,9 +22,12 @@ public:
     // Factory methods
     static std::shared_ptr<TriangleMesh> createIcosahedron(double radius);
     
+    // Subdivision
+    std::shared_ptr<TriangleMesh> subdivide() const;
+    
     // Vertex mesh access
-    std::shared_ptr<Vertices> getVertexMesh() const { return m_pVertexMesh; }
-    void setVertexMesh(std::shared_ptr<Vertices> vertexMesh) { m_pVertexMesh = vertexMesh; }
+    std::shared_ptr<Vertices> getVertices() const { return m_pVertexMesh; }
+    void setVertices(std::shared_ptr<Vertices> vertexMesh) { m_pVertexMesh = vertexMesh; }
     
     // Triangle operations (basic access, no connectivity)
     uint3 getTriangleVertices(uint32_t triangleIndex) const;
@@ -48,10 +52,15 @@ public:
     
     // Bounding box
     box3 getBox() const;
+    
+    // Topology verification
+    virtual void verifyTopology() const;
 
 protected:
     void incrementVersion() { ++m_version; }
-    void populateIcosahedron(double radius);
+    uint32_t getMidpoint(uint32_t v1, uint32_t v2, 
+                         std::unordered_map<uint64_t, uint32_t>& midpoints,
+                         float radius);
     
     std::shared_ptr<Vertices> m_pVertexMesh;
     std::vector<uint3> m_triangles;
