@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 #include "geometry/vectors/vector.h"
-#include "geometry/mesh/edgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 #include "physics/PhysicsIntegrator.h"
 #include "physics/VolumeConstraint.h"
 #include "physics/PhysicsMesh.h"

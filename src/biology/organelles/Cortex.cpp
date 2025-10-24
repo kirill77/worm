@@ -5,7 +5,7 @@
 #include "utils/log/ILog.h"
 #include "geometry/geomHelpers/BVHMesh.h"
 #include "geometry/geomHelpers/BVHCache.h"
-#include "geometry/mesh/edgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 #include "geometry/BVH/BVH.h"
 #include "geometry/BVH/ITraceableObject.h"
 #include <algorithm>
@@ -23,7 +23,7 @@ Cortex::Cortex(std::weak_ptr<Cell> pCell, double fThickness)
     auto pOwnedCell = getCell();
     double fVolumeMicroM = pOwnedCell->getInternalMedium().getVolumeMicroM();
     double fRadiusMicroM = std::cbrt(fVolumeMicroM * 3.0 / (4.0 * PI));
-    m_pCortexMesh = EdgeMesh::createSphere(fRadiusMicroM, 2);
+    m_pCortexMesh = TriangleMesh::createSphere(fRadiusMicroM, 2);
     m_pCortexBVH = BVHCache::instance().getOrCreate(m_pCortexMesh);
 
     // Validate mapping consistency between normalizedToCell and cellToNormalized
@@ -343,13 +343,13 @@ void Cortex::CortexRay::notifyIntersection(float fDist, const ITraceableObject*,
 }
 
 // Provide cortex surface mesh from external simulation
-void Cortex::setMesh(const std::shared_ptr<EdgeMesh> pMesh)
+void Cortex::setTriangleMesh(const std::shared_ptr<TriangleMesh> pMesh)
 {
     m_pCortexMesh = pMesh;
     m_pCortexBVH = BVHCache::instance().getOrCreate(m_pCortexMesh);
 }
 
-std::shared_ptr<EdgeMesh> Cortex::getEdgeMesh() const
+std::shared_ptr<TriangleMesh> Cortex::getTriangleMesh() const
 {
     return m_pCortexMesh;
 }

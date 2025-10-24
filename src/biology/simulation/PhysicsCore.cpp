@@ -20,7 +20,7 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     // Pull mesh from cell's cortex and create physics mesh
     auto pCortex = std::dynamic_pointer_cast<Cortex>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
     assert(pCortex && "Cell must have a cortex organelle");
-    auto pCortexMesh = pCortex->getEdgeMesh();
+    auto pCortexMesh = pCortex->getTriangleMesh();
     m_pCortexAdapter = std::make_shared<PhysicsMesh>(pCortexMesh);
 
     // Register body with integrator
@@ -55,7 +55,7 @@ void PhysicsCore::makeTimeStep(double fDtSec)
 
     // Push updated mesh back to cortex
     auto pCortex = std::dynamic_pointer_cast<Cortex>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CORTEX));
-    pCortex->setMesh(m_pCortexAdapter->m_pMesh);
+    pCortex->setTriangleMesh(m_pCortexAdapter->m_pMesh);
 }
 
 

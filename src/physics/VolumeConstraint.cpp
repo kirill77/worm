@@ -1,5 +1,5 @@
 #include "VolumeConstraint.h"
-#include "geometry/mesh/EdgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 
 double VolumeConstraintXPBD::computeSignedVolume() const
 {

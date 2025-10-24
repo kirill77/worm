@@ -3,8 +3,7 @@
 #include <memory>
 #include <vector>
 #include "geometry/vectors/vector.h"
-
-class EdgeMesh;
+#include "geometry/mesh/TriangleMesh.h"
 
 // Per-vertex dynamic state (velocity, force, mass)
 // Position is stored in the mesh geometry
@@ -19,9 +18,9 @@ struct PhysVertex
 class PhysicsMesh : public std::enable_shared_from_this<PhysicsMesh>
 {
 public:
-    std::shared_ptr<EdgeMesh> m_pMesh;
+    std::shared_ptr<TriangleMesh> m_pMesh;
 
-    explicit PhysicsMesh(std::shared_ptr<EdgeMesh> mesh);
+    explicit PhysicsMesh(std::shared_ptr<TriangleMesh> mesh);
 
     const PhysVertex& getVertex(uint32_t index) const { return m_nodeData[index]; }
     PhysVertex& getVertex(uint32_t index) { return m_nodeData[index]; }

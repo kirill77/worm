@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EdgeMesh.h" />
     <ClInclude Include="Edges.h" />
     <ClInclude Include="TriangleMesh.h" />
     <ClInclude Include="Vertices.h" />
@@ -27,7 +26,6 @@
     <ClInclude Include="Identifiable.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EdgeMesh.cpp" />
     <ClCompile Include="Edges.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
     <ClCompile Include="Vertices.cpp" />

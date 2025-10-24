@@ -1,5 +1,5 @@
 #include "PhysicsIntegrator.h"
-#include "geometry/mesh/EdgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 #include <algorithm>
 
 void PhysicsIntegrator::addBody(std::shared_ptr<PhysicsMesh> body)

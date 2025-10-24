@@ -2,7 +2,7 @@
 #include "PhysCentrosome.h"
 #include "PhysMicrotubule.h"
 #include "PhysicsMesh.h"
-#include "geometry/mesh/EdgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 #include <cmath>
 
 DyneinPullingForce::DyneinPullingForce(

@@ -1,7 +1,7 @@
 #include "PhysicsMesh.h"
-#include "geometry/mesh/EdgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 
-PhysicsMesh::PhysicsMesh(std::shared_ptr<EdgeMesh> mesh)
+PhysicsMesh::PhysicsMesh(std::shared_ptr<TriangleMesh> mesh)
     : m_pMesh(std::move(mesh))
 {
     const uint32_t vertexCount = m_pMesh->getVertices()->getVertexCount();

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <unordered_map>
+#include <cassert>
 #include "geometry/vectors/intersections.h"
 #include "Edges.h"
 
@@ -29,6 +30,7 @@ box3 TriangleMesh::getBox() const {
 void TriangleMesh::clear() {
     m_pVertexMesh->clear();
     m_triangles.clear();
+    invalidateEdges();
     incrementVersion();
 }
 
@@ -87,6 +89,7 @@ float3 TriangleMesh::computeBary(uint32_t triangleIndex, const float3& point) co
 // Helper method for derived classes to add triangles directly to storage
 uint32_t TriangleMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) {
     m_triangles.emplace_back(v1, v2, v3);
+    invalidateEdges();
     incrementVersion();
     return static_cast<uint32_t>(m_triangles.size() - 1);
 }
@@ -95,6 +98,7 @@ uint32_t TriangleMesh::addTriangle(uint32_t v1, uint32_t v2, uint32_t v3) {
 std::vector<uint3> TriangleMesh::extractTriangles() {
     std::vector<uint3> extracted = std::move(m_triangles);
     m_triangles.clear(); // Ensure triangles is in a valid empty state
+    invalidateEdges();
     incrementVersion();
     return extracted;
 }
@@ -154,17 +158,67 @@ std::shared_ptr<TriangleMesh> TriangleMesh::createIcosahedron(double radius) {
     return mesh;
 }
 
+// Static factory method to create a sphere mesh
+std::shared_ptr<TriangleMesh> TriangleMesh::createSphere(double radius, uint32_t subdivisionLevel) {
+    // Create initial icosahedron as a TriangleMesh
+    std::shared_ptr<TriangleMesh> triangleMesh = TriangleMesh::createIcosahedron(radius);
+    
+    triangleMesh->verifyTopology();
+    
+    // Subdivide the mesh the requested number of times
+    for (uint32_t level = 0; level < subdivisionLevel; ++level) {
+        triangleMesh = triangleMesh->subdivide();
+        triangleMesh->verifyTopology();
+    }
+    
+    triangleMesh->getOrCreateEdges();
+
+    // Verify optimal tessellation
+    triangleMesh->verifyTopology();
+    
+    // Additional verification for subdivided icosahedron: expected face count
+    // An icosahedron has 20 faces; each subdivision multiplies faces by 4
+    uint32_t F = triangleMesh->getTriangleCount();
+    uint32_t expectedF = 20 * (1u << (2 * subdivisionLevel)); // 20 * 4^subdivisionLevel
+    assert(F == expectedF && "Triangle count mismatch for subdivided icosahedron");
+    
+    return triangleMesh;
+}
+
+// Lazily compute and return edges
+std::shared_ptr<Edges> TriangleMesh::getOrCreateEdges() {
+    if (!m_pEdges) {
+        m_pEdges = Edges::computeEdges(*this);
+    }
+    return m_pEdges;
+}
+
+std::shared_ptr<const Edges> TriangleMesh::getOrCreateEdges() const {
+    if (!m_pEdges) {
+        m_pEdges = Edges::computeEdges(*this);
+    }
+    return m_pEdges;
+}
+
 // Verify mesh topology using Euler's formula
 void TriangleMesh::verifyTopology() const {
     // For a closed triangle mesh, Euler's formula: V - E + F = 2
-    // Since we don't have edges computed, we use the derived relationship: V = 2 + F/2
-    // This comes from E = 3F/2 (each triangle has 3 edges, each edge shared by 2 triangles)
+    // We can verify both with and without edge information
     uint32_t V = m_pVertexMesh->getVertexCount();
     uint32_t F = getTriangleCount();
-    uint32_t expectedV = 2 + F / 2;
     
+    // Basic verification: V = 2 + F/2 (derived from Euler's formula with E = 3F/2)
     assert(F % 2 == 0 && "Face count must be even for closed triangle mesh");
+    uint32_t expectedV = 2 + F / 2;
     assert(V == expectedV && "Vertex count should equal 2 + F/2 for closed triangle mesh");
+    
+    // If edges are computed, verify them too
+    if (m_pEdges) {
+        uint32_t E = m_pEdges->getEdgeCount();
+        uint32_t expectedE = (3 * F) / 2;
+        assert(E == expectedE && "Edge count should equal 3F/2 for closed triangle mesh");
+        assert(V - E + F == 2 && "Euler's formula V - E + F = 2 violated");
+    }
 }
 
 // Subdivide the mesh once (creates a new subdivided mesh)

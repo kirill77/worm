@@ -1,16 +1,18 @@
 #include "ForceGenerator.h"
-#include "geometry/mesh/EdgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
+#include "geometry/mesh/Edges.h"
 
 EdgeSpringForce::EdgeSpringForce(PhysicsMesh& body, double springConstant)
     : m_body(body)
     , m_springConstant(springConstant)
 {
-    const uint32_t edgeCount = m_body.m_pMesh->getEdgeCount();
+    auto pEdges = m_body.m_pMesh->getOrCreateEdges();
+    const uint32_t edgeCount = pEdges->getEdgeCount();
     m_edgeRestLengths.reserve(edgeCount);
     
     for (uint32_t e = 0; e < edgeCount; ++e)
     {
-        auto edge = m_body.m_pMesh->getEdge(e);
+        auto edge = pEdges->getEdge(e);
         float3 pos1 = m_body.m_pMesh->getVertices()->getVertexPosition(edge.first);
         float3 pos2 = m_body.m_pMesh->getVertices()->getVertexPosition(edge.second);
         double restLength = length(pos2 - pos1);
@@ -21,12 +23,13 @@ EdgeSpringForce::EdgeSpringForce(PhysicsMesh& body, double springConstant)
 void EdgeSpringForce::apply(double dt)
 {
     (void)dt;
-    const uint32_t edgeCount = m_body.m_pMesh->getEdgeCount();
+    auto pEdges = m_body.m_pMesh->getOrCreateEdges();
+    const uint32_t edgeCount = pEdges->getEdgeCount();
     if (edgeCount == 0) return;
 
     for (uint32_t e = 0; e < edgeCount; ++e)
     {
-        auto ab = m_body.m_pMesh->getEdge(e);
+        auto ab = pEdges->getEdge(e);
         double3 pa = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.first));
         double3 pb = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.second));
         double3 edgeVec = pb - pa;
@@ -43,12 +46,13 @@ void EdgeSpringForce::apply(double dt)
 void EdgeDampingForce::apply(double dt)
 {
     (void)dt;
-    const uint32_t edgeCount = m_body.m_pMesh->getEdgeCount();
+    auto pEdges = m_body.m_pMesh->getOrCreateEdges();
+    const uint32_t edgeCount = pEdges->getEdgeCount();
     if (edgeCount == 0) return;
 
     for (uint32_t e = 0; e < edgeCount; ++e)
     {
-        auto ab = m_body.m_pMesh->getEdge(e);
+        auto ab = pEdges->getEdge(e);
         double3 pa = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.first));
         double3 pb = double3(m_body.m_pMesh->getVertices()->getVertexPosition(ab.second));
         double3 edgeVec = pb - pa;

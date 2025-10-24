@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "chemistry/molecules/simConstants.h"
 #include "geometry/vectors/intersections.h"
-#include "geometry/mesh/EdgeMesh.h"
+#include "geometry/mesh/TriangleMesh.h"
 
 Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     : m_pCentrosome(pCentrosome)
@@ -335,7 +335,7 @@ void Y_TuRC::attemptCorticalBindingWithIntersection(const Cortex::CortexRay& int
         location.m_triangleIndex = intersection.triangleIndex;
         
         // Compute barycentric coordinates at the intersection point via mesh helper
-        auto pMesh = pCortex->getEdgeMesh();
+        auto pMesh = pCortex->getTriangleMesh();
         float3 baryCoords = pMesh->computeBary(intersection.triangleIndex, intersection.worldHitPoint);
         location.setBarycentric(baryCoords);
         
