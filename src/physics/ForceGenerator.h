@@ -15,7 +15,7 @@ public:
     virtual ~IForceGenerator() = default;
 
     // Apply forces to the associated body
-    virtual void apply(double dt) = 0;
+    virtual void apply() = 0;
 };
 
 /** Edge-aligned Hookean springs for each mesh edge */
@@ -24,7 +24,7 @@ class EdgeSpringForce : public IForceGenerator
 public:
     EdgeSpringForce(PhysicsMesh& body, double springConstant);
 
-    void apply(double dt) override;
+    void apply() override;
 
 private:
     PhysicsMesh& m_body;
@@ -41,7 +41,7 @@ public:
         , m_dampingCoeff(dampingCoeff) {
     }
 
-    void apply(double dt) override;
+    void apply() override;
 
 private:
     PhysicsMesh& m_body;

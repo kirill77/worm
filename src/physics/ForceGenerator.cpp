@@ -20,9 +20,8 @@ EdgeSpringForce::EdgeSpringForce(PhysicsMesh& body, double springConstant)
     }
 }
 
-void EdgeSpringForce::apply(double dt)
+void EdgeSpringForce::apply()
 {
-    (void)dt;
     auto pEdges = m_body.m_pMesh->getOrCreateEdges();
     const uint32_t edgeCount = pEdges->getEdgeCount();
     if (edgeCount == 0) return;
@@ -43,9 +42,8 @@ void EdgeSpringForce::apply(double dt)
     }
 }
 
-void EdgeDampingForce::apply(double dt)
+void EdgeDampingForce::apply()
 {
-    (void)dt;
     auto pEdges = m_body.m_pMesh->getOrCreateEdges();
     const uint32_t edgeCount = pEdges->getEdgeCount();
     if (edgeCount == 0) return;

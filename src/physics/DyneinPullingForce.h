@@ -16,7 +16,7 @@ public:
         const std::vector<std::shared_ptr<PhysCentrosome>>& centrosomes,
         double pullingForcePerMT);
 
-    void apply(double dt) override;
+    void apply() override;
 
 private:
     PhysicsMesh& m_cortexBody;

@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "PhysicsMesh.h"
+#include "PhysCentrosome.h"
 #include "ForceGenerator.h"
 #include "PhysicsConstraints.h"
 
@@ -16,6 +17,9 @@ public:
     // Add a body to be integrated
     void addBody(std::shared_ptr<PhysicsMesh> body);
 
+    // Add a centrosome to be integrated
+    void addCentrosome(std::shared_ptr<PhysCentrosome> centrosome);
+
     // Add a force generator to the simulation
     void addForceGenerator(std::unique_ptr<IForceGenerator> generator);
 
@@ -27,6 +31,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<PhysicsMesh>> m_bodies;
+    std::vector<std::shared_ptr<PhysCentrosome>> m_centrosomes;
     std::vector<std::unique_ptr<IForceGenerator>> m_forceGenerators;
     std::vector<std::shared_ptr<IConstraint>> m_constraints;
 };

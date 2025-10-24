@@ -26,10 +26,11 @@ void PhysicsCore::initialize(std::shared_ptr<Cell> pCell)
     // Register body with integrator
     m_integrator.addBody(m_pCortexAdapter);
 
-    // Get centrosomes for dynein force
+    // Get centrosomes for dynein force and register with integrator
     auto pCentrosome = std::dynamic_pointer_cast<Centrosome>(m_pCell->getOrganelle(StringDict::ID::ORGANELLE_CENTROSOME));
     auto pPhysCentrosome = pCentrosome->getPhysCentrosome();
     m_centrosomes.push_back(pPhysCentrosome);
+    m_integrator.addCentrosome(pPhysCentrosome);
 
     // Register force generators with integrator
     m_integrator.addForceGenerator(std::make_unique<EdgeSpringForce>(*m_pCortexAdapter, m_fSpringC));

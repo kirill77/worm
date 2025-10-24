@@ -15,7 +15,7 @@ DyneinPullingForce::DyneinPullingForce(
 {
 }
 
-void DyneinPullingForce::apply(double dt)
+void DyneinPullingForce::apply()
 {
     // Iterate through all centrosomes and their microtubules
     for (const auto& pCentrosome : m_centrosomes)
@@ -25,6 +25,9 @@ void DyneinPullingForce::apply(double dt)
         // Get centrosome position in cell space (transform from normalized to cell coordinates)
         const affine3& toNormalized = pCentrosome->getToNormalizedCell();
         const float3& centrosomePos = toNormalized.m_translation;
+
+        // Accumulate reaction forces on centrosome
+        double3 centrosomeReactionForce(0, 0, 0);
 
         // Iterate through microtubules
         for (const auto& pMT : pCentrosome->getMicrotubules())
@@ -56,39 +59,48 @@ void DyneinPullingForce::apply(double dt)
                 // Normalize direction
                 forceDir = float3(forceDir.x / length, forceDir.y / length, forceDir.z / length);
                 
-                // Scale by force magnitude
+                // Scale by force magnitude (force on cortex: pulls toward centrosome)
                 float3 force = float3(
                     forceDir.x * static_cast<float>(m_pullingForcePerMT),
                     forceDir.y * static_cast<float>(m_pullingForcePerMT),
                     forceDir.z * static_cast<float>(m_pullingForcePerMT)
                 );
 
-                       // Get attachment location (triangle and barycentric coordinates)
-                       const auto& mesh = m_cortexBody.m_pMesh;
-                       const MeshLocation& attachmentLoc = pMT->getAttachmentLocation();
-                       
-                       // Get triangle vertices
-                       uint3 triangle = mesh->getTriangleVertices(attachmentLoc.m_triangleIndex);
+                // Apply force to cortex vertices
+                const auto& mesh = m_cortexBody.m_pMesh;
+                const MeshLocation& attachmentLoc = pMT->getAttachmentLocation();
                 
-                       // Distribute force to triangle vertices using barycentric weights
-                       const float3& baryCoords = attachmentLoc.getBarycentric();
-                       auto& v0 = m_cortexBody.getVertex(triangle.x);
-                       auto& v1 = m_cortexBody.getVertex(triangle.y);
-                       auto& v2 = m_cortexBody.getVertex(triangle.z);
-                       
-                       v0.m_vForce.x += force.x * baryCoords.x;
-                       v0.m_vForce.y += force.y * baryCoords.x;
-                       v0.m_vForce.z += force.z * baryCoords.x;
-                       
-                       v1.m_vForce.x += force.x * baryCoords.y;
-                       v1.m_vForce.y += force.y * baryCoords.y;
-                       v1.m_vForce.z += force.z * baryCoords.y;
-                       
-                       v2.m_vForce.x += force.x * baryCoords.z;
-                       v2.m_vForce.y += force.y * baryCoords.z;
-                       v2.m_vForce.z += force.z * baryCoords.z;
+                // Get triangle vertices
+                uint3 triangle = mesh->getTriangleVertices(attachmentLoc.m_triangleIndex);
+                
+                // Distribute force to triangle vertices using barycentric weights
+                const float3& baryCoords = attachmentLoc.getBarycentric();
+                auto& v0 = m_cortexBody.getVertex(triangle.x);
+                auto& v1 = m_cortexBody.getVertex(triangle.y);
+                auto& v2 = m_cortexBody.getVertex(triangle.z);
+                
+                v0.m_vForce.x += force.x * baryCoords.x;
+                v0.m_vForce.y += force.y * baryCoords.x;
+                v0.m_vForce.z += force.z * baryCoords.x;
+                
+                v1.m_vForce.x += force.x * baryCoords.y;
+                v1.m_vForce.y += force.y * baryCoords.y;
+                v1.m_vForce.z += force.z * baryCoords.y;
+                
+                v2.m_vForce.x += force.x * baryCoords.z;
+                v2.m_vForce.y += force.y * baryCoords.z;
+                v2.m_vForce.z += force.z * baryCoords.z;
+
+                // Newton's third law: apply equal and opposite reaction force to centrosome
+                // Force on centrosome: pulls toward cortex (opposite direction)
+                centrosomeReactionForce.x -= force.x;
+                centrosomeReactionForce.y -= force.y;
+                centrosomeReactionForce.z -= force.z;
             }
         }
+
+        // Apply accumulated reaction force to centrosome
+        pCentrosome->getPhysVertex().m_vForce += centrosomeReactionForce;
     }
 }
 
