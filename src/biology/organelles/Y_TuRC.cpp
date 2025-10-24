@@ -59,8 +59,8 @@ Y_TuRC::Y_TuRC(std::weak_ptr<Centrosome> pCentrosome)
     );
     
     // Initialize with origin and a small initial segment
-    getPoints().push_back(nucleationPos);
-    getPoints().push_back(nucleationPos + m_vTipDir * 0.02f);
+    addVertex(nucleationPos);
+    addVertex(nucleationPos + m_vTipDir * 0.02f);
 }
 
 void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::shared_ptr<Cortex>& pCortex, Medium& internalMedium)
@@ -107,30 +107,30 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
         const float segmentLength = static_cast<float>(MoleculeConstants::MT_SEGMENT_LENGTH_MICROM);
         
         // Grow the last segment in the tip direction
-        float3 currentTip = getPoints().back();
+        float3 currentTip = getTipPosition();
         float3 newTip = currentTip + m_vTipDir * growthThisStep;
-        getPoints().back() = newTip;
+        setVertexPosition(getVertexCount() - 1, newTip);
         
         // Add new full segments when last segment exceeds segment length
         float lastSegLen = getLastSegmentLength();
         while (lastSegLen >= segmentLength)
         {
             // Make the last segment exactly segmentLength
-            float3 prevPoint = getPoints()[getPoints().size() - 2];
-            getPoints().back() = prevPoint + m_vTipDir * segmentLength;
+            float3 prevPoint = getVertexPosition(getVertexCount() - 2);
+            setVertexPosition(getVertexCount() - 1, prevPoint + m_vTipDir * segmentLength);
             
             // Add a new segment starting from current tip
-            float3 segmentEnd = getPoints().back();
+            float3 segmentEnd = getTipPosition();
             float3 newSegmentEnd = segmentEnd + m_vTipDir * (lastSegLen - segmentLength);
-            getPoints().push_back(newSegmentEnd);
+            addVertex(newSegmentEnd);
             
             lastSegLen = getLastSegmentLength();
         }
         
         // Check cortex intersection for the tip segment only
-        size_t lastIdx = getPoints().size() - 1;
-        float3 segStart = centrosomeCellPos + getPoints()[lastIdx - 1];
-        float3 segEnd = centrosomeCellPos + getPoints()[lastIdx];
+        uint32_t lastIdx = getVertexCount() - 1;
+        float3 segStart = centrosomeCellPos + getVertexPosition(lastIdx - 1);
+        float3 segEnd = centrosomeCellPos + getVertexPosition(lastIdx);
         float3 segDir = segEnd - segStart;
         float segLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
         
@@ -143,7 +143,7 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
             {
                 // Truncate MT at cortex contact
                 float3 contactPoint = segStart + segDir * intersection.distance - centrosomeCellPos;
-                getPoints()[lastIdx] = contactPoint;
+                setVertexPosition(lastIdx, contactPoint);
                 
                 // First contact - attempt cortical binding directly
                 m_mtContactCortex = true;
@@ -171,9 +171,9 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
         {
             // Remove segments until shrinkage is consumed
             shrinkageThisStep -= lastSegLen;
-            while (getPoints().size() > 2 && shrinkageThisStep > 0.0f)
+            while (getVertexCount() > 2 && shrinkageThisStep > 0.0f)
             {
-                getPoints().pop_back();
+                removeLastVertex();
                 float segLen = getLastSegmentLength();
                 if (shrinkageThisStep >= segLen)
                 {
@@ -182,13 +182,13 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
                 else
                 {
                     // Partially shrink this segment
-                    float3 prevPoint = getPoints()[getPoints().size() - 2];
-                    float3 currentTip = getPoints().back();
+                    float3 prevPoint = getVertexPosition(getVertexCount() - 2);
+                    float3 currentTip = getTipPosition();
                     float3 segDir = currentTip - prevPoint;
                     float currentLen = sqrtf(segDir.x * segDir.x + segDir.y * segDir.y + segDir.z * segDir.z);
                     if (currentLen > 0.0f) {
                         segDir = float3(segDir.x / currentLen, segDir.y / currentLen, segDir.z / currentLen);
-                        getPoints().back() = prevPoint + segDir * (currentLen - shrinkageThisStep);
+                        setVertexPosition(getVertexCount() - 1, prevPoint + segDir * (currentLen - shrinkageThisStep));
                         m_vTipDir = segDir; // Update tip direction
                     }
                     shrinkageThisStep = 0.0f;
@@ -196,14 +196,14 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
             }
             
             // If down to minimum size (2 points), enter refractory period
-            if (getPoints().size() == 2)
+            if (getVertexCount() == 2)
             {
                 float remainingLen = getLastSegmentLength();
                 if (remainingLen <= 0.02f || shrinkageThisStep > 0.0f)
                 {
                     // Reset to small stub
-                    float3 origin = getPoints()[0];
-                    getPoints()[1] = origin + m_vTipDir * 0.02f;
+                    float3 origin = getOrigin();
+                    setVertexPosition(1, origin + m_vTipDir * 0.02f);
                     m_mtRefractorySec = 1.0f; // wait before re-nucleation
                     m_mtContactCortex = false;
                     
@@ -218,12 +218,12 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
         else
         {
             // Partially shrink the last segment
-            float3 prevPoint = getPoints()[getPoints().size() - 2];
-            float3 currentTip = getPoints().back();
+            float3 prevPoint = getVertexPosition(getVertexCount() - 2);
+            float3 currentTip = getTipPosition();
             float3 segDir = currentTip - prevPoint;
             if (lastSegLen > 0.0f) {
                 segDir = float3(segDir.x / lastSegLen, segDir.y / lastSegLen, segDir.z / lastSegLen);
-                getPoints().back() = prevPoint + segDir * (lastSegLen - shrinkageThisStep);
+                setVertexPosition(getVertexCount() - 1, prevPoint + segDir * (lastSegLen - shrinkageThisStep));
             }
         }
         
@@ -253,8 +253,8 @@ void Y_TuRC::update(double dtSec, const float3& centrosomeCellPos, const std::sh
             m_mtContactCortex = false;
             
             // Reset to small segment in tip direction
-            float3 origin = getPoints()[0];
-            getPoints()[1] = origin + m_vTipDir * 0.02f;
+            float3 origin = getOrigin();
+            setVertexPosition(1, origin + m_vTipDir * 0.02f);
             
             // Reset binding parameters
             m_bindingStrength = 0.0;

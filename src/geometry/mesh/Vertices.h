@@ -27,6 +27,7 @@ public:
     float3 getVertexPosition(uint32_t index) const;
     void setVertexPosition(uint32_t index, const float3& position);
     uint32_t getVertexCount() const;
+    void removeLastVertex();
     
     // Clear mesh data
     virtual void clear();

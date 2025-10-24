@@ -109,7 +109,6 @@ void DataCollector::collectData(double currentTime, double stepTimeMs)
             // Centrosome cell position
             float3 centroCell = pCortex->normalizedToCell(pCentro->getNormalizedPosition());
             for (const auto& r : rings) {
-                if (!r || !r->hasActiveMT()) continue;
                 const float length = r->getMTLengthMicroM();
                 const float3 tipCell = centroCell + r->getTipPosition();
                 // Convert tip to normalized for sampling
@@ -220,10 +219,8 @@ double DataCollector::computeAverageMTLength() const
         if (pCentro) {
             const auto& rings = pCentro->getRingComplexes();
             for (const auto& r : rings) {
-                if (r && r->hasActiveMT()) {
-                    mtSum += static_cast<double>(r->getMTLengthMicroM());
-                    ++mtCount;
-                }
+                mtSum += static_cast<double>(r->getMTLengthMicroM());
+                ++mtCount;
             }
         }
     }

@@ -5,9 +5,10 @@
 #include <cassert>
 #include "geometry/vectors/vector.h"
 #include "geometry/mesh/MeshLocation.h"
+#include "geometry/mesh/Vertices.h"
 
-// Physics representation of a microtubule as a sequence of points in 3D space
-class PhysMicrotubule : public std::enable_shared_from_this<PhysMicrotubule>
+// Physics representation of a microtubule as a 1D mesh (polyline)
+class PhysMicrotubule : public Vertices
 {
 public:
     // Microtubule dynamic state
@@ -16,18 +17,9 @@ public:
     PhysMicrotubule() = default;
     virtual ~PhysMicrotubule() = default;
 
-    explicit PhysMicrotubule(std::vector<float3> points)
-        : m_points(std::move(points))
-    {
-    }
-
-    // Geometry accessors (const)
-    const float3& getOrigin() const { return m_points[0]; }
-    bool hasActiveMT() const { return m_points.size() >= 2; }
-    float3 getTipPosition() const { return m_points.back(); }
-
-    // Geometry accessors (non-const, for derived classes)
-    std::vector<float3>& getPoints() { return m_points; }
+    // Microtubule-specific geometry accessors
+    float3 getOrigin() const { return getVertexPosition(0); }
+    float3 getTipPosition() const { return getVertexPosition(getVertexCount() - 1); }
 
     // State accessors
     MTState getState() const { return m_mtState; }
@@ -55,9 +47,6 @@ public:
     }
 
 private:
-    // Points defining the microtubule path (from minus end to plus end)
-    std::vector<float3> m_points;
-    
     // Current state (relevant for physics: Bound state enables cortical forces)
     MTState m_mtState = MTState::Growing;
 

@@ -29,14 +29,10 @@ void DyneinPullingForce::apply(double dt)
         // Iterate through microtubules
         for (const auto& pMT : pCentrosome->getMicrotubules())
         {
-            if (!pMT) continue;
-
             // Only apply force if microtubule is bound to cortex
             if (pMT->getState() != PhysMicrotubule::MTState::Bound) continue;
 
             // Get microtubule tip position (in centrosome-local space)
-            if (!pMT->hasActiveMT()) continue;
-            
             float3 tipLocal = pMT->getTipPosition();
             
             // Transform tip position from centrosome-local to cell space

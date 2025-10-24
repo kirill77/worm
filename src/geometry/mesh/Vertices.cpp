@@ -70,3 +70,11 @@ uint32_t Vertices::getVertexCount() const {
     return static_cast<uint32_t>(m_vertices.size());
 }
 
+// Remove last vertex
+void Vertices::removeLastVertex() {
+    if (!m_vertices.empty()) {
+        m_vertices.pop_back();
+        ++m_version;
+    }
+}
+

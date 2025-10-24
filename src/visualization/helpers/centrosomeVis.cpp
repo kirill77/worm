@@ -150,7 +150,7 @@ void CentrosomeVis::updateRingComplexNodes()
         float3 tipPos = pRing->getTipPosition();
 
         affine3 ringXf = affine3::identity();
-        float useLen = pRing->hasActiveMT() ? std::max(pRing->getMTLengthMicroM(), fDefaultStubMicroM) : fDefaultStubMicroM;
+        float useLen = std::max(pRing->getMTLengthMicroM(), fDefaultStubMicroM);
         ringXf.m_linear = CentrosomeVis::buildScaledCylinderMatrix(dir, useLen, fRingCylRadiusMicroM);
         // Shift by +0.5 * length along axis so the cylinder starts at the ring center and grows outward
         ringXf.m_translation = pos + dir * (0.5f * useLen);
